@@ -1,0 +1,15 @@
+# compiled output
+integrations-client/dist
+integrations-client/tmp
+
+# dependencies
+integrations-client/node_modules
+integrations-client/bower_components
+
+# misc
+integrations-client/.sass-cache
+integrations-client/connect.lock
+integrations-client/coverage/*
+integrations-client/libpeerconnection.log
+integrations-client/npm-debug.log*
+integrations-client/testem.log
