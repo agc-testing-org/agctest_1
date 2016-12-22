@@ -1,0 +1,10 @@
+<form {{action 'register' on="submit"}}>
+
+    {{input value=identification placeholder="First Name" class="form-control input-lg margin-bottom-sm"}}
+
+    {{input value=password placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
+
+    <h5 class="tos text-center">By signing in you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h5>
+    <button type="submit" class="btn btn-info">Register</button>
+
+</form>

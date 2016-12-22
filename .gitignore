@@ -1,3 +1,12 @@
+## General
+*.swo
+*.swp
+*.log
+*.lock
+*.pid
+.DS_Store
+
+## Ember
 # compiled output
 integrations-client/dist
 integrations-client/tmp
@@ -13,3 +22,5 @@ integrations-client/coverage/*
 integrations-client/libpeerconnection.log
 integrations-client/npm-debug.log*
 integrations-client/testem.log
+
+
