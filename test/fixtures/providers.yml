@@ -1,0 +1,4 @@
+github:
+  name: github
+  client_id: 12345
+  client_secret: ABCD

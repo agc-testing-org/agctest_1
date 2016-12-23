@@ -3,16 +3,83 @@ require_relative '../spec_helper'
 describe ".Account" do
     before(:all) do
         @mysql_client = Mysql2::Client.new(
-            :host => ENV['WIRED7_CORE_HOST'],
-            :username => ENV['WIRED7_CORE_USERNAME'],
-            :password => ENV['WIRED7_CORE_PASSWORD'],
-            :database => "w7_core_#{ENV['RACK_ENV']}"
+            :host => ENV['INTEGRATIONS_MYSQL_HOST'],
+            :username => ENV['INTEGRATIONS_MYSQL_USERNAME'],
+            :password => ENV['INTEGRATIONS_MYSQL_PASSWORD'],
+            :database => "integrations_#{ENV['RACK_ENV']}"
         )
-        @redis = Redis.new(:host => ENV['WIRED7_REDIS_HOST'], :port => ENV['WIRED7_REDIS_PORT'], :db => ENV['WIRED7_REDIS_DB'])
+        @redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
     end
     before(:each) do
         @account = Account.new
     end
+
+    context "#get_provider_by_name" do
+        context "no provider" do
+            it "should return nil" do
+                expect(@account.get_provider_by_name "github").to be nil
+            end
+        end
+        context "providers" do
+            fixtures :providers
+            context "object" do
+                before(:each) do
+                    @res = @account.get_provider_by_name providers(:github).name
+                end
+                it "should include name" do
+                    expect(@res[:name]).to eq(providers(:github).name)
+                end
+                it "should include id" do
+                    expect(@res[:id]).to eq(providers(:github).id)
+                end
+                it "should include client_id" do
+                    expect(@res[:client_id]).to eq(providers(:github).client_id) 
+                end
+                it "should include client_secret" do
+                    expect(@res[:client_secret]).to eq(providers(:github).client_secret) 
+                end
+            end
+        end
+    end
+   
+    context "#code_for_token" do
+        fixtures :providers
+        before(:each) do
+            @code = "123"
+            @access_token = "ACCESS123"
+        end
+        context "service error" do
+            before(:each) do
+                stub_request(:post, "https://github.com/login/oauth/access_token").
+                    with(:body => "{\"client_id\":\"#{providers(:github).client_id}\",\"client_secret\":\"#{providers(:github).client_secret}\",\"code\":\"#{@code}\"}").
+                    to_return(:status => 500, :body => {"access_tokenz" => @access_token}.to_json, :headers => {})
+                @res = @account.code_for_token @code, providers(:github)
+
+                @account.code_for_token @code, providers(:github)
+            end
+            it "should return nil" do
+                expect(@res).to be nil
+            end
+        end
+        context "service success" do
+            before(:each) do
+                stub_request(:post, "https://github.com/login/oauth/access_token").
+                    with(:body => "{\"client_id\":\"#{providers(:github).client_id}\",\"client_secret\":\"#{providers(:github).client_secret}\",\"code\":\"#{@code}\"}").
+                    to_return(:status => 200, :body => {"access_token" => @access_token}.to_json, :headers => {})
+                @res = @account.code_for_token @code, providers(:github)
+            end
+            it "should return access_token" do
+                expect(@res).to eq(@access_token)
+            end
+        end
+    end
+
+    context "#redis_connection" do
+        it "should return a redis connection" do
+            expect(@account.redis_connection.inspect).to include("redis:")
+        end
+    end
+
     context "#create_client_and_secret" do
         before(:all) do
             @secret = "ABC"
@@ -32,81 +99,86 @@ describe ".Account" do
     end
     context "#save_token" do
         before(:each) do
+            @type = "auth"
             @token = "1234567890"
-            @secret = "SECRET"
-            @res = @account.save_token @token, @secret
+            @value = "VALUE"
+            @res = @account.save_token @type, @token, @value
         end
         it "should return true" do
             expect(@res).to be true
         end
-        it "should save the token in redis as a key with 'auth:'" do
-            expect(@redis.exists("auth:#{@token}")).to be true 
-        end
-        it "should save the user secret in redis as a value" do
-            expect(@redis.get("auth:#{@token}")).to eq(@secret)
-        end
-        it "should add a TTL to of 3 hours to the token" do
-            expect(@redis.ttl("auth:#{@token}")).to eq(60*60*3)
+        context "redis" do
+            it "should save the token as a key with '#{@type}:'" do
+                expect(@redis.exists("#{@type}:#{@token}")).to be true 
+            end
+            it "should save the value" do
+                expect(@redis.get("#{@type}:#{@token}")).to eq(@value)
+            end
+            it "should add a TTL of 3 hours to the token" do
+                expect(@redis.ttl("#{@type}:#{@token}")).to eq(60*60*3)
+            end
         end
     end
-    context "#create_token" do #user_id, user_secret, oauth
+    context "#create_token" do
         before(:each) do
             @id = 1
             @secret = "SECRET"
-            @oauth = {"github" => "GHB"}
-            @username = "ADAM11"
-            @token = @account.create_token @id, @secret, @oauth, @username
-            @payload, @header = JWT.decode @token, Digest::MD5.hexdigest("#{ENV['WIRED7_HMAC']}:#{@secret}"), true, { :verify_iat => true, :verify_jti => true, :algorithm => 'HS256' }
+            @payload = {"github" => "GHB"}
+            @token = @account.create_token @id, @secret, @payload
+            @res, @header = JWT.decode @token, Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}"), true, { :verify_iat => true, :verify_jti => true, :algorithm => 'HS256' }
         end
         context "context jwt" do
             it "should contain user_id" do
-                expect(@payload["user_id"]).to eq(@id)
+                expect(@res["user_id"]).to eq(@id)
             end
-            it "should contain oauth token" do
-                expect(@payload["oauth"]).to eq(@oauth)
-            end
-            it "should contain username" do
-                expect(@payload["username"]).to eq(@username)
+            it "should contain payload" do
+                expect(@res["payload"]).to eq(@payload)
             end
         end
     end
-    context "#get_secret" do
+    context "#get_key" do
         before(:each) do
             @token = "123456"
-            @secret = "ABCDEF"
-            @redis.set("auth:#{@token}", @secret)
+            @value = "ABCDEF"
+            @type = "auth"
         end
-        it "should return value for token key" do
-            expect(@account.get_secret @token).to eq(@secret)
+        context "key exists" do
+            before(:each) do
+                @redis.set("#{@type}:#{@token}", @value)
+            end
+            it "should return value" do
+                expect(@account.get_key @type, @token).to eq(@value)
+            end
+        end
+        context "key does not exist" do
+            it "should return nil" do
+                expect(@account.get_key @type, @token).to be nil
+            end
         end
     end
     context "#validate_token" do
         before(:each) do
             @id = 1
             @secret = "SECRET"
-            @oauth = {"github" => "GHB"}
-            @username = "ADAM11"
+            @load = {"github" => "GHB"}
         end
         context "valid token" do
             before(:each) do
-                @valid_token = @account.create_token @id, @secret, @oauth, @username
+                @valid_token = @account.create_token @id, @secret, @load
                 @payload = @account.validate_token @valid_token, @secret
-            end
-            it "should return nil" do
-                expect(@payload).to_not be nil
             end
             context "payload" do
                 it "should return user_id" do
                     expect(@payload["user_id"]).to eq(@id)
                 end
-                it "should return oauth" do
-                    expect(@payload["oauth"]).to eq(@oauth)
+                it "should return payload" do
+                    expect(@payload["payload"]).to eq(@load)
                 end
                 it "should return iat" do
                     expect(@payload["iat"]).to be <= Time.now.to_i
                 end
                 it "should return jti" do
-                    expect(@payload["jti"]).to eq(Digest::MD5.hexdigest("#{Digest::MD5.hexdigest("#{ENV['WIRED7_HMAC']}:#{@secret}")}:#{@payload["iat"]}"))
+                    expect(@payload["jti"]).to eq(Digest::MD5.hexdigest("#{Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}")}:#{@payload["iat"]}"))
                 end
             end
         end
@@ -117,9 +189,9 @@ describe ".Account" do
                         :iat => Time.now.to_i,
                         :jti => "1234",
                         :user_id => 1,
-                        :oauth =>  {"github" => "GHB"} 
+                        :payload =>  {"github" => "GHB"} 
                     }
-                    token = JWT.encode payload, Digest::MD5.hexdigest("#{ENV['WIRED7_HMAC']}:#{@secret}"), "HS256"
+                    token = JWT.encode payload, Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}"), "HS256"
                     expect(@account.validate_token token, @secret).to be nil
                 end
             end
@@ -127,11 +199,11 @@ describe ".Account" do
                 it "should return nil" do
                     payload = {
                         :iat => Time.now.to_i,
-                        :jti => Digest::MD5.hexdigest("#{Digest::MD5.hexdigest("#{ENV['WIRED7_HMAC']}:#{@secret}")}:#{Time.now.to_i}"),
+                        :jti => Digest::MD5.hexdigest("#{Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}")}:#{Time.now.to_i}"),
                         :user_id => 1,
-                        :oauth =>  {"github" => "GHB"}                  
+                        :payload =>  {"github" => "GHB"}                  
                     }
-                    token = JWT.encode payload, Digest::MD5.hexdigest("#{ENV['WIRED7_HMAC']}:#{@secret}"), "HS256"
+                    token = JWT.encode payload, Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}"), "HS256"
                     expect(@account.validate_token token, "ABC").to be nil
                 end
             end
@@ -139,38 +211,36 @@ describe ".Account" do
     end
     context "#delete_token" do
         before(:each) do
+            @type = "auth"
             @token = "123456"
             @secret = "ABCDEF"
-            @redis.set("auth:#{@token}", @secret)
-            @res = @account.delete_token @token 
         end
-        it "should return OK" do
-            expect(@res).to be true
-        end
-        it "should delete the token" do
-            expect(@redis.exists("auth:#{@token}")).to be false
-        end
-    end
-    context "#has_account" do
-        context "account does not exist" do
-            it "should return 0" do
-                expect(@account.has_account "adam0@wired7.com").to eq(0)
+        context "exists" do
+            before(:each) do
+                @redis.set("#{@type}:#{@token}", @secret)
+                @res = @account.delete_token @type, @token 
+            end
+            it "should return OK" do
+                expect(@res).to be true
+            end
+            it "should delete the token" do
+                expect(@redis.exists("auth:#{@token}")).to be false
             end
         end
-        context "account exists" do
-            fixtures :users
-            it "should return user id" do
-                expect(@account.has_account users(:adam).email).to eq(users(:adam).id)
+        context "does not exist" do
+            it "should return false" do
+                expect(@account.delete_token @type, @token).to be false
             end
         end
     end
+
     context "#create" do
         context "email does exist" do
             fixtures :users
             before(:each) do
-                @res = @account.create users(:adam).email, users(:adam).username, "something.png"
+                @res = @account.create users(:adam).email, users(:adam).name
             end
-            it "should return -1" do
+            it "should return nil" do
                 expect(@res).to eq(nil)
             end
             it "should not create a new record in the users table" do
@@ -180,9 +250,8 @@ describe ".Account" do
         context "email does not exist" do
             before(:each) do
                 @email = "adam0@wired7.com"
-                @username = "adam"
-                @avatar = "avatar.png"
-                @res = @account.create @email, @username, @avatar
+                @name = "adam"
+                @res = @account.create @email, @name
                 @mysql = @mysql_client.query("select * from users").first
             end
             context "users table" do
@@ -190,13 +259,10 @@ describe ".Account" do
                     expect(@mysql["email"]).to eq(@email)
                 end
                 it "should include username" do
-                    expect(@mysql["username"]).to eq(@username)
+                    expect(@mysql["name"]).to eq(@name)
                 end
                 it "should include admin = 0" do
                     expect(@mysql["admin"]).to eq(0)
-                end
-                it "should include avatar" do
-                    expect(@mysql["avatar"]).to eq(@avatar)
                 end
                 it "should include lock = false" do
                     expect(@mysql["lock"]).to be 0
@@ -209,7 +275,8 @@ describe ".Account" do
         before(:each) do
             @ip = "192.168.1.1"
             @jwt = "1234567890"
-            @res = @account.update users(:adam).id, @ip, @jwt
+            @tokens = {:a => 1, :b => 2}
+            @res = @account.update users(:adam).id, @ip, @jwt, @tokens
             @record = @mysql_client.query("select * from users where id = #{users(:adam).id}").first
         end
         context "response" do
@@ -223,6 +290,9 @@ describe ".Account" do
             end
             it "should save jwt" do
                 expect(@record["jwt"]).to eq(@jwt)
+            end
+            it "should save tokens" do
+                expect(@record["tokens"]).to eq(@tokens.to_s)
             end
         end
     end
@@ -253,7 +323,7 @@ describe ".Account" do
     context "#record_login" do
         context "no users foreign key" do
             before(:each) do
-                @res = @account.record_login 22, "123.56"
+                @res = @account.record_login 22, "123.56", 1
             end
             it "should return nil" do
                 expect(@res).to be nil
@@ -264,8 +334,9 @@ describe ".Account" do
             before(:each) do
                 @ip = "192.168.1.1"
                 @id = users(:adam).id
-                @res = @account.record_login @id, @ip
-                @record = @mysql_client.query("select * from logins where id = #{users(:adam).id}").first
+                @provider = 1
+                @res = @account.record_login @id, @ip, @provider
+                @record = @mysql_client.query("select * from logins where user_id = #{users(:adam).id}").first
             end
             context "response" do
                 it "should return id of login" do
@@ -274,10 +345,13 @@ describe ".Account" do
             end
             context "logins table" do
                 it "should save user id" do
-                    expect(@record["id"]).to eq(@id)
+                    expect(@record["user_id"]).to eq(@id)
                 end
                 it "should save ip address" do
                     expect(@record["ip"]).to eq(@ip)
+                end
+                it "should save provider id" do
+                    expect(@record["provider_id"]).to eq(@provider)
                 end
             end
         end

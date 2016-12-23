@@ -1,38 +1,36 @@
 require_relative '../spec_helper'
 
-describe "/session" do
+describe "API" do
     before(:all) do
         @mysql_client = Mysql2::Client.new(
             :host => ENV['WIRED7_CORE_HOST'],
             :username => ENV['WIRED7_CORE_USERNAME'],
             :password => ENV['WIRED7_CORE_PASSWORD'],
-            :database => "w7_core_#{ENV['RACK_ENV']}"
-        )
+            :database => "w7_core_#{ENV['RACK_ENV']}"       
+        )                                                           
         @redis = Redis.new(:host => ENV['WIRED7_REDIS_HOST'], :port => ENV['WIRED7_REDIS_PORT'], :db => ENV['WIRED7_REDIS_DB'])
     end
-    before(:each) do
-        access_token = "12345"
-        @username = "adam123"
-        @email = "adam+0@wired7.com"
-        @avatar_url = "a.jpg"
-        access = {
-            :access_token => access_token
-        }
-        emails = [
-            {:email => @email}
-        ]
-        user = {
-            :avatar_url => @avatar_url
-        }
+    describe "POST /register" do
+        context "new user" do
+            @name = "adam"
+            @email = "adam+0@wired7.com"
+            post "/register?username=#{@name}&password=#{@email}"
+        end
+        context "existing user" do
 
-        @access = JSON.parse(access.to_json, object_class: OpenStruct)
-        @emails = JSON.parse(emails.to_json, object_class: OpenStruct)
-        @user = JSON.parse(user.to_json, object_class: OpenStruct)
-        Octokit::Client.any_instance.stub(:exchange_code_for_token) { @access }
-        Octokit::Client.any_instance.stub(:emails) { @emails }
-        Octokit::Client.any_instance.stub(:user) { @user }
-        Octokit::Client.any_instance.stub(:login) { @username }
+        end
     end
+    describe "POST /session/:provider" do
+
+    end
+    describe "DELETE /session" do
+
+    end
+
+end
+
+
+describe "/session" do
     describe "POST" do
         context "valid auth code" do
             before(:each) do

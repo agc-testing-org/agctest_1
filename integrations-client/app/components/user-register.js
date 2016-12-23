@@ -4,11 +4,12 @@ const { inject: { service }, Component } = Ember;
 
 export default Component.extend({
     session: service('session'),
-
+    path: "/register",
+    password: null,
     actions: {
         register() {
-            let { identification, password } = this.getProperties('identification', 'password');
-            this.get('session').authenticate('authenticator:oauth2', identification, password).catch((reason) => {
+            var credentials = this.getProperties('name', 'email', 'password', 'path');
+            this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
                 this.set('errorMessage', reason.error);
             });
         },

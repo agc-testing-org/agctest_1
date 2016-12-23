@@ -1,5 +1,5 @@
 adam:
-  id: 1
+  name: adam
   email: adam+0@wired7.com
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

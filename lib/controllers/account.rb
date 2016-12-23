@@ -27,28 +27,35 @@ class Account
         }.to_json
 
         begin
-            res = JSON.parse(https.request(req).body)
-            puts res.inspect
-            return res["access_token"]
+            res = https.request(req)
+            if res.code == "200"
+                return JSON.parse(res.body)["access_token"]
+            else
+                return nil
+            end
         rescue
             return nil
         end
     end
 
+    def redis_connection
+        return Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
+    end
+
     def create_client_and_secret user_secret
-        return Digest::MD5.hexdigest([ENV['WIRED7_HMAC'], user_secret].join(':').to_s)
+        return Digest::MD5.hexdigest([ENV['INTEGRATIONS_HMAC'], user_secret].join(':').to_s)
     end
 
     def create_jti user_and_client_secret, iat
         return Digest::MD5.hexdigest([user_and_client_secret, iat].join(':').to_s)
     end
 
-    def save_token token, user_secret
-        redis = Redis.new(:host => ENV['WIRED7_REDIS_HOST'], :port => ENV['WIRED7_REDIS_PORT'], :db => ENV['WIRED7_REDIS_DB'])
-        return (redis.set("auth:#{token}", user_secret) == "OK") && redis.expire("auth:#{token}", 60*60*3 ) #3 hours
+    def save_token type, token, value #type = auth OR user 
+        redis = redis_connection
+        return (redis.set("#{type}:#{token}", value) == "OK") && redis.expire("#{type}:#{token}", 60*60*3 ) #3 hours
     end
 
-    def create_token user_id, user_secret, oauth, provider, name
+    def create_token user_id, user_secret, payload
 
         user_and_client_secret = create_client_and_secret user_secret 
 
@@ -60,16 +67,15 @@ class Account
             :iat => iat,
             :jti => jti,
             :user_id => user_id,
-            :provider =>  provider,
-            :name => name
+            :payload => payload
         }
 
         return JWT.encode payload, user_and_client_secret, "HS256"
     end
 
-    def get_secret token
-        redis = Redis.new(:host => ENV['WIRED7_REDIS_HOST'], :port => ENV['WIRED7_REDIS_PORT'], :db => ENV['WIRED7_REDIS_DB'])
-        return redis.get("auth:#{token}")
+    def get_key type, token
+        redis = redis_connection
+        return redis.get("#{type}:#{token}")
     end
 
     def validate_token token, user_secret
@@ -88,14 +94,14 @@ class Account
         end
     end
 
-    def delete_token token
-        redis = Redis.new(:host => ENV['WIRED7_REDIS_HOST'], :port => ENV['WIRED7_REDIS_PORT'], :db => ENV['WIRED7_REDIS_DB'])
-        return (redis.del("auth:#{token}") > 0)
+    def delete_token type, token #type = auth or pro
+        redis = redis_connection
+        return (redis.del("#{type}:#{token}") > 0)
     end
 
     def mail to, subject, body
         begin
-            if ENV['RACK_ENV'] != "test"
+            if ENV['INTEGRATIONS_EMAIL_ADDRESS']
                 Pony.mail({
                     :to => to,
                     :from => 'DoNotReply@wired7.com',
@@ -107,8 +113,8 @@ class Account
                         :address              => 'wiredsevencom.netfirms.com',
                         :port                 => '587',
                         :enable_starttls_auto => true,
-                        :user_name            => 'ateam@wired7.com',
-                        :password             => ENV['WIRED7_EMAIL_PASSWORD'],
+                        :user_name            => ENV['INTEGRATIONS_EMAIL_ADDRESS'],
+                        :password             => ENV['INTEGRATIONS_EMAIL_PASSWORD'],
                         :openssl_verify_mode => OpenSSL::SSL::VERIFY_NONE,
                         #:authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
                         :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
@@ -117,19 +123,6 @@ class Account
             end
         rescue Exception => e
             puts e
-        end
-    end
-
-    def has_account email
-        begin
-            user = User.find_by(email: email )
-            if user
-                return user.id
-            else
-                return 0
-            end
-        rescue => e
-            return -1
         end
     end
 
@@ -176,12 +169,13 @@ class Account
         end
     end
 
-    def update id, ip, jwt
+    def update id, ip, jwt, tokens
         begin
             user = User.find_by(id: id)
             user.update({
                 ip: ip,
-                jwt: jwt
+                jwt: jwt,
+                tokens: tokens
             })
             return user.save
         rescue => e
@@ -193,7 +187,7 @@ class Account
     def record_login id, ip, provider
         begin
             login = Login.create({
-                user: id,
+                user_id: id,
                 ip: ip,
                 provider_id: provider
             })
@@ -204,9 +198,9 @@ class Account
         end
     end
 
-    def create_email email, first
+    def create_email email, name 
         begin
-            mail email, "Welcome to Wired7 (Beta) #{first}", "#{first},\n\nThanks for joining us at this early stage!  We would love to hear about your experience.  Contact us at ateam@wired7.com\n\n\n- The Wired7 Team"
+            mail email, "Welcome to Wired7 (Beta) #{name}", "#{name},\n\nThanks for joining us at this early stage!  We would love to hear about your experience.  Contact us at ateam@wired7.com\n\n\n- The Wired7 Team"
         rescue => e
             puts e
         end

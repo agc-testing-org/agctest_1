@@ -15,6 +15,7 @@ require_relative '../controllers/account.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/provider.rb'
+require_relative '../models/login.rb'
 
 # Workers
 
@@ -37,15 +38,14 @@ class Integrations < Sinatra::Base
     end
 
     def authorized?
-        token = retrieve_token
-        if token
+        @jwt = retrieve_token
+        if @jwt
             account = Account.new
-            secret = account.get_secret token
-            if secret
-                @jwt = account.validate_token token, secret
-                if @jwt
-                    @github = Octokit::Client.new(:access_token => @jwt["oauth"]["github"])
-                    return !@jwt.empty?
+            jwt_value = account.get_key "user", @jwt
+            if jwt_value
+                if account.validate_token @jwt, jwt_value["secret"]
+                    @user = account.get_hash "user", @jwt
+                    return true 
                 else
                     return false
                 end
@@ -65,22 +65,25 @@ class Integrations < Sinatra::Base
         end
     end
 
-    session_post = lambda do
+    register_post = lambda do
         status 400
-        response = {:success => false, :message => nil}
+        response = {:success => false}
         provider = {:name => "W7", :id => 0}
         begin
-            if params[:username].to_s.length > 1
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if fields[:name].to_s.length > 1
                 account = Account.new
-                if (account.valid_email params[:password]) #password param is email
-                    user_id = account.create params[:password], params[:username]
+                if (account.valid_email fields[:email]) 
+                    user_id = account.create fields[:email], fields[:name]
                     if user_id && user_id > 0
                         user_secret = SecureRandom.hex(32)
-                        token = account.create_token response[:success], user_secret, nil, nil, params[:username]
-                        if (account.save_token token, user_secret) && (account.update user_id, request.ip, token) && (account.record_login user_id, request.ip, provider[:id])
+                        jwt = account.create_token user_id, user_secret, fields[:name]
+                        if (account.save_token "user", jwt, user_secret) && (account.update user_id, request.ip, jwt, nil) && (account.record_login user_id, request.ip, provider[:id])
                             response[:success] = true
+                            response[:w7_token] = jwt 
                             status 200
-                            account.create_email params[:password], params[:username]
+                            account.create_email fields[:email], fields[:name]
                         else
                             status 500
                         end
@@ -110,14 +113,13 @@ class Integrations < Sinatra::Base
         provider = account.get_provider_by_name params[:grant_type]
         puts provider.inspect
         if provider
-            access_token = account.code_for_token(params[:auth_code], provider)
+            access_token = account.code_for_token(params[:auth_code], provider[:name])
 
-            #TODO - get old token, delete old token, then recreate and save
-
-            token = account.create_token user_id, user_secret, access_token, provider.name, name
-            if (account.save_token token, user_secret) && (account.update user_id, request.ip, token) && (account.record_login user_id, request.ip, provider.id) 
+            @user[provider[:name].to_sym] = access_token
+                
+            if (account.save_token "user", @jwt, @user) && (account.update user_id, request.ip, @jwt, tokens) && (account.record_login user_id, request.ip, provider[:id]) 
                 status 200
-                return {:success => true, :w7_token => token}.to_json
+                return {:success => true, :w7_token => @jwt}.to_json
             else
                 return response.to_json
             end
@@ -131,7 +133,7 @@ class Integrations < Sinatra::Base
     session_delete = lambda do
         protected!
         account = Account.new
-        if account.delete_token retrieve_token
+        if account.delete_token "user", @jwt
             status 200
             return {:success => true}.to_json
         else
@@ -140,10 +142,18 @@ class Integrations < Sinatra::Base
         end
     end
 
+    account_get = lambda do
+    #    protected!
+        status 200
+        return {:id =>  1, :name => "adam"}.to_json
+    end
+
     #API
-    post "/session", &session_post
+    post "/register", &register_post
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
+
+    get "/account", &account_get
 
     #Ember
     get "*" do

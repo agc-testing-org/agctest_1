@@ -41,6 +41,7 @@ ActiveRecord::Schema.define(version: 20161222013527) do
     t.datetime "created_at",                               null: false
     t.datetime "updated_at",                               null: false
     t.text     "jwt",        limit: 65535
+    t.text     "tokens",     limit: 65535
     t.string   "ip",         limit: 255
     t.boolean  "lock",                     default: false
     t.string   "password",   limit: 255

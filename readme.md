@@ -18,9 +18,13 @@
     export INTEGRATIONS_REDIS_HOST="127.0.0.1"
     export INTEGRATIONS_REDIS_PORT="6379"
     export INTEGRATIONS_REDIS_DB=1
+    export INTEGRATIONS_HMAC=""
+    export INTEGRATIONS_EMAIL_ADDRESS=""
+    export INTEGRATIONS_EMAIL_PASSWORD=""
     if [ "$RACK_ENV" == "test" ]; then
         export INTEGRATIONS_REDIS_DB=2
-    fi
+        export INTEGRATIONS_EMAIL_ADDRESS="" # !!KEEP EMPTY
+    fi  
 
 ### Running
 
