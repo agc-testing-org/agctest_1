@@ -109,25 +109,33 @@ class Integrations < Sinatra::Base
         protected!
         status 401
         response = {:success => false}
-        puts request.body.inspect
-        account = Account.new
-        puts params.inspect
-        provider = account.get_provider_by_name params[:grant_type]
-        puts provider.inspect
-        if provider
-            access_token = account.code_for_token(params[:auth_code], provider[:name])
 
-            @user[provider[:name].to_sym] = access_token
-                
-            if (account.save_token "user", @jwt, @user) && (account.update user_id, request.ip, @jwt, @user) && (account.record_login user_id, request.ip, provider[:id]) 
-                status 200
-                return {:success => true, :w7_token => @jwt}.to_json
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            puts fields.inspect
+            account = Account.new
+            puts params.inspect
+            provider = account.get_provider_by_name fields[:grant_type]
+            puts provider.inspect
+            if provider
+                access_token = account.code_for_token(fields[:auth_code], provider)
+
+                @user[provider[:name].to_sym] = access_token
+
+                if (account.save_token "user", @jwt, @user) && (account.update user_id, request.ip, @jwt, @user) && (account.record_login user_id, request.ip, provider[:id]) 
+                    status 200
+                    return {:success => true, :w7_token => @jwt}.to_json
+                else
+                    return response.to_json
+                end
             else
+                status 500
                 return response.to_json
             end
-        else
-            status 500
-            return response.to_json
+        rescue => e
+            puts e
         end
     end
 
@@ -144,7 +152,7 @@ class Integrations < Sinatra::Base
     end
 
     account_get = lambda do
-    #    protected!
+        #    protected!
         status 200
         return {:id =>  1, :name => "adam"}.to_json
     end

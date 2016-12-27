@@ -17,7 +17,7 @@ export default ToriiAuthenticator.extend({
                               'Content-Type': "application/json",
                           'Authorization': headerValue
                           },
-                          data: { 'grant_type': data.provider, 'auth_code': data.authorizationCode }
+                          data: JSON.stringify({ 'grant_type': data.provider, 'auth_code': data.authorizationCode })
                    }).then((response) => {
                        //       this.get('session.data.authenticated').then(function(auth){
                        //      auth.set('access_token',response.w7_token);
