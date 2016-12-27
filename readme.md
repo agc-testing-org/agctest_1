@@ -6,6 +6,7 @@
     cd integrations-client
     sudo npm -g install npm@next
     npm install -g ember-cli@2.10
+    npm install
 
     vi ~/.bashrc
     
@@ -28,4 +29,18 @@
 
 ### Running
 
-    ember s
+Shell 1 (project root)
+
+    rvm use ruby-2.2.3
+    bundle install
+    export RACK_ENV=development
+    source ~/.bashrc
+    rake db:migrate
+    passenger start
+
+Shell 2
+
+    cd integrations-client
+    bower install
+    source ~/.bashrc
+    ember build --watch

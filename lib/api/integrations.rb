@@ -8,6 +8,7 @@ require 'jwt'
 require 'net/http'
 require 'uri'
 require 'bcrypt'
+require 'pony'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -43,8 +44,8 @@ class Integrations < Sinatra::Base
             account = Account.new
             jwt_value = account.get_key "user", @jwt
             if jwt_value
-                if account.validate_token @jwt, jwt_value["secret"]
-                    @user = account.get_hash "user", @jwt
+                if account.validate_token @jwt, jwt_value
+                    @user = account.get_key "user", @jwt
                     return true 
                 else
                     return false
@@ -108,8 +109,9 @@ class Integrations < Sinatra::Base
         protected!
         status 401
         response = {:success => false}
-
+        puts request.body.inspect
         account = Account.new
+        puts params.inspect
         provider = account.get_provider_by_name params[:grant_type]
         puts provider.inspect
         if provider
@@ -117,13 +119,12 @@ class Integrations < Sinatra::Base
 
             @user[provider[:name].to_sym] = access_token
                 
-            if (account.save_token "user", @jwt, @user) && (account.update user_id, request.ip, @jwt, tokens) && (account.record_login user_id, request.ip, provider[:id]) 
+            if (account.save_token "user", @jwt, @user) && (account.update user_id, request.ip, @jwt, @user) && (account.record_login user_id, request.ip, provider[:id]) 
                 status 200
                 return {:success => true, :w7_token => @jwt}.to_json
             else
                 return response.to_json
             end
-
         else
             status 500
             return response.to_json

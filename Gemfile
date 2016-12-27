@@ -6,6 +6,7 @@ gem 'rake'
 gem 'redis', '~>3.2'
 gem 'jwt'
 gem 'bcrypt'
+gem 'pony'
 
 group :development do
     gem 'passenger'
