@@ -4,11 +4,13 @@
 
     {{input value=email placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
 
+    {{input value=password placeholder="Password" type="password" class="form-control input-lg margin-bottom-sm"}}
+
     <h5 class="tos text-center">By signing in you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h5>
     <button type="submit" class="btn btn-info">Register</button>
 
     {{#if session.isAuthenticated}}
-    AUTHENTICATED
+    AUTHENTICATED with {{session.data.authenticated.provider}}
     {{session.data.authenticated.access_token}}
     {{else}}
     NOT SIGNED IN

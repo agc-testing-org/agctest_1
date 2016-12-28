@@ -5,7 +5,6 @@ const { inject: { service }, Component } = Ember;
 export default Component.extend({
     session: service('session'),
     path: "/register",
-    password: null,
     actions: {
         register() {
             var credentials = this.getProperties('name', 'email', 'password', 'path');

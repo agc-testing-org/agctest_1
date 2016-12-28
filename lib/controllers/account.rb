@@ -126,11 +126,12 @@ class Account
         end
     end
 
-    def create email, name
+    def create email, name, password
         begin
             user = User.create({
                 email: email,
-                name: name
+                name: name,
+                password: password
             })
             return user.id
         rescue => e

@@ -39,14 +39,16 @@ class Integrations < Sinatra::Base
     end
 
     def authorized?
-        @jwt = retrieve_token
-        if @jwt
+        @session = retrieve_token
+        if @session
             account = Account.new
-            jwt_value = account.get_key "user", @jwt
-            if jwt_value
-                if account.validate_token @jwt, jwt_value
-                    @user = account.get_key "user", @jwt
-                    return true 
+            @session_hash = account.get_key "session", @session
+            if @session_hash
+                @key = JSON.parse(@session_hash)["key"]
+                @jwt_hash = account.validate_token @session, @key
+                if @jwt_hash
+                    @providers = account.validate_token @jwt_hash[:providers], @key 
+                    return true
                 else
                     return false
                 end
@@ -76,11 +78,11 @@ class Integrations < Sinatra::Base
             if fields[:name].to_s.length > 1
                 account = Account.new
                 if (account.valid_email fields[:email]) 
-                    user_id = account.create fields[:email], fields[:name]
+                    user_id = account.create fields[:email], fields[:name], fields[:password]
                     if user_id && user_id > 0
-                        user_secret = SecureRandom.hex(32)
+                        user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user_id, user_secret, fields[:name]
-                        if (account.save_token "user", jwt, user_secret) && (account.update user_id, request.ip, jwt, nil) && (account.record_login user_id, request.ip, provider[:id])
+                        if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user_id, request.ip, jwt, nil) && (account.record_login user_id, request.ip, provider[:id])
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 200
@@ -107,7 +109,7 @@ class Integrations < Sinatra::Base
 
     session_provider_post = lambda do
         protected!
-        status 401
+        status 400
         response = {:success => false}
 
         begin
@@ -122,11 +124,12 @@ class Integrations < Sinatra::Base
             if provider
                 access_token = account.code_for_token(fields[:auth_code], provider)
 
-                @user[provider[:name].to_sym] = access_token
+                @providers[provider[:name].to_sym] = access_token
+                providers = account.create_token @jwt_hash["user_id"], @key, @providers 
 
-                if (account.save_token "user", @jwt, @user) && (account.update user_id, request.ip, @jwt, @user) && (account.record_login user_id, request.ip, provider[:id]) 
+                if (account.save_token "session", @session, {:key => @key, :providers => providers}.to_json) && (account.update @jwt_hash["user_id"], request.ip, @session, providers) && (account.record_login @jwt_hash["user_id"], request.ip, provider[:id]) 
                     status 200
-                    return {:success => true, :w7_token => @jwt}.to_json
+                    return {:success => true, :w7_token => @session}.to_json
                 else
                     return response.to_json
                 end
@@ -142,7 +145,7 @@ class Integrations < Sinatra::Base
     session_delete = lambda do
         protected!
         account = Account.new
-        if account.delete_token "user", @jwt
+        if (account.delete_token "session", @session)
             status 200
             return {:success => true}.to_json
         else
