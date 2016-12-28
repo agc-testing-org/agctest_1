@@ -30,6 +30,11 @@ module.exports = function(environment) {
               apiKey: process.env.INTEGRATIONS_GITHUB_CLIENT_ID,
               scope: "user:email public_repo",
               redirectUri: process.env.INTEGRATIONS_HOST+"/callback/github"
+          },
+          'instagram-oauth2': {
+            apiKey: process.env.INTEGRATIONS_INSTAGRAM_CLIENT_ID,
+            scope: "public_content follower_list",
+            redirectUri: process.env.INTEGRATIONS_HOST+"/callback/instagram"
           }
       }
   };
