@@ -27,7 +27,8 @@ class Account
         req.body = {
             client_id: provider.client_id,
             client_secret: provider.client_secret,
-            code: code
+            code: code,
+            redirect_uri: "#{ENV['INTEGRATIONS_HOST']}/callback/#{provider.name}"
         }.to_json
 
         begin
