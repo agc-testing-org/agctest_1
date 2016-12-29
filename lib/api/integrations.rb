@@ -136,7 +136,7 @@ class Integrations < Sinatra::Base
             if provider
                 access_token = account.code_for_token(fields[:auth_code], provider)
 
-                @providers[provider[:name].to_sym] = access_token
+                @providers[provider[:name]] = access_token
                 puts "HERE"
                 puts @providers.inspect
                 provider_token = account.create_token @jwt_hash["user_id"], @key, @providers 

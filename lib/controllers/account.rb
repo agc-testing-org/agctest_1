@@ -24,13 +24,20 @@ class Account
             'Content-Type' => 'application/json',
             'Accept' => 'application/json'
         })
-        req.body = {
+
+        params = {
             client_id: provider.client_id,
             client_secret: provider.client_secret,
             code: code,
+            grant_type: "authorization_code",
             redirect_uri: "#{ENV['INTEGRATIONS_HOST']}/callback/#{provider.name}"
-        }.to_json
+        }
 
+        if provider.name == "instagram"
+            req.set_form_data(params)
+        else
+            req.body = params.to_json
+        end
         begin
             res = https.request(req)
             if res.code == "200"
