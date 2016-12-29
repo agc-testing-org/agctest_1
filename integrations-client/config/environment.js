@@ -32,9 +32,14 @@ module.exports = function(environment) {
               redirectUri: process.env.INTEGRATIONS_HOST+"/callback/github"
           },
           'instagram-oauth2': {
-            apiKey: process.env.INTEGRATIONS_INSTAGRAM_CLIENT_ID,
-            scope: "public_content follower_list",
-            redirectUri: process.env.INTEGRATIONS_HOST+"/callback/instagram"
+              apiKey: process.env.INTEGRATIONS_INSTAGRAM_CLIENT_ID,
+              scope: "public_content follower_list",
+              redirectUri: process.env.INTEGRATIONS_HOST+"/callback/instagram"
+          },
+          'facebook-oauth2': {
+              apiKey: process.env.INTEGRATIONS_FACEBOOK_CLIENT_ID,
+              scope: 'email,user_birthday',
+              redirectUri: process.env.INTEGRATIONS_HOST+"/callback/facebook"
           }
       }
   };

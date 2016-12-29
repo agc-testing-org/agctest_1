@@ -12,8 +12,12 @@ class Account
         end
     end
 
-    def code_for_token code, provider 
-        uri = URI.parse("https://github.com/login/oauth/access_token")
+    def code_for_token code, provider
+        #graph.facebook.com/v2.8
+        #api.instagram.com
+        #github.com/login
+
+        uri = URI.parse("https://#{provider.endpoint}/oauth/access_token")
         https = Net::HTTP.new(uri.host,uri.port)
         https.use_ssl = true
         req = Net::HTTP::Post.new(uri.path, initheader = {
@@ -110,15 +114,15 @@ class Account
                     :subject => subject,
                     :body => body,
                     :via_options => {
-                        :address              => 'wiredsevencom.netfirms.com',
-                        :port                 => '587',
-                        :enable_starttls_auto => true,
-                        :user_name            => ENV['INTEGRATIONS_EMAIL_ADDRESS'],
-                        :password             => ENV['INTEGRATIONS_EMAIL_PASSWORD'],
-                        :openssl_verify_mode => OpenSSL::SSL::VERIFY_NONE,
-                        #:authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
-                        :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
-                    }
+                    :address              => 'wiredsevencom.netfirms.com',
+                    :port                 => '587',
+                    :enable_starttls_auto => true,
+                    :user_name            => ENV['INTEGRATIONS_EMAIL_ADDRESS'],
+                    :password             => ENV['INTEGRATIONS_EMAIL_PASSWORD'],
+                    :openssl_verify_mode => OpenSSL::SSL::VERIFY_NONE,
+                    #:authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
+                    :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
+                }
                 })
             end
         rescue Exception => e

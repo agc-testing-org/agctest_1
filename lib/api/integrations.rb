@@ -40,14 +40,26 @@ class Integrations < Sinatra::Base
 
     def authorized?
         @session = retrieve_token
+        @providers = {} 
         if @session
             account = Account.new
             @session_hash = account.get_key "session", @session
+            parsed_hash = JSON.parse(@session_hash)
             if @session_hash
-                @key = JSON.parse(@session_hash)["key"]
+                @key = parsed_hash["key"]
+                puts "::unlocking token"
                 @jwt_hash = account.validate_token @session, @key
                 if @jwt_hash
-                    @providers = account.validate_token @jwt_hash[:providers], @key 
+                    puts "::unlocking provider"
+                    if parsed_hash["providers"]
+                        provider_hash = account.validate_token parsed_hash["providers"], @key
+                        if provider_hash
+                            puts provider_hash.inspect
+                            puts provider_hash["payload"]
+                            @providers = provider_hash["payload"]
+                            puts @providers.inspect
+                        end
+                    end
                     return true
                 else
                     return false
@@ -125,9 +137,12 @@ class Integrations < Sinatra::Base
                 access_token = account.code_for_token(fields[:auth_code], provider)
 
                 @providers[provider[:name].to_sym] = access_token
-                providers = account.create_token @jwt_hash["user_id"], @key, @providers 
+                puts "HERE"
+                puts @providers.inspect
+                provider_token = account.create_token @jwt_hash["user_id"], @key, @providers 
+                puts provider_token.inspect
 
-                if (account.save_token "session", @session, {:key => @key, :providers => providers}.to_json) && (account.update @jwt_hash["user_id"], request.ip, @session, providers) && (account.record_login @jwt_hash["user_id"], request.ip, provider[:id]) 
+                if (account.save_token "session", @session, {:key => @key, :providers => provider_token}.to_json) && (account.update @jwt_hash["user_id"], request.ip, @session, provider_token) && (account.record_login @jwt_hash["user_id"], request.ip, provider[:id]) 
                     status 200
                     return {:success => true, :w7_token => @session}.to_json
                 else
@@ -160,12 +175,25 @@ class Integrations < Sinatra::Base
         return {:id =>  1, :name => "adam"}.to_json
     end
 
+    facebook_get = lambda do
+        protected!
+        status 200
+        puts @providers.inspect
+        puts Net::HTTP.get('graph.facebook.com', "/v2.4/shakira/insights/page_impressions?access_token=#{@providers[:github]}")
+        return Net::HTTP.get('graph.facebook.com', "/v2.4/shakira/insights/page_impressions?access_token=#{@providers[:github]}")
+    end
+
     #API
     post "/register", &register_post
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
 
     get "/account", &account_get
+
+
+
+    get "/facebook", &facebook_get
+
 
     #Ember
     get "*" do
