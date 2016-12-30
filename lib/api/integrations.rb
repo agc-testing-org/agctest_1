@@ -6,6 +6,7 @@ require 'sinatra/base'
 require 'redis'
 require 'jwt'
 require 'net/http'
+require 'open-uri'
 require 'uri'
 require 'bcrypt'
 require 'pony'
@@ -178,9 +179,13 @@ class Integrations < Sinatra::Base
     facebook_get = lambda do
         protected!
         status 200
-        puts @providers.inspect
-        puts Net::HTTP.get('graph.facebook.com', "/v2.4/shakira/insights/page_impressions?access_token=#{@providers[:github]}")
-        return Net::HTTP.get('graph.facebook.com', "/v2.4/shakira/insights/page_impressions?access_token=#{@providers[:github]}")
+        puts @providers.inspect        
+        uri = URI.parse("https://graph.facebook.com/v2.4/me/posts?access_token=#{@providers["facebook"]}")#v2.4/shakira/insights/page_impressions?access_token=#{@providers["github"]}")
+        http = Net::HTTP.new(uri.host, uri.port)
+        http.use_ssl = true
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE # read into this
+        data = http.get(uri.request_uri)
+        puts data.body.inspect
     end
 
     #API
@@ -189,8 +194,6 @@ class Integrations < Sinatra::Base
     delete "/session", &session_delete
 
     get "/account", &account_get
-
-
 
     get "/facebook", &facebook_get
 

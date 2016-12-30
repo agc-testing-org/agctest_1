@@ -17,7 +17,12 @@ class Account
         #api.instagram.com
         #github.com/login
 
-        uri = URI.parse("https://#{provider.endpoint}/oauth/access_token")
+        if provider.name == "salesforce"
+            uri = URI.parse("https://#{provider.endpoint}/oauth2/token")
+        else
+            uri = URI.parse("https://#{provider.endpoint}/oauth/access_token")
+        end
+
         https = Net::HTTP.new(uri.host,uri.port)
         https.use_ssl = true
         req = Net::HTTP::Post.new(uri.path, initheader = {
@@ -33,13 +38,16 @@ class Account
             redirect_uri: "#{ENV['INTEGRATIONS_HOST']}/callback/#{provider.name}"
         }
 
-        if provider.name == "instagram"
+        if (provider.name == "instagram") || (provider.name == "salesforce")
             req.set_form_data(params)
         else
             req.body = params.to_json
         end
+
         begin
+            puts req.inspect
             res = https.request(req)
+            puts res.body.inspect
             if res.code == "200"
                 return JSON.parse(res.body)["access_token"]
             else

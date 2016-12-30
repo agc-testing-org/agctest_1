@@ -38,8 +38,14 @@ module.exports = function(environment) {
           },
           'facebook-oauth2': {
               apiKey: process.env.INTEGRATIONS_FACEBOOK_CLIENT_ID,
-              scope: 'email,user_birthday',
+              scope: 'user_posts,read_insights',
               redirectUri: process.env.INTEGRATIONS_HOST+"/callback/facebook"
+          },
+          'salesforce-oauth2': {
+              apiKey: process.env.INTEGRATIONS_SALESFORCE_CLIENT_ID,
+              scope: 'api',
+              response_type: 'code',
+              redirectUri: process.env.INTEGRATIONS_HOST+"/callback/salesforce"
           }
       }
   };
