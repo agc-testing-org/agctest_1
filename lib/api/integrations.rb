@@ -10,6 +10,7 @@ require 'open-uri'
 require 'uri'
 require 'bcrypt'
 require 'pony'
+require 'curb'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -138,7 +139,6 @@ class Integrations < Sinatra::Base
                 access_token = account.code_for_token(fields[:auth_code], provider)
 
                 @providers[provider[:name]] = access_token
-                puts "HERE"
                 puts @providers.inspect
                 provider_token = account.create_token @jwt_hash["user_id"], @key, @providers 
                 puts provider_token.inspect

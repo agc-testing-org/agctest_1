@@ -43,7 +43,7 @@ module.exports = function(environment) {
           },
           'salesforce-oauth2': {
               apiKey: process.env.INTEGRATIONS_SALESFORCE_CLIENT_ID,
-              scope: 'api',
+              scope: 'full api',
               response_type: 'code',
               redirectUri: process.env.INTEGRATIONS_HOST+"/callback/salesforce"
           }

@@ -7,6 +7,7 @@ gem 'redis', '~>3.2'
 gem 'jwt'
 gem 'bcrypt'
 gem 'pony'
+gem 'curb'
 
 group :development do
     gem 'passenger'

@@ -17,19 +17,6 @@ class Account
         #api.instagram.com
         #github.com/login
 
-        if provider.name == "salesforce"
-            uri = URI.parse("https://#{provider.endpoint}/oauth2/token")
-        else
-            uri = URI.parse("https://#{provider.endpoint}/oauth/access_token")
-        end
-
-        https = Net::HTTP.new(uri.host,uri.port)
-        https.use_ssl = true
-        req = Net::HTTP::Post.new(uri.path, initheader = {
-            'Content-Type' => 'application/json',
-            'Accept' => 'application/json'
-        })
-
         params = {
             client_id: provider.client_id,
             client_secret: provider.client_secret,
@@ -38,14 +25,31 @@ class Account
             redirect_uri: "#{ENV['INTEGRATIONS_HOST']}/callback/#{provider.name}"
         }
 
-        if (provider.name == "instagram") || (provider.name == "salesforce")
-            req.set_form_data(params)
+        if provider.name == "salesforce"
+            uri = URI.parse("https://#{provider.endpoint}/oauth2/token")
         else
+            uri = URI.parse("https://#{provider.endpoint}/oauth/access_token")
+        end
+
+        https = Net::HTTP.new(uri.host,uri.port)
+        https.use_ssl = true
+       # https.set_debug_output($stdout)
+
+        if (provider.name == "instagram") || (provider.name == "salesforce")
+            req = Net::HTTP::Post.new(uri.path)
+            query = URI.encode_www_form(params)
+            query.gsub!(/%25/,'%') # salesforce uses encodable characters in the temp code...
+            req.body = query
+            req.content_type = 'application/x-www-form-urlencoded'
+        else
+            req = Net::HTTP::Post.new(uri.path, initheader = {
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            })
             req.body = params.to_json
         end
 
         begin
-            puts req.inspect
             res = https.request(req)
             puts res.body.inspect
             if res.code == "200"

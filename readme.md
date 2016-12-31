@@ -11,7 +11,7 @@
     vi ~/.bashrc
     
     ### INTEGRATIONS ENV VARS
-    export INTEGRATIONS_HOST="http://localhost:3000" #https://wired7.com
+    export INTEGRATIONS_HOST="https://localhost:3000" #https://wired7.com
     export INTEGRATIONS_GITHUB_CLIENT_ID=""
     export INTEGRATIONS_INSTAGRAM_CLIENT_ID=""
     export INTEGRATIONS_FACEBOOK_CLIENT_ID=""
@@ -39,7 +39,7 @@ Shell 1 (project root)
     export RACK_ENV=development
     source ~/.bashrc
     rake db:migrate
-    passenger start
+    passenger start --ssl --ssl-certificate localhost.crt --ssl-certificate-key localhost.key --port 3001 --ssl-port 3000 
 
 Shell 2
 
