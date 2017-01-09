@@ -1,0 +1,113 @@
+/* main layout */
+html {
+    position: relative;
+    min-height: 100%;
+}
+body {
+    /* Margin bottom by footer height */
+    margin-bottom: 100px;
+    margin-top:56px;
+    height:100%;
+    background-color: #333;
+    /*background-color:#f9f9f9;*/
+    /*background-color: #28B6C3;*/
+    font-family: 'Lato', sans-serif;
+    font-weight:400;
+    font-size:14px;
+    /*color: #4C4C4C;*/
+    color: #fff;
+    /*    -webkit-font-smoothing: subpixel-antialiased; */
+}
+h1{
+    font-size:42px;
+    line-height:48px;
+    font-weight:900;
+}
+h2{
+    font-size:32px;
+    line-height:36px;
+    font-weight:400;
+}
+h3{
+    font-weight:300;
+    font-size:22px;
+    margin-top:22px;
+    line-height:26px;
+    margin-top:0px;
+}
+h4{
+    font-size:14px;
+    line-height:18px;
+    font-weight:300;
+    margin-bottom:5px;
+}
+
+
+/* index */
+
+.login-form {
+    position: relative;
+    z-index: 1;
+    max-width: 360px;
+    margin: 0 auto 0px;
+    padding: 0px;
+    text-align: center;
+    border:0px;
+}
+.login-form input{
+    margin-bottom:20px;
+    border:none;
+    background-color: #f9f9f9;
+    color:#28B6C3;
+}
+.login-form button{
+    margin-top:10px;
+    width:100%;
+}
+.login-form .btn-group label{
+    margin-bottom: 10px;
+    margin-right: 10px;
+    -webkit-border-radius: 4px !important;
+    -moz-border-radius: 4px !important;
+    border-radius: 4px !important; 
+}
+.login-form .btn-group label.active{
+
+}
+.login-form .tos{
+    margin-top:10px; 
+    color: #949494;
+}
+.split{
+    max-width:720px;
+    padding-top:0px;
+    padding-bottom:0px;
+    padding:50px;
+    padding-top:30px;
+}
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
+.carousel{
+    position:fixed;
+    left:0px;
+    top:0px;
+    width:100%;
+    height:100%;
+}
+
+/* misc */
+* {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important; 
+}
+.form-control{
+    color: #fff;
+}
+.form-control[disabled]{
+    color: #fff;
+    background-color:#fff;
+}

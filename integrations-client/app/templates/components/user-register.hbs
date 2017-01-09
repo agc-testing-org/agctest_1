@@ -1,19 +1,25 @@
-<form {{action 'register' on="submit"}}>
+<form class="login-form text-center" {{action 'register' on="submit"}}>
 
     {{input value=name placeholder="First Name" class="form-control input-lg margin-bottom-sm"}}
 
     {{input value=email placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
 
-    {{input value=password placeholder="Password" type="password" class="form-control input-lg margin-bottom-sm"}}
+    <div class="btn-group text-left" data-toggle="buttons">
+        <label class="btn btn-primary">
+            {{input type="checkbox" class="checkbox" name="pm"}} Product Manager
+        </label>
+        <label class="btn btn-primary">
+            {{input type="checkbox" class="checkbox" name="quality"}} Quality Engineer/Analyst
+        </label>
+        <label class="btn btn-primary">
+            {{input type="checkbox" class="checkbox" name="dev"}} Developer
+        </label>
+        <label class="btn btn-primary">
+            {{input type="checkbox" class="checkbox" name="designer"}} Designer
+        </label>
+    </div>
 
-    <h5 class="tos text-center">By signing in you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h5>
-    <button type="submit" class="btn btn-info">Register</button>
+    <button type="submit" class="btn btn-info btn-lg">Register</button>
 
-    {{#if session.isAuthenticated}}
-    AUTHENTICATED with {{session.data.authenticated.provider}}
-    {{session.data.authenticated.access_token}}
-    {{else}}
-    NOT SIGNED IN
-    {{/if}}
-
+    <h4 class="tos">By registering you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
 </form>

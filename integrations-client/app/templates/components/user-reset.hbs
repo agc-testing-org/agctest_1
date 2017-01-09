@@ -1,0 +1,9 @@
+<form {{action 'reset' on="submit"}}>
+    <div class="text-center">
+        {{input type="password" value=password placeholder="Password" class="form-control input-lg margin-bottom-sm"}}
+        {{input type="password" value=passwordb placeholder="Confirm Password" class="form-control input-lg margin-bottom-sm"}}
+
+        <button type="submit" class="btn btn-info btn-lg margin-top-md">Save</button>
+        <h5>Want us to send another email? {{ link-to 'Resend' index }}</h5>
+    </div>
+</form>
