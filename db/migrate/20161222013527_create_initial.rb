@@ -9,6 +9,7 @@ class CreateInitial < ActiveRecord::Migration
             t.text     "jwt",        limit: 65535
             t.string   "ip",         limit: 255
             t.boolean  "lock",                     default: false
+            t.boolean "protected", default: false
             t.string   "password",   limit: 255, null:true
             t.boolean  "confirmed",              default: false
             t.string   "token",      limit: 255, null:true
@@ -24,5 +25,6 @@ class CreateInitial < ActiveRecord::Migration
         add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
         add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
         add_foreign_key "logins", "users", column: "user_id"
+
     end
 end

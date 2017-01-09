@@ -90,25 +90,14 @@ class Integrations < Sinatra::Base
             if fields[:name].length > 1 && fields[:name].length < 30
                 account = Account.new
                 if (account.valid_email fields[:email]) 
-                    account.create fields[:email], fields[:name], request.ip
+                    token = account.create fields[:email], fields[:name], request.ip
+                    if token # send welcome email with token
+                        account.create_email fields[:email], fields[:name], token
+                    else # user forgot OR unauthorized claim, so send reset password email
+                        account.request_token fields[:email]
+                    end
                     response[:success] = true
                     status 201
-
-         #           if user_id && user_id > 0
-         #               user_secret = SecureRandom.hex(32) #session secret, not password
-         #               jwt = account.create_token user_id, user_secret, fields[:name]
-         #               if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user_id, request.ip, jwt) && (account.record_login user_id, request.ip)
-         #                   response[:success] = true
-         #                   response[:w7_token] = jwt 
-         #                   status 201
-         #                   account.create_email fields[:email], fields[:name]
-         #               else
-         #                   status 500
-         #               end
-         #           else
-         #               status 201
-         #               response[:message] = "This email address exists in our system.  Please try to Sign In."
-         #           end
                 else
                     response[:message] = "Please enter a valid email address."
                 end
@@ -118,6 +107,41 @@ class Integrations < Sinatra::Base
         rescue => e
             puts e
             response[:message] = "Invalid request"
+        end
+        return response.to_json
+    end
+
+    reset_post = lambda do
+        status 400
+        response = { :success => false }
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            account = Account.new
+            if fields[:token] && fields[:password]
+                password_length = fields[:password].to_s.length
+                if password_length > 7 && password_length < 31
+                    user_id = account.validate_reset_token fields[:token], fields[:password], request.ip
+                    if user_id
+                        user_secret = SecureRandom.hex(32) #session secret, not password
+                        jwt = account.create_token user_id, user_secret, fields[:name]
+                        if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user_id, request.ip, jwt) && (account.record_login user_id, request.ip)
+                            response[:success] = true
+                            response[:w7_token] = jwt 
+                            status 201
+                        end
+                    else
+                        response[:message] = "This token has expired"
+                    end
+                else
+                    response[:message] = "Your password must be 8-30 characters in length"
+                end
+            else
+                response[:message] = "This request is not valid"
+            end
+        rescue => e
+            puts e
+            response[:message] = "This request is not valid"
         end
         return response.to_json
     end
@@ -178,6 +202,7 @@ class Integrations < Sinatra::Base
 
     #API
     post "/register", &register_post
+    post "/reset", &reset_post
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
 

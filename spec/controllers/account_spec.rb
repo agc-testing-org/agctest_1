@@ -226,6 +226,9 @@ describe ".Account" do
                 @res = @account.create @email, @name, @ip
                 @mysql = @mysql_client.query("select * from users").first
             end
+            it "should return token" do
+                expect(@res).to eq(@mysql["token"])
+            end
             context "users table" do
                 it "should include downcased email" do
                     expect(@mysql["email"]).to eq(@email.downcase)
@@ -236,8 +239,8 @@ describe ".Account" do
                 it "should include admin = 0" do
                     expect(@mysql["admin"]).to eq(0)
                 end
-                it "should include lock = false" do
-                    expect(@mysql["lock"]).to be 0
+                it "should include protected = false" do
+                    expect(@mysql["protected"]).to be 0
                 end
                 it "should include ip" do
                     expect(@mysql["ip"]).to eq @ip
@@ -280,7 +283,10 @@ describe ".Account" do
                 it "should include email" do
                     expect(@res.email).to eq(users(:adam).email)
                 end
-                it "should include include lock" do
+                it "should include include protected" do
+                    expect(@res.protected).to be false
+                end
+                it "should include lock" do
                     expect(@res.lock).to be false
                 end
             end
@@ -444,11 +450,11 @@ describe ".Account" do
                     @account.request_token @email
                     @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
                 end
-                it "should return true" do
-                    expect(@res).to eq(true)
+                it "should return user id" do
+                    expect(@res).to eq(@mysql_client.query(@query).first["id"])
                 end
                 it "should save the new password" do
-                    expect(@mysql_client.query(@query).first["password"]).to eq(@password)
+                    expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
                 end
                 it "should make the token nil" do
                     expect(@mysql_client.query(@query).first["token"]).to be nil
@@ -460,15 +466,15 @@ describe ".Account" do
                     expect(@mysql_client.query(@query).first["ip"]).to eq(@ip)
                 end
             end
-            context "locked account" do
+            context "protected account" do
                 before(:each) do
-                    query = "update users SET `lock` = 1 where id = #{users(:adam).id}"
+                    query = "update users SET `protected` = 1 where id = #{users(:adam).id}"
                     @mysql_client.query(query)
                     @account.request_token @email
                     @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
                 end
-                it "should set lock to false" do
-                    expect(@mysql_client.query(@query).first["lock"]).to eq(0)
+                it "should set protected to false" do
+                    expect(@mysql_client.query(@query).first["protected"]).to eq(0)
                 end
             end
         end

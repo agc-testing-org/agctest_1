@@ -117,7 +117,11 @@ class Account
                 token: SecureRandom.hex(32),
                 ip: ip
             })
-            return user.id
+            if user.id
+                return user.token
+            else
+                return nil
+            end
         rescue => e
             puts e
             return nil
@@ -181,9 +185,9 @@ class Account
         end
     end
 
-    def create_email email, name 
+    def create_email email, name, token 
         begin
-            mail email, "Welcome to Wired7 (Beta) #{name}", "#{name},\n\nThanks for joining us at this early stage!  We would love to hear about your experience.  Contact us at ateam@wired7.com\n\n\n- The Wired7 Team"
+            mail email, "Welcome to Wired7 #{name.capitalize}", "#{name.capitalize},\n\nThanks for joining us!  To continue using the service please confirm your email by opening the following link:\n#{ENV['INTEGRATIONS_ROOT']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\n  \n\n\n- The Wired7 Team"
         rescue => e
             puts e
         end
@@ -205,12 +209,13 @@ class Account
         token = token.split("-")
         user = User.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token[1]).take
         if user && (Digest::MD5.hexdigest(user[:email]) == token[0])
-            user[:password] = password
+            user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
-            user[:lock] = false
+            user[:protected] = false
             user[:confirmed] = true
             user[:ip] = ip
-            return user.save
+            user.save
+            return user[:id]
         else
             return false
         end

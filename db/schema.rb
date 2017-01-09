@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(version: 20161222013527) do
     t.text     "jwt",        limit: 65535
     t.string   "ip",         limit: 255
     t.boolean  "lock",                     default: false
+    t.boolean  "protected",                default: false
     t.string   "password",   limit: 255
     t.boolean  "confirmed",                default: false
     t.string   "token",      limit: 255
