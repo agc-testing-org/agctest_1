@@ -98,9 +98,6 @@ describe ".Account" do
             @res, @header = JWT.decode @token, Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}"), true, { :verify_iat => true, :verify_jti => true, :algorithm => 'HS256' }
         end
         context "context jwt" do
-            it "should contain user_id" do
-                expect(@res["user_id"]).to eq(@id)
-            end
             it "should contain payload" do
                 expect(@res["payload"]).to eq(@payload)
             end
@@ -138,9 +135,6 @@ describe ".Account" do
                 @payload = @account.validate_token @valid_token, @secret
             end
             context "payload" do
-                it "should return user_id" do
-                    expect(@payload["user_id"]).to eq(@id)
-                end
                 it "should return payload" do
                     expect(@payload["payload"]).to eq(@load)
                 end

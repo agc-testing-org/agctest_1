@@ -49,7 +49,6 @@ class Account
             # :exp => Time.now.to_i + 600,
             :iat => iat,
             :jti => jti,
-            :user_id => user_id,
             :payload => payload
         }
 
