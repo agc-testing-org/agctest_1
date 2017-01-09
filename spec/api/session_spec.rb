@@ -66,6 +66,20 @@ describe "API", :focus => true do
                 #expect(Zxcvbn.test(@password).score).to eq(2)
             end
             context "with valid token" do
+                shared_examples_for "successful_reset" do
+                    it "should return success = true" do
+                        expect(@res["success"]).to eq(true)
+                    end
+                    it "should return w7 token" do
+                        expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["w7_token"])
+                    end
+                    it "should save w7 token in redis" do
+                        expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
+                    end 
+                    it "should save new password" do 
+                        expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
+                    end
+                end
                 context "non-protected account" do
                     before(:each) do
                         @query = "select * from users where id = #{users(:adam_confirmed).id}"
@@ -74,21 +88,18 @@ describe "API", :focus => true do
                         post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                         @res = JSON.parse(last_response.body)
                     end
-                    it "should return success = true" do
-                        expect(@res["success"]).to eq(true)
-                    end
-                    it "should save new password" do 
-                        expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
-                    end
+                    it_behaves_like "successful_reset"
                 end
                 context "protected account" do
                     before(:each) do
+                        @query = "select * from users where id = #{users(:adam_protected).id}"
                         post "/reset", { :password => @password, :token => "#{Digest::MD5.hexdigest(users(:adam_protected).email)}-#{users(:adam_protected).token}" }.to_json 
                         @res = JSON.parse(last_response.body)
                     end
                     it "should set protected to false" do
                         expect(@mysql_client.query("select * from users where email = '#{users(:adam_protected).email}'").first["protected"]).to eq(0)
                     end
+                    it_behaves_like "successful_reset"
                 end
             end
             context "with token older than 24 hours / invalid" do
