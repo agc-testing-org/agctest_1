@@ -7,7 +7,7 @@ gem 'redis', '~>3.2'
 gem 'jwt'
 gem 'bcrypt'
 gem 'pony'
-gem 'curb'
+gem 'octokit', '~> 4.6.0'
 
 group :development do
     gem 'passenger'

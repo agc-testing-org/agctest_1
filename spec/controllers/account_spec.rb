@@ -12,50 +12,20 @@ describe ".Account" do
     end
     before(:each) do
         @account = Account.new
-    end
-
-    context "#get_provider_by_name" do
-        context "no provider" do
-            it "should return nil" do
-                expect(@account.get_provider_by_name "github").to be nil
-            end
-        end
-        context "providers" do
-            fixtures :providers
-            context "object" do
-                before(:each) do
-                    @res = @account.get_provider_by_name providers(:github).name
-                end
-                it "should include name" do
-                    expect(@res[:name]).to eq(providers(:github).name)
-                end
-                it "should include id" do
-                    expect(@res[:id]).to eq(providers(:github).id)
-                end
-                it "should include client_id" do
-                    expect(@res[:client_id]).to eq(providers(:github).client_id) 
-                end
-                it "should include client_secret" do
-                    expect(@res[:client_secret]).to eq(providers(:github).client_secret) 
-                end
-            end
-        end
-    end
-   
+    end   
     context "#code_for_token" do
-        fixtures :providers
         before(:each) do
             @code = "123"
             @access_token = "ACCESS123"
         end
         context "service error" do
             before(:each) do
-                stub_request(:post, "https://github.com/login/oauth/access_token").
-                    with(:body => "{\"client_id\":\"#{providers(:github).client_id}\",\"client_secret\":\"#{providers(:github).client_secret}\",\"code\":\"#{@code}\"}").
-                    to_return(:status => 500, :body => {"access_tokenz" => @access_token}.to_json, :headers => {})
-                @res = @account.code_for_token @code, providers(:github)
+                Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({      
+                    :error => true 
+                }.to_json, object_class: OpenStruct) }
+                @res = @account.code_for_token @code
 
-                @account.code_for_token @code, providers(:github)
+                @account.code_for_token @code
             end
             it "should return nil" do
                 expect(@res).to be nil
@@ -63,10 +33,10 @@ describe ".Account" do
         end
         context "service success" do
             before(:each) do
-                stub_request(:post, "https://github.com/login/oauth/access_token").
-                    with(:body => "{\"client_id\":\"#{providers(:github).client_id}\",\"client_secret\":\"#{providers(:github).client_secret}\",\"code\":\"#{@code}\"}").
-                    to_return(:status => 200, :body => {"access_token" => @access_token}.to_json, :headers => {})
-                @res = @account.code_for_token @code, providers(:github)
+                Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({ 
+                    :access_token => @access_token
+                }.to_json, object_class: OpenStruct) }
+                @res = @account.code_for_token @code
             end
             it "should return access_token" do
                 expect(@res).to eq(@access_token)
@@ -201,7 +171,7 @@ describe ".Account" do
                         :iat => Time.now.to_i,
                         :jti => Digest::MD5.hexdigest("#{Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}")}:#{Time.now.to_i}"),
                         :user_id => 1,
-                        :payload =>  {"github" => "GHB"}                  
+                            :payload =>  {"github" => "GHB"}                  
                     }
                     token = JWT.encode payload, Digest::MD5.hexdigest("#{ENV['INTEGRATIONS_HMAC']}:#{@secret}"), "HS256"
                     expect(@account.validate_token token, "ABC").to be nil
@@ -238,7 +208,8 @@ describe ".Account" do
         context "email does exist" do
             fixtures :users
             before(:each) do
-                @res = @account.create users(:adam).email, users(:adam).name
+                ip = "192.168.1.1"
+                @res = @account.create users(:adam).email, users(:adam).name, ip 
             end
             it "should return nil" do
                 expect(@res).to eq(nil)
@@ -249,23 +220,30 @@ describe ".Account" do
         end
         context "email does not exist" do
             before(:each) do
-                @email = "adam0@wired7.com"
-                @name = "adam"
-                @res = @account.create @email, @name
+                @email = "Adam0@wired7.com"
+                @name = "ADAM"
+                @ip = "192.168.1.1"
+                @res = @account.create @email, @name, @ip
                 @mysql = @mysql_client.query("select * from users").first
             end
             context "users table" do
-                it "should include email" do
-                    expect(@mysql["email"]).to eq(@email)
+                it "should include downcased email" do
+                    expect(@mysql["email"]).to eq(@email.downcase)
                 end
-                it "should include username" do
-                    expect(@mysql["name"]).to eq(@name)
+                it "should include downcased name" do
+                    expect(@mysql["name"]).to eq(@name.downcase)
                 end
                 it "should include admin = 0" do
                     expect(@mysql["admin"]).to eq(0)
                 end
                 it "should include lock = false" do
                     expect(@mysql["lock"]).to be 0
+                end
+                it "should include ip" do
+                    expect(@mysql["ip"]).to eq @ip
+                end
+                it "should include token" do
+                    expect(@mysql["token"]).to_not be nil 
                 end
             end
         end
@@ -275,8 +253,7 @@ describe ".Account" do
         before(:each) do
             @ip = "192.168.1.1"
             @jwt = "1234567890"
-            @tokens = {:a => 1, :b => 2}
-            @res = @account.update users(:adam).id, @ip, @jwt, @tokens
+            @res = @account.update users(:adam).id, @ip, @jwt
             @record = @mysql_client.query("select * from users where id = #{users(:adam).id}").first
         end
         context "response" do
@@ -290,9 +267,6 @@ describe ".Account" do
             end
             it "should save jwt" do
                 expect(@record["jwt"]).to eq(@jwt)
-            end
-            it "should save tokens" do
-                expect(@record["tokens"]).to eq(@tokens.to_s)
             end
         end
     end
@@ -323,7 +297,7 @@ describe ".Account" do
     context "#record_login" do
         context "no users foreign key" do
             before(:each) do
-                @res = @account.record_login 22, "123.56", 1
+                @res = @account.record_login 22, "123.56"
             end
             it "should return nil" do
                 expect(@res).to be nil
@@ -335,7 +309,7 @@ describe ".Account" do
                 @ip = "192.168.1.1"
                 @id = users(:adam).id
                 @provider = 1
-                @res = @account.record_login @id, @ip, @provider
+                @res = @account.record_login @id, @ip
                 @record = @mysql_client.query("select * from logins where user_id = #{users(:adam).id}").first
             end
             context "response" do
@@ -349,9 +323,6 @@ describe ".Account" do
                 end
                 it "should save ip address" do
                     expect(@record["ip"]).to eq(@ip)
-                end
-                it "should save provider id" do
-                    expect(@record["provider_id"]).to eq(@provider)
                 end
             end
         end
@@ -411,6 +382,103 @@ describe ".Account" do
                 it "should return false" do
                     expect(@account.valid_email email).to be false
                 end
+            end
+        end
+    end
+
+    context "#request_token" do
+        context "when an account exists" do
+            fixtures :users
+            before(:each) do
+                @email = users(:adam).email
+                @res = @account.request_token @email
+                @upload_query = "select * from users where id = #{users(:adam).id}"
+            end
+            it "should return true" do
+                expect(@res).to eq(true)
+            end
+            it "should save a token to the database" do
+                expect(@mysql_client.query(@upload_query).first["token"]).to_not be_empty
+            end
+            it "should save a random token" do
+                first_token = users(:adam).token
+                second_token = @mysql_client.query(@upload_query).first["token"]
+                expect(first_token).to_not eq(second_token)
+            end
+        end
+        context "when an account does not exist" do
+            it "should return false" do
+                expect(@account.request_token "adam12345@wired7.com").to eq(false)
+            end
+        end
+    end
+
+    context "#validate_reset_token" do
+        before(:each) do
+            @ip = '192.168.1.1'
+        end
+        context "when an account exists" do
+            fixtures :users
+            before(:each) do
+                @email = users(:adam).email
+                @email_hash = Digest::MD5.hexdigest(@email)
+                @query = "select * from users where id = #{users(:adam).id}"
+                @password = "12345678"
+            end
+            context "token generated 24 hours +" do
+                before(:each) do
+                    @res = @account.validate_reset_token "#{@email_hash}-#{users(:adam).token}", @password, @ip
+                end
+                it "should return false" do
+                    expect(@res).to eq(false)
+                end
+                it "should not update confirmed" do
+                    expect(@mysql_client.query(@query).first["confirmed"]).to eq(0)
+                end
+                it "should not save the new password" do
+                    expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
+                end
+            end
+            context "token generated within 24 hours" do
+                before(:each) do
+                    @account.request_token @email
+                    @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
+                end
+                it "should return true" do
+                    expect(@res).to eq(true)
+                end
+                it "should save the new password" do
+                    expect(@mysql_client.query(@query).first["password"]).to eq(@password)
+                end
+                it "should make the token nil" do
+                    expect(@mysql_client.query(@query).first["token"]).to be nil
+                end
+                it "should update confirmed to true" do
+                    expect(@mysql_client.query(@query).first["confirmed"]).to eq(1)
+                end
+                it "should save the user's ip address" do
+                    expect(@mysql_client.query(@query).first["ip"]).to eq(@ip)
+                end
+            end
+            context "locked account" do
+                before(:each) do
+                    query = "update users SET `lock` = 1 where id = #{users(:adam).id}"
+                    @mysql_client.query(query)
+                    @account.request_token @email
+                    @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
+                end
+                it "should set lock to false" do
+                    expect(@mysql_client.query(@query).first["lock"]).to eq(0)
+                end
+            end
+        end
+        context "when an account does not exist" do
+            before(:each) do
+                @password = "12345678"
+                @res = @account.validate_reset_token "1234567865432-12121212", @password, @ip
+            end
+            it "should return false" do
+                expect(@res).to eq(false)
             end
         end
     end

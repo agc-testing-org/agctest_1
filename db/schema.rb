@@ -11,29 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161229192026) do
+ActiveRecord::Schema.define(version: 20161222013527) do
 
   create_table "logins", force: :cascade do |t|
-    t.integer  "user_id",     limit: 4,               null: false
-    t.string   "ip",          limit: 255,             null: false
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
-    t.integer  "provider_id", limit: 4,   default: 0
+    t.integer  "user_id",    limit: 4,   null: false
+    t.string   "ip",         limit: 255, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
   end
 
   add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
   add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
-
-  create_table "providers", force: :cascade do |t|
-    t.string   "name",          limit: 255,   null: false
-    t.string   "client_id",     limit: 255
-    t.string   "client_secret", limit: 255
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.text     "endpoint",      limit: 65535
-  end
-
-  add_index "providers", ["name"], name: "index_providers_on_name", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",      limit: 255,                   null: false
@@ -42,7 +30,6 @@ ActiveRecord::Schema.define(version: 20161229192026) do
     t.datetime "created_at",                               null: false
     t.datetime "updated_at",                               null: false
     t.text     "jwt",        limit: 65535
-    t.text     "tokens",     limit: 65535
     t.string   "ip",         limit: 255
     t.boolean  "lock",                     default: false
     t.string   "password",   limit: 255

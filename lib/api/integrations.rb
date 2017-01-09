@@ -10,14 +10,13 @@ require 'open-uri'
 require 'uri'
 require 'bcrypt'
 require 'pony'
-require 'curb'
+require 'octokit'
 
 # Controllers
 require_relative '../controllers/account.rb'
 
 # Models
 require_relative '../models/user.rb'
-require_relative '../models/provider.rb'
 require_relative '../models/login.rb'
 
 # Workers
@@ -85,29 +84,31 @@ class Integrations < Sinatra::Base
     register_post = lambda do
         status 400
         response = {:success => false}
-        provider = {:name => "W7", :id => 0}
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:name].to_s.length > 1
+            if fields[:name].length > 1 && fields[:name].length < 30
                 account = Account.new
                 if (account.valid_email fields[:email]) 
-                    user_id = account.create fields[:email], fields[:name], fields[:password]
-                    if user_id && user_id > 0
-                        user_secret = SecureRandom.hex(32) #session secret, not password
-                        jwt = account.create_token user_id, user_secret, fields[:name]
-                        if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user_id, request.ip, jwt, nil) && (account.record_login user_id, request.ip, provider[:id])
-                            response[:success] = true
-                            response[:w7_token] = jwt 
-                            status 200
-                            account.create_email fields[:email], fields[:name]
-                        else
-                            status 500
-                        end
-                    else
-                        status 201
-                        response[:message] = "This email address exists in our system.  Please try to Sign In."
-                    end
+                    account.create fields[:email], fields[:name], request.ip
+                    response[:success] = true
+                    status 201
+
+         #           if user_id && user_id > 0
+         #               user_secret = SecureRandom.hex(32) #session secret, not password
+         #               jwt = account.create_token user_id, user_secret, fields[:name]
+         #               if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user_id, request.ip, jwt) && (account.record_login user_id, request.ip)
+         #                   response[:success] = true
+         #                   response[:w7_token] = jwt 
+         #                   status 201
+         #                   account.create_email fields[:email], fields[:name]
+         #               else
+         #                   status 500
+         #               end
+         #           else
+         #               status 201
+         #               response[:message] = "This email address exists in our system.  Please try to Sign In."
+         #           end
                 else
                     response[:message] = "Please enter a valid email address."
                 end
@@ -116,7 +117,7 @@ class Integrations < Sinatra::Base
             end
         rescue => e
             puts e
-            response[:message] = "This request is not valid.  We're looking into this."
+            response[:message] = "Invalid request"
         end
         return response.to_json
     end
@@ -133,17 +134,16 @@ class Integrations < Sinatra::Base
             puts fields.inspect
             account = Account.new
             puts params.inspect
-            provider = account.get_provider_by_name fields[:grant_type]
-            puts provider.inspect
-            if provider
-                access_token = account.code_for_token(fields[:auth_code], provider)
 
-                @providers[provider[:name]] = access_token
+            if fields[:grant_type]
+                access_token = account.code_for_token(fields[:auth_code])
+
+                @providers[fields[:grant_type]] = access_token
                 puts @providers.inspect
                 provider_token = account.create_token @jwt_hash["user_id"], @key, @providers 
                 puts provider_token.inspect
 
-                if (account.save_token "session", @session, {:key => @key, :providers => provider_token}.to_json) && (account.update @jwt_hash["user_id"], request.ip, @session, provider_token) && (account.record_login @jwt_hash["user_id"], request.ip, provider[:id]) 
+                if (account.save_token "session", @session, {:key => @key, :providers => provider_token}.to_json) && (account.update @jwt_hash["user_id"], request.ip, @session) && (account.record_login @jwt_hash["user_id"], request.ip) 
                     status 200
                     return {:success => true, :w7_token => @session}.to_json
                 else
@@ -176,27 +176,12 @@ class Integrations < Sinatra::Base
         return {:id =>  1, :name => "adam"}.to_json
     end
 
-    facebook_get = lambda do
-        protected!
-        status 200
-        puts @providers.inspect        
-        uri = URI.parse("https://graph.facebook.com/v2.4/me/posts?access_token=#{@providers["facebook"]}")#v2.4/shakira/insights/page_impressions?access_token=#{@providers["github"]}")
-        http = Net::HTTP.new(uri.host, uri.port)
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE # read into this
-        data = http.get(uri.request_uri)
-        puts data.body.inspect
-    end
-
     #API
     post "/register", &register_post
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
 
     get "/account", &account_get
-
-    get "/facebook", &facebook_get
-
 
     #Ember
     get "*" do

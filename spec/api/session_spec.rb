@@ -1,23 +1,60 @@
 require_relative '../spec_helper'
 
-describe "API" do
+describe "API", :focus => true do
     before(:all) do
         @mysql_client = Mysql2::Client.new(
-            :host => ENV['WIRED7_CORE_HOST'],
-            :username => ENV['WIRED7_CORE_USERNAME'],
-            :password => ENV['WIRED7_CORE_PASSWORD'],
-            :database => "w7_core_#{ENV['RACK_ENV']}"       
-        )                                                           
-        @redis = Redis.new(:host => ENV['WIRED7_REDIS_HOST'], :port => ENV['WIRED7_REDIS_PORT'], :db => ENV['WIRED7_REDIS_DB'])
+            :host => ENV['INTEGRATIONS_MYSQL_HOST'],
+            :username => ENV['INTEGRATIONS_MYSQL_USERNAME'],
+            :password => ENV['INTEGRATIONS_MYSQL_PASSWORD'],
+            :database => "integrations_#{ENV['RACK_ENV']}"
+        )
+        @redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
     end
     describe "POST /register" do
+        shared_examples_for "register" do
+            context "response" do
+                it "should return code of 201" do
+                    expect(last_response.status).to eq 201
+                end
+                it "should return success = true" do
+                    expect(@res[:success]).to be true
+                end
+            end
+            context "users" do
+                it "should save email" do
+                    expect(@users["email"]).to eq(@email)
+                end
+                it "should save name" do
+                    expect(@users["name"]).to eq(@name)
+                end
+                it "should save ip" do
+                    expect(@users["ip"]).to eq(@ip)
+                end
+            end
+        end
         context "new user" do
-            @name = "adam"
-            @email = "adam+0@wired7.com"
-            post "/register?username=#{@name}&password=#{@email}"
+            before(:each) do
+                @name = "adam"
+                @ip = "127.0.0.1"
+                @email = "adam+0@wired7.com"
+                post "/register", {:name => @name, :email=> @email}.to_json
+                @res = JSON.parse(last_response.body, :symbolize_names => true)
+                @users = @mysql_client.query("select * from users").first
+                @logins = @mysql_client.query("select * from logins").first
+            end
+            it_behaves_like "register"
         end
         context "existing user" do
-
+            fixtures :users
+            before(:each) do
+                @name = users(:adam).name
+                @email = users(:adam).email
+                post "/register", {:name => @name, :email=> @email}.to_json
+                @res = JSON.parse(last_response.body, :symbolize_names => true)
+                @users = @mysql_client.query("select * from users").first
+                @logins = @mysql_client.query("select * from logins").first
+            end
+            it_behaves_like "register"
         end
     end
     describe "POST /session/:provider" do
@@ -27,94 +64,20 @@ describe "API" do
 
     end
 
-end
-
-
-describe "/session" do
-    describe "POST" do
-        context "valid auth code" do
-            before(:each) do
-                code = "ABCD"
-                post "/session?auth_code=#{code}"
-                @users = @mysql_client.query("select * from users").first
-                @logins = @mysql_client.query("select * from logins").first
-            end
-            it "should save a new auth token in redis" do
-                res = JSON.parse(last_response.body)
-                expect("auth:#{res["w7_token"]}").to eq(@redis.keys("*")[0])
-            end
-            it "should return a 200" do
-                expect(last_response.status).to eq 200
-            end
-            it "should return success" do
-                res = JSON.parse(last_response.body)
-                expect(res["success"]).to be true
-            end
-            context "users" do
-                it "should save email" do
-                    expect(@users["email"]).to eq(@email)
-                end
-                it "should save username" do
-                    expect(@users["username"]).to eq(@username)
-                end
-                it "should save jwt" do
-                    res = JSON.parse(last_response.body)
-                    expect(@users["jwt"]).to eq(res["w7_token"])
-                end
-                it "should save ip" do
-                    expect(@users["ip"]).to eq("127.0.0.1")
-                end
-                it "should save avatar" do
-                    expect(@users["avatar"]).to eq(@avatar_url)
-                end 
-            end
-            context "logins" do
-                it "should save ip" do
-                    expect(@logins["ip"]).to eq("127.0.0.1")
-                end
-                it "should save user" do
-                    expect(@logins["user"]).to eq(1)
-                end
-            end
-        end
-        context "invalid auth code" do
-            before(:each) do
-                @access = JSON.parse({}.to_json, object_class: OpenStruct)
-                Octokit::Client.any_instance.stub(:exchange_code_for_token) { @access }
-                code = "ABCD"
-                post "/session?auth_code=#{code}"
-            end
-            it "should not return success" do
-                res = JSON.parse(last_response.body)
-                expect(res["success"]).to be false
-            end
-            it "should return a 401" do
-                expect(last_response.status).to eq 401
-            end
-            it "should not return an auth token" do
-                res = JSON.parse(last_response.body)
-                expect(res["w7_token"]).to be nil
-            end
-            it "should not save a new auth token in redis" do
-                expect(@redis.keys("*").length).to eq 0
-            end
-        end
-    end
-    describe "DELETE", :focus => true do
+    describe "DELETE" do
         before(:each) do
-            post "/session?auth_code=1234"
-            @token = JSON.parse(last_response.body)["w7_token"]
+
+
         end 
         context "success" do
             it "should return 200" do
                 delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@token}"} 
-                expect(last_response.status).to eq 200
+
             end
         end
         context "bad token" do
             it "should return 200" do
                 delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@token}"}
-                expect(last_response.status).to eq 200
             end
         end
     end

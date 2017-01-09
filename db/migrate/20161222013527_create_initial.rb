@@ -7,7 +7,6 @@ class CreateInitial < ActiveRecord::Migration
             t.datetime "created_at",                               null: false
             t.datetime "updated_at",                               null: false
             t.text     "jwt",        limit: 65535
-            t.text     "tokens", limit: 65535
             t.string   "ip",         limit: 255
             t.boolean  "lock",                     default: false
             t.string   "password",   limit: 255, null:true
@@ -21,20 +20,9 @@ class CreateInitial < ActiveRecord::Migration
             t.string   "ip",         limit: 255, null: false
             t.datetime "created_at",             null: false
             t.datetime "updated_at",             null: false
-            t.integer "provider_id", default: 0
         end
         add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
         add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
         add_foreign_key "logins", "users", column: "user_id"
-
-        create_table "providers", force: :cascade do |t|
-            t.string   "name", null: false
-            t.string   "client_id"
-            t.string   "client_secret"
-            t.datetime "created_at", null: false
-            t.datetime "updated_at", null: false
-        end 
-        add_index "providers", ["name"], name: "index_providers_on_name", using: :btree
     end
-
 end

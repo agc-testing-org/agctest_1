@@ -12,53 +12,12 @@ class Account
         end
     end
 
-    def code_for_token code, provider
-        #graph.facebook.com/v2.8
-        #api.instagram.com
-        #github.com/login
-
-        params = {
-            client_id: provider.client_id,
-            client_secret: provider.client_secret,
-            code: code,
-            grant_type: "authorization_code",
-            redirect_uri: "#{ENV['INTEGRATIONS_HOST']}/callback/#{provider.name}"
-        }
-
-        if provider.name == "salesforce"
-            uri = URI.parse("https://#{provider.endpoint}/oauth2/token")
-        else
-            uri = URI.parse("https://#{provider.endpoint}/oauth/access_token")
-        end
-
-        https = Net::HTTP.new(uri.host,uri.port)
-        https.use_ssl = true
-       # https.set_debug_output($stdout)
-
-        if (provider.name == "instagram") || (provider.name == "salesforce")
-            req = Net::HTTP::Post.new(uri.path)
-            query = URI.encode_www_form(params)
-            query.gsub!(/%25/,'%') # salesforce uses encodable characters in the temp code...
-            req.body = query
-            req.content_type = 'application/x-www-form-urlencoded'
-        else
-            req = Net::HTTP::Post.new(uri.path, initheader = {
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json'
-            })
-            req.body = params.to_json
-        end
-
+    def code_for_token code
         begin
-            res = https.request(req)
-            puts res.body.inspect
-            if res.code == "200"
-                return JSON.parse(res.body)["access_token"]
-            else
-                return nil
-            end
-        rescue
-            return nil
+            return Octokit.exchange_code_for_token(code, ENV['INTEGRATIONS_GITHUB_CLIENT_ID'], ENV['INTEGRATIONS_GITHUB_CLIENT_SECRET'])[:access_token]
+        rescue => e
+            puts e
+            return nil 
         end
     end
 
@@ -125,7 +84,7 @@ class Account
 
     def mail to, subject, body
         begin
-            if ENV['INTEGRATIONS_EMAIL_ADDRESS']
+            if !ENV['INTEGRATIONS_EMAIL_ADDRESS'].empty?
                 Pony.mail({
                     :to => to,
                     :from => 'DoNotReply@wired7.com',
@@ -134,15 +93,15 @@ class Account
                     :subject => subject,
                     :body => body,
                     :via_options => {
-                    :address              => 'wiredsevencom.netfirms.com',
-                    :port                 => '587',
-                    :enable_starttls_auto => true,
-                    :user_name            => ENV['INTEGRATIONS_EMAIL_ADDRESS'],
-                    :password             => ENV['INTEGRATIONS_EMAIL_PASSWORD'],
-                    :openssl_verify_mode => OpenSSL::SSL::VERIFY_NONE,
-                    #:authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
-                    :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
-                }
+                        :address              => 'wiredsevencom.netfirms.com',
+                        :port                 => '587',
+                        :enable_starttls_auto => true,
+                        :user_name            => ENV['INTEGRATIONS_EMAIL_ADDRESS'],
+                        :password             => ENV['INTEGRATIONS_EMAIL_PASSWORD'],
+                        :openssl_verify_mode => OpenSSL::SSL::VERIFY_NONE,
+                        #:authentication       => :plain, # :plain, :login, :cram_md5, no auth by default
+                        :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
+                    }
                 })
             end
         rescue Exception => e
@@ -150,12 +109,13 @@ class Account
         end
     end
 
-    def create email, name, password
+    def create email, name, ip
         begin
             user = User.create({
-                email: email,
-                name: name,
-                password: password
+                email: email.downcase,
+                name: name.downcase,
+                token: SecureRandom.hex(32),
+                ip: ip
             })
             return user.id
         rescue => e
@@ -194,13 +154,12 @@ class Account
         end
     end
 
-    def update id, ip, jwt, tokens
+    def update id, ip, jwt
         begin
             user = User.find_by(id: id)
             user.update({
                 ip: ip,
-                jwt: jwt,
-                tokens: tokens
+                jwt: jwt
             })
             return user.save
         rescue => e
@@ -209,12 +168,11 @@ class Account
         end
     end
 
-    def record_login id, ip, provider
+    def record_login id, ip
         begin
             login = Login.create({
                 user_id: id,
-                ip: ip,
-                provider_id: provider
+                ip: ip
             })
             return login.id
         rescue => e
@@ -230,4 +188,32 @@ class Account
             puts e
         end
     end
+
+    def request_token email
+        user = User.find_by(email: email)
+        if user 
+            user[:token] = SecureRandom.hex
+            mail user.email, "Wired7 Password Reset", "#{user.name.capitalize},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_ROOT']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+
+            return user.save
+        else
+            return false
+        end
+    end
+
+    def validate_reset_token token, password, ip
+        token = token.split("-")
+        user = User.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token[1]).take
+        if user && (Digest::MD5.hexdigest(user[:email]) == token[0])
+            user[:password] = password
+            user[:token] = nil
+            user[:lock] = false
+            user[:confirmed] = true
+            user[:ip] = ip
+            return user.save
+        else
+            return false
+        end
+    end
+
 end
