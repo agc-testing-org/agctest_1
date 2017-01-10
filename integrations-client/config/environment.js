@@ -30,22 +30,6 @@ module.exports = function(environment) {
               apiKey: process.env.INTEGRATIONS_GITHUB_CLIENT_ID,
               scope: "user:email public_repo",
               redirectUri: process.env.INTEGRATIONS_HOST+"/callback/github"
-          },
-          'instagram-oauth2': {
-              apiKey: process.env.INTEGRATIONS_INSTAGRAM_CLIENT_ID,
-              scope: "public_content follower_list",
-              redirectUri: process.env.INTEGRATIONS_HOST+"/callback/instagram"
-          },
-          'facebook-oauth2': {
-              apiKey: process.env.INTEGRATIONS_FACEBOOK_CLIENT_ID,
-              scope: 'user_posts,read_insights',
-              redirectUri: process.env.INTEGRATIONS_HOST+"/callback/facebook"
-          },
-          'salesforce-oauth2': {
-              apiKey: process.env.INTEGRATIONS_SALESFORCE_CLIENT_ID,
-              scope: 'full api',
-              response_type: 'code',
-              redirectUri: process.env.INTEGRATIONS_HOST+"/callback/salesforce"
           }
       }
   };
@@ -56,6 +40,10 @@ module.exports = function(environment) {
       authenticationRoute: 'index'
   };
 
+
+  ENV.contentSecurityPolicy = {
+      'connect-src': "'self' http://localhost:4200"
+  }
 
   if (environment === 'development') {
       // ENV.APP.LOG_RESOLVER = true;
