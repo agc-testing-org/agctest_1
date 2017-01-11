@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161222013527) do
+ActiveRecord::Schema.define(version: 20170110155210) do
 
   create_table "logins", force: :cascade do |t|
     t.integer  "user_id",    limit: 4,   null: false
@@ -22,6 +22,23 @@ ActiveRecord::Schema.define(version: 20161222013527) do
 
   add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
   add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
+
+  create_table "roles", force: :cascade do |t|
+    t.string   "name",       limit: 255, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  create_table "user_roles", force: :cascade do |t|
+    t.integer  "user_id",    limit: 4, null: false
+    t.integer  "role_id",    limit: 4, null: false
+    t.datetime "created_at",           null: false
+    t.datetime "updated_at",           null: false
+    t.boolean  "active",               null: false
+  end
+
+  add_index "user_roles", ["role_id"], name: "fk_rails_3369e0d5fc", using: :btree
+  add_index "user_roles", ["user_id"], name: "index_user_roles_on_user", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",      limit: 255,                   null: false
@@ -41,4 +58,6 @@ ActiveRecord::Schema.define(version: 20161222013527) do
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
 
   add_foreign_key "logins", "users"
+  add_foreign_key "user_roles", "roles"
+  add_foreign_key "user_roles", "users"
 end

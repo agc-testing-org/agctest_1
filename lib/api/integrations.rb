@@ -17,6 +17,9 @@ require_relative '../controllers/account.rb'
 
 # Models
 require_relative '../models/user.rb'
+require_relative '../models/user_role.rb'
+require_relative '../models/role.rb'
+require_relative '../models/user.rb'
 require_relative '../models/login.rb'
 
 # Workers
@@ -90,9 +93,14 @@ class Integrations < Sinatra::Base
             if fields[:name].length > 1 && fields[:name].length < 30
                 account = Account.new
                 if (account.valid_email fields[:email]) 
-                    token = account.create fields[:email], fields[:name], request.ip
-                    if token # send welcome email with token
-                        account.create_email fields[:email], fields[:name], token
+                    user = account.create fields[:email], fields[:name], request.ip
+                    if user # send welcome email with token
+                        account.create_email fields[:email], fields[:name], user.token
+                        account.update_role user.id, fields[:roles][:product][:id], fields[:roles][:product][:active]
+                        account.update_role user.id, fields[:roles][:design][:id], fields[:roles][:design][:active]
+                        account.update_role user.id, fields[:roles][:development][:id], fields[:roles][:development][:active]
+                        account.update_role user.id, fields[:roles][:quality][:id], fields[:roles][:quality][:active]
+
                     else # user forgot OR unauthorized claim, so send reset password email
                         account.request_token fields[:email]
                     end
@@ -121,11 +129,11 @@ class Integrations < Sinatra::Base
             if fields[:token] && fields[:password]
                 password_length = fields[:password].to_s.length
                 if password_length > 7 && password_length < 31
-                    user_id = account.validate_reset_token fields[:token], fields[:password], request.ip
-                    if user_id
+                    user = account.validate_reset_token fields[:token], fields[:password], request.ip
+                    if user
                         user_secret = SecureRandom.hex(32) #session secret, not password
-                        jwt = account.create_token user_id, user_secret, fields[:name]
-                        if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user_id, request.ip, jwt) && (account.record_login user_id, request.ip)
+                        jwt = account.create_token user[:id], user_secret, fields[:name]
+                        if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -139,6 +147,35 @@ class Integrations < Sinatra::Base
             else
                 response[:message] = "This request is not valid"
             end
+        rescue => e
+            puts e
+            response[:message] = "This request is not valid"
+        end
+        return response.to_json
+    end
+
+    login_post = lambda do
+        status 400
+        response = { :success => false}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            account = Account.new
+
+            user = account.sign_in fields[:email], fields[:password], request.ip
+            if user
+                user_secret = SecureRandom.hex(32) #session secret, not password
+                jwt = account.create_token user[:id], user_secret, user[:name]
+                if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                    response[:success] = true
+                    response[:w7_token] = jwt
+                    status 200
+                end
+            else
+                state[:message] = "Email or password incorrect."
+                status 200
+            end
+
         rescue => e
             puts e
             response[:message] = "This request is not valid"
@@ -203,6 +240,8 @@ class Integrations < Sinatra::Base
     #API
     post "/register", &register_post
     post "/reset", &reset_post
+    post "/login", &login_post
+
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
 

@@ -5,18 +5,18 @@
     {{input value=email placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
 
     <div class="btn-group text-left" data-toggle="buttons">
-        <label class="btn btn-primary">
-            {{input type="checkbox" class="checkbox" name="pm"}} Product
+        <label class="btn btn-primary" {{action "role" "product"}} >
+            Product
         </label>
-        <label class="btn btn-primary">
-            {{input type="checkbox" class="checkbox" name="quality"}} Quality
-        </label>
-        <label class="btn btn-primary">
-            {{input type="checkbox" class="checkbox" name="dev"}} Development
-        </label>
-        <label class="btn btn-primary">
-            {{input type="checkbox" class="checkbox" name="designer"}} Design
-        </label>
+            <label class="btn btn-primary" {{action "role" "quality"}} >
+                Quality
+            </label>
+                <label class="btn btn-primary" {{action "role" "development"}} >
+                    Development
+                </label>
+                    <label class="btn btn-primary" {{action "role" "design"}} >
+                        Design
+                    </label>
     </div>
 
     <button {{action "register"}} type="submit" class="btn btn-info btn-lg">Register</button>

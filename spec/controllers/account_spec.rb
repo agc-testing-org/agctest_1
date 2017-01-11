@@ -220,8 +220,8 @@ describe ".Account" do
                 @res = @account.create @email, @name, @ip
                 @mysql = @mysql_client.query("select * from users").first
             end
-            it "should return token" do
-                expect(@res).to eq(@mysql["token"])
+            it "should return user object" do
+                expect(@res.token).to eq(@mysql["token"])
             end
             context "users table" do
                 it "should include downcased email" do
@@ -429,8 +429,8 @@ describe ".Account" do
                 before(:each) do
                     @res = @account.validate_reset_token "#{@email_hash}-#{users(:adam).token}", @password, @ip
                 end
-                it "should return false" do
-                    expect(@res).to eq(false)
+                it "should return nil" do
+                    expect(@res).to be nil 
                 end
                 it "should not update confirmed" do
                     expect(@mysql_client.query(@query).first["confirmed"]).to eq(0)
@@ -444,8 +444,8 @@ describe ".Account" do
                     @account.request_token @email
                     @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
                 end
-                it "should return user id" do
-                    expect(@res).to eq(@mysql_client.query(@query).first["id"])
+                it "should return user object" do
+                    expect(@res[:id]).to eq(@mysql_client.query(@query).first["id"])
                 end
                 it "should save the new password" do
                     expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
@@ -478,8 +478,95 @@ describe ".Account" do
                 @res = @account.validate_reset_token "1234567865432-12121212", @password, @ip
             end
             it "should return false" do
-                expect(@res).to eq(false)
+                expect(@res).to be nil 
             end
         end
+    end
+    context "#get_roles" do
+        fixtures :roles
+        it "should return all roles" do
+            roles = @account.get_roles
+            expect(roles.length).to be > 0
+            roles.each_with_index do |r,i|
+                expect(r["name"]).to eq(roles("role#{i+1}").name)
+            end
+        end
+    end
+    context "#update_role", :focus => true do
+        fixtures :users, :roles
+        before(:each) do
+            @user_id = users(:adam).id
+            @role_id = roles(:role1).id
+            @active = true
+            @account.update_role @user_id, @role_id, @active
+        end
+        context "user role does not exist" do
+            it "should save a role" do
+                @account.update_role @user_id, @role_id, @active
+                query = @mysql_client.query("select * from user_roles").first
+                expect(query["user_id"]).to eq(@user_id)
+                expect(query["role_id"]).to eq(@role_id)
+                expect(query["active"]).to eq(1)
+            end
+        end
+        context "user role exists" do
+            it "should update a role" do
+                @account.update_role @user_id, @role_id, @active
+                @account.update_role @user_id, @role_id, false
+                query = @mysql_client.query("select * from user_roles").first
+                expect(query["user_id"]).to eq(@user_id)
+                expect(query["role_id"]).to eq(@role_id)
+                expect(query["active"]).to eq(0)
+            end
+        end
+        context "multiple user roles" do
+            it "should add the 2nd role" do
+                @account.update_role @user_id, @role_id, @active
+                @account.update_role @user_id, roles(:role2).id, @active
+                query = @mysql_client.query("select * from user_roles")
+                expect(query.count).to eq(2)
+            end
+        end
+    end
+
+    context "#sign_in" do
+        context "when account exists" do
+            fixtures :users
+            context "when password is correct" do
+                before(:each) do
+                    @ip = '192.168.1.1'
+                     @password = "adam12345"
+                end
+                context "when not confirmed" do
+                    it "should return nil" do
+                        @email = users(:adam).email
+                        expect(@account.sign_in @email, @password, @ip).to be nil 
+                    end
+                end
+                context "when confirmed" do
+                    it "should return user object" do
+                        @email = users(:adam_confirmed).email
+                        expect((@account.sign_in @email, @password, @ip)[:id]).to eq(users(:adam_confirmed).id)                    
+                    end
+                end
+            end
+            context "when protected" do
+                fixtures :users
+                it "should return nil" do
+                    ip = '192.168.1.1'
+                    expect(@account.sign_in users(:adam_protected).email, @password, ip).to be nil 
+                end
+            end
+            context "when password is not correct" do
+                it "should return -1" do
+                    expect(@account.sign_in users(:adam).email, 123, @ip).to be nil 
+                end
+            end
+        end
+        context "when account does not exist" do
+            it "should return nil" do
+                expect(@account.sign_in "adamm@wired7.com", @password, @ip).to be nil 
+            end
+        end 
     end
 end

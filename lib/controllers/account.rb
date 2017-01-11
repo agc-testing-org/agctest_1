@@ -118,7 +118,7 @@ class Account
                 ip: ip
             })
             if user.id
-                return user.token
+                return user
             else
                 return nil
             end
@@ -187,7 +187,7 @@ class Account
 
     def create_email email, name, token 
         begin
-            mail email, "Welcome to Wired7 #{name.capitalize}", "#{name.capitalize},<br><br>Thanks for joining us!<br><br>To continue using the service please confirm your email by opening the following link:<br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 Team", "Welcome to Wired7 #{name.capitalize}", "#{name.capitalize},\n\nThanks for joining us!\n\n  To continue using the service please confirm your email by opening the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 Team"
+            mail email, "Welcome to Wired7 #{name.capitalize}", "#{name.capitalize},<br><br>Thanks for joining us!<br><br>To continue using the service please confirm your email by opening the following link:<br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 Team", "#{name.capitalize},\n\nThanks for joining us!\n\n  To continue using the service please confirm your email by opening the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 Team"
         rescue => e
             puts e
         end
@@ -198,7 +198,6 @@ class Account
         if user 
             user[:token] = SecureRandom.hex
             mail user.email, "Wired7 Password Reset", "#{user.name.capitalize},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{user.name.capitalize},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
-
             return user.save
         else
             return false
@@ -215,10 +214,40 @@ class Account
             user[:confirmed] = true
             user[:ip] = ip
             user.save
-            return user[:id]
+            return user
         else
-            return false
+            return nil 
         end
     end
 
+    def get_roles
+        begin 
+            return Role.all.order(:id)
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_role user_id, role_id, active
+        begin
+            return role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
+        rescue => e
+            puts e
+            return nil 
+        end
+    end
+
+    def sign_in email, password, ip
+        user = User.find_by(email: email.downcase)
+        if user && user.password
+            if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
+                return user
+            else
+                return nil
+            end
+        else
+            return nil 
+        end
+    end
 end

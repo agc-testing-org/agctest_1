@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-describe "API", :focus => true do
+describe "API" do
     before(:all) do
         @mysql_client = Mysql2::Client.new(
             :host => ENV['INTEGRATIONS_MYSQL_HOST'],
@@ -10,8 +10,49 @@ describe "API", :focus => true do
         )
         @redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
     end
+
+    shared_examples_for "new_session" do
+        it "should return success = true" do
+            expect(@res["success"]).to eq(true)
+        end
+        it "should return w7 token" do
+            expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["w7_token"])
+        end
+        it "should save w7 token in redis" do
+            expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
+        end
+        it "should save new password" do
+            expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
+        end
+    end
+
     describe "POST /register" do
+        fixtures :roles
+        before(:each) do
+            @roles = {
+                :product => { 
+                    :active => true,
+                    :id => 1
+                },
+                :design => {
+                    :active => false,
+                    :id => 2
+                },
+                :development => {
+                    :active => false,
+                    :id => 3
+                },
+                :quality => {
+                    :active => true,
+                    :id => 4
+                }
+            }
+        end
         shared_examples_for "register" do
+            before(:each) do
+                @res = JSON.parse(last_response.body, :symbolize_names => true)
+                @logins = @mysql_client.query("select * from logins").first
+            end
             context "response" do
                 it "should return code of 201" do
                     expect(last_response.status).to eq 201
@@ -37,24 +78,66 @@ describe "API", :focus => true do
                 @name = "adam"
                 @ip = "127.0.0.1"
                 @email = "adam+01@wired7.com"
-                post "/register", {:name => @name, :email=> @email}.to_json
-                @res = JSON.parse(last_response.body, :symbolize_names => true)
+                post "/register", {:name => @name, :email=> @email, :roles => @roles}.to_json
                 @users = @mysql_client.query("select * from users where email = '#{@email}'").first
-                @logins = @mysql_client.query("select * from logins").first
+                @user_roles = @mysql_client.query("select * from user_roles")
             end
             it_behaves_like "register"
+            context "user_roles" do
+                it "should save user roles" do
+                    expect(@user_roles.count).to be > 0
+                    @user_roles.each_with_index do |r,i|
+                        expect(r["role_id"]).to eq(@roles[@roles.keys[i]][:id])
+                    end
+                end
+            end
         end
         context "existing user" do
             fixtures :users
             before(:each) do
                 @name = users(:adam).name
                 @email = users(:adam).email
-                post "/register", {:name => @name, :email=> @email}.to_json
-                @res = JSON.parse(last_response.body, :symbolize_names => true)
+                post "/register", {:name => @name, :email=> @email, :roles => @roles}.to_json
                 @users = @mysql_client.query("select * from users where email = '#{@email}'").first
-                @logins = @mysql_client.query("select * from logins").first
             end
-            it_behaves_like "register"
+            it_behaves_like "register" # don't want to let user know account exists, unless owner -- send email
+            context "database" do
+                it "does not update the record" do
+                    expect(@users["created_at"].to_s(:db)).to eq(users(:adam).created_at.to_s(:db))
+                end
+            end
+        end
+    end
+
+
+    context "POST /login" do
+        fixtures :users 
+        context "with valid password" do
+            before(:each) do
+                @password = "adam12345"
+                post "/login", { :password => @password, :email => users(:adam_confirmed).email }.to_json 
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it_behaves_like "new_session"
+        end
+        context "invalid" do
+            after(:each) do
+                res = JSON.parse(last_response.body)
+                expect(res["success"]).to be false
+                expect(last_response.status).to eq 200
+            end
+            context "email" do
+                before(:each) do
+                    password = "adam12345"
+                    post "/login", { :password => password, :email => users(:adam).email }.to_json
+                end
+            end
+            context "password" do
+                before(:each) do
+                    post "/login", { :password => "123", :email => users(:adam_confirmed).email }.to_json
+                end
+            end
         end
     end
 
@@ -66,20 +149,6 @@ describe "API", :focus => true do
                 #expect(Zxcvbn.test(@password).score).to eq(2)
             end
             context "with valid token" do
-                shared_examples_for "successful_reset" do
-                    it "should return success = true" do
-                        expect(@res["success"]).to eq(true)
-                    end
-                    it "should return w7 token" do
-                        expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["w7_token"])
-                    end
-                    it "should save w7 token in redis" do
-                        expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
-                    end 
-                    it "should save new password" do 
-                        expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
-                    end
-                end
                 context "non-protected account" do
                     before(:each) do
                         @query = "select * from users where id = #{users(:adam_confirmed).id}"
@@ -88,7 +157,7 @@ describe "API", :focus => true do
                         post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                         @res = JSON.parse(last_response.body)
                     end
-                    it_behaves_like "successful_reset"
+                    it_behaves_like "new_session"
                 end
                 context "protected account" do
                     before(:each) do
@@ -99,7 +168,7 @@ describe "API", :focus => true do
                     it "should set protected to false" do
                         expect(@mysql_client.query("select * from users where email = '#{users(:adam_protected).email}'").first["protected"]).to eq(0)
                     end
-                    it_behaves_like "successful_reset"
+                    it_behaves_like "new_session"
                 end
             end
             context "with token older than 24 hours / invalid" do

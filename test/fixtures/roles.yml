@@ -1,0 +1,15 @@
+role1:
+  id: 1
+  name: "product"
+
+role2:
+  id: 2
+  name: "quality"
+
+role3:
+  id: 3
+  name: "design"
+
+role4:
+  id: 4
+  name: "development"
