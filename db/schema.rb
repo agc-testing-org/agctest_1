@@ -30,11 +30,11 @@ ActiveRecord::Schema.define(version: 20170110155210) do
   end
 
   create_table "user_roles", force: :cascade do |t|
-    t.integer  "user_id",    limit: 4, null: false
-    t.integer  "role_id",    limit: 4, null: false
-    t.datetime "created_at",           null: false
-    t.datetime "updated_at",           null: false
-    t.boolean  "active",               null: false
+    t.integer  "user_id",    limit: 4,                 null: false
+    t.integer  "role_id",    limit: 4,                 null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.boolean  "active",               default: false
   end
 
   add_index "user_roles", ["role_id"], name: "fk_rails_3369e0d5fc", using: :btree

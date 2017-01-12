@@ -29,24 +29,16 @@ describe "API" do
     describe "POST /register" do
         fixtures :roles
         before(:each) do
-            @roles = {
-                :product => { 
+            @roles = [ 
+                { 
                     :active => true,
                     :id => 1
                 },
-                :design => {
+                {
                     :active => false,
                     :id => 2
-                },
-                :development => {
-                    :active => false,
-                    :id => 3
-                },
-                :quality => {
-                    :active => true,
-                    :id => 4
                 }
-            }
+            ]
         end
         shared_examples_for "register" do
             before(:each) do
@@ -87,7 +79,7 @@ describe "API" do
                 it "should save user roles" do
                     expect(@user_roles.count).to be > 0
                     @user_roles.each_with_index do |r,i|
-                        expect(r["role_id"]).to eq(@roles[@roles.keys[i]][:id])
+                        expect(r["role_id"]).to eq(@roles[i][:id])
                     end
                 end
             end
@@ -109,6 +101,24 @@ describe "API" do
         end
     end
 
+    context "POST /forgot" do
+        context "valid email, even if not in DB" do
+            before(:each) do
+                post "/forgot", { :email => "a@a.co" }.to_json 
+            end
+            it "should return success = true" do
+                expect(JSON.parse(last_response.body)["success"]).to be true
+            end
+        end
+        context "invalid email" do
+            before(:each) do 
+                post "/forgot", { :email => "a@.c" }.to_json 
+            end
+            it "should return success = false" do
+                expect(JSON.parse(last_response.body)["success"]).to be false
+            end
+        end
+    end
 
     context "POST /login" do
         fixtures :users 

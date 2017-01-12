@@ -4,13 +4,27 @@ const { inject: { service }, Component } = Ember;
 
 export default Component.extend({
     session: service('session'),
-    path: "/register",
+    path: "/reset",
+    errorMessage: null,
     actions: {
-        register() {
-            var credentials = this.getProperties('token', 'password', 'path');
-            this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
-                this.set('errorMessage', reason.error);
-            });
+        reset() {
+            var password = this.get("password");
+            var passwordb = this.get("passwordb");
+            if(password && (password.length > 7)){
+                if(password === passwordb){
+                    var credentials = this.getProperties('token', 'password', 'path');
+                    this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
+                        console.log(reason);
+                        this.set('errorMessage', JSON.parse(reason).message);
+                    });
+                }
+                else {
+                    this.set('errorMessage', "Passwords do not match");
+                }
+            }
+            else {
+                this.set('errorMessage', "Password must be 8-30 characters");
+            }
         },
     }
 });

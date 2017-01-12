@@ -16,7 +16,7 @@ class CreateRoles < ActiveRecord::Migration
             t.integer  "role_id",   limit: 4,                null: false
             t.datetime "created_at",                          null: false
             t.datetime "updated_at",                          null: false
-            t.boolean "active", null: false
+            t.boolean "active", default: false
         end
 
         add_index "user_roles", ["user_id"], name: "index_user_roles_on_user", using: :btree

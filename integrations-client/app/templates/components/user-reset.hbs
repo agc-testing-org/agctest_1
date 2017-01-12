@@ -1,9 +1,10 @@
-<form {{action 'reset' on="submit"}}>
+<form {{action 'reset' on="submit"}} class="register-form">
     <div class="text-center">
+        {{#if errorMessage}}<div class="alert alert-warning">{{errorMessage}}</div>{{/if}}
         {{input type="password" value=password placeholder="Password" class="form-control input-lg margin-bottom-sm"}}
         {{input type="password" value=passwordb placeholder="Confirm Password" class="form-control input-lg margin-bottom-sm"}}
 
-        <button type="submit" class="btn btn-info btn-lg margin-top-md">Save</button>
+        <button type="submit" class="btn btn-info btn-lg">Save</button>
         <h5>Want us to send another email? {{ link-to 'Resend' index }}</h5>
     </div>
 </form>

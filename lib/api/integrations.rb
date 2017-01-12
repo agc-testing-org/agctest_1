@@ -84,6 +84,27 @@ class Integrations < Sinatra::Base
         end
     end
 
+    forgot_post = lambda do
+        status 400
+        response = {:success => false}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            account = Account.new
+            if account.valid_email fields[:email]
+                 account.request_token fields[:email]
+                 response[:success] = true
+                 status 201
+            else
+                response[:message] = "Please enter a valid email address"
+            end
+        rescue => e
+            puts e
+            response[:message] = "Invalid request"
+        end
+        return response.to_json
+    end
+
     register_post = lambda do
         status 400
         response = {:success => false}
@@ -96,11 +117,11 @@ class Integrations < Sinatra::Base
                     user = account.create fields[:email], fields[:name], request.ip
                     if user # send welcome email with token
                         account.create_email fields[:email], fields[:name], user.token
-                        account.update_role user.id, fields[:roles][:product][:id], fields[:roles][:product][:active]
-                        account.update_role user.id, fields[:roles][:design][:id], fields[:roles][:design][:active]
-                        account.update_role user.id, fields[:roles][:development][:id], fields[:roles][:development][:active]
-                        account.update_role user.id, fields[:roles][:quality][:id], fields[:roles][:quality][:active]
-
+                        if fields[:roles].length < 10
+                            fields[:roles].each do |r|
+                                account.update_role user.id, r[:id], r[:active]
+                            end
+                        end
                     else # user forgot OR unauthorized claim, so send reset password email
                         account.request_token fields[:email]
                     end
@@ -183,6 +204,11 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    get_roles = lambda do
+        account = Account.new
+        return account.get_roles.to_json
+    end
+
     session_provider_post = lambda do
         protected!
         status 400
@@ -239,8 +265,11 @@ class Integrations < Sinatra::Base
 
     #API
     post "/register", &register_post
+    post "/forgot", &forgot_post
     post "/reset", &reset_post
     post "/login", &login_post
+
+    get "/roles", &get_roles
 
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
