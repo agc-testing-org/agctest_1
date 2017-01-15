@@ -11,7 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170110155210) do
+ActiveRecord::Schema.define(version: 20170114231356) do
+
+  create_table "contributors", force: :cascade do |t|
+    t.integer  "user_id",        limit: 4,   null: false
+    t.integer  "sprint_id",      limit: 4,   null: false
+    t.string   "repo",           limit: 255, null: false
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.string   "commit",         limit: 255
+    t.string   "commit_remote",  limit: 255
+    t.boolean  "commit_success"
+    t.integer  "insertions",     limit: 4
+    t.integer  "deletions",      limit: 4
+    t.integer  "lines",          limit: 4
+    t.integer  "files",          limit: 4
+  end
+
+  add_index "contributors", ["sprint_id"], name: "index_contributors_on_sprint_id", using: :btree
+  add_index "contributors", ["user_id"], name: "fk_rails_75adfa0433", using: :btree
+
+  create_table "labels", force: :cascade do |t|
+    t.string   "name",       limit: 255, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
 
   create_table "logins", force: :cascade do |t|
     t.integer  "user_id",    limit: 4,   null: false
@@ -29,6 +53,57 @@ ActiveRecord::Schema.define(version: 20170110155210) do
     t.datetime "updated_at",             null: false
   end
 
+  create_table "skillsets", force: :cascade do |t|
+    t.string   "name",       limit: 255, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  create_table "sprint_skillsets", force: :cascade do |t|
+    t.integer  "skillset_id", limit: 4,                null: false
+    t.integer  "sprint_id",   limit: 4,                null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.boolean  "active",                default: true, null: false
+  end
+
+  add_index "sprint_skillsets", ["skillset_id"], name: "index_sprint_skillsets_on_skillset_id", using: :btree
+  add_index "sprint_skillsets", ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id", using: :btree
+
+  create_table "sprint_timelines", force: :cascade do |t|
+    t.integer  "sprint_id",  limit: 4, null: false
+    t.integer  "state_id",   limit: 4
+    t.integer  "label_id",   limit: 4
+    t.datetime "created_at",           null: false
+  end
+
+  add_index "sprint_timelines", ["label_id"], name: "fk_rails_1b320ef958", using: :btree
+  add_index "sprint_timelines", ["sprint_id"], name: "index_sprint_timelines_on_sprint_id", using: :btree
+  add_index "sprint_timelines", ["state_id"], name: "fk_rails_c9feeeb84f", using: :btree
+
+  create_table "sprints", force: :cascade do |t|
+    t.integer  "user_id",     limit: 4,     null: false
+    t.string   "repo",        limit: 255,   null: false
+    t.string   "title",       limit: 255
+    t.text     "description", limit: 65535
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+    t.datetime "deadline"
+    t.string   "sha",         limit: 255,   null: false
+    t.string   "org",         limit: 255,   null: false
+    t.integer  "winner_id",   limit: 4
+  end
+
+  add_index "sprints", ["repo"], name: "index_sprints_on_repo", using: :btree
+  add_index "sprints", ["user_id"], name: "index_sprints_on_user_id", using: :btree
+  add_index "sprints", ["winner_id"], name: "index_sprints_on_winner_id", using: :btree
+
+  create_table "states", force: :cascade do |t|
+    t.string   "name",       limit: 255, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.integer  "user_id",    limit: 4,                 null: false
     t.integer  "role_id",    limit: 4,                 null: false
@@ -39,6 +114,17 @@ ActiveRecord::Schema.define(version: 20170110155210) do
 
   add_index "user_roles", ["role_id"], name: "fk_rails_3369e0d5fc", using: :btree
   add_index "user_roles", ["user_id"], name: "index_user_roles_on_user", using: :btree
+
+  create_table "user_skillsets", force: :cascade do |t|
+    t.integer  "user_id",     limit: 4,                null: false
+    t.integer  "skillset_id", limit: 4,                null: false
+    t.datetime "created_at",                           null: false
+    t.datetime "updated_at",                           null: false
+    t.boolean  "active",                default: true, null: false
+  end
+
+  add_index "user_skillsets", ["skillset_id"], name: "index_user_skillsets_on_skillset_id", using: :btree
+  add_index "user_skillsets", ["user_id"], name: "index_user_skillsets_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",      limit: 255,                   null: false
@@ -57,7 +143,17 @@ ActiveRecord::Schema.define(version: 20170110155210) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
 
+  add_foreign_key "contributors", "sprints"
+  add_foreign_key "contributors", "users"
   add_foreign_key "logins", "users"
+  add_foreign_key "sprint_skillsets", "skillsets"
+  add_foreign_key "sprint_skillsets", "sprints"
+  add_foreign_key "sprint_timelines", "labels"
+  add_foreign_key "sprint_timelines", "sprints"
+  add_foreign_key "sprint_timelines", "states"
+  add_foreign_key "sprints", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
+  add_foreign_key "user_skillsets", "skillsets"
+  add_foreign_key "user_skillsets", "users"
 end

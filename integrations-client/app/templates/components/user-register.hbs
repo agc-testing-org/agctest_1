@@ -1,5 +1,9 @@
 <form class="register-form text-center" {{action 'register' on="submit"}}>
 
+    {{#if registered}}
+    <h3 class="text-left">We've sent a confirmation email to {{email}}.  Please verify your email address to continue.</h3>
+    {{else}}
+
     {{input value=name placeholder="First Name" class="form-control input-lg margin-bottom-sm"}}
 
     {{input value=email placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
@@ -12,4 +16,6 @@
 
     <button {{action "register"}} type="submit" class="btn btn-info btn-lg">Register</button>
     <h4 class="tos">By registering you agree to our <br>{{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
+    
+    {{/if}}
 </form>

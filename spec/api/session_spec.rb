@@ -21,6 +21,9 @@ describe "API" do
         it "should save w7 token in redis" do
             expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
         end
+        it "should save user_id in redis" do
+             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["user_id"]).to eq(@mysql_client.query("select * from users where email = '#{@email}'").first["id"])
+        end
         it "should save new password" do
             expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
         end
@@ -32,11 +35,11 @@ describe "API" do
             @roles = [ 
                 { 
                     :active => true,
-                    :id => 1
+                    :id => roles(:product).id
                 },
                 {
                     :active => false,
-                    :id => 2
+                    :id => roles(:quality).id
                 }
             ]
         end
@@ -125,7 +128,8 @@ describe "API" do
         context "with valid password" do
             before(:each) do
                 @password = "adam12345"
-                post "/login", { :password => @password, :email => users(:adam_confirmed).email }.to_json 
+                @email = users(:adam_confirmed).email
+                post "/login", { :password => @password, :email => @email }.to_json 
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
@@ -163,6 +167,7 @@ describe "API" do
                     before(:each) do
                         @query = "select * from users where id = #{users(:adam_confirmed).id}"
                         @token = users(:adam_confirmed).token
+                        @email = users(:adam_confirmed).email
                         @email_hash = Digest::MD5.hexdigest(users(:adam_confirmed).email)
                         post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                         @res = JSON.parse(last_response.body)
@@ -172,6 +177,7 @@ describe "API" do
                 context "protected account" do
                     before(:each) do
                         @query = "select * from users where id = #{users(:adam_protected).id}"
+                        @email = users(:adam_protected).email
                         post "/reset", { :password => @password, :token => "#{Digest::MD5.hexdigest(users(:adam_protected).email)}-#{users(:adam_protected).token}" }.to_json 
                         @res = JSON.parse(last_response.body)
                     end
@@ -216,27 +222,56 @@ describe "API" do
     end
 
     describe "POST /session/:provider" do
-
-    end
-    describe "DELETE /session" do
-
-    end
-
-    describe "DELETE" do
+        fixtures :users
         before(:each) do
+            @password = "adam12345"
+            @email = users(:adam_confirmed).email
+            post "/login", { :password => @password, :email => @email }.to_json
+            res = JSON.parse(last_response.body)
+            @w7_token = res["w7_token"]
+        end
+        context "github" do
+            before(:each) do
+                @code = "123"
+                @access_token = "ACCESS123"
 
+                Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
+                    :access_token => @access_token
+                }.to_json, object_class: OpenStruct) }
 
-        end 
-        context "success" do
-            it "should return 200" do
-                delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@token}"} 
-
+                post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return success" do
+                expect(@res["success"]).to be true
+            end
+            it "should return w7 token" do
+                expect(@res["w7_token"]).to eq(@w7_token)
+            end
+            it "should return github token" do
+                account = Account.new
+                token = account.validate_token @res["github_token"], JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["key"]
+                expect(token["payload"]).to eq(@access_token)
             end
         end
-        context "bad token" do
-            it "should return 200" do
-                delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@token}"}
-            end
+    end
+
+    describe "DELETE /session" do
+        fixtures :users
+        before(:each) do
+            @password = "adam12345"
+            @email = users(:adam_confirmed).email
+            post "/login", { :password => @password, :email => @email }.to_json
+            res = JSON.parse(last_response.body)
+            @w7_token = res["w7_token"]
+
+            delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
+        end
+        it "should delete session from redis" do
+            expect(@redis.exists("session:#{@w7_token}")).to be false
+        end
+        it "should return 200" do
+            expect(last_response.status).to eq 200
         end
     end
 end

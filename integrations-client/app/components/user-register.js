@@ -6,6 +6,7 @@ export default Component.extend({
     session: service('session'),
     store: Ember.inject.service(),
     routes: Ember.inject.service('route-injection'),
+    registered: false,
     actions: {
         role(obj){
             if(obj.get("active") === true){
@@ -46,6 +47,7 @@ export default Component.extend({
                         var res = JSON.parse(response);
                         if(res["success"] === true){
                             console.log("REGISTERED");
+                            _this.set("registered",true);
                         }
                         else {
 

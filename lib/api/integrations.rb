@@ -14,6 +14,7 @@ require 'octokit'
 
 # Controllers
 require_relative '../controllers/account.rb'
+require_relative '../controllers/issue.rb'
 
 # Models
 require_relative '../models/user.rb'
@@ -21,6 +22,14 @@ require_relative '../models/user_role.rb'
 require_relative '../models/role.rb'
 require_relative '../models/user.rb'
 require_relative '../models/login.rb'
+require_relative '../models/skillset.rb'
+require_relative '../models/sprint.rb'
+require_relative '../models/sprint_skillset.rb'
+require_relative '../models/user_skillset.rb'
+require_relative '../models/sprint_timeline.rb'
+require_relative '../models/state.rb'
+require_relative '../models/label.rb'
+require_relative '../models/contributor.rb'
 
 # Workers
 
@@ -44,26 +53,15 @@ class Integrations < Sinatra::Base
 
     def authorized?
         @session = retrieve_token
-        @providers = {} 
         if @session
             account = Account.new
-            @session_hash = account.get_key "session", @session
-            parsed_hash = JSON.parse(@session_hash)
+            session_hash = account.get_key "session", @session
+            @session_hash = JSON.parse(session_hash)
             if @session_hash
-                @key = parsed_hash["key"]
+                @key = @session_hash["key"]
                 puts "::unlocking token"
                 @jwt_hash = account.validate_token @session, @key
                 if @jwt_hash
-                    puts "::unlocking provider"
-                    if parsed_hash["providers"]
-                        provider_hash = account.validate_token parsed_hash["providers"], @key
-                        if provider_hash
-                            puts provider_hash.inspect
-                            puts provider_hash["payload"]
-                            @providers = provider_hash["payload"]
-                            puts @providers.inspect
-                        end
-                    end
                     return true
                 else
                     return false
@@ -154,7 +152,7 @@ class Integrations < Sinatra::Base
                     if user
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, fields[:name]
-                        if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                        if (account.save_token "session", jwt, {:key => user_secret, :user_id => user[:id]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -187,7 +185,7 @@ class Integrations < Sinatra::Base
             if user
                 user_secret = SecureRandom.hex(32) #session secret, not password
                 jwt = account.create_token user[:id], user_secret, user[:name]
-                if (account.save_token "session", jwt, {:key => user_secret}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                if (account.save_token "session", jwt, {:key => user_secret, :user_id => user[:id]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
                     response[:success] = true
                     response[:w7_token] = jwt
                     status 200
@@ -204,11 +202,6 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    get_roles = lambda do
-        account = Account.new
-        return account.get_roles.to_json
-    end
-
     session_provider_post = lambda do
         protected!
         status 400
@@ -218,21 +211,16 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            puts fields.inspect
             account = Account.new
-            puts params.inspect
 
             if fields[:grant_type]
                 access_token = account.code_for_token(fields[:auth_code])
 
-                @providers[fields[:grant_type]] = access_token
-                puts @providers.inspect
-                provider_token = account.create_token @jwt_hash["user_id"], @key, @providers 
-                puts provider_token.inspect
+                provider_token = account.create_token @jwt_hash["user_id"], @key, access_token
 
-                if (account.save_token "session", @session, {:key => @key, :providers => provider_token}.to_json) && (account.update @jwt_hash["user_id"], request.ip, @session) && (account.record_login @jwt_hash["user_id"], request.ip) 
+                if (account.save_token "session", @session, {:key => @key, :github => true}.to_json)
                     status 200
-                    return {:success => true, :w7_token => @session}.to_json
+                    return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else
                     return response.to_json
                 end
@@ -263,16 +251,51 @@ class Integrations < Sinatra::Base
         return {:id =>  1, :name => "adam"}.to_json
     end
 
+    roles_get = lambda do
+        account = Account.new
+        return account.get_roles.to_json
+    end
+
+    sprint_post = lambda do
+        protected!
+        status 400
+        response = {:success => false}
+
+        puts @session_hash.inspect
+
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            if fields[:title] && fields[:title].length > 5
+                if fields[:description] && fields[:description].length > 5
+                    if fields[:org] && fields[:repo]
+                        issue = Issue.new
+                        res = issue.create @session_hash["user_id"], fields[:title],  fields[:description],  fields[:org],  fields[:repo],  "ABC"
+                        if res
+                            status 201
+                            response["id"] = res
+                            response[:success] = true
+                        end
+                    end
+                end
+            end
+        end
+        return response.to_json
+    end
+
+
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
     post "/reset", &reset_post
     post "/login", &login_post
-
-    get "/roles", &get_roles
-
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
+
+    get "/roles", &roles_get
+
+    post "/sprint", &sprint_post
 
     get "/account", &account_get
 

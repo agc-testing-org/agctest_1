@@ -19,6 +19,7 @@ export default Base.extend({
                 url: options.path,
                 type: 'POST',
                 data: JSON.stringify({
+                    email: options.email,
                     token: options.token,
                     password: options.password
                 }),

@@ -488,7 +488,7 @@ describe ".Account" do
             roles = @account.get_roles
             expect(roles.length).to be > 0
             roles.each_with_index do |r,i|
-                expect(r["name"]).to eq(roles("role#{i+1}").name)
+                expect(r["name"]).to eq(roles(r["name"]).name)
             end
         end
     end
@@ -496,7 +496,7 @@ describe ".Account" do
         fixtures :users, :roles
         before(:each) do
             @user_id = users(:adam).id
-            @role_id = roles(:role1).id
+            @role_id = roles(:product).id
             @active = true
             @account.update_role @user_id, @role_id, @active
         end
@@ -522,7 +522,7 @@ describe ".Account" do
         context "multiple user roles" do
             it "should add the 2nd role" do
                 @account.update_role @user_id, @role_id, @active
-                @account.update_role @user_id, roles(:role2).id, @active
+                @account.update_role @user_id, roles(:development).id, @active
                 query = @mysql_client.query("select * from user_roles")
                 expect(query.count).to eq(2)
             end

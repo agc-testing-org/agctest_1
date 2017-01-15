@@ -1,15 +1,11 @@
-role1:
-  id: 1
+product:
   name: "product"
 
-role2:
-  id: 2
+quality:
   name: "quality"
 
-role3:
-  id: 3
+design:
   name: "design"
 
-role4:
-  id: 4
+development:
   name: "development"
