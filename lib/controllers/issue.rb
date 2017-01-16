@@ -3,15 +3,13 @@ class Issue
 
     end 
 
-    def create user_id, title, description, org, repo, sha
+    def create user_id, title, description, project_id
         begin
             sprint = Sprint.create({
                 user_id: user_id,
                 title: title,
                 description: description,
-                org: org,
-                repo: repo,
-                sha: sha
+                project_id: project_id
             })
             return sprint.id
         rescue => e

@@ -74,21 +74,28 @@ class CreateSprints < ActiveRecord::Migration
         add_index "user_skillsets", ["skillset_id"]
         add_index "user_skillsets", ["user_id"]
 
+
+        create_table "projects", force: :cascade do |t|
+            t.string  "org",       limit: 255, null: false
+            t.string  "name",       limit: 255,                 null: false
+            t.datetime "created_at",             null: false
+            t.datetime "updated_at",             null: false
+        end
+
         create_table "sprints", force: :cascade do |t|
             t.integer  "user_id",       limit: 4,                   null: false
-            t.string   "repo",       limit: 255,                 null: false
+            t.integer   "project_id",       limit: 4,                 null: false
             t.string "title", limit: 255
             t.text "description"
             t.datetime "created_at",                             null: false
             t.datetime "updated_at",                             null: false
             t.datetime "deadline"
-            t.string   "sha",        limit: 255,                 null: false
-            t.string   "org",        limit: 255,                 null: false
+            t.string   "sha",        limit: 255,                 null: true 
             t.integer  "winner_id",     limit: 4
         end
 
         add_index "sprints", ["user_id"]
-        add_index "sprints", ["repo"]
+        add_index "sprints", ["project_id"]
         add_index "sprints", ["winner_id"]
 
         create_table "sprint_skillsets", force: :cascade do |t|
@@ -103,6 +110,7 @@ class CreateSprints < ActiveRecord::Migration
         add_index "sprint_skillsets", ["sprint_id"]
 
         add_foreign_key "sprints", "users", column: "user_id"
+        add_foreign_key "sprints", "projects", column: "project_id"
         add_foreign_key "user_skillsets", "skillsets", column: "skillset_id"
         add_foreign_key "user_skillsets", "users", column: "user_id"
         add_foreign_key "sprint_skillsets", "skillsets", column: "skillset_id"

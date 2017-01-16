@@ -1,9 +1,8 @@
 sprint_1:
   user: adam_confirmed
-  repo: "REPO"
   title: "TITLE"
   description: "DESCRIPTION"
   sha: "SHABCD"
-  org: "ORG"
+  project_id: demo
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

@@ -30,6 +30,7 @@ require_relative '../models/sprint_timeline.rb'
 require_relative '../models/state.rb'
 require_relative '../models/label.rb'
 require_relative '../models/contributor.rb'
+require_relative '../models/project.rb'
 
 # Workers
 
@@ -74,6 +75,29 @@ class Integrations < Sinatra::Base
         end
     end
 
+    def github_authorization
+        if @session_hash["github"]
+            github_token = retrieve_github_token
+            begin
+                puts "::unlocking github token"
+                account = Account.new
+                access_code = (account.validate_token github_token, @key)
+                return Octokit::Client.new(:access_token => access_code["payload"])
+            rescue => e
+                puts e
+                return nil
+            end
+        end 
+    end
+
+    def retrieve_github_token
+        if request.env["HTTP_AUTHORIZATION_GITHUB"]
+            return request.env["HTTP_AUTHORIZATION_GITHUB"].split("Bearer ")[1]
+        else
+            return nil
+        end
+    end
+
     def retrieve_token
         if request.env["HTTP_AUTHORIZATION"]
             return request.env["HTTP_AUTHORIZATION"].split("Bearer ")[1]
@@ -90,9 +114,9 @@ class Integrations < Sinatra::Base
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             account = Account.new
             if account.valid_email fields[:email]
-                 account.request_token fields[:email]
-                 response[:success] = true
-                 status 201
+                account.request_token fields[:email]
+                response[:success] = true
+                status 201
             else
                 response[:message] = "Please enter a valid email address"
             end
@@ -182,6 +206,7 @@ class Integrations < Sinatra::Base
             account = Account.new
 
             user = account.sign_in fields[:email], fields[:password], request.ip
+
             if user
                 user_secret = SecureRandom.hex(32) #session secret, not password
                 jwt = account.create_token user[:id], user_secret, user[:name]
@@ -191,10 +216,9 @@ class Integrations < Sinatra::Base
                     status 200
                 end
             else
-                state[:message] = "Email or password incorrect."
+                response[:message] = "Email or password incorrect."
                 status 200
             end
-
         rescue => e
             puts e
             response[:message] = "This request is not valid"
@@ -256,12 +280,50 @@ class Integrations < Sinatra::Base
         return account.get_roles.to_json
     end
 
+    repositories_get = lambda do
+        protected!
+        github_client = github_authorization 
+        puts github_client
+        repositories = Array.new
+        begin
+            github_client.repositories.each do |repo|
+                repositories[repositories.length] = {
+                    :name => repo.name,         
+                    :owner => repo.owner.login 
+                } 
+            end
+        rescue => e
+            puts e
+        end
+        return repositories.to_json
+    end
+
+    projects_get = lambda do
+        protected!
+        issue = Issue.new
+        projects = issue.projects
+        return projects.to_json
+    end
+
+    project_post = lambda do
+        protected!
+        account = Account.new
+        if account.check_admin @session_hash["user_id"]
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                issue = Issue.new
+                issue.create_project fields[:org], fields[:name]
+                status 201
+                response = {:success => true}
+            end
+        end
+    end
+
     sprint_post = lambda do
         protected!
         status 400
         response = {:success => false}
-
-        puts @session_hash.inspect
 
         begin
             request.body.rewind
@@ -269,9 +331,9 @@ class Integrations < Sinatra::Base
 
             if fields[:title] && fields[:title].length > 5
                 if fields[:description] && fields[:description].length > 5
-                    if fields[:org] && fields[:repo]
+                    if fields[:project_id]
                         issue = Issue.new
-                        res = issue.create @session_hash["user_id"], fields[:title],  fields[:description],  fields[:org],  fields[:repo],  "ABC"
+                        res = issue.create @session_hash["user_id"], fields[:title],  fields[:description],  fields[:project_id]
                         if res
                             status 201
                             response["id"] = res
@@ -293,6 +355,8 @@ class Integrations < Sinatra::Base
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
 
+    get "/projects", &projects_get
+    get "/repositories", &repositories_get
     get "/roles", &roles_get
 
     post "/sprint", &sprint_post

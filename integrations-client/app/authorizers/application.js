@@ -1,3 +1,17 @@
+import Ember from 'ember';
 import OAuth2Bearer from 'ember-simple-auth/authorizers/oauth2-bearer';
 
-export default OAuth2Bearer.extend();
+const { isEmpty } = Ember;
+
+export default OAuth2Bearer.extend({
+    authorize(data, block) {
+        const { token }  = data.github_token;
+        console.log(data.access_token);
+        console.log(data.github_token);
+        console.log(token);
+        if (!isEmpty(data)) {
+            block('Authorization', `Bearer ${data.access_token}`);
+            block('Authorization-Github', `Bearer ${data.github_token}`);
+        }
+    }
+});

@@ -28,6 +28,14 @@
         export INTEGRATIONS_EMAIL_ADDRESS="" # !!KEEP EMPTY
     fi  
 
+    export RACK_ENV=test
+    source ~/.bashrc
+    rake db:create
+
+    export RACK_ENV=development
+    source ~/.bashrc
+    rake db:create
+
 ### Running
 
 Shell 1 (project root)

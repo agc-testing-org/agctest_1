@@ -47,6 +47,13 @@ ActiveRecord::Schema.define(version: 20170114231356) do
   add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
   add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
 
+  create_table "projects", force: :cascade do |t|
+    t.string   "org",        limit: 255, null: false
+    t.string   "name",       limit: 255, null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
   create_table "roles", force: :cascade do |t|
     t.string   "name",       limit: 255, null: false
     t.datetime "created_at",             null: false
@@ -83,18 +90,17 @@ ActiveRecord::Schema.define(version: 20170114231356) do
 
   create_table "sprints", force: :cascade do |t|
     t.integer  "user_id",     limit: 4,     null: false
-    t.string   "repo",        limit: 255,   null: false
+    t.integer  "project_id",  limit: 4,     null: false
     t.string   "title",       limit: 255
     t.text     "description", limit: 65535
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
     t.datetime "deadline"
-    t.string   "sha",         limit: 255,   null: false
-    t.string   "org",         limit: 255,   null: false
+    t.string   "sha",         limit: 255
     t.integer  "winner_id",   limit: 4
   end
 
-  add_index "sprints", ["repo"], name: "index_sprints_on_repo", using: :btree
+  add_index "sprints", ["project_id"], name: "index_sprints_on_project_id", using: :btree
   add_index "sprints", ["user_id"], name: "index_sprints_on_user_id", using: :btree
   add_index "sprints", ["winner_id"], name: "index_sprints_on_winner_id", using: :btree
 
@@ -151,6 +157,7 @@ ActiveRecord::Schema.define(version: 20170114231356) do
   add_foreign_key "sprint_timelines", "labels"
   add_foreign_key "sprint_timelines", "sprints"
   add_foreign_key "sprint_timelines", "states"
+  add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
