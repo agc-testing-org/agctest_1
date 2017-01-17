@@ -12,9 +12,11 @@ export default Ember.Service.extend({
         return new RSVP.Promise((resolve, reject) => {
             const authenticated = this.get('session.isAuthenticated');
             if (authenticated) {
+
                 console.log("AUTHENTICATED");
                 return this.get('store').queryRecord('account',{ reload: shouldReload }).then((account) => {
                     this.set('account',account);
+
                     /*
                     this.get('intercom').boot({
                         app_id: "isl89nk1",
@@ -24,6 +26,9 @@ export default Ember.Service.extend({
                     */
                     resolve();
                 }, reject);
+
+                
+
             } else {
                 resolve();
             }

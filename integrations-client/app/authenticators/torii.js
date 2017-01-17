@@ -31,7 +31,7 @@ export default ToriiAuthenticator.extend({
                    return {
                        access_token: response.w7_token,
                            provider: data.provider,
-                           github_token: response.github_token,
+                           github_token: response.github_token
                    };
                    //                 this.set('session.data.authenticated.access_token',response.w7_token);
                    //                   console.log(this.get('session.data.authenticated'));

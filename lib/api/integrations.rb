@@ -240,9 +240,9 @@ class Integrations < Sinatra::Base
             if fields[:grant_type]
                 access_token = account.code_for_token(fields[:auth_code])
 
-                provider_token = account.create_token @jwt_hash["user_id"], @key, access_token
+                provider_token = account.create_token @session_hash["user_id"], @key, access_token
 
-                if (account.save_token "session", @session, {:key => @key, :github => true}.to_json)
+                if (account.save_token "session", @session, {:key => @key, :user_id => @session_hash["user_id"], :github => true}.to_json)
                     status 200
                     return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else
@@ -270,9 +270,10 @@ class Integrations < Sinatra::Base
     end
 
     account_get = lambda do
-        #    protected!
+        protected!
         status 200
-        return {:id =>  1, :name => "adam"}.to_json
+        puts @session_hash.inspect
+        return {:id => @session_hash["user_id"], :name => "adam"}.to_json
     end
 
     roles_get = lambda do
@@ -288,6 +289,7 @@ class Integrations < Sinatra::Base
         begin
             github_client.repositories.each do |repo|
                 repositories[repositories.length] = {
+                    :id => repo.id,
                     :name => repo.name,         
                     :owner => repo.owner.login 
                 } 
