@@ -49,13 +49,14 @@ class Integrations < Sinatra::Base
 
     def protected!
         return if authorized?
-        redirect to("/unauthorized.json")
+        redirect to("/unauthorized")
     end
 
     def authorized?
         @session = retrieve_token
         if @session
             account = Account.new
+            begin
             session_hash = account.get_key "session", @session
             @session_hash = JSON.parse(session_hash)
             if @session_hash
@@ -68,6 +69,10 @@ class Integrations < Sinatra::Base
                     return false
                 end
             else
+                return false
+            end
+            rescue => e
+                puts e
                 return false
             end
         else
@@ -176,7 +181,7 @@ class Integrations < Sinatra::Base
                     if user
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, fields[:name]
-                        if (account.save_token "session", jwt, {:key => user_secret, :user_id => user[:id]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -210,7 +215,7 @@ class Integrations < Sinatra::Base
             if user
                 user_secret = SecureRandom.hex(32) #session secret, not password
                 jwt = account.create_token user[:id], user_secret, user[:name]
-                if (account.save_token "session", jwt, {:key => user_secret, :user_id => user[:id]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
                     response[:success] = true
                     response[:w7_token] = jwt
                     status 200
@@ -240,9 +245,9 @@ class Integrations < Sinatra::Base
             if fields[:grant_type]
                 access_token = account.code_for_token(fields[:auth_code])
 
-                provider_token = account.create_token @session_hash["user_id"], @key, access_token
+                provider_token = account.create_token @session_hash["id"], @key, access_token
 
-                if (account.save_token "session", @session, {:key => @key, :user_id => @session_hash["user_id"], :github => true}.to_json)
+                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => true}.to_json)
                     status 200
                     return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else
@@ -272,8 +277,7 @@ class Integrations < Sinatra::Base
     account_get = lambda do
         protected!
         status 200
-        puts @session_hash.inspect
-        return {:id => @session_hash["user_id"], :name => "adam"}.to_json
+        return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"]}.to_json
     end
 
     roles_get = lambda do
@@ -307,10 +311,10 @@ class Integrations < Sinatra::Base
         return projects.to_json
     end
 
-    project_post = lambda do
+    projects_post = lambda do
         protected!
         account = Account.new
-        if account.check_admin @session_hash["user_id"]
+        if @session_hash["admin"]
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
@@ -335,7 +339,7 @@ class Integrations < Sinatra::Base
                 if fields[:description] && fields[:description].length > 5
                     if fields[:project_id]
                         issue = Issue.new
-                        res = issue.create @session_hash["user_id"], fields[:title],  fields[:description],  fields[:project_id]
+                        res = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id]
                         if res
                             status 201
                             response["id"] = res
@@ -357,16 +361,23 @@ class Integrations < Sinatra::Base
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
 
-    get "/projects", &projects_get
-    get "/repositories", &repositories_get
     get "/roles", &roles_get
+    get "/repositories", &repositories_get
+    post "/projects", &projects_post
+    get "/projects", &projects_get
 
     post "/sprint", &sprint_post
 
     get "/account", &account_get
 
+    get '/unauthorized' do
+        status 401
+        return {:message => "Looks like we went too far?"}.to_json
+    end
+
     #Ember
     get "*" do
         send_file File.expand_path('index.html',settings.public_folder)
     end
+
 end

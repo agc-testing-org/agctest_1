@@ -13,6 +13,7 @@ adam_confirmed:
   token: DEF
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>
+  admin: false
 
 adam_protected:
   email: adam+protected@wired7.com

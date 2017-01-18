@@ -21,11 +21,19 @@ describe "API" do
         it "should save w7 token in redis" do
             expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
         end
-        it "should save user_id in redis" do
-             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["user_id"]).to eq(@mysql_client.query("select * from users where email = '#{@email}'").first["id"])
+        it "should save user id in redis" do
+             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["id"]).to eq(@mysql_client.query(@query).first["id"])
         end
-        it "should save new password" do
-            expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
+        it "should save user admin status in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["admin"]).to eq(!@mysql_client.query(@query).first["admin"].zero?)
+        end
+        it "should save user name in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["name"]).to eq(@mysql_client.query(@query).first["name"])
+        end
+        if @password
+            it "should save new password" do
+                expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
+            end
         end
     end
 
@@ -155,6 +163,35 @@ describe "API" do
         end
     end
 
+    context "GET /account" do
+        fixtures :users
+        context "signed in" do
+            before(:each) do
+                @password = "adam12345"
+                @email = users(:adam_confirmed).email
+                post "/login", { :password => @password, :email => @email }.to_json
+                res = JSON.parse(last_response.body)
+                w7_token = res["w7_token"]
+                get "/account",{},{"HTTP_AUTHORIZATION" => "Bearer #{w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should include user id" do
+                expect(@res["id"]).to eq(users(:adam_confirmed).id)
+            end
+            it "should include user admin" do
+                 expect(@res["admin"]).to eq(users(:adam_confirmed).admin)
+            end
+            it "should include user name" do
+                expect(@res["name"]).to eq(users(:adam_confirmed).name)
+            end
+            it "should not return key" do
+                expect(@res["key"]).to be nil
+            end
+        end
+
+    end
+
+
     context "POST /reset" do
         fixtures :users
         context "with valid password" do
@@ -171,6 +208,7 @@ describe "API" do
                         @email_hash = Digest::MD5.hexdigest(users(:adam_confirmed).email)
                         post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                         @res = JSON.parse(last_response.body)
+                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
                     end
                     it_behaves_like "new_session"
                 end
@@ -180,6 +218,7 @@ describe "API" do
                         @email = users(:adam_protected).email
                         post "/reset", { :password => @password, :token => "#{Digest::MD5.hexdigest(users(:adam_protected).email)}-#{users(:adam_protected).token}" }.to_json 
                         @res = JSON.parse(last_response.body)
+                        @query = "select * from users where id = #{users(:adam_protected).id}"
                     end
                     it "should set protected to false" do
                         expect(@mysql_client.query("select * from users where email = '#{users(:adam_protected).email}'").first["protected"]).to eq(0)
@@ -241,13 +280,9 @@ describe "API" do
 
                 post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
                 @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
-            it "should return success" do
-                expect(@res["success"]).to be true
-            end
-            it "should return w7 token" do
-                expect(@res["w7_token"]).to eq(@w7_token)
-            end
+            it_behaves_like "new_session"
             it "should return github token" do
                 account = Account.new
                 token = account.validate_token @res["github_token"], JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["key"]

@@ -1,0 +1,14 @@
+<div class="dropdown">                                                                  
+    <div class="btn dropdown-toggle" type="button" data-toggle="dropdown">Create Project<span class="caret"></span></div>
+    <ul class="dropdown-menu">              
+        {{#each repositories as |repository|}}
+        <li>
+            <a {{action "selectProject" repository.owner repository.name}}>
+                <div>{{repository.owner}}/{{repository.name}}</div>   
+            </a>
+        </li> 
+        {{/each}}
+    </ul>
+</div>
+
+<button {{action "createProject"}} type="submit" class="btn btn-info btn-lg">Create Project</button>
