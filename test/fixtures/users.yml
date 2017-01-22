@@ -8,7 +8,7 @@ adam:
 adam_confirmed:
   email: adam+confirmed@wired7.com
   name: adam_confirmed
-  confirmed: 1
+  confirmed: true 
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
   token: DEF
   updated_at: <%= 2.hours.ago.to_s(:db) %>
@@ -24,3 +24,12 @@ adam_protected:
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>
 
+adam_admin:
+  name: adam_admin
+  email: adam+admin@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: ABCDE
+  admin: true
+  confirmed: true
+  password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq

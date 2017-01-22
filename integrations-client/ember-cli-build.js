@@ -44,6 +44,5 @@ module.exports = function(defaults) {
   app.import('bower_components/font-awesome/fonts/fontawesome-webfont.woff2', {
       destDir: 'fonts'
   });
-
   return app.toTree();
 };

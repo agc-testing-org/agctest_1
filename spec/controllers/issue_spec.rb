@@ -16,4 +16,8 @@ describe ".Issue" do
     context "#create" do
         #covered by API test
     end
+
+    context "#create_project" do
+        #covered by API test
+    end
 end

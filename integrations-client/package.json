@@ -17,6 +17,7 @@
   "devDependencies": {
     "broccoli-asset-rev": "^2.4.5",
     "ember-ajax": "^2.4.1",
+    "ember-browserify": "1.1.13",
     "ember-cli": "2.10.0",
     "ember-cli-app-version": "^2.0.0",
     "ember-cli-babel": "^5.1.7",
@@ -37,10 +38,13 @@
     "ember-simple-auth": "1.2.0-beta.1",
     "ember-welcome-page": "^1.0.3",
     "loader.js": "^4.0.10",
-    "torii": "^0.8.1"
+    "torii": "^0.8.1",
+    "ldclient-js": "^1.1.6"
   },
   "engines": {
     "node": ">= 0.12.0"
   },
-  "private": true
+  "private": true,
+  "dependencies": {
+  }
 }

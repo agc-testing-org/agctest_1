@@ -11,6 +11,7 @@ require 'uri'
 require 'bcrypt'
 require 'pony'
 require 'octokit'
+require 'ldclient-rb'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -46,6 +47,10 @@ set :database, {
 class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
+
+    def start_ld 
+        return LaunchDarkly::LDClient.new("sdk-8e35035f-a4ce-4dea-8a7a-fb88aa8d1794")
+    end
 
     def protected!
         return if authorized?
@@ -286,65 +291,90 @@ class Integrations < Sinatra::Base
     end
 
     repositories_get = lambda do
-        protected!
-        github_client = github_authorization 
-        puts github_client
-        repositories = Array.new
-        begin
-            github_client.repositories.each do |repo|
-                repositories[repositories.length] = {
-                    :id => repo.id,
-                    :name => repo.name,         
-                    :owner => repo.owner.login 
-                } 
+        if start_ld.variation("get-repositories", {:key => "adam@wired7.com"}, false)
+            protected!
+            github_client = github_authorization 
+            puts github_client
+            repositories = Array.new
+            begin
+                github_client.repositories.each do |repo|
+                    repositories[repositories.length] = {
+                        :id => repo.id,
+                        :name => repo.name,         
+                        :owner => repo.owner.login 
+                    } 
+                end
+            rescue => e
+                puts e
             end
-        rescue => e
-            puts e
+            return repositories.to_json
         end
-        return repositories.to_json
     end
 
     projects_get = lambda do
-        protected!
         issue = Issue.new
-        projects = issue.projects
+        projects = issue.get_projects {}
         return projects.to_json
+    end
+
+    projects_get_by_id = lambda do
+        issue = Issue.new
+        query = {:id => params[:id].to_i}
+        project = issue.get_projects query
+        return project.to_json
     end
 
     projects_post = lambda do
         protected!
-        account = Account.new
+        status 400
+        response = {}
         if @session_hash["admin"]
+            account = Account.new
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                issue = Issue.new
-                issue.create_project fields[:org], fields[:name]
-                status 201
-                response = {:success => true}
+                if fields[:org] && fields[:name]
+                    issue = Issue.new
+                    project = issue.create_project fields[:org], fields[:name]
+                    if project 
+                        response[:id] = project 
+                        status 201
+                    end
+                end
             end
         end
+        return response.to_json
     end
 
-    sprint_post = lambda do
+    sprints_get = lambda do
+        issue = Issue.new
+        query = {:project_id => params[:project_id].to_i }
+        sprints = issue.get_sprints query
+        return sprints.to_json
+    end
+
+    sprints_get_by_id = lambda do
+        issue = Issue.new
+        query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
+        sprint = issue.get_sprints query
+        return sprint.to_json
+    end
+
+    sprints_post = lambda do
         protected!
         status 400
-        response = {:success => false}
-
+        response = {}
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
             if fields[:title] && fields[:title].length > 5
                 if fields[:description] && fields[:description].length > 5
-                    if fields[:project_id]
-                        issue = Issue.new
-                        res = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id]
-                        if res
-                            status 201
-                            response["id"] = res
-                            response[:success] = true
-                        end
+                    issue = Issue.new
+                    sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  params[:project_id].to_i
+                    if sprint
+                        status 201
+                        response[:id] = sprint
                     end
                 end
             end
@@ -360,15 +390,19 @@ class Integrations < Sinatra::Base
     post "/login", &login_post
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
+    get "/account", &account_get
 
     get "/roles", &roles_get
+
     get "/repositories", &repositories_get
+
     post "/projects", &projects_post
     get "/projects", &projects_get
+    get "/projects/:id", &projects_get_by_id
+    post "/projects/:project_id/sprints", &sprints_post
+    get "/projects/:project_id/sprints", &sprints_get
+    get "/projects/:project_id/sprints/:id", &sprints_get_by_id
 
-    post "/sprint", &sprint_post
-
-    get "/account", &account_get
 
     get '/unauthorized' do
         status 401

@@ -8,6 +8,7 @@ gem 'jwt'
 gem 'bcrypt'
 gem 'pony'
 gem 'octokit', '~> 4.6.0'
+gem 'ldclient-rb', '2.0.3'
 
 group :development do
     gem 'passenger'
