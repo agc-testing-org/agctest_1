@@ -3,6 +3,6 @@ sprint_1:
   title: "TITLE"
   description: "DESCRIPTION"
   sha: "SHABCD"
-  project_id: demo
+  project: demo
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

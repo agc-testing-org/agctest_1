@@ -31,18 +31,33 @@ class Issue
         end
     end
 
-    def get_projects query
+    def get_projects query, single
         begin
-            return Project.where(query)
+            project = Project.where(query)
+            if single 
+                return project[0]
+            else
+                return project
+            end
         rescue => e
             puts e
             return nil
         end
     end
     
-    def get_sprints query
-        begin 
-            return Sprint.where(query)
+    def get_sprints query, single
+        begin
+            response = Array.new
+            Sprint.where(query).includes(:project).each_with_index do |s,i|
+                response[i] = s.as_json
+                response[i][:project] = s.project.as_json
+                response[i].delete("project_id")
+            end
+            if single
+                return response[0]
+            else
+                return response
+            end
         rescue => e
             puts e
             return nil

@@ -313,14 +313,14 @@ class Integrations < Sinatra::Base
 
     projects_get = lambda do
         issue = Issue.new
-        projects = issue.get_projects {}
+        projects = issue.get_projects nil, false
         return projects.to_json
     end
 
     projects_get_by_id = lambda do
         issue = Issue.new
         query = {:id => params[:id].to_i}
-        project = issue.get_projects query
+        project = issue.get_projects query, true 
         return project.to_json
     end
 
@@ -349,14 +349,14 @@ class Integrations < Sinatra::Base
     sprints_get = lambda do
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i }
-        sprints = issue.get_sprints query
+        sprints = issue.get_sprints query, false
         return sprints.to_json
     end
 
     sprints_get_by_id = lambda do
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
-        sprint = issue.get_sprints query
+        sprint = issue.get_sprints query, true
         return sprint.to_json
     end
 

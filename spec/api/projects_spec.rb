@@ -63,37 +63,40 @@ describe "/projects" do
             end
         end
     end
-    shared_examples_for "project" do |p,mp|
+    shared_examples_for "project" do
         it "should return id" do
-            expect(p["id"]).to eq(mp["id"])
+            expect(@project["id"]).to eq(@project_result["id"])
         end
         it "should return org" do
-            expect(p["org"]).to eq(mp["org"])           
+            expect(@project["org"]).to eq(@project_result["org"])           
         end
         it "should return name" do
-            expect(p["name"]).to eq(mp["name"])
+            expect(@project["name"]).to eq(@project_result["name"])
+        end
+    end
+    shared_examples_for "projects" do
+        it "should return more than one result" do
+            expect(@projects[0]["id"]).to eq(@project_results.first["id"])
         end
     end
     describe "GET /" do
         fixtures :projects
         before(:each) do
             get "/projects"
-            @res = JSON.parse(last_response.body)
-            @projects = @mysql_client.query("select * from projects")
-            @res.each_with_index do |p,i|
-                it_behaves_like "project", p, @projects[i]
-            end
+            @projects = JSON.parse(last_response.body)
+            @project_results = @mysql_client.query("select * from projects")
         end
+        it_behaves_like "projects"
     end 
     describe "GET /:id" do
         fixtures :projects
         before(:each) do 
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
-            res = JSON.parse(last_response.body)
-            project = @mysql_client.query("select * from projects where id = #{project_id}").first
-            it_behaves_like "project", res, project
+            @project = JSON.parse(last_response.body)
+            @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
         end
+        it_behaves_like "project"
     end
     describe "POST /:id/sprints" do
         fixtures :projects
@@ -127,5 +130,60 @@ describe "/projects" do
                 expect(@res["id"]).to eq(@mysql["id"])
             end
         end
+    end
+    shared_examples_for "sprint" do
+        it "should return id" do
+            expect(@sprint["id"]).to eq(@sprint_result["id"])
+        end
+        it "should return user_id" do
+            expect(@sprint["user_id"]).to eq(@sprint_result["user_id"])
+        end
+        it "should return title" do
+            expect(@sprint["title"]).to eq(@sprint_result["title"])
+        end
+        it "should return description" do
+            expect(@sprint["description"]).to eq(@sprint_result["description"])
+        end
+        it "should return sha" do
+            expect(@sprint["sha"]).to eq(@sprint_result["sha"])
+        end
+        it "should return winnder_id" do
+            expect(@sprint["winner_id"]).to eq(@sprint_result["winner_id"])
+        end 
+    end
+    shared_examples_for "sprints" do
+        it "should return more than one result" do
+            expect(@sprints[0]["id"]).to eq(@sprint_results.first["id"])
+        end
+    end
+    describe "GET /:id/sprints" do
+        fixtures :projects, :sprints
+        before(:each) do
+            project_id = projects(:demo).id
+            get "/projects/#{project_id}/sprints"
+            res = JSON.parse(last_response.body)
+            @sprint_results = @mysql_client.query("select * from sprints where project_id = #{project_id}")
+            @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
+            @project = res[0]["project"]
+            @sprints = res
+        end
+
+        it_behaves_like "project"
+        it_behaves_like "sprints"
+    end
+    describe "GET /:id/sprints/:id" do
+        fixtures :projects, :sprints
+        before(:each) do
+            sprint = sprints(:sprint_1)
+            get "/projects/#{sprint.project_id}/sprints/#{sprint.id}"
+            res = JSON.parse(last_response.body)
+            @sprint_result = @mysql_client.query("select * from sprints where project_id = #{sprint.project_id}").first
+            @project_result = @mysql_client.query("select * from projects where id = #{sprint.project_id}").first
+            @project = res["project"]
+            @sprint = res
+        end
+
+        it_behaves_like "project"
+        it_behaves_like "sprint"
     end
 end
