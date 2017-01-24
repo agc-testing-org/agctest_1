@@ -10,6 +10,9 @@ Router.map(function() {
     this.route('token',{ path: '/token/:id' });
     this.route('forgot');
     this.route('home');
+    this.route('project', {path: '/:org/project/:name'}, function() {
+        this.route('index', {path: '/'});
+    });
 });
 
 export default Router;

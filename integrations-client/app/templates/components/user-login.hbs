@@ -1,8 +1,9 @@
 <form class="login-form" {{action 'login' on="submit"}}>
-    {{input type="email" value=email placeholder="Email" class="form-control input-sm margin-bottom-sm"}}
 
-    {{input type="password" value=password placeholder="Password" class="form-control input-sm margin-bottom-sm"}}
 
-    <button type="submit" class="btn btn-info btn-sm margin-top-md">Sign In</button>
+    {{input type="email" value=email placeholder="Email" class="form-control"}}
+    {{input type="password" value=password placeholder="Password" class="form-control"}}
+
+    <button type="submit" class="btn btn-outline-secondary">Sign In</button>
     {{ link-to 'Forgot?' index }}
 </form>

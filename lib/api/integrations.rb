@@ -48,10 +48,6 @@ class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
 
-    def start_ld 
-        return LaunchDarkly::LDClient.new("sdk-8e35035f-a4ce-4dea-8a7a-fb88aa8d1794")
-    end
-
     def protected!
         return if authorized?
         redirect to("/unauthorized")
@@ -291,24 +287,22 @@ class Integrations < Sinatra::Base
     end
 
     repositories_get = lambda do
-        if start_ld.variation("get-repositories", {:key => "adam@wired7.com"}, false)
-            protected!
-            github_client = github_authorization 
-            puts github_client
-            repositories = Array.new
-            begin
-                github_client.repositories.each do |repo|
-                    repositories[repositories.length] = {
-                        :id => repo.id,
-                        :name => repo.name,         
-                        :owner => repo.owner.login 
-                    } 
-                end
-            rescue => e
-                puts e
+        protected!
+        github_client = github_authorization 
+        puts github_client
+        repositories = Array.new
+        begin
+            github_client.repositories.each do |repo|
+                repositories[repositories.length] = {
+                    :id => repo.id,
+                    :name => repo.name,         
+                    :owner => repo.owner.login 
+                } 
             end
-            return repositories.to_json
+        rescue => e
+            puts e
         end
+        return repositories.to_json
     end
 
     projects_get = lambda do

@@ -1,21 +1,30 @@
-<form class="register-form text-center" {{action 'register' on="submit"}}>
+<form class="register-form text-left" {{action 'register' on="submit"}}>
 
     {{#if registered}}
     <h3 class="text-left">We've sent a confirmation email to {{email}}.  Please verify your email address to continue.</h3>
     {{else}}
 
-    {{input value=name placeholder="First Name" class="form-control input-lg margin-bottom-sm"}}
-
-    {{input value=email placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
-
-    <div class="btn-group text-left" data-toggle="buttons">
-        {{#each roles as |role|}}
-        <label class="btn btn-primary" {{action "role" role}} >{{role.name}}</label>
-        {{/each}}
+    <div class="form-group">
+        <label>First Name</label>
+        {{input value=name placeholder="First Name" class="form-control input-lg margin-bottom-sm"}}
     </div>
 
-    <button {{action "register"}} type="submit" class="btn btn-info btn-lg">Register</button>
-    <h4 class="tos">By registering you agree to our <br>{{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
-    
+    <div class="form-group">
+        <label>Email</label>
+        {{input value=email type="email" placeholder="Email" class="form-control input-lg margin-bottom-sm"}}
+    </div>
+
+    <div class="form-group">
+        <label>Group</label>
+        <div class="btn-group" data-toggle="buttons">
+            {{#each roles as |role|}}
+            <label class="btn btn-primary btn-sm" {{action "role" role}} >{{role.name}}</label>
+            {{/each}}
+        </div>
+    </div>
+
+    <button {{action "register"}} type="submit" class="btn btn-outline-secondary btn-lg">Register</button>
+    <h4 class="tos text-center">By registering you agree to our <br>{{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
+
     {{/if}}
 </form>
