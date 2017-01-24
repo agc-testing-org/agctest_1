@@ -1,29 +1,25 @@
 <nav class="navbar navbar-default fixed-top navbar-toggleable-md clear">
     <div class="background"></div>
-    <div class="container">
-        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-            <span class="navbar-toggler-icon"></span>
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        {{#unless session.isAuthenticated}}
-        {{#link-to 'index' class="cursor-pointer navbar-brand" }}{{/link-to}}
-        {{else}}
-        {{#link-to 'index' class="cursor-pointer navbar-brand"}}{{/link-to}}
-        {{/unless}}
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    {{#unless session.isAuthenticated}}
+    {{#link-to 'index' class="cursor-pointer navbar-brand" }}{{/link-to}}
+    {{else}}
+    {{#link-to 'index' class="cursor-pointer navbar-brand"}}{{/link-to}}
+    {{/unless}}
 
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav ml-auto">
-                {{#unless session.isAuthenticated}}
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav ml-auto">
+            {{#unless session.isAuthenticated}}
 
-                {{user-login tagName="li" class="cursor-pointer"}}
+            {{user-login tagName="li" class="cursor-pointer"}}
 
-                {{else}}                        
+            {{else}}                        
 
-                {{user-logout tagName="li" class="cursor-pointer"}} 
+            {{user-logout tagName="li" class="cursor-pointer"}} 
 
-                {{/unless}} 
-            </ul>
-        </div>
+            {{/unless}} 
+        </ul>
     </div>
 </nav>

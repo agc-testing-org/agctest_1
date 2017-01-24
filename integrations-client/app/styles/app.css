@@ -129,13 +129,11 @@ label{
     border: 2px solid transparent;
 }
 
-.navbar-default .navbar-toggle .icon-bar {
-    background-color: #fff;
+.navbar-toggler {
+   border: 1px solid #fff;
 }
-.navbar-toggle {
-    background-color: transparent !important;
-    margin-right:5px;
-    margin-top:14px;
+.navbar-toggler .navbar-toggler-icon{
+
 }
 input{
     border:none !important;
