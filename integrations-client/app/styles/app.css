@@ -74,8 +74,7 @@ label{
     background-image: url('w7_logo_dark_11_15_16_small.png');
     width:130px;
     height:35px;
-    margin-top:0px;
-    margin-bottom:3px;
+    margin-top:3px;
     background-repeat: no-repeat;
 }
 .body-dark .navbar-brand{
@@ -86,6 +85,8 @@ label{
     background-color:#333;
     border-color:#333;
     box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    padding-left:10px;
+    padding-right:10px;
 }
 .navbar-default.clear {
     background-color:transparent;
@@ -111,6 +112,11 @@ label{
     box-shadow:none;
 }
 
+.navbar-collapse.collapse.show{
+    padding:10px;
+    text-align:center;
+}
+
 .body-dark .navbar-default .navbar-nav > li > a {
     border: 0px solid #fff;
     color: #fff;
@@ -130,10 +136,10 @@ label{
 }
 
 .navbar-toggler {
-   border: 1px solid #fff;
+   border: 0px;
 }
-.navbar-toggler .navbar-toggler-icon{
-
+.navbar-inverse .navbar-toggler-icon{
+    margin-top:6px;
 }
 input{
     border:none !important;
