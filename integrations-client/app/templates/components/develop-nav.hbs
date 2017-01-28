@@ -1,0 +1,35 @@
+<nav class="navbar navbar-default navbar-toggleable-md navbar-inverse fixed-top bg-inverse develop">
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    {{#unless session.isAuthenticated}}
+    {{#link-to 'index' class="cursor-pointer navbar-brand" }}{{/link-to}}
+    {{else}}
+    {{#link-to 'index' class="cursor-pointer navbar-brand"}}{{/link-to}}
+    {{/unless}}
+
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav ml-auto">
+
+            <li class="nav-item">
+                <a class="nav-link" href="#">Idea</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Backlog</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">In-Progress</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Resolved</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Closed</a>
+            </li>
+
+
+            {{user-logout tagName="li" class="cursor-pointer"}}
+
+        </ul>
+    </div>
+</nav>

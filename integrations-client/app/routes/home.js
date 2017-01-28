@@ -4,8 +4,12 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-ro
 export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
+        //var post_id = this.modelFor('post.show').get('id');
+        this.store.adapterFor('sprint').set('namespace', 'projects/' + 1 );
+
         return Ember.RSVP.hash({
-            repositories: this.store.findAll('repository')
+            repositories: this.store.findAll('repository'),
+            sprints: this.store.findAll('sprint')
         });
     }
 });
