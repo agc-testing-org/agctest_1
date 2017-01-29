@@ -5,25 +5,27 @@
         </li>
     </ul>
 
-    List of Issues Will Show Below
     <ul class="nav nav-pills flex-column">
-        <li class="nav-item">
-            <a class="nav-link active" href="#">All<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Idea</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Backlog</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">In-Progress</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Resolved</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="#">Closed</a>
+        <li class="nav-item timeline">
+            <div class="title">Implement Sinatra API endpoint that accepts a user's email address</div>
+            <div class="description">
+                The front-end team is building a splash page for our web application.
+
+                The team will POST (application/json) an email address to a '/registrations' route.
+
+                Please create this route and save the email address in a 'users' table in MySQL, with the following fields:
+
+                email
+                id
+                created_at
+                updated_at
+            </div>
+            <div class="change">
+                status changed from 
+                <span class="badge badge-default">idea</span>
+                to 
+                <span class="badge badge-default">backlog</span>
+            </div>
         </li>
     </ul>
 </nav>
