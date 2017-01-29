@@ -25,4 +25,7 @@ describe ".Issue" do
     context "#get_sprints" do
         #covered by API test
     end
+    context "#log_event" do
+        #covered by API test
+    end
 end

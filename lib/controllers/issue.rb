@@ -18,6 +18,20 @@ class Issue
         end
     end
 
+    def log_event sprint_id, state_id, label_id
+        begin
+            sprint_event = SprintTimeline.create({
+                sprint_id: sprint_id,
+                state_id: state_id,
+                label_id: label_id
+            })
+            return sprint_event.id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def create_project org, name
         begin
             project = Project.create({
@@ -33,18 +47,22 @@ class Issue
 
     def get_projects query, single
         begin
-            project = Project.where(query)
+            response = Array.new
+            Project.where(query).includes(:sprint_timeline).each_with_index do |p,i|
+                response[i] = p.as_json
+                response[i][:timeline] = p.sprint_timeline.as_json
+            end
             if single 
-                return project[0]
+                return response[0]
             else
-                return project
+                return response
             end
         rescue => e
             puts e
             return nil
         end
     end
-    
+
     def get_sprints query, single
         begin
             response = Array.new

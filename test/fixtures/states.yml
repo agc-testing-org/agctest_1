@@ -1,0 +1,19 @@
+idea:
+  id: 1
+  name: "idea"
+
+backlog:
+  id: 2
+  name: "backlog"
+
+in-progress:
+  id: 3
+  name: "in-progress"
+
+resolved:
+  id: 4
+  name: "resolved"
+
+closed:
+  id: 5
+  name: "closed"

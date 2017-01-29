@@ -99,17 +99,18 @@ describe "/projects" do
         it_behaves_like "project"
     end
     describe "POST /:id/sprints" do
-        fixtures :projects
+        fixtures :projects, :states, :labels
         before(:each) do
             @title = "SPRINT TITLE"
             @description = "SPRINT DESCRIPTION"
             @project_id = projects(:demo).id
             @sha = "SHA"
         end
-        context "valid fields" do
+        context "valid fields", :focus => true do
             before(:each) do
                 post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from sprints").first
+                @timeline = @mysql_client.query("select * from sprint_timelines").first
                 @res = JSON.parse(last_response.body)
             end
             context "sprint" do
@@ -124,6 +125,17 @@ describe "/projects" do
                 end
                 it "should include user_id" do
                     expect(@mysql["user_id"]).to eq(@user)
+                end
+            end
+            context "sprint_timeline" do
+                it "should include sprint_id" do
+                    expect(@timeline["sprint_id"]).to eq(@res["id"])
+                end
+                it "should include state_id" do
+                    expect(@timeline["state_id"]).to eq(states(:idea).id)
+                end
+                it "should include label_id" do
+                    expect(@timeline["label_id"]).to be nil 
                 end
             end
             it "should return sprint id" do

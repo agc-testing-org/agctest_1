@@ -1,30 +1,24 @@
-<nav class="navbar navbar-default navbar-toggleable-md navbar-inverse fixed-top bg-inverse develop">
+<nav class="col-md-9 offset-md-3 navbar navbar-default navbar-toggleable-md navbar-inverse fixed-top bg-inverse develop">
     <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-    {{#unless session.isAuthenticated}}
-    {{#link-to 'index' class="cursor-pointer navbar-brand" }}{{/link-to}}
-    {{else}}
-    {{#link-to 'index' class="cursor-pointer navbar-brand"}}{{/link-to}}
-    {{/unless}}
-
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav ml-auto">
 
             <li class="nav-item">
-                <a class="nav-link" href="#">Idea</a>
+                <a class="nav-link rounded" href="#">Idea</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Backlog</a>
+                <a class="nav-link rounded" href="#">Backlog</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">In-Progress</a>
+                <a class="nav-link rounded" href="#">In-Progress</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Resolved</a>
+                <a class="nav-link rounded" href="#">Resolved</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Closed</a>
+                <a class="nav-link rounded" href="#">Closed</a>
             </li>
 
 

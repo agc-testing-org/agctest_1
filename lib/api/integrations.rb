@@ -366,11 +366,15 @@ class Integrations < Sinatra::Base
                 if fields[:description] && fields[:description].length > 5
                     issue = Issue.new
                     sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  params[:project_id].to_i
-                    if sprint
+                    if sprint && (issue.log_event sprint, 1, nil)
                         status 201
                         response[:id] = sprint
                     end
+                else
+                    response[:message] = "Please enter a more detailed description"                    
                 end
+            else
+                response[:message] = "Please enter a more descriptive title"
             end
         end
         return response.to_json
