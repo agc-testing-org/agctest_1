@@ -1,0 +1,23 @@
+demo_1:
+  user: adam_confirmed
+  project: demo 
+  sprint: sprint_1
+  state_id: 1
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+demo_2:
+  user: adam_confirmed
+  project: demo
+  sprint: sprint_1
+  state_id: 1
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+demob_1:
+  user: adam_confirmed
+  project: demob
+  sprint: sprint_1
+  state_id: 1
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>

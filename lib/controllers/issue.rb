@@ -18,9 +18,11 @@ class Issue
         end
     end
 
-    def log_event sprint_id, state_id, label_id
+    def log_event user_id, project_id, sprint_id, state_id, label_id
         begin
             sprint_event = SprintTimeline.create({
+                user_id: project_id,
+                project_id: project_id,
                 sprint_id: sprint_id,
                 state_id: state_id,
                 label_id: label_id
@@ -48,9 +50,19 @@ class Issue
     def get_projects query, single
         begin
             response = Array.new
-            Project.where(query).includes(:sprint_timeline).each_with_index do |p,i|
+            Project.where(query).includes(:sprint_timelines).each_with_index do |p,i|
                 response[i] = p.as_json
-                response[i][:timeline] = p.sprint_timeline.as_json
+                response[i][:timeline] = []
+                p.sprint_timelines.includes(:sprint,:user,:label,:state).each_with_index do |st,j| 
+                    response[i][:timeline][j] = {
+                        :id => st.id,
+                        :created_at => st.created_at,
+                        :user => {:id => st.user.id},
+                        :sprint => st.sprint.as_json,
+                        :label => st.label.as_json,
+                        :state => st.state.as_json
+                    }
+                end
             end
             if single 
                 return response[0]

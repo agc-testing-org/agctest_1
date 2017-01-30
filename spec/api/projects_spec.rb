@@ -74,6 +74,28 @@ describe "/projects" do
             expect(@project["name"]).to eq(@project_result["name"])
         end
     end
+    shared_examples_for "sprint_timeline" do
+        it "should return the sprint_id" do
+            @timeline_result.each_with_index do |t,i|
+                expect(@project["timeline"][i]["sprint"]["id"]).to eq(t["sprint_id"])
+            end
+        end
+        it "should return the user_id" do
+            @timeline_result.each_with_index do |t,i|
+                expect(@project["timeline"][i]["user"]["id"]).to eq(t["user_id"])
+            end
+        end
+        it "should return the state_id" do
+            @timeline_result.each_with_index do |t,i|
+                expect(@project["timeline"][i]["state"]["id"]).to eq(t["state_id"])
+            end
+        end
+        it "should return the label_id" do
+            @timeline_result.each_with_index do |t,i|
+                expect(@project["timeline"][i]["label"]["id"]).to eq(t["label_id"])
+            end
+        end
+    end
     shared_examples_for "projects" do
         it "should return more than one result" do
             expect(@projects[0]["id"]).to eq(@project_results.first["id"])
@@ -88,15 +110,17 @@ describe "/projects" do
         end
         it_behaves_like "projects"
     end 
-    describe "GET /:id" do
-        fixtures :projects
-        before(:each) do 
+    describe "GET /:id", :focus => true do
+        fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
+        before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
             @project = JSON.parse(last_response.body)
             @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
+            @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
         end
         it_behaves_like "project"
+        it_behaves_like "sprint_timeline"
     end
     describe "POST /:id/sprints" do
         fixtures :projects, :states, :labels
@@ -106,7 +130,7 @@ describe "/projects" do
             @project_id = projects(:demo).id
             @sha = "SHA"
         end
-        context "valid fields", :focus => true do
+        context "valid fields" do
             before(:each) do
                 post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from sprints").first

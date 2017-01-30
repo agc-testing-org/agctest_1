@@ -23,6 +23,10 @@
     </ul>
 
     <ul class="nav nav-pills flex-column">
+        {{#each model.project.timeline as |timeline|}}
+            {{timeline.sprint.title}}
+        {{/each}}
+
         <li class="nav-item timeline">
             <div class="title">Implement Sinatra API endpoint that accepts a user's email address</div>
             <div class="description">

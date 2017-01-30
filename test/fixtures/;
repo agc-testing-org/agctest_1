@@ -1,0 +1,6 @@
+event_1:
+  user: adam_confirmed
+  project: demo 
+  state: idea
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>
