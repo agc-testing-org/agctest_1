@@ -34,7 +34,6 @@ describe "/projects" do
             before(:each) do
                 post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from projects").first
-                puts last_response.body.inspect
                 @res = JSON.parse(last_response.body)
             end
             it "should not return an id" do
@@ -77,22 +76,27 @@ describe "/projects" do
     shared_examples_for "sprint_timeline" do
         it "should return the sprint_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@project["timeline"][i]["sprint"]["id"]).to eq(t["sprint_id"])
+                expect(@timeline[i]["sprint"]["id"]).to eq(t["sprint_id"])
             end
         end
         it "should return the user_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@project["timeline"][i]["user"]["id"]).to eq(t["user_id"])
+                expect(@timeline[i]["user"]["id"]).to eq(t["user_id"])
             end
         end
         it "should return the state_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@project["timeline"][i]["state"]["id"]).to eq(t["state_id"])
+                expect(@timeline[i]["state"]["id"]).to eq(t["state_id"])
             end
         end
         it "should return the label_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@project["timeline"][i]["label"]["id"]).to eq(t["label_id"])
+                expect(@timeline[i]["label"]["id"]).to eq(t["label_id"])
+            end
+        end
+        it "should return the after id" do
+            @timeline_result.each_with_index do |t,i|
+                expect(@timeline[i]["after"]).to eq(t["after"])
             end
         end
     end
@@ -110,19 +114,17 @@ describe "/projects" do
         end
         it_behaves_like "projects"
     end 
-    describe "GET /:id", :focus => true do
+    describe "GET /:id" do
         fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
         before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
             @project = JSON.parse(last_response.body)
             @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
-            @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
         end
         it_behaves_like "project"
-        it_behaves_like "sprint_timeline"
     end
-    describe "POST /:id/sprints" do
+    describe "POST /:id/sprints", :focus => true do
         fixtures :projects, :states, :labels
         before(:each) do
             @title = "SPRINT TITLE"
@@ -134,7 +136,7 @@ describe "/projects" do
             before(:each) do
                 post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from sprints").first
-                @timeline = @mysql_client.query("select * from sprint_timelines").first
+                @timeline = @mysql_client.query("select * from sprint_timelines where project_id = #{@project_id}").first
                 @res = JSON.parse(last_response.body)
             end
             context "sprint" do
@@ -160,6 +162,9 @@ describe "/projects" do
                 end
                 it "should include label_id" do
                     expect(@timeline["label_id"]).to be nil 
+                end
+                it "should include after" do
+                    expect(@timeline["after"]).to be nil
                 end
             end
             it "should return sprint id" do
@@ -207,6 +212,18 @@ describe "/projects" do
         it_behaves_like "project"
         it_behaves_like "sprints"
     end
+
+    describe "GET /:id/events" do
+        fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
+        before(:each) do
+            project_id = projects(:demo).id
+            get "/projects/#{project_id}/events"
+            @timeline = JSON.parse(last_response.body)
+            @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
+        end
+        it_behaves_like "sprint_timeline"
+    end
+
     describe "GET /:id/sprints/:id" do
         fixtures :projects, :sprints
         before(:each) do

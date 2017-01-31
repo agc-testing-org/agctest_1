@@ -23,30 +23,25 @@
     </ul>
 
     <ul class="nav nav-pills flex-column">
-        {{#each model.project.timeline as |timeline|}}
-            {{timeline.sprint.title}}
-        {{/each}}
-
+        {{#each model.events as |event|}}
         <li class="nav-item timeline">
-            <div class="title">Implement Sinatra API endpoint that accepts a user's email address</div>
+            <div class="title">
+                {{event.sprint.title}}
+            </div>
             <div class="description">
-                The front-end team is building a splash page for our web application.
-
-                The team will POST (application/json) an email address to a '/registrations' route.
-
-                Please create this route and save the email address in a 'users' table in MySQL, with the following fields:
-
-                email
-                id
-                created_at
-                updated_at
+                {{event.sprint.description}}
             </div>
             <div class="change">
-                status changed from 
-                <span class="badge badge-default rounded">idea</span>
-                to 
-                <span class="badge badge-default rounded">backlog</span>
+                {{compare "state" (previous "event" event.after) event}}
+
+                status
+                <span class="badge badge-default rounded">{{event.state.name}}</span>
+                {{#if (previous "event" event.after)}}
+                 changed from 
+                <span class="badge badge-default rounded">{{previous "event" event.after}}</span>
+                {{/if}}
             </div>
         </li>
+        {{/each}}
     </ul>
 </nav>

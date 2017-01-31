@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170130035203) do
+ActiveRecord::Schema.define(version: 20170131050955) do
 
   create_table "contributors", force: :cascade do |t|
     t.integer  "user_id",        limit: 4,   null: false
@@ -84,6 +84,7 @@ ActiveRecord::Schema.define(version: 20170130035203) do
     t.datetime "created_at",           null: false
     t.integer  "project_id", limit: 4, null: false
     t.integer  "user_id",    limit: 4, null: false
+    t.integer  "after",      limit: 4
   end
 
   add_index "sprint_timelines", ["label_id"], name: "fk_rails_1b320ef958", using: :btree

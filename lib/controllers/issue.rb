@@ -18,14 +18,26 @@ class Issue
         end
     end
 
+    def last_event sprint_id
+        begin
+            return SprintTimeline.find_by(sprint_id: sprint_id).last(1).id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def log_event user_id, project_id, sprint_id, state_id, label_id
+        after = (last_event sprint_id)
+         puts "setting after to #{after}"
         begin
             sprint_event = SprintTimeline.create({
                 user_id: project_id,
                 project_id: project_id,
                 sprint_id: sprint_id,
                 state_id: state_id,
-                label_id: label_id
+                label_id: label_id,
+                after: after
             })
             return sprint_event.id
         rescue => e
@@ -47,35 +59,16 @@ class Issue
         end
     end
 
-    def get_projects query, single
+    def get_projects query
         begin
-            response = Array.new
-            Project.where(query).includes(:sprint_timelines).each_with_index do |p,i|
-                response[i] = p.as_json
-                response[i][:timeline] = []
-                p.sprint_timelines.includes(:sprint,:user,:label,:state).each_with_index do |st,j| 
-                    response[i][:timeline][j] = {
-                        :id => st.id,
-                        :created_at => st.created_at,
-                        :user => {:id => st.user.id},
-                        :sprint => st.sprint.as_json,
-                        :label => st.label.as_json,
-                        :state => st.state.as_json
-                    }
-                end
-            end
-            if single 
-                return response[0]
-            else
-                return response
-            end
+            return Project.where(query).as_json
         rescue => e
             puts e
             return nil
         end
     end
 
-    def get_sprints query, single
+    def get_sprints query
         begin
             response = Array.new
             Sprint.where(query).includes(:project).each_with_index do |s,i|
@@ -83,16 +76,33 @@ class Issue
                 response[i][:project] = s.project.as_json
                 response[i].delete("project_id")
             end
-            if single
-                return response[0]
-            else
-                return response
-            end
+            return response
         rescue => e
             puts e
             return nil
         end 
     end 
+
+    def get_events query
+        begin
+            response = Array.new
+            SprintTimeline.where(query).includes(:sprint,:user,:label,:state).each_with_index do |st,i|
+                response[i] = {
+                    :id => st.id,
+                    :created_at => st.created_at,
+                    :user => {:id => st.user.id},
+                    :sprint => st.sprint.as_json,
+                    :label => st.label.as_json,
+                    :state => st.state.as_json,
+                    :after => st.after
+                }
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 
 
     def update_skillsets sprint_id, skillset_id, active

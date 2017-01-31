@@ -307,15 +307,15 @@ class Integrations < Sinatra::Base
 
     projects_get = lambda do
         issue = Issue.new
-        projects = issue.get_projects nil, false
+        projects = issue.get_projects nil
         return projects.to_json
     end
 
     projects_get_by_id = lambda do
         issue = Issue.new
         query = {:id => params[:id].to_i}
-        project = issue.get_projects query, true 
-        return project.to_json
+        project = issue.get_projects query
+        return project[0].to_json
     end
 
     projects_post = lambda do
@@ -343,15 +343,22 @@ class Integrations < Sinatra::Base
     sprints_get = lambda do
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i }
-        sprints = issue.get_sprints query, false
+        sprints = issue.get_sprints query
         return sprints.to_json
+    end
+
+    events_get = lambda do
+        issue = Issue.new
+        query = {:project_id => params[:project_id].to_i }
+        events = issue.get_events query
+        return events.to_json
     end
 
     sprints_get_by_id = lambda do
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
-        sprint = issue.get_sprints query, true
-        return sprint.to_json
+        sprint = issue.get_sprints query
+        return sprint[0].to_json
     end
 
     sprints_post = lambda do
@@ -399,6 +406,7 @@ class Integrations < Sinatra::Base
     get "/projects/:id", &projects_get_by_id
     post "/projects/:project_id/sprints", &sprints_post
     get "/projects/:project_id/sprints", &sprints_get
+    get "/projects/:project_id/events", &events_get
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
 
 

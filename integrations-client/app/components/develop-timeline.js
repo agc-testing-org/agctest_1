@@ -6,6 +6,9 @@ export default Ember.Component.extend({
     sessionAccount: Ember.inject.service('session-account'),
     displayCreate: null,
     errorMessage: null,
+    init() {
+        this._super(...arguments);
+    },
     actions: {
         showCreate(){
             if(this.get("displayCreate")){
