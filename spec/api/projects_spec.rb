@@ -124,7 +124,7 @@ describe "/projects" do
         end
         it_behaves_like "project"
     end
-    describe "POST /:id/sprints", :focus => true do
+    describe "POST /:id/sprints" do
         fixtures :projects, :states, :labels
         before(:each) do
             @title = "SPRINT TITLE"
@@ -238,5 +238,26 @@ describe "/projects" do
 
         it_behaves_like "project"
         it_behaves_like "sprint"
+    end
+    
+    describe "POST /:id/sprints/:id", :focus => true do
+        fixtures :projects, :sprints, :states
+        before(:each) do
+            sprint = sprints(:sprint_1)
+            post "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+            @res = JSON.parse(last_response.body)
+            @sprint_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}").first 
+        end
+        context "sprint_state" do
+            it "should create id" do
+                expect(@sprint_result["id"]).to eq(@res["id"])
+            end
+            it "should save sprint_id" do
+                expect(@sprint_result["sprint_id"]).to eq(sprints(:sprint_1).id)
+            end
+            it "should save state_id" do
+                expect(@sprint_result["state_id"]).to eq(states(:idea).id)
+            end
+        end
     end
 end

@@ -18,6 +18,33 @@ class Issue
         end
     end
 
+    def create_sprint_state sprint_id, state_id
+        begin
+            sprint_state = SprintState.create({
+                sprint_id: sprint_id,
+                state_id: state_id
+            })
+            return sprint_state.id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_comment user_id, sprint_id, comment_id
+        begin
+            comment = Comment.create({
+                user_id: user_id,
+                sprint_id: sprint_id,
+                comment_id: comment_id
+            })
+            return comment.id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def last_event sprint_id
         begin
             return SprintTimeline.find_by(sprint_id: sprint_id).last(1).id
@@ -29,7 +56,6 @@ class Issue
 
     def log_event user_id, project_id, sprint_id, state_id, label_id
         after = (last_event sprint_id)
-         puts "setting after to #{after}"
         begin
             sprint_event = SprintTimeline.create({
                 user_id: project_id,
@@ -104,6 +130,14 @@ class Issue
         end
     end
 
+    def get_state_by_name name
+        begin
+            return State.find_by(:name => name).id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 
     def update_skillsets sprint_id, skillset_id, active
         begin

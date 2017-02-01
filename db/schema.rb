@@ -11,7 +11,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170131050955) do
+ActiveRecord::Schema.define(version: 20170201032320) do
+
+  create_table "comments", force: :cascade do |t|
+    t.integer  "user_id",         limit: 4, null: false
+    t.integer  "sprint_state_id", limit: 4, null: false
+    t.integer  "comment_id",      limit: 4
+    t.integer  "resource_id",     limit: 4
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+  end
+
+  add_index "comments", ["resource_id"], name: "fk_rails_30653fd404", using: :btree
+  add_index "comments", ["sprint_state_id"], name: "index_comments_on_sprint_state_id", using: :btree
+  add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
 
   create_table "contributors", force: :cascade do |t|
     t.integer  "user_id",        limit: 4,   null: false
@@ -54,6 +67,19 @@ ActiveRecord::Schema.define(version: 20170131050955) do
     t.datetime "updated_at",             null: false
   end
 
+  create_table "resources", force: :cascade do |t|
+    t.integer  "sprint_state_id", limit: 4,     null: false
+    t.integer  "user_id",         limit: 4,     null: false
+    t.integer  "sprint_id",       limit: 4,     null: false
+    t.text     "solution",        limit: 65535
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+  end
+
+  add_index "resources", ["sprint_id"], name: "index_resources_on_sprint_id", using: :btree
+  add_index "resources", ["sprint_state_id"], name: "index_resources_on_sprint_state_id", using: :btree
+  add_index "resources", ["user_id"], name: "index_resources_on_user_id", using: :btree
+
   create_table "roles", force: :cascade do |t|
     t.string   "name",       limit: 255, null: false
     t.datetime "created_at",             null: false
@@ -77,18 +103,34 @@ ActiveRecord::Schema.define(version: 20170131050955) do
   add_index "sprint_skillsets", ["skillset_id"], name: "index_sprint_skillsets_on_skillset_id", using: :btree
   add_index "sprint_skillsets", ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id", using: :btree
 
-  create_table "sprint_timelines", force: :cascade do |t|
+  create_table "sprint_states", force: :cascade do |t|
     t.integer  "sprint_id",  limit: 4, null: false
-    t.integer  "state_id",   limit: 4
-    t.integer  "label_id",   limit: 4
+    t.integer  "state_id",   limit: 4, null: false
+    t.datetime "deadline"
     t.datetime "created_at",           null: false
-    t.integer  "project_id", limit: 4, null: false
-    t.integer  "user_id",    limit: 4, null: false
-    t.integer  "after",      limit: 4
+    t.datetime "updated_at",           null: false
+    t.integer  "user_id",    limit: 4
   end
 
+  add_index "sprint_states", ["sprint_id"], name: "index_sprint_states_on_sprint_id", using: :btree
+  add_index "sprint_states", ["state_id"], name: "fk_rails_bececa531a", using: :btree
+
+  create_table "sprint_timelines", force: :cascade do |t|
+    t.integer  "sprint_id",       limit: 4, null: false
+    t.integer  "state_id",        limit: 4
+    t.integer  "label_id",        limit: 4
+    t.datetime "created_at",                null: false
+    t.integer  "project_id",      limit: 4, null: false
+    t.integer  "user_id",         limit: 4, null: false
+    t.integer  "after",           limit: 4
+    t.integer  "comment_id",      limit: 4
+    t.integer  "sprint_state_id", limit: 4
+  end
+
+  add_index "sprint_timelines", ["comment_id"], name: "fk_rails_1251c5b8fd", using: :btree
   add_index "sprint_timelines", ["label_id"], name: "fk_rails_1b320ef958", using: :btree
   add_index "sprint_timelines", ["sprint_id"], name: "index_sprint_timelines_on_sprint_id", using: :btree
+  add_index "sprint_timelines", ["sprint_state_id"], name: "fk_rails_e755d52f56", using: :btree
   add_index "sprint_timelines", ["state_id"], name: "fk_rails_c9feeeb84f", using: :btree
 
   create_table "sprints", force: :cascade do |t|
@@ -100,12 +142,10 @@ ActiveRecord::Schema.define(version: 20170131050955) do
     t.datetime "updated_at",                null: false
     t.datetime "deadline"
     t.string   "sha",         limit: 255
-    t.integer  "winner_id",   limit: 4
   end
 
   add_index "sprints", ["project_id"], name: "index_sprints_on_project_id", using: :btree
   add_index "sprints", ["user_id"], name: "index_sprints_on_user_id", using: :btree
-  add_index "sprints", ["winner_id"], name: "index_sprints_on_winner_id", using: :btree
 
   create_table "states", force: :cascade do |t|
     t.string   "name",       limit: 255, null: false
@@ -152,12 +192,22 @@ ActiveRecord::Schema.define(version: 20170131050955) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
 
+  add_foreign_key "comments", "resources"
+  add_foreign_key "comments", "sprint_states"
+  add_foreign_key "comments", "users"
   add_foreign_key "contributors", "sprints"
   add_foreign_key "contributors", "users"
   add_foreign_key "logins", "users"
+  add_foreign_key "resources", "sprint_states"
+  add_foreign_key "resources", "sprints"
+  add_foreign_key "resources", "users"
   add_foreign_key "sprint_skillsets", "skillsets"
   add_foreign_key "sprint_skillsets", "sprints"
+  add_foreign_key "sprint_states", "sprints"
+  add_foreign_key "sprint_states", "states"
+  add_foreign_key "sprint_timelines", "comments"
   add_foreign_key "sprint_timelines", "labels"
+  add_foreign_key "sprint_timelines", "sprint_states"
   add_foreign_key "sprint_timelines", "sprints"
   add_foreign_key "sprint_timelines", "states"
   add_foreign_key "sprints", "projects"

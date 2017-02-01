@@ -44,12 +44,7 @@ class CreateSprints < ActiveRecord::Migration
             t.datetime "updated_at",             null: false
         end
 
-        Label.create("name": "needs-spec")
-        Label.create("name": "needs-design")
-        Label.create("name": "needs-developer")
-        Label.create("name": "needs-review")
-        Label.create("name": "needs-decision")
-        Label.create("name": "needs-testing")
+        Label.create("name": "needs-owner")
 
         create_table "states", force: :cascade do |t|
             t.string   "name",       limit: 255, null: false
@@ -59,8 +54,12 @@ class CreateSprints < ActiveRecord::Migration
 
         State.create("name": "idea")
         State.create("name": "backlog")
-        State.create("name": "in-progress")
-        State.create("name": "resolved")
+        State.create("name": "in-requirements-design")
+        State.create("name": "in-requirements-review")
+        State.create("name": "in-visual-design")
+        State.create("name": "in-design-review")
+        State.create("name": "in-development")
+        State.create("name": "in-development-review")
         State.create("name": "closed")
 
         create_table "user_skillsets", force: :cascade do |t|
@@ -91,12 +90,10 @@ class CreateSprints < ActiveRecord::Migration
             t.datetime "updated_at",                             null: false
             t.datetime "deadline"
             t.string   "sha",        limit: 255,                 null: true 
-            t.integer  "winner_id",     limit: 4
         end
 
         add_index "sprints", ["user_id"]
         add_index "sprints", ["project_id"]
-        add_index "sprints", ["winner_id"]
 
         create_table "sprint_skillsets", force: :cascade do |t|
             t.integer  "skillset_id",   limit: 4,                null: false

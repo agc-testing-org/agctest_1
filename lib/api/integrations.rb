@@ -32,6 +32,7 @@ require_relative '../models/state.rb'
 require_relative '../models/label.rb'
 require_relative '../models/contributor.rb'
 require_relative '../models/project.rb'
+require_relative '../models/sprint_state.rb'
 
 # Workers
 
@@ -387,6 +388,52 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    sprints_post_by_id = lambda do
+        protected!
+        if @session_hash["admin"]
+            status 400
+            response = {}
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if fields[:state_id]
+                    issue = Issue.new
+                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id]
+                    if sprint_state && (issue.log_event @session_hash["id"], params[:project_id].to_i, params[:id], fields[:state_id], nil)
+                        status 201
+                        response[:id] = sprint_state
+                    end
+                end
+            end
+        else
+            status 401
+            response[:message] = "You are not authorized to perform this action."
+        end
+        return response.to_json
+    end
+
+    sprints_post_comments = lambda do
+        protected! 
+        status 400
+        response = {}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            if fields[:comment] && fields[:comment].length > 1
+                issue = Issue.new
+                comment = issue.create_comment @session_hash["id"], params[:id], fields[:comment_id]
+                if comment && (issue.log_event @session_hash["id"], params[:project_id].to_i, sprint, 1, nil)
+
+                end
+            else
+                response[:message] = "Please enter a more detailed comment"
+            end
+
+        end
+        return response.to_json
+    end
+
 
     #API
     post "/register", &register_post
@@ -408,7 +455,8 @@ class Integrations < Sinatra::Base
     get "/projects/:project_id/sprints", &sprints_get
     get "/projects/:project_id/events", &events_get
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
-
+    post "/projects/:project_id/sprints/:id", &sprints_post_by_id
+    post "/projects/:project_id/sprints/:id/comments", &sprints_post_comments
 
     get '/unauthorized' do
         status 401

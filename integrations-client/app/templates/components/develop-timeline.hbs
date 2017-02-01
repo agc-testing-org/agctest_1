@@ -32,14 +32,7 @@
                 {{event.sprint.description}}
             </div>
             <div class="change">
-                {{compare "state" (previous "event" event.after) event}}
-
-                status
-                <span class="badge badge-default rounded">{{event.state.name}}</span>
-                {{#if (previous "event" event.after)}}
-                 changed from 
-                <span class="badge badge-default rounded">{{previous "event" event.after}}</span>
-                {{/if}}
+                {{develop-timeline-compare event=event previous_event=(previous "event" event.after)}}
             </div>
         </li>
         {{/each}}

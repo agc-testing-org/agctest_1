@@ -6,14 +6,30 @@ backlog:
   id: 2
   name: "backlog"
 
-in-progress:
+in-requirements-design:
   id: 3
-  name: "in-progress"
+  name: "in-requirements-design"
 
-resolved:
+in-requirements-review:
   id: 4
-  name: "resolved"
+  name: "in-requirements-review"
+
+in-visual-design:
+  id: 5
+  name: "in-visual-design"
+
+in-visual-review:
+  id: 6
+  name: "in-visual-review"
+
+in-development:
+  id: 7
+  name: "in-development"
+
+in-development-review:
+  id: 8
+  name: "in-development-review"
 
 closed:
-  id: 5
+  id: 9
   name: "closed"

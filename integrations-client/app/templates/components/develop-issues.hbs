@@ -1,0 +1,11 @@
+<div class="list-group sprint">
+    {{#each model.sprints as |sprint|}}
+    <a href="#" class="list-group-item list-group-item-action flex-column align-items-start rounded">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">{{sprint.title}}</h5>
+            <small>{{sprint.updated_at}}</small>
+        </div>
+        <small>{{sprint.description}}</small>
+    </a>
+    {{/each}}
+</div>

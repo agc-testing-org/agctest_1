@@ -470,6 +470,10 @@ li.nav-item.timeline .change .badge{
     padding-left:10px;
 }
 
+.sprint .list-group-item{
+    margin-bottom:4px;
+}
+
 /* Placeholders */
 .placeholders {
     padding-bottom: 3rem;

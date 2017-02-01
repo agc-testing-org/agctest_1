@@ -28,4 +28,17 @@ describe ".Issue" do
     context "#log_event" do
         #covered by API test
     end
+    context "#get_state_by_name" do
+        fixtures :states
+        context "state exists" do
+            it "should return state by name" do
+                expect(@issue.get_state_by_name states(:backlog).name).to eq(states(:backlog).id)
+            end
+        end
+        context "state does not exist" do
+            it "should return nil" do
+                expect(@issue.get_state_by_name "wrong").to be nil
+            end
+        end
+    end
 end

@@ -492,7 +492,7 @@ describe ".Account" do
             end
         end
     end
-    context "#update_role", :focus => true do
+    context "#update_role" do
         fixtures :users, :roles
         before(:each) do
             @user_id = users(:adam).id
