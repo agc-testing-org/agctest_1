@@ -20,11 +20,11 @@ export default Ember.Component.extend({
             var org = this.get("selectedOrg");
             var name = this.get("selectedProject");
 
-            var store = this.get('store');
-            store.createRecord('project', {
+            console.log(org + " " + name);
+            var project = this.get('store').createRecord('project', {
                 org: org,
                 name: name
-            });
+            }).save();
         }
     }
 

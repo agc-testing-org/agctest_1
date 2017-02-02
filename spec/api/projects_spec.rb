@@ -240,11 +240,11 @@ describe "/projects" do
         it_behaves_like "sprint"
     end
     
-    describe "POST /:id/sprints/:id", :focus => true do
+    describe "PATCH /:id/sprints/:id", :focus => true do
         fixtures :projects, :sprints, :states
         before(:each) do
             sprint = sprints(:sprint_1)
-            post "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+            patch "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
             @res = JSON.parse(last_response.body)
             @sprint_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}").first 
         end

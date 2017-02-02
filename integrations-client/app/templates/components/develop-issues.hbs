@@ -6,6 +6,16 @@
             <small>{{sprint.updated_at}}</small>
         </div>
         <small>{{sprint.description}}</small>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Transitions
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                {{#each model.states as |state|}}
+                <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
+                {{/each}}
+            </div>
+        </div>
     </a>
     {{/each}}
 </div>

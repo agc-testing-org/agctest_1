@@ -10,7 +10,8 @@ export default Ember.Route.extend({
         return Ember.RSVP.hash({
             project: this.store.findRecord('project', params.name.split("-")[0]),
             events: this.store.findAll('event'),
-            sprints: this.store.findAll('sprint')
+            sprints: this.store.findAll('sprint'),
+            states: this.store.findAll('state')
         });
     }
 });

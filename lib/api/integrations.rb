@@ -287,6 +287,12 @@ class Integrations < Sinatra::Base
         return account.get_roles.to_json
     end
 
+    states_get = lambda do
+        issue = Issue.new
+        query = {}
+        return (issue.get_states query).to_json
+    end
+
     repositories_get = lambda do
         protected!
         github_client = github_authorization 
@@ -388,7 +394,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    sprints_post_by_id = lambda do
+    sprints_patch_by_id = lambda do
         protected!
         if @session_hash["admin"]
             status 400
@@ -445,6 +451,7 @@ class Integrations < Sinatra::Base
     get "/account", &account_get
 
     get "/roles", &roles_get
+    get "/states", &states_get
 
     get "/repositories", &repositories_get
 
@@ -455,7 +462,7 @@ class Integrations < Sinatra::Base
     get "/projects/:project_id/sprints", &sprints_get
     get "/projects/:project_id/events", &events_get
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
-    post "/projects/:project_id/sprints/:id", &sprints_post_by_id
+    patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
     post "/projects/:project_id/sprints/:id/comments", &sprints_post_comments
 
     get '/unauthorized' do

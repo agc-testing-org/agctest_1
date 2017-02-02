@@ -47,7 +47,7 @@ class Issue
 
     def last_event sprint_id
         begin
-            return SprintTimeline.find_by(sprint_id: sprint_id).last(1).id
+            return SprintTimeline.where(sprint_id: sprint_id).last.id
         rescue => e
             puts e
             return nil
@@ -130,9 +130,9 @@ class Issue
         end
     end
 
-    def get_state_by_name name
+    def get_states query
         begin
-            return State.find_by(:name => name).id
+            return State.where(query).as_json
         rescue => e
             puts e
             return nil

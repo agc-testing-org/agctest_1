@@ -28,16 +28,26 @@ describe ".Issue" do
     context "#log_event" do
         #covered by API test
     end
-    context "#get_state_by_name" do
+    context "#get_state" do
         fixtures :states
         context "state exists" do
-            it "should return state by name" do
-                expect(@issue.get_state_by_name states(:backlog).name).to eq(states(:backlog).id)
+            it "should return state" do
+                query = {:id => states(:backlog).id}
+                expect((@issue.get_states query)[:name]).to eq(states(:backlog).name)
             end
         end
         context "state does not exist" do
             it "should return nil" do
-                expect(@issue.get_state_by_name "wrong").to be nil
+                query = {:id => 1000}
+                expect(@issue.get_states query).to be nil
+            end
+        end
+    end
+    context "#last_event" do
+        fixtures :sprint_timelines
+        context "after exists" do
+            it "should return id of last event" do
+                expect(@issue.last_event sprint_timelines(:demo_2).sprint_id).to eq(sprint_timelines(:demo_1).id)
             end
         end
     end
