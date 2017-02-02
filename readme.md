@@ -31,10 +31,12 @@
     export RACK_ENV=test
     source ~/.bashrc
     rake db:create
+    rake db:migrate
 
     export RACK_ENV=development
     source ~/.bashrc
     rake db:create
+    rake db:migrate
 
 ### Running
 

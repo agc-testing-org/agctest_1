@@ -33,13 +33,13 @@ describe ".Issue" do
         context "state exists" do
             it "should return state" do
                 query = {:id => states(:backlog).id}
-                expect((@issue.get_states query)[:name]).to eq(states(:backlog).name)
+                expect((@issue.get_states query)[0]["name"]).to eq(states(:backlog).name)
             end
         end
         context "state does not exist" do
             it "should return nil" do
                 query = {:id => 1000}
-                expect(@issue.get_states query).to be nil
+                expect((@issue.get_states query)[0]).to be nil
             end
         end
     end
@@ -47,7 +47,7 @@ describe ".Issue" do
         fixtures :sprint_timelines
         context "after exists" do
             it "should return id of last event" do
-                expect(@issue.last_event sprint_timelines(:demo_2).sprint_id).to eq(sprint_timelines(:demo_1).id)
+                expect(@issue.last_event sprint_timelines(:demo_2).sprint_id).to eq(sprint_timelines(:demo_2).id) #return the last event for a sprint...demo_2 is last
             end
         end
     end

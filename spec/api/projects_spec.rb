@@ -240,7 +240,7 @@ describe "/projects" do
         it_behaves_like "sprint"
     end
     
-    describe "PATCH /:id/sprints/:id", :focus => true do
+    describe "PATCH /:id/sprints/:id" do
         fixtures :projects, :sprints, :states
         before(:each) do
             sprint = sprints(:sprint_1)

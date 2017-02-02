@@ -113,25 +113,6 @@ class CreateSprints < ActiveRecord::Migration
         add_foreign_key "sprint_skillsets", "skillsets", column: "skillset_id"
         add_foreign_key "sprint_skillsets", "sprints", column: "sprint_id"
 
-        create_table "contributors", force: :cascade do |t|
-            t.integer  "user_id",       limit: 4,   null: false
-            t.integer  "sprint_id",         limit: 4,   null: false
-            t.string   "repo",           limit: 255, null: false
-            t.datetime "created_at",                 null: false
-            t.datetime "updated_at",                 null: false
-            t.string   "commit",         limit: 255
-            t.string   "commit_remote",  limit: 255
-            t.boolean  "commit_success"
-            t.integer  "insertions",     limit: 4
-            t.integer  "deletions",      limit: 4
-            t.integer  "lines",          limit: 4
-            t.integer  "files",          limit: 4
-        end
-
-        add_index "contributors", ["sprint_id"]
-        add_foreign_key "contributors", "users", column: "user_id"
-        add_foreign_key "contributors", "sprints", column: "sprint_id"
-
         create_table "sprint_timelines", force: :cascade do |t|
             t.integer  "sprint_id",     limit: 4,                 null: false
             t.integer  "state_id", limit: 4, null: true

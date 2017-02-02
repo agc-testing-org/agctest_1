@@ -17,32 +17,32 @@ ActiveRecord::Schema.define(version: 20170201032320) do
     t.integer  "user_id",         limit: 4, null: false
     t.integer  "sprint_state_id", limit: 4, null: false
     t.integer  "comment_id",      limit: 4
-    t.integer  "resource_id",     limit: 4
+    t.integer  "contributor_id",  limit: 4
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
   end
 
-  add_index "comments", ["resource_id"], name: "fk_rails_30653fd404", using: :btree
+  add_index "comments", ["contributor_id"], name: "fk_rails_a1385053cc", using: :btree
   add_index "comments", ["sprint_state_id"], name: "index_comments_on_sprint_state_id", using: :btree
   add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
 
   create_table "contributors", force: :cascade do |t|
-    t.integer  "user_id",        limit: 4,   null: false
-    t.integer  "sprint_id",      limit: 4,   null: false
-    t.string   "repo",           limit: 255, null: false
-    t.datetime "created_at",                 null: false
-    t.datetime "updated_at",                 null: false
-    t.string   "commit",         limit: 255
-    t.string   "commit_remote",  limit: 255
+    t.integer  "user_id",         limit: 4,   null: false
+    t.integer  "sprint_state_id", limit: 4,   null: false
+    t.string   "repo",            limit: 255, null: false
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+    t.string   "commit",          limit: 255
+    t.string   "commit_remote",   limit: 255
     t.boolean  "commit_success"
-    t.integer  "insertions",     limit: 4
-    t.integer  "deletions",      limit: 4
-    t.integer  "lines",          limit: 4
-    t.integer  "files",          limit: 4
+    t.integer  "insertions",      limit: 4
+    t.integer  "deletions",       limit: 4
+    t.integer  "lines",           limit: 4
+    t.integer  "files",           limit: 4
   end
 
-  add_index "contributors", ["sprint_id"], name: "index_contributors_on_sprint_id", using: :btree
-  add_index "contributors", ["user_id"], name: "fk_rails_75adfa0433", using: :btree
+  add_index "contributors", ["sprint_state_id"], name: "index_contributors_on_sprint_state_id", using: :btree
+  add_index "contributors", ["user_id"], name: "index_contributors_on_user_id", using: :btree
 
   create_table "labels", force: :cascade do |t|
     t.string   "name",       limit: 255, null: false
@@ -66,19 +66,6 @@ ActiveRecord::Schema.define(version: 20170201032320) do
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
   end
-
-  create_table "resources", force: :cascade do |t|
-    t.integer  "sprint_state_id", limit: 4,     null: false
-    t.integer  "user_id",         limit: 4,     null: false
-    t.integer  "sprint_id",       limit: 4,     null: false
-    t.text     "solution",        limit: 65535
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-  end
-
-  add_index "resources", ["sprint_id"], name: "index_resources_on_sprint_id", using: :btree
-  add_index "resources", ["sprint_state_id"], name: "index_resources_on_sprint_state_id", using: :btree
-  add_index "resources", ["user_id"], name: "index_resources_on_user_id", using: :btree
 
   create_table "roles", force: :cascade do |t|
     t.string   "name",       limit: 255, null: false
@@ -192,15 +179,12 @@ ActiveRecord::Schema.define(version: 20170201032320) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
 
-  add_foreign_key "comments", "resources"
+  add_foreign_key "comments", "contributors"
   add_foreign_key "comments", "sprint_states"
   add_foreign_key "comments", "users"
-  add_foreign_key "contributors", "sprints"
+  add_foreign_key "contributors", "sprint_states"
   add_foreign_key "contributors", "users"
   add_foreign_key "logins", "users"
-  add_foreign_key "resources", "sprint_states"
-  add_foreign_key "resources", "sprints"
-  add_foreign_key "resources", "users"
   add_foreign_key "sprint_skillsets", "skillsets"
   add_foreign_key "sprint_skillsets", "sprints"
   add_foreign_key "sprint_states", "sprints"
