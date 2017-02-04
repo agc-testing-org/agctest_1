@@ -113,7 +113,7 @@ class Repo
 
     def save_commits resource_id, local, remote, resource_stats
         begin
-            repo = Resource.find_by(id: resource_id)
+            repo = Contributor.find_by(id: resource_id)
             repo.commit = local
             repo.commit_remote = remote
             repo.commit_success = (local == remote)

@@ -5,25 +5,18 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav ml-auto">
 
-            <li class="nav-item">
-                <a class="nav-link rounded" href="#">Idea</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded" href="#">Backlog</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded" href="#">In-Progress</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded" href="#">Resolved</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded" href="#">Closed</a>
-            </li>
-
+            <div class="dropdown mr-1">
+                <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Stages
+                </button>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                    {{#each model.states as |state|}}
+                    <button class="dropdown-item">{{state.name}}</button>
+                    {{/each}}
+                </div>
+            </div>
 
             {{user-logout tagName="li" class="cursor-pointer"}}
-
         </ul>
     </div>
 </nav>

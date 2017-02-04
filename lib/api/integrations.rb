@@ -440,6 +440,16 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    sprints_post_join = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+            puts "HERE"
+        end
+        return response.to_json
+    end
+
 
     #API
     post "/register", &register_post
@@ -464,6 +474,8 @@ class Integrations < Sinatra::Base
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
     patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
     post "/projects/:project_id/sprints/:id/comments", &sprints_post_comments
+
+    post "/sprint_states/:id/joins", &sprints_post_join
 
     get '/unauthorized' do
         status 401

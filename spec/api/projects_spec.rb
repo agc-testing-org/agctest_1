@@ -197,6 +197,25 @@ describe "/projects" do
             expect(@sprints[0]["id"]).to eq(@sprint_results.first["id"])
         end
     end
+    
+    shared_examples_for "sprint_states" do
+        it "should return id" do
+             @sprint_state_result.each_with_index do |s,i|
+                expect(@sprint_state[i]["id"]).to eq(s["id"])
+             end
+        end
+        it "should return deadline" do
+            @sprint_state_result.each_with_index do |s,i|
+                expect(@sprint_state[i]["deadline"]).to_not be nil
+            end
+        end
+        it "should return state" do
+            @sprint_state_result.each_with_index do |s,i|
+                expect(@sprint_state[i]["state"]["id"]).to eq(s["state_id"])
+            end
+        end
+    end
+
     describe "GET /:id/sprints" do
         fixtures :projects, :sprints
         before(:each) do
@@ -224,22 +243,25 @@ describe "/projects" do
         it_behaves_like "sprint_timeline"
     end
 
-    describe "GET /:id/sprints/:id" do
-        fixtures :projects, :sprints
+    describe "GET /:id/sprints/:id", :focus => true do
+        fixtures :projects, :sprints, :sprint_states, :states
         before(:each) do
             sprint = sprints(:sprint_1)
             get "/projects/#{sprint.project_id}/sprints/#{sprint.id}"
             res = JSON.parse(last_response.body)
             @sprint_result = @mysql_client.query("select * from sprints where project_id = #{sprint.project_id}").first
             @project_result = @mysql_client.query("select * from projects where id = #{sprint.project_id}").first
+            @sprint_state_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}")
             @project = res["project"]
             @sprint = res
+            @sprint_state = res["sprint_states"]
         end
 
         it_behaves_like "project"
         it_behaves_like "sprint"
+        it_behaves_like "sprint_states"
     end
-    
+
     describe "PATCH /:id/sprints/:id" do
         fixtures :projects, :sprints, :states
         before(:each) do

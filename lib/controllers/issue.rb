@@ -97,9 +97,16 @@ class Issue
     def get_sprints query
         begin
             response = Array.new
-            Sprint.where(query).includes(:project).each_with_index do |s,i|
+            Sprint.where(query).includes(:project).includes(:sprint_states).each_with_index do |s,i|
                 response[i] = s.as_json
                 response[i][:project] = s.project.as_json
+                response[i][:sprint_states] = []
+                s.sprint_states.includes(:state).each_with_index do |ss,j|
+                    response[i][:sprint_states][j] = ss.as_json
+                    response[i][:sprint_states][j][:state] = ss.state.as_json 
+                    response[i][:sprint_states][j].delete("state_id")
+                    response[i][:sprint_states][j].delete("sprint_id")
+                end
                 response[i].delete("project_id")
             end
             return response
