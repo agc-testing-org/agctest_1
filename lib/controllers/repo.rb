@@ -4,16 +4,51 @@
 # Answers get merged into 
 
 class Repo   
-    def create sprint_id, name
+
+    def get_repository user_id, project_id
+        begin 
+           return Contributor.joins(:project).where(:user_id => user_id, :project_id => project_id).last
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+    
+    def create user_id, project_id, sprint_state_id, repo
         begin
             repo = Contributor.create({
-
+                user_id: user_id,
+                project_id: project_id,
+                sprint_state_id: sprint_state_id,
+                repo: repo
             })
             return repo.id
         rescue => e
             puts e
             return nil
         end
+    end
+
+    #TODO
+    def refresh sprint, owner, repo, branch
+        # create branch named after contributor_id and sprint_state_id
+        # push single branch to user repo, using access token
+
+        begin
+            r = clone "#{ENV['WIRED7_GITHUB_URL']}/#{owner}/#{repo}.git", sprint, owner, branch
+            local_hash = log_head r
+            added_remote = add_remote r, "#{ENV['WIRED7_GITHUB_URL_AUTHORIZED']}/#{repo}_#{sprint}.git", branch
+            if added_remote
+                push_remote r, branch
+                remote_hash = log_head_remote "#{ENV["WIRED7_GITHUB_ADMIN_ORG"]}/#{repo}_#{sprint}", branch
+                return (remote_hash == local_hash) && (clear_clone sprint, owner)
+            else
+                return false
+            end
+        rescue => e
+            puts e
+        end
+
     end
 
     def clear_clone sprint, login

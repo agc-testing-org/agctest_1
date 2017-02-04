@@ -7,7 +7,7 @@
         </div>
         <small>{{sprint.description}}</small>
         <div class="dropdown">
-            <button class="btn btn-outline-secondary rounded" {{action "join" sessionAccount.account.id state.id }}>Join</button>
+            <button class="btn btn-outline-secondary rounded" {{action "join" sessionAccount.account.id sprint.project.id sprint.sprint_states }}>Join</button>
             <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 Transitions
             </button>

@@ -16,7 +16,7 @@ require 'ldclient-rb'
 # Controllers
 require_relative '../controllers/account.rb'
 require_relative '../controllers/issue.rb'
-
+require_relative '../controllers/repo.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -82,14 +82,22 @@ class Integrations < Sinatra::Base
         end
     end
 
+    def github_client access_code
+        begin
+            return Octokit::Client.new(:access_token => access_code["payload"])
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def github_authorization
         if @session_hash["github"]
             github_token = retrieve_github_token
             begin
                 puts "::unlocking github token"
                 account = Account.new
-                access_code = (account.validate_token github_token, @key)
-                return Octokit::Client.new(:access_token => access_code["payload"])
+                return (account.validate_token github_token, @key)
             rescue => e
                 puts e
                 return nil
@@ -295,8 +303,7 @@ class Integrations < Sinatra::Base
 
     repositories_get = lambda do
         protected!
-        github_client = github_authorization 
-        puts github_client
+        github_client = (github_client github_authorization)
         repositories = Array.new
         begin
             github_client.repositories.each do |repo|
@@ -405,6 +412,7 @@ class Integrations < Sinatra::Base
                 if fields[:state_id]
                     issue = Issue.new
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id]
+                    #TODO - this should record the sha of the repo
                     if sprint_state && (issue.log_event @session_hash["id"], params[:project_id].to_i, params[:id], fields[:state_id], nil)
                         status 201
                         response[:id] = sprint_state
@@ -440,12 +448,33 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    sprints_post_join = lambda do
+    repositories_post = lambda do
         protected!
         status 400
         response = {}
         begin
-            puts "HERE"
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            puts fields[:sprint_state_id]
+            repo = Repo.new
+            repository = repo.get_repository
+
+            if !repository
+                #create repository
+                name = repo.name
+                github_client = (github_client github_authorization)
+                if github_client.create_repository(name)
+                    repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
+                    repo.refresh @session, retrieve_github_token, name
+                end
+            else
+                repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
+                repo.refresh @session, retrieve_github_token, name
+            end
+
+            # background job
+
         end
         return response.to_json
     end
@@ -468,14 +497,13 @@ class Integrations < Sinatra::Base
     post "/projects", &projects_post
     get "/projects", &projects_get
     get "/projects/:id", &projects_get_by_id
+    post "/projects/:project_id/repositories", &repositories_post
     post "/projects/:project_id/sprints", &sprints_post
     get "/projects/:project_id/sprints", &sprints_get
     get "/projects/:project_id/events", &events_get
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
     patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
     post "/projects/:project_id/sprints/:id/comments", &sprints_post_comments
-
-    post "/sprint_states/:id/joins", &sprints_post_join
 
     get '/unauthorized' do
         status 401

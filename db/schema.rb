@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170201032320) do
+ActiveRecord::Schema.define(version: 20170204043421) do
 
   create_table "comments", force: :cascade do |t|
     t.integer  "user_id",         limit: 4, null: false
@@ -39,6 +39,7 @@ ActiveRecord::Schema.define(version: 20170201032320) do
     t.integer  "deletions",       limit: 4
     t.integer  "lines",           limit: 4
     t.integer  "files",           limit: 4
+    t.string   "project_id",      limit: 255, null: false
   end
 
   add_index "contributors", ["sprint_state_id"], name: "index_contributors_on_sprint_state_id", using: :btree
@@ -91,12 +92,13 @@ ActiveRecord::Schema.define(version: 20170201032320) do
   add_index "sprint_skillsets", ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id", using: :btree
 
   create_table "sprint_states", force: :cascade do |t|
-    t.integer  "sprint_id",  limit: 4, null: false
-    t.integer  "state_id",   limit: 4, null: false
+    t.integer  "sprint_id",  limit: 4,   null: false
+    t.integer  "state_id",   limit: 4,   null: false
     t.datetime "deadline"
-    t.datetime "created_at",           null: false
-    t.datetime "updated_at",           null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
     t.integer  "user_id",    limit: 4
+    t.string   "sha",        limit: 255
   end
 
   add_index "sprint_states", ["sprint_id"], name: "index_sprint_states_on_sprint_id", using: :btree

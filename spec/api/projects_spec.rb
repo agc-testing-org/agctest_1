@@ -243,7 +243,7 @@ describe "/projects" do
         it_behaves_like "sprint_timeline"
     end
 
-    describe "GET /:id/sprints/:id", :focus => true do
+    describe "GET /:id/sprints/:id" do
         fixtures :projects, :sprints, :sprint_states, :states
         before(:each) do
             sprint = sprints(:sprint_1)
