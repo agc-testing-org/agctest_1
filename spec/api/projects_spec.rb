@@ -37,11 +37,11 @@ describe "/projects" do
 
         FileUtils.rm_rf('repositories/')
         @username = "adam_on_github"
-        puts %x( mkdir "test/#{@username}")
+        %x( mkdir "test/#{@username}")
         @uri = "test/#{@username}/git-repo-log.git"
         @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
-        puts %x( rm -rf #{@uri})
-        puts %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
+        %x( rm -rf #{@uri})
+        %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
 
     end
     after(:each) do
@@ -287,7 +287,7 @@ describe "/projects" do
         it_behaves_like "sprint_states"
     end
 
-    describe "PATCH /:id/sprints/:id", :focusa => true do
+    describe "PATCH /:id/sprints/:id" do
         fixtures :projects, :sprints, :sprint_states, :states
         before(:each) do
             body = { 
@@ -303,8 +303,9 @@ describe "/projects" do
             sprint = sprints(:sprint_1)
             patch "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
             @res = JSON.parse(last_response.body)
-            @sprint_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}").first 
+            @sprint_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id} ORDER BY id DESC").first 
         end
+
         context "sprint_state" do
             it "should create id" do
                 expect(@sprint_result["id"]).to eq(@res["id"])
@@ -325,6 +326,16 @@ describe "/projects" do
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
             Octokit::Client.any_instance.stub(:create_repository) { {} }
+
+            body = {
+                :name=>"1",
+                :commit=>{
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
+            }
+
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid sprint_state_id" do
             fixtures :users, :sprint_states, :projects
@@ -334,7 +345,7 @@ describe "/projects" do
                 sprint = sprints(:sprint_1)
                 post "/projects/#{@project}/repositories", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
-                @sql = @mysql_client.query("select * from contributors").first
+                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
             end
             context "contributor" do
                 it "should include repo name" do
@@ -348,7 +359,7 @@ describe "/projects" do
                 end
             end
             it "should return contributor id" do
-                expect(@res["id"]).to eq(1)
+                expect(@res["id"]).to eq(@sql["id"])
             end
         end 
         context "invalid sprint_state_id" do

@@ -1,6 +1,6 @@
 require_relative '../spec_helper'
 
-describe ".Issue" do
+describe ".Repo" do
     before(:all) do
         @mysql_client = Mysql2::Client.new(
             :host => ENV['INTEGRATIONS_MYSQL_HOST'],
@@ -16,7 +16,7 @@ describe ".Issue" do
         @uri = "test/git-repo-log"
         @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
         %x( rm -rf #{@uri})                 
-        %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
+        %x( cp -rf test/git-repo #{@uri}; mv -f #{@uri}/git #{@uri}/.git)
     end
     after(:each) do
         %x( rm -rf #{@uri}) 
@@ -44,7 +44,6 @@ describe ".Issue" do
             end
         end
     end
-
     context "#clone" do
         before(:each) do
             @sprint_state_id = 99
@@ -69,6 +68,18 @@ describe ".Issue" do
                     expect(@repo.clone @uri, @sprint_state_id, @contributor_id, "master").to be nil
                 end
             end
+        end
+    end
+    context "#checkout" do
+        before(:each) do
+            @sprint_state_id = 99
+            @contributor_id = "adam123"
+            @branch = "master"
+            @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
+            @res = @repository.checkout @sha
+        end
+        it "should check out" do
+            expect(%x( cd repositories/#{@sprint_state_id}_#{@contributor_id}; git branch ).split("\n")[0]).to eq("* (HEAD detached at b218bd1)")
         end
     end
     context "#log_head" do
@@ -210,5 +221,5 @@ describe ".Issue" do
             expect(@res).to eq(@body.commit.sha) 
         end
     end
-    
+
 end

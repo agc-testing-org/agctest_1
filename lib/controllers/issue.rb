@@ -18,6 +18,16 @@ class Issue
         end
     end
 
+    def get_sprint_state sprint_state_id
+        begin
+            return SprintState.find_by(:id => sprint_state_id)
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+
     def create_sprint_state sprint_id, state_id, sha
         begin
             sprint_state = SprintState.create({
@@ -48,7 +58,12 @@ class Issue
 
     def last_event sprint_id
         begin
-            return SprintTimeline.where(sprint_id: sprint_id).last.id
+            events = SprintTimeline.where(sprint_id: sprint_id)
+            if events
+                return events.last.id
+            else
+                return nil
+            end
         rescue => e
             puts e
             return nil

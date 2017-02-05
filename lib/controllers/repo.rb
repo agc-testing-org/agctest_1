@@ -38,12 +38,12 @@ class Repo
         end
     end
 
-    def refresh session, github_token, contributor_id, sprint_state_id, github_username, repo, sha
+    def refresh session, github_token, contributor_id, sprint_state_id, github_username, repo, branch, sha
         # create branch named after contributor_id
         # push single branch to user repo, using access token
 
         begin
-            r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{github_username}/#{repo}.git", sprint_state_id, contributor_id, sha
+            r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{github_username}/#{repo}.git", sprint_state_id, contributor_id, branch
             local_hash = log_head r
 
             account = Account.new
@@ -58,7 +58,8 @@ class Repo
             added_remote = add_remote r, "#{prefix}/#{github_username}/#{repo}", sprint_state_id
 
             if added_remote
-                push_remote r, branch
+                add_branch r, sprint_state_id
+                push_remote r, sprint_state_id, sprint_state_id 
                 remote_hash = log_head_remote github_secret, github_username, repo, sprint_state_id
                 return (remote_hash == local_hash)
             else
@@ -98,6 +99,14 @@ class Repo
         rescue => e
             puts e
             return false 
+        end
+    end
+
+    def checkout g, sha
+        begin
+            return g.checkout(sha)
+        rescue => e
+            puts e
         end
     end
 
@@ -155,8 +164,6 @@ class Repo
                 if !commit
                     sleep 3
                     poll_count = poll_count + 1
-                else
-                    puts commit.commit.sha
                 end
             end
             return commit.commit.sha

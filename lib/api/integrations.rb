@@ -468,12 +468,13 @@ class Integrations < Sinatra::Base
             rescue => e
                 puts e
             end
-
+          
             created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
             if created
                 status 201
                 response[:id] = created
-                repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], username, name
+                issue = Issue.new
+                repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], username, name, "master", (issue.get_sprint_state fields[:sprint_state_id]).sha
             else
                 response[:message] = "This is not available" 
             end
