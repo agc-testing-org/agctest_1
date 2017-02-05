@@ -12,6 +12,7 @@ require 'bcrypt'
 require 'pony'
 require 'octokit'
 require 'ldclient-rb'
+require 'git'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -82,26 +83,11 @@ class Integrations < Sinatra::Base
         end
     end
 
-    def github_client access_code
-        begin
-            return Octokit::Client.new(:access_token => access_code["payload"])
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def github_authorization
         if @session_hash["github"]
-            github_token = retrieve_github_token
-            begin
-                puts "::unlocking github token"
-                account = Account.new
-                return (account.validate_token github_token, @key)
-            rescue => e
-                puts e
-                return nil
-            end
+            account = Account.new
+            puts "::unlocking github token"
+            return account.unlock_github_token @session, retrieve_github_token 
         end 
     end
 
@@ -303,10 +289,11 @@ class Integrations < Sinatra::Base
 
     repositories_get = lambda do
         protected!
-        github_client = (github_client github_authorization)
+        repo = Repo.new
+        github = (repo.github_client github_authorization)
         repositories = Array.new
         begin
-            github_client.repositories.each do |repo|
+            github.repositories.each do |repo|
                 repositories[repositories.length] = {
                     :id => repo.id,
                     :name => repo.name,         
@@ -410,9 +397,17 @@ class Integrations < Sinatra::Base
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:state_id]
+                    
                     issue = Issue.new
-                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id]
-                    #TODO - this should record the sha of the repo
+                    query = {:id => params[:project_id].to_i}
+                    project = (issue.get_projects query)[0]
+
+                    repo = Repo.new
+                    github = (repo.github_client github_authorization)
+                    sha = github.branch(project["org"],project["name"]).commit.sha
+
+                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
+
                     if sprint_state && (issue.log_event @session_hash["id"], params[:project_id].to_i, params[:id], fields[:state_id], nil)
                         status 201
                         response[:id] = sprint_state
@@ -456,23 +451,32 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            puts fields[:sprint_state_id]
             repo = Repo.new
-            repository = repo.get_repository
+            repository = repo.get_repository @session_hash["id"], params[:project_id]
+
+            github = (repo.github_client github_authorization)
+            username = github.login
 
             if !repository
-                #create repository
                 name = repo.name
-                github_client = (github_client github_authorization)
-                if github_client.create_repository(name)
-                    repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
-                    repo.refresh @session, retrieve_github_token, name
-                end
             else
-                repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
-                repo.refresh @session, retrieve_github_token, name
+                name = repository.repo
             end
 
+            begin
+                github.create_repository(name)
+            rescue => e
+                puts e
+            end
+
+            created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
+            if created
+                status 201
+                response[:id] = created
+                repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], username, name
+            else
+                response[:message] = "This is not available" 
+            end
             # background job
 
         end

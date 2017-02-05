@@ -14,6 +14,7 @@
     export INTEGRATIONS_HOST="https://localhost:3000" #https://wired7.com
     export INTEGRATIONS_GITHUB_CLIENT_ID=""
     export INTEGRATIONS_GITHUB_CLIENT_SECRET=""
+    export INTEGRATIONS_GITHUB_URL="https://github.com"
     export INTEGRATIONS_MYSQL_USERNAME="root"
     export INTEGRATIONS_MYSQL_PASSWORD="123456"
     export INTEGRATIONS_MYSQL_HOST="localhost"
@@ -24,6 +25,7 @@
     export INTEGRATIONS_EMAIL_ADDRESS=""
     export INTEGRATIONS_EMAIL_PASSWORD=""
     if [ "$RACK_ENV" == "test" ]; then
+        export INTEGRATIONS_GITHUB_URL="test"
         export INTEGRATIONS_REDIS_DB=2
         export INTEGRATIONS_EMAIL_ADDRESS="" # !!KEEP EMPTY
     fi  
@@ -49,7 +51,7 @@ Shell 1 (project root)
     rake db:migrate
     passenger start --ssl --ssl-certificate localhost.crt --ssl-certificate-key localhost.key --port 3001 --ssl-port 3000 
 
-Shell 2
+    Shell 2
 
     cd integrations-client
     bower install

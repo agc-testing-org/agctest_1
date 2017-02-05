@@ -173,6 +173,24 @@ describe ".Account" do
             end
         end
     end
+
+    context "#unlock_github_token" do
+        before(:each) do
+            @id = 1
+            @key = "KEY"
+            @access_token = "123456"
+            @session = "ABC"
+            @provider_token = @account.create_token @id, @key, @access_token
+            @account.save_token "session", @session, {:key => @key}.to_json
+            
+        end
+        context "valid token" do
+            it "should return access_token" do
+                expect(@account.unlock_github_token @session, @provider_token).to eq(@access_token)
+            end
+        end
+    end
+
     context "#delete_token" do
         before(:each) do
             @type = "auth"
@@ -535,7 +553,7 @@ describe ".Account" do
             context "when password is correct" do
                 before(:each) do
                     @ip = '192.168.1.1'
-                     @password = "adam12345"
+                    @password = "adam12345"
                 end
                 context "when not confirmed" do
                     it "should return nil" do

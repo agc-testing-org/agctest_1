@@ -23,6 +23,31 @@ describe "/projects" do
         post "/login", { :password => admin_password, :email => email }.to_json
         res = JSON.parse(last_response.body)
         @non_admin_w7_token = res["w7_token"]
+    
+        code = "123"
+        access_token = "ACCESS123"
+
+        Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
+            :access_token => access_token
+        }.to_json, object_class: OpenStruct) }
+
+        post "/session/github", {:grant_type => "github", :auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+        res = JSON.parse(last_response.body)
+        @non_admin_github_token = res["github_token"]
+
+        FileUtils.rm_rf('repositories/')
+        @username = "adam_on_github"
+        puts %x( mkdir "test/#{@username}")
+        @uri = "test/#{@username}/git-repo-log.git"
+        @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
+        puts %x( rm -rf #{@uri})
+        puts %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
+
+    end
+    after(:each) do
+        %x( rm -rf #{@uri})
+        %x( rm -rf "test/#{@username}")
+        %x( rm -rf repositories/*)
     end
 
     describe "POST /" do
@@ -197,12 +222,12 @@ describe "/projects" do
             expect(@sprints[0]["id"]).to eq(@sprint_results.first["id"])
         end
     end
-    
+
     shared_examples_for "sprint_states" do
         it "should return id" do
-             @sprint_state_result.each_with_index do |s,i|
+            @sprint_state_result.each_with_index do |s,i|
                 expect(@sprint_state[i]["id"]).to eq(s["id"])
-             end
+            end
         end
         it "should return deadline" do
             @sprint_state_result.each_with_index do |s,i|
@@ -262,9 +287,19 @@ describe "/projects" do
         it_behaves_like "sprint_states"
     end
 
-    describe "PATCH /:id/sprints/:id" do
-        fixtures :projects, :sprints, :states
+    describe "PATCH /:id/sprints/:id", :focusa => true do
+        fixtures :projects, :sprints, :sprint_states, :states
         before(:each) do
+            body = { 
+                :name=>"1", 
+                :commit=>{
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
+            }
+
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:branch => @body)
+
             sprint = sprints(:sprint_1)
             patch "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
             @res = JSON.parse(last_response.body)
@@ -279,6 +314,53 @@ describe "/projects" do
             end
             it "should save state_id" do
                 expect(@sprint_result["state_id"]).to eq(states(:idea).id)
+            end
+            it "should save sha" do
+                expect(@sprint_result["sha"]).to eq(sprint_states(:sprint_1_state_1).sha)
+            end
+        end
+    end
+    describe "POST /:id/repositories", :focus => true do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            Octokit::Client.any_instance.stub(:login) { @username }
+            Octokit::Client.any_instance.stub(:create_repository) { {} }
+        end
+        context "valid sprint_state_id" do
+            fixtures :users, :sprint_states, :projects
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1_state_1).id
+                @project = projects(:demo).id
+                sprint = sprints(:sprint_1)
+                post "/projects/#{@project}/repositories", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors").first
+            end
+            context "contributor" do
+                it "should include repo name" do
+                    expect(@sql["repo"]).to_not be nil
+                end
+                it "should include user_id" do
+                    expect(@sql["user_id"]).to eq(users(:adam_confirmed).id)
+                end
+                it "should include sprint_state_id" do
+                    expect(@sql["sprint_state_id"]).to eq(@sprint_state_id)
+                end
+            end
+            it "should return contributor id" do
+                expect(@res["id"]).to eq(1)
+            end
+        end 
+        context "invalid sprint_state_id" do
+            fixtures :users, :projects
+            before(:each) do
+                @project = projects(:demo).id
+                @sprint_state_id = 99
+                post "/projects/#{@project}/repositories", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return nil" do
+                expect(@res["message"]).to_not be nil
             end
         end
     end

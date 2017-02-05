@@ -1,7 +1,7 @@
 adam_confirmed_1:
   user: adam_confirmed
   project: demo
-  repo: "a_repo"
+  repo: "git-repo-log"
   sprint_state: sprint_1_state_1
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>

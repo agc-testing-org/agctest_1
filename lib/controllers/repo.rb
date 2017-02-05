@@ -5,15 +5,24 @@
 
 class Repo   
 
-    def get_repository user_id, project_id
-        begin 
-           return Contributor.joins(:project).where(:user_id => user_id, :project_id => project_id).last
+    def github_client access_code
+        begin
+            return Octokit::Client.new(:access_token => access_code)
         rescue => e
             puts e
             return nil
         end
     end
-    
+
+    def get_repository user_id, project_id
+        begin 
+            return Contributor.joins(:project).where(:user_id => user_id, :project_id => project_id).last
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def create user_id, project_id, sprint_state_id, repo
         begin
             repo = Contributor.create({
@@ -29,24 +38,35 @@ class Repo
         end
     end
 
-    #TODO
-    def refresh sprint, owner, repo, branch
-        # create branch named after contributor_id and sprint_state_id
+    def refresh session, github_token, contributor_id, sprint_state_id, github_username, repo, sha
+        # create branch named after contributor_id
         # push single branch to user repo, using access token
 
         begin
-            r = clone "#{ENV['WIRED7_GITHUB_URL']}/#{owner}/#{repo}.git", sprint, owner, branch
+            r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{github_username}/#{repo}.git", sprint_state_id, contributor_id, sha
             local_hash = log_head r
-            added_remote = add_remote r, "#{ENV['WIRED7_GITHUB_URL_AUTHORIZED']}/#{repo}_#{sprint}.git", branch
+
+            account = Account.new
+            github_secret = account.unlock_github_token session, github_token
+
+            prefix = "https://#{github_username}:#{github_secret}@github.com"
+
+            if ENV['RACK_ENV'] == "test"
+                prefix = "test"
+            end
+
+            added_remote = add_remote r, "#{prefix}/#{github_username}/#{repo}", sprint_state_id
+
             if added_remote
                 push_remote r, branch
-                remote_hash = log_head_remote "#{ENV["WIRED7_GITHUB_ADMIN_ORG"]}/#{repo}_#{sprint}", branch
-                return (remote_hash == local_hash) && (clear_clone sprint, owner)
+                remote_hash = log_head_remote github_secret, github_username, repo, sprint_state_id
+                return (remote_hash == local_hash)
             else
                 return false
             end
         rescue => e
             puts e
+            return false
         end
 
     end
@@ -61,29 +81,29 @@ class Repo
         end
     end
 
-    def clone uri, sprint, login, branch
+    def clone uri, sprint_state_id, contributor_id, branch
         begin
             #g = Git.clone("https://github.com/#{login}/#{name}.git","#{sprint}_#{login}",:path => "repositories")
-            return Git.clone(uri,"#{sprint}_#{login}",{ :path => "repositories", :branch => branch })
+            return Git.clone(uri,"#{sprint_state_id}_#{contributor_id}",{ :path => "repositories", :branch => branch })
         rescue => e
             puts e
             return nil
         end
     end
 
-    def add_remote g, uri, resource_id
+    def add_remote g, uri, name
         begin
             #return g.add_remote(resource_id, "https://#{ENV['WIRED7_GITHUB_ADMIN_USER']}:#{ENV['WIRED7_GITHUB_ADMIN_PASSWORD']}@github.com/#{ENV['WIRED7_GITHUB_ADMIN_ORG']}/#{repo}.git")
-            return (g.add_remote(resource_id, uri).name == resource_id)
+            return (g.add_remote(name, uri).name == name)
         rescue => e
             puts e
             return false 
         end
     end
 
-    def add_branch g, resource_id
+    def add_branch g, branch
         begin
-            return (g.branch(resource_id.to_s).checkout.include? resource_id.to_s)
+            return (g.branch(branch.to_s).checkout.include? branch.to_s)
         rescue => e
             puts e
             return false
@@ -101,9 +121,9 @@ class Repo
         end
     end
 
-    def push_remote g, resource_id
+    def push_remote g, name, branch
         begin
-            g.push(g.remote(resource_id.to_s),resource_id.to_s,{:force => true})
+            g.push(g.remote(name.to_s),branch.to_s,{:force => true})
             return true
         rescue => e
             puts e
@@ -120,14 +140,14 @@ class Repo
         end
     end
 
-    def log_head_remote repo, resource_id
-        admin = authenticate ENV['WIRED7_GITHUB_ADMIN_SECRET']
-        if admin
+    def log_head_remote access_code, username, repo, branch 
+        github = (github_client access_code)
+        if github 
             commit = nil
             poll_count = 0
             while !commit && (poll_count < 10)
                 begin
-                    commit = admin.branch(repo, resource_id)
+                    commit = github.branch("#{username}/#{repo}", branch)
                 rescue => e
                     puts e
                     commit = nil 

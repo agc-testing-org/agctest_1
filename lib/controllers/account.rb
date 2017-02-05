@@ -220,6 +220,18 @@ class Account
         end
     end
 
+    def unlock_github_token session, github_token
+        begin
+            session_hash_string = get_key "session", session
+            session_hash = JSON.parse(session_hash_string)
+            key = session_hash["key"]                                   
+            return (validate_token github_token, key)["payload"]
+        rescue => e
+            puts e
+            return nil
+        end 
+    end 
+
     def get_roles
         begin 
             return Role.all.order(:id)

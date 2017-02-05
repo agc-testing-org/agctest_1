@@ -18,11 +18,12 @@ class Issue
         end
     end
 
-    def create_sprint_state sprint_id, state_id
+    def create_sprint_state sprint_id, state_id, sha
         begin
             sprint_state = SprintState.create({
                 sprint_id: sprint_id,
-                state_id: state_id
+                state_id: state_id,
+                sha: sha
             })
             return sprint_state.id
         rescue => e

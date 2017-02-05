@@ -4,6 +4,7 @@ sprint_1_state_1:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   deadline: <%= 5.day.ago.to_s(:db) %>
+  sha: "b218bd1da7786b8beece26fc2e6b2fa240597969"
 
 sprint_1_state_2:
   sprint: sprint_1
