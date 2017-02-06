@@ -110,19 +110,30 @@ class Issue
         end
     end
 
-    def get_sprints query
+    def get_sprints query, user_id
         begin
             response = Array.new
             Sprint.where(query).includes(:project).includes(:sprint_states).each_with_index do |s,i|
                 response[i] = s.as_json
                 response[i][:project] = s.project.as_json
                 response[i][:sprint_states] = []
-                s.sprint_states.includes(:state).each_with_index do |ss,j|
+                s.sprint_states.includes(:state,:contributors).each_with_index do |ss,j|
                     response[i][:sprint_states][j] = ss.as_json
                     response[i][:sprint_states][j][:state] = ss.state.as_json 
+                    response[i][:sprint_states][j][:contributors] = []
+                    ss.contributors.each_with_index do |c,k|
+                        response[i][:sprint_states][j][:contributors][k] = []
+                        if c.user_id == user_id
+                            response[i][:sprint_states][j][:contributors][k] = {
+                                :created_at => c.created_at,
+                                :repo => c.repo
+                            }
+                        end
+                    end
                     response[i][:sprint_states][j].delete("state_id")
                     response[i][:sprint_states][j].delete("sprint_id")
                 end
+
                 response[i].delete("project_id")
             end
             return response

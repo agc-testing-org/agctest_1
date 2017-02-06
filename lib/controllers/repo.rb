@@ -38,29 +38,30 @@ class Repo
         end
     end
 
-    def refresh session, github_token, contributor_id, sprint_state_id, github_username, repo, branch, sha
+    def refresh session, github_token, contributor_id, sprint_state_id, master_username, master_project, slave_username, slave_project, branch, sha
         # create branch named after contributor_id
         # push single branch to user repo, using access token
 
         begin
-            r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{github_username}/#{repo}.git", sprint_state_id, contributor_id, branch
+            r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
             local_hash = log_head r
 
             account = Account.new
             github_secret = account.unlock_github_token session, github_token
 
-            prefix = "https://#{github_username}:#{github_secret}@github.com"
+            prefix = "https://#{slave_username}:#{github_secret}@github.com"
 
             if ENV['RACK_ENV'] == "test"
                 prefix = "test"
             end
 
-            added_remote = add_remote r, "#{prefix}/#{github_username}/#{repo}", sprint_state_id
+            added_remote = add_remote r, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
 
             if added_remote
+                checkout r, sha
                 add_branch r, sprint_state_id
                 push_remote r, sprint_state_id, sprint_state_id 
-                remote_hash = log_head_remote github_secret, github_username, repo, sprint_state_id
+                remote_hash = log_head_remote github_secret, slave_username, slave_project, sprint_state_id
                 return (remote_hash == local_hash)
             else
                 return false

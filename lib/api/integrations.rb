@@ -273,7 +273,7 @@ class Integrations < Sinatra::Base
     account_get = lambda do
         protected!
         status 200
-        return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"]}.to_json
+        return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"]}.to_json
     end
 
     roles_get = lambda do
@@ -342,9 +342,14 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get = lambda do
+        authorized?
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i }
-        sprints = issue.get_sprints query
+        if @session_hash["id"]
+            sprints = issue.get_sprints query, @session_hash["id"] 
+        else
+            sprints = issue.get_sprints query, nil 
+        end
         return sprints.to_json
     end
 
@@ -356,9 +361,14 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get_by_id = lambda do
+        authorized?
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
-        sprint = issue.get_sprints query
+        if @session_hash["id"]
+            sprint = issue.get_sprints query,  @session_hash["id"]
+        else
+            sprint = issue.get_sprints query, nil
+        end
         return sprint[0].to_json
     end
 
@@ -397,14 +407,15 @@ class Integrations < Sinatra::Base
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:state_id]
-                    
+
                     issue = Issue.new
                     query = {:id => params[:project_id].to_i}
                     project = (issue.get_projects query)[0]
 
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
-                    sha = github.branch(project["org"],project["name"]).commit.sha
+
+                    sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
 
@@ -446,39 +457,54 @@ class Integrations < Sinatra::Base
     repositories_post = lambda do
         protected!
         status 400
-        response = {}
+        response = {:github_signed => false}
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            repo = Repo.new
-            repository = repo.get_repository @session_hash["id"], params[:project_id]
+            issue = Issue.new
 
-            github = (repo.github_client github_authorization)
-            username = github.login
+            query = {:id => params[:project_id].to_i}
+            project = (issue.get_projects query)[0] 
 
-            if !repository
-                name = repo.name
+            if project
+                repo = Repo.new
+                github = (repo.github_client github_authorization)
+                username = github.login
+
+                if username
+
+                    response[:github_signed] = true
+
+                    repository = repo.get_repository @session_hash["id"], params[:project_id]
+                    if !repository
+                        name = repo.name
+                    else
+                        name = repository.repo
+                    end
+
+                    begin
+                        github.create_repository(name)
+                    rescue => e
+                        puts e
+                    end
+
+                    created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
+                    if created
+                        status 201
+                        response[:id] = created
+                        issue = Issue.new
+                        repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], project["org"], project["name"], username, name, "master", (issue.get_sprint_state fields[:sprint_state_id]).sha
+                    else
+                        response[:message] = "This iteration is not available" 
+                    end
+                    # background job
+                else
+                    response[:message] = "Please sign in to Github" 
+                end
             else
-                name = repository.repo
+                response[:message] = "This project is not available"
             end
-
-            begin
-                github.create_repository(name)
-            rescue => e
-                puts e
-            end
-          
-            created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
-            if created
-                status 201
-                response[:id] = created
-                issue = Issue.new
-                repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], username, name, "master", (issue.get_sprint_state fields[:sprint_state_id]).sha
-            else
-                response[:message] = "This is not available" 
-            end
-            # background job
 
         end
         return response.to_json

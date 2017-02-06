@@ -4,6 +4,7 @@ import ToriiAuthenticator from 'ember-simple-auth/authenticators/torii';
 export default ToriiAuthenticator.extend({
     torii: Ember.inject.service(),
        session: Ember.inject.service('session'),
+       sessionAccount: Ember.inject.service('session-account'),
        authenticate(){
            var _this = this;
            return _this._super(...arguments).then((data) => {
@@ -28,6 +29,7 @@ export default ToriiAuthenticator.extend({
                    //
                    console.log(response);
                    console.log("AUTHENTICATED "+data.provider);
+                   _this.get('sessionAccount').loadCurrentUser();
                    return {
                        access_token: response.w7_token,
                            provider: data.provider,

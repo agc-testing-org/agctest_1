@@ -422,6 +422,20 @@ button{
 /*
  * Dashboard
  */
+
+.flow{
+    
+}
+
+ul.history{
+   margin-left:0px;
+   padding-left:0px;
+}
+ul.history li{
+    display:inline;
+    padding:0px;
+}
+
 .develop a.nav-link {
     margin-left:0px !important;
     margin-right:8px;

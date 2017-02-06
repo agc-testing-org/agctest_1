@@ -14,13 +14,6 @@ export default Ember.Component.extend({
                  sprint.set('state_id', transition);
                  sprint.save(); 
             });
-        },
-        join(user_id, project_id, sprint_states){
-            var store = this.get('store');
-            this.store.adapterFor('repository').set('namespace', 'projects/' + project_id );
-            var project = store.createRecord('repository', {
-                sprint_state_id: sprint_states[sprint_states.length - 1]
-            }).save();
         }
     }
 

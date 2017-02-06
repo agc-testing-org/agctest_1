@@ -241,6 +241,14 @@ describe "/projects" do
         end
     end
 
+    shared_examples_for "contributors" do
+        it "should return repo name" do
+            @contributor_result.each_with_index do |c,i|
+                expect(@contributors[i]["repo"]).to eq(c["repo"])
+            end
+        end
+    end
+
     describe "GET /:id/sprints" do
         fixtures :projects, :sprints
         before(:each) do
@@ -268,23 +276,27 @@ describe "/projects" do
         it_behaves_like "sprint_timeline"
     end
 
-    describe "GET /:id/sprints/:id" do
-        fixtures :projects, :sprints, :sprint_states, :states
+    describe "GET /:id/sprints/:id", :focus => true do
+        fixtures :projects, :sprints, :sprint_states, :states, :contributors
         before(:each) do
             sprint = sprints(:sprint_1)
-            get "/projects/#{sprint.project_id}/sprints/#{sprint.id}"
+            get "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             res = JSON.parse(last_response.body)
             @sprint_result = @mysql_client.query("select * from sprints where project_id = #{sprint.project_id}").first
             @project_result = @mysql_client.query("select * from projects where id = #{sprint.project_id}").first
             @sprint_state_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}")
+            @contributor_result = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}")
             @project = res["project"]
             @sprint = res
             @sprint_state = res["sprint_states"]
+            @contributors = res["sprint_states"][0]["contributors"]
+#            puts res.inspect
         end
 
         it_behaves_like "project"
         it_behaves_like "sprint"
         it_behaves_like "sprint_states"
+        it_behaves_like "contributors"
     end
 
     describe "PATCH /:id/sprints/:id" do
@@ -321,7 +333,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /:id/repositories", :focus => true do
+    describe "POST /:id/repositories" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }

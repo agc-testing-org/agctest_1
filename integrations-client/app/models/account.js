@@ -4,5 +4,6 @@ const { attr, Model } = DS;
 
 export default DS.Model.extend({
     name: attr('string'),
-    admin: attr('boolean')
+    admin: attr('boolean'),
+    github: attr('boolean')
 });

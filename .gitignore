@@ -1,4 +1,6 @@
 ## General
+*.swm
+*.swn
 *.swo
 *.swp
 *.log
