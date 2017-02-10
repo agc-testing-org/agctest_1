@@ -1,30 +1,26 @@
 <div class="list-group sprint">
     {{#each model.sprints as |sprint|}}
     {{#link-to "develop.project.sprint" sprint.id class="list-group-item list-group-item-action flex-column align-items-start rounded"}}
-        <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{sprint.title}}</h5>
-            <small>{{sprint.updated_at}}</small>
-        </div>
-        <small>{{sprint.description}}</small>
-        <ul class="history">
+    <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{sprint.title}}</h5>
+        <small>{{sprint.updated_at}}</small>
+    </div>
+    <small>{{sprint.description}}</small>
+    <ul class="history">
         {{#each sprint.sprint_states as |sprint_state|}}
         <li><i class="fa fa-arrow-right" aria-hidden="true"></i> {{sprint_state.state.name}}</li>
         {{/each}}
-        </ul>
-        <div class="dropdown">
-            {{#unless sessionAccount.account.github}}
-            {{user-login-github class="btn btn-outline-secondary rounded"}}
-            {{else}}
-            {{/unless}}
-            <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                Transitions
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                {{#each model.states as |state|}}
-                <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
-                {{/each}}
-            </div>
-        </div>
+    </ul>
     {{/link-to}}
+    <div class="dropdown">
+        <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Transitions
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {{#each model.states as |state|}}
+            <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
+            {{/each}}
+        </div>
+    </div>
     {{/each}}
 </div>

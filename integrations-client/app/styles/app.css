@@ -431,14 +431,38 @@ button{
 .flow{
 
 }
-.flow .icon{
+.flow .stage{
+    height:50px;        
+}
+.flow .stage .header{
+    position:relative;
+}
+.flow .stage .icon{
     background-color: orange;
     width:40px;
     height:40px;
     color: #fff;
+    display: inline-block;
+    position:relative;
+    margin-right:5px;
 }
-.flow .divider{
-
+.flow .stage .icon .fa{
+    position:absolute;
+    left:0px;
+    width: 40px;
+    height: 40px;
+    top: 6px;
+}
+.flow .info{
+    display: inline-block;
+}
+.flow .stage .name{
+    font-size:20px;
+}
+.flow .stage .description{
+    font-size: 14px;
+    line-height: 16px;
+    font-weight:300;
 }
 
 ul.history{

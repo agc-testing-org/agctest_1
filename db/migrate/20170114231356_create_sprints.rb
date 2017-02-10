@@ -48,19 +48,20 @@ class CreateSprints < ActiveRecord::Migration
 
         create_table "states", force: :cascade do |t|
             t.string   "name",       limit: 255, null: false
+            t.string   "fa_icon",       limit: 255, null: false
+            t.string   "description",       limit: 255, null: false
             t.datetime "created_at",             null: false
             t.datetime "updated_at",             null: false
         end
 
-        State.create("name": "idea")
-        State.create("name": "backlog")
-        State.create("name": "in-requirements-design")
-        State.create("name": "in-requirements-review")
-        State.create("name": "in-visual-design")
-        State.create("name": "in-design-review")
-        State.create("name": "in-development")
-        State.create("name": "in-development-review")
-        State.create("name": "closed")
+        State.create("name": "idea", "fa_icon": "fa-lightbulb-o", "description": "introduction of a new feature proposal, task, or bug")
+        State.create("name": "in requirements design", "fa_icon": "fa-location-arrow", "description": "definition of requirements / specifications")
+        State.create("name": "in requirements review", "fa_icon": "fa-globe", "description": "review of specifications")
+        State.create("name": "in visual design", "fa_icon": "fa-paint-brush", "description": "user interface / experience design")
+        State.create("name": "in design review", "fa_icon": "fa-globe", "description": "review of user interface / experience")
+        State.create("name": "in development", "fa_icon": "fa-code", "description": "technical implementation of requirements")
+        State.create("name": "in development review", "fa_icon": "fa-globe", "description": "review of technical implementation")
+        State.create("name": "closed", "fa_icon": "fa-thumbs-o-up", "description": "completion of an idea")
 
         create_table "user_skillsets", force: :cascade do |t|
             t.integer  "user_id",       limit: 4,                null: false

@@ -1,35 +1,26 @@
 <div class="flow">
     <h2 class="text-capitalize">{{model.sprint.title}}</h2>
-    <h3 class="divider">
-        <i class="fa fa-lightbulb-o icon circular p-2 text-center" aria-hidden="true"></i> Idea Stage
-    </h3>
+
     <h4>{{model.sprint.description}}</h4>
-    <h3 class="divider">
-        <i class="fa fa-location-arrow icon circular p-2 text-center" aria-hidden="true"></i> Requirements-Design Stage
-    </h3>
-    <h3 class="divider">
-        <i class="fa fa-globe icon circular p-2 text-center" aria-hidden="true"></i> Requirements-Design Review Stage
-    </h3>
-    <h3 class="divider">
-        <i class="fa fa-paint-brush icon circular p-2 text-center" aria-hidden="true"></i> Visual-Design Stage
-    </h3>
-    <h3 class="divider">
-        <i class="fa fa-globe icon circular p-2 text-center" aria-hidden="true"></i> Visual-Design Review Stage
-    </h3>
-    <h3 class="divider">
-        <i class="fa fa-terminal icon circular p-2 text-center" aria-hidden="true"></i> Development Stage
-    </h3>
-    <h3 class="divider">
-        <i class="fa fa-globe icon circular p-2 text-center" aria-hidden="true"></i> Development-Review Stage
-    </h3>
+
+    {{#each model.sprint.sprint_states as |sprint_state index|}}
+    <div class="stage text-capitalize">
+        <div class="header">
+            <div class="icon circular text-center"><i class="fa {{sprint_state.state.fa_icon}} fa-fw fa-2x" aria-hidden="true"></i></div>
+            <div class="info">
+                <div class="name">{{sprint_state.state.name}}</div>
+                <div class="description">{{sprint_state.state.description}}</div>
+            </div>
+        </div>
+
+        {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
+        {{#unless sessionAccount.account.github}}
+        {{user-login-github class="btn btn-outline-secondary rounded"}}
+        {{else}}
+        <button class="btn btn-outline-secondary rounded" {{action "join" sessionAccount.account.id model.sprint.project.id model.sprint.sprint_states }}>Join</button>
+        {{/unless}}
+        {{/if}}
+
+    </div>
+    {{/each}}
 </div>
-
-{{#each model.sprint.sprint_states as |sprint_state|}}
-<li><i class="fa fa-arrow-right" aria-hidden="true"></i> {{sprint_state.state.name}}</li>
-{{/each}}
-
-{{#unless sessionAccount.account.github}}
-{{user-login-github class="btn btn-outline-secondary rounded"}}
-{{else}}
-<button class="btn btn-outline-secondary rounded" {{action "join" sessionAccount.account.id model.sprint.project.id model.sprint.sprint_states }}>Join</button>
-{{/unless}}
