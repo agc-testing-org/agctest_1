@@ -35,7 +35,7 @@ describe ".Repo" do
         context "repository exists" do           
             fixtures :contributors
             it "should return last contribution" do
-                expect(@repo.get_repository users(:adam_confirmed).id, projects(:demo).id).to eq(contributors(:adam_confirmed_1))
+                expect(@repo.get_repository contributors(:adam_confirmed_1).user_id, contributors(:adam_confirmed_1).project_id).to eq(contributors(:adam_confirmed_1))
             end
         end
         context "repository does not exist" do
@@ -44,6 +44,24 @@ describe ".Repo" do
             end
         end
     end
+
+    context "#get_contributor", :focus => true do
+        fixtures :users, :projects, :sprints, :sprint_states
+        context "contributor exists" do
+            fixtures :contributors
+            it "should return last contribution" do
+                query = {:sprint_state_id => contributors(:adam_confirmed_1).sprint_state_id, :user_id => contributors(:adam_confirmed_1).user_id }
+                expect((@repo.get_contributor query)).to eq(contributors(:adam_confirmed_1))
+            end
+        end
+        context "contributor does not exist" do
+            it "should return nil" do
+                query = {:sprint_state_id => 11, :user_id => users(:adam_confirmed).id }
+                expect(@repo.get_contributor query).to eq(nil)
+            end
+        end
+    end 
+
     context "#clone" do
         before(:each) do
             @sprint_state_id = 99

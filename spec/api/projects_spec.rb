@@ -31,13 +31,13 @@ describe "/projects" do
             :access_token => access_token
         }.to_json, object_class: OpenStruct) }
 
+        @username = "ADAM123"
         Octokit::Client.any_instance.stub(:login) { @username }
         post "/session/github", {:grant_type => "github", :auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
         res = JSON.parse(last_response.body)
         @non_admin_github_token = res["github_token"]
 
         FileUtils.rm_rf('repositories/')
-        @username = "ADAM123"
         %x( mkdir "test/#{@username}")
         @uri = "test/#{@username}/git-repo-log.git"
         @uri_master = "test/ADAM123/DEMO.git"
@@ -294,7 +294,7 @@ describe "/projects" do
             @sprint = res
             @sprint_state = res["sprint_states"]
             @contributors = res["sprint_states"][0]["contributors"]
-#            puts res.inspect
+            #            puts res.inspect
         end
 
         it_behaves_like "project"
@@ -337,7 +337,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /projects/:id/repositories" do
+    describe "POST /projects/:id/contributors" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -359,7 +359,7 @@ describe "/projects" do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
                 sprint = sprints(:sprint_1)
-                post "/projects/#{@project}/repositories", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
             end
@@ -383,7 +383,7 @@ describe "/projects" do
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99
-                post "/projects/#{@project}/repositories", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should return nil" do
@@ -391,4 +391,57 @@ describe "/projects" do
             end
         end
     end
+    describe "PATCH /projects/:id/contributors", :focus => true do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            Octokit::Client.any_instance.stub(:login) { @username }
+            Octokit::Client.any_instance.stub(:create_repository) { {} }
+
+            body = {
+                :name=>"1",
+                :commit=>{
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
+            }
+
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:branch => @body)
+        end
+        context "valid contributor" do
+            fixtures :users, :sprint_states, :projects, :contributors
+            before(:each) do
+                @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+                @project = projects(:demo).id
+                sprint = sprints(:sprint_1)
+                %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
+                patch "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+            end
+            context "contributor" do
+                it "should include commit" do
+                    expect(@sql["commit"]).to eq(@sha)
+                end
+                it "should include commit_success" do
+                    expect(@sql["commit_success"]).to eq(1) 
+                end
+            end
+            it "should return contributor id" do
+                expect(@res["id"]).to eq(@sql["id"])
+            end
+        end
+        context "invalid contributor" do
+            fixtures :users, :projects
+            before(:each) do
+                @project = projects(:demo).id
+                @sprint_state_id = 99
+                patch "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return nil" do
+                expect(@res["message"]).to_not be nil
+            end
+        end
+    end
+
 end

@@ -468,7 +468,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    repositories_post = lambda do
+    contributors_post = lambda do
         protected!
         status 400
         response = {:github_signed => false}
@@ -524,6 +524,48 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    contributors_patch_by_id = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            repo = Repo.new
+            query = {:sprint_state_id => fields[:sprint_state_id], :user_id => @session_hash["id"] }
+            contributor = repo.get_contributor query
+
+            if contributor
+                contributor.save #update timestamp
+
+                issue = Issue.new
+
+                query = {:id => params[:project_id].to_i}
+                project = (issue.get_projects query)[0]
+
+                fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id] 
+
+                if fetched
+                    contributor.commit = fetched[:sha]
+                    contributor.commit_success = fetched[:success]
+                    contributor.save
+                    status 201
+                    response[:id] = contributor[:id]
+                else
+                    response[:message] = "An error has occurred"
+                end
+            else
+                response[:message] = "You have not joined yet!"
+            end
+
+        rescue => e
+            puts e
+        end
+        return response.to_json
+    end
+
 
     #API
     post "/register", &register_post
@@ -542,7 +584,10 @@ class Integrations < Sinatra::Base
     post "/projects", &projects_post
     get "/projects", &projects_get
     get "/projects/:id", &projects_get_by_id
-    post "/projects/:project_id/repositories", &repositories_post
+
+    post "/projects/:project_id/contributors", &contributors_post
+    patch "/projects/:project_id/contributors", &contributors_patch_by_id
+
     post "/projects/:project_id/sprints", &sprints_post
     get "/projects/:project_id/sprints", &sprints_get
     get "/projects/:project_id/events", &events_get

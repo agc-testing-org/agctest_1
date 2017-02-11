@@ -23,6 +23,15 @@ class Repo
         end
     end
 
+    def get_contributor query
+        begin
+            return Contributor.where(query).last
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def create user_id, project_id, sprint_state_id, repo
         begin
             repo = Contributor.create({
@@ -46,10 +55,14 @@ class Repo
             r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
             local_hash = log_head r
 
-            account = Account.new
-            github_secret = account.unlock_github_token session, github_token
+            if session
+                account = Account.new
+                github_secret = account.unlock_github_token session, github_token
 
-            prefix = "https://#{slave_username}:#{github_secret}@github.com"
+                prefix = "https://#{slave_username}:#{github_secret}@github.com"
+            else
+                prefix = "https://#{slave_username}:#{ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']}@github.com"
+            end
 
             if ENV['RACK_ENV'] == "test"
                 prefix = "test"
@@ -62,7 +75,7 @@ class Repo
                 add_branch r, sprint_state_id
                 push_remote r, sprint_state_id, sprint_state_id 
                 remote_hash = log_head_remote github_secret, slave_username, slave_project, sprint_state_id
-                return (remote_hash == local_hash)
+                return {:success => (remote_hash == local_hash), :sha => remote_hash}
             else
                 return false
             end
