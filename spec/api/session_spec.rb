@@ -182,7 +182,7 @@ describe "API" do
                  expect(@res["admin"]).to eq(users(:adam_confirmed).admin)
             end
             it "should include github signed in status" do
-                 expect(@res["github"]).to eq(false)
+                 expect(@res.keys).to include("github")
             end
             it "should include user name" do
                 expect(@res["name"]).to eq(users(:adam_confirmed).name)
