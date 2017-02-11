@@ -5,26 +5,29 @@
 
     {{#each model.sprint.sprint_states as |sprint_state index|}}
     <div class="stage">
-        <div class="header">
+        <div class="header pb-1 pt-2">
             <div class="icon circular text-center"><i class="fa {{sprint_state.state.fa_icon}} fa-fw fa-2x" aria-hidden="true"></i></div>
             <div class="info">
                 <div class="name text-capitalize">{{sprint_state.state.name}}</div>
                 <div class="description">{{sprint_state.state.description}}</div>
             </div>
         </div>
-
-
-        {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
-        {{#unless sprint_state.contributors.0.repo}}
-        {{#unless sessionAccount.account.github}}
-        {{user-login-github class="btn btn-outline-secondary rounded"}}
-        {{else}}
-        <button class="btn btn-outline-secondary rounded" {{action "join" sessionAccount.account.id model.sprint.project.id model.sprint.sprint_states }}>Join</button>        
-        {{/unless}}
-        {{else}}
-        Contribute to https://github.com/USERNAME/{{sprint_state.contributors.0.repo}}
-        {{/unless}}
-        {{/if}}
+        <div class="grid">
+            {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
+            {{#unless sprint_state.contributors.0.repo}}
+            {{#unless sessionAccount.account.github}}
+            {{user-login-github class="btn btn-outline-secondary rounded"}}
+            {{else}}
+            <button class="btn btn-outline-secondary rounded" {{action "join" model.sprint.project.id model.sprint.sprint_states }}>Join</button>        
+            {{/unless}}
+            {{else}}
+            <div class="box">
+                <div class="point"></div>
+            {{develop-contribute repo=sprint_state.contributors.0.repo branch=sprint_state.id}}
+            </div>
+            {{/unless}}
+            {{/if}}
+        </div>
 
     </div>
     {{/each}}

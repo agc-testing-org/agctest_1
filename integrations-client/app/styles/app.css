@@ -437,6 +437,25 @@ button{
 .flow .stage .header{
     position:relative;
 }
+.flow .stage .grid{
+    border-left: 4px solid #ededed;
+    margin-left: 18px;
+    padding-top: 10px;
+    margin-top: -10px;
+}
+.flow .stage .grid .box{
+    margin-left: 28px;
+    position:relative;
+        
+}
+.flow .stage .grid .box .point{
+    position: absolute;
+    left: -29px;
+    top: 9px;
+    width: 10px;
+    height: 4px;
+    background-color: #ededed;
+}
 .flow .stage .icon{
     background-color: orange;
     width:40px;
@@ -463,6 +482,10 @@ button{
     font-size: 14px;
     line-height: 16px;
     font-weight:300;
+}
+.flow .text-background{
+    background-color: #ededed;
+    display: inline-block;
 }
 
 ul.history{
@@ -553,4 +576,13 @@ li.nav-item.timeline .change .badge{
 .form-control[disabled]{
     color: #fff;
     background-color:#fff;
+}
+.no-select {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+    supported by Chrome and Opera */
 }

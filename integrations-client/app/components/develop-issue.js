@@ -8,15 +8,15 @@ export default Ember.Component.extend({
         this._super(...arguments);   
     },
     actions: {
-        join(user_id, project_id, sprint_states){
+        join(project_id, sprint_states){
             var _this = this;
             var store = this.get('store');
-            store.adapterFor('repository').set('namespace', 'projects/' + project_id );
-            console.log(user_id);
+            store.adapterFor('contributor').set('namespace', 'projects/' + project_id );
+
             console.log(project_id);
             var sprint_state_array = sprint_states.toArray();
 
-            var project = store.createRecord('repository', {
+            var project = store.createRecord('contributor', {
                 sprint_state_id: sprint_state_array[sprint_state_array.length - 1].id
             }).save().then(function() {
                 console.log("refreshing");
