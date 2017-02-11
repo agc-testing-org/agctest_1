@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170204043421) do
+ActiveRecord::Schema.define(version: 20170211015731) do
 
   create_table "comments", force: :cascade do |t|
     t.integer  "user_id",         limit: 4, null: false
@@ -167,18 +167,19 @@ ActiveRecord::Schema.define(version: 20170204043421) do
   add_index "user_skillsets", ["user_id"], name: "index_user_skillsets_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
-    t.string   "email",      limit: 255,                   null: false
-    t.string   "name",       limit: 255,                   null: false
-    t.boolean  "admin",                    default: false
-    t.datetime "created_at",                               null: false
-    t.datetime "updated_at",                               null: false
-    t.text     "jwt",        limit: 65535
-    t.string   "ip",         limit: 255
-    t.boolean  "lock",                     default: false
-    t.boolean  "protected",                default: false
-    t.string   "password",   limit: 255
-    t.boolean  "confirmed",                default: false
-    t.string   "token",      limit: 255
+    t.string   "email",           limit: 255,                   null: false
+    t.string   "name",            limit: 255,                   null: false
+    t.boolean  "admin",                         default: false
+    t.datetime "created_at",                                    null: false
+    t.datetime "updated_at",                                    null: false
+    t.text     "jwt",             limit: 65535
+    t.string   "ip",              limit: 255
+    t.boolean  "lock",                          default: false
+    t.boolean  "protected",                     default: false
+    t.string   "password",        limit: 255
+    t.boolean  "confirmed",                     default: false
+    t.string   "token",           limit: 255
+    t.string   "github_username", limit: 255
   end
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree

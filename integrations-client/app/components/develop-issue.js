@@ -9,6 +9,7 @@ export default Ember.Component.extend({
     },
     actions: {
         join(user_id, project_id, sprint_states){
+            var _this = this;
             var store = this.get('store');
             store.adapterFor('repository').set('namespace', 'projects/' + project_id );
             console.log(user_id);
@@ -17,7 +18,10 @@ export default Ember.Component.extend({
 
             var project = store.createRecord('repository', {
                 sprint_state_id: sprint_state_array[sprint_state_array.length - 1].id
-            }).save();
+            }).save().then(function() {
+                console.log("refreshing");
+                _this.sendAction("refresh"); 
+            });
         }
     }
 

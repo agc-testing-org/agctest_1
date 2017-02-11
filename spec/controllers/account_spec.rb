@@ -268,7 +268,11 @@ describe ".Account" do
         before(:each) do
             @ip = "192.168.1.1"
             @jwt = "1234567890"
-            @res = @account.update users(:adam).id, @ip, @jwt
+            update_fields = {
+                :ip => @ip,
+                :jwt => @jwt
+            }
+            @res = @account.update users(:adam).id, update_fields 
             @record = @mysql_client.query("select * from users where id = #{users(:adam).id}").first
         end
         context "response" do

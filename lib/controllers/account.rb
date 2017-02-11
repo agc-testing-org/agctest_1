@@ -158,13 +158,10 @@ class Account
         end
     end
 
-    def update id, ip, jwt
+    def update id, fields
         begin
             user = User.find_by(id: id)
-            user.update({
-                ip: ip,
-                jwt: jwt
-            })
+            user.update(fields)
             return user.save
         rescue => e
             puts e

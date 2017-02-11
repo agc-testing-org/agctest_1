@@ -271,6 +271,7 @@ describe "API" do
             post "/login", { :password => @password, :email => @email }.to_json
             res = JSON.parse(last_response.body)
             @w7_token = res["w7_token"]
+            @username = "adam_on_github"
         end
         context "github" do
             before(:each) do
@@ -280,6 +281,7 @@ describe "API" do
                 Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
                     :access_token => @access_token
                 }.to_json, object_class: OpenStruct) }
+                Octokit::Client.any_instance.stub(:login) { @username }
 
                 post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
                 @res = JSON.parse(last_response.body)
@@ -290,6 +292,11 @@ describe "API" do
                 account = Account.new
                 token = account.validate_token @res["github_token"], JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["key"]
                 expect(token["payload"]).to eq(@access_token)
+            end
+            context "users table" do
+                it "should save github_username" do
+                    expect(@mysql_client.query("select * from users").first["github_username"]).to eq(@username)
+                end
             end
         end
     end

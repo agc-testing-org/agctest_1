@@ -177,7 +177,11 @@ class Integrations < Sinatra::Base
                     if user
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, fields[:name]
-                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                        update_fields = {
+                            ip: request.ip,
+                            jwt: jwt
+                        }
+                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -211,7 +215,11 @@ class Integrations < Sinatra::Base
             if user
                 user_secret = SecureRandom.hex(32) #session secret, not password
                 jwt = account.create_token user[:id], user_secret, user[:name]
-                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], request.ip, jwt) && (account.record_login user[:id], request.ip)
+                update_fields = {
+                    ip: request.ip, 
+                    jwt: jwt                        
+                }  
+                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                     response[:success] = true
                     response[:w7_token] = jwt
                     status 200
@@ -241,9 +249,15 @@ class Integrations < Sinatra::Base
             if fields[:grant_type]
                 access_token = account.code_for_token(fields[:auth_code])
 
-                provider_token = account.create_token @session_hash["id"], @key, access_token
+                repo = Repo.new
+                github = (repo.github_client access_token)
+                username = github.login
 
-                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => true}.to_json)
+                provider_token = account.create_token @session_hash["id"], @key, access_token
+                update_fields = {
+                    github_username: username 
+                }  
+                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => true}.to_json) && (account.update @session_hash["id"], update_fields)
                     status 200
                     return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else

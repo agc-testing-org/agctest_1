@@ -1,35 +1,53 @@
 idea:
   id: 1
   name: "idea"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 backlog:
   id: 2
   name: "backlog"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 in-requirements-design:
   id: 3
   name: "in-requirements-design"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 in-requirements-review:
   id: 4
   name: "in-requirements-review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 in-visual-design:
   id: 5
   name: "in-visual-design"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 in-visual-review:
   id: 6
   name: "in-visual-review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 in-development:
   id: 7
   name: "in-development"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 in-development-review:
   id: 8
   name: "in-development-review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
 
 closed:
   id: 9
   name: "closed"
+  fa_icon: "fa fa-cool"
+  description: "this is"
