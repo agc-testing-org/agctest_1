@@ -14,6 +14,11 @@
         </div>
         <div class="grid">
             {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
+            {{#each sprint_state.contributors as |contributor|}}
+                {{contributor.repo}}
+            {{/each}}
+            {{sprint_state.contributors.length}}
+            HERE: {{sprint_state.contributors.0.id}}
             {{#unless sprint_state.contributors.0.repo}}
             {{#unless sessionAccount.account.github}}
             {{user-login-github class="btn btn-outline-secondary rounded"}}
@@ -23,7 +28,7 @@
             {{else}}
             <div class="box">
                 <div class="point"></div>
-            {{develop-contribute repo=sprint_state.contributors.0.repo branch=sprint_state.id}}
+                {{develop-contribute repo=sprint_state.contributors.0.repo branch=sprint_state.id project_id=model.sprint.project.id}}
             </div>
             {{/unless}}
             {{/if}}

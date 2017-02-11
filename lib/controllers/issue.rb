@@ -125,6 +125,7 @@ class Issue
                         response[i][:sprint_states][j][:contributors][k] = []
                         if c.user_id == user_id
                             response[i][:sprint_states][j][:contributors][k] = {
+                                :id => c.id,
                                 :created_at => c.created_at,
                                 :repo => c.repo
                             }

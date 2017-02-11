@@ -7,7 +7,7 @@ export default DS.Model.extend({
     state: DS.belongsTo('state'),
     deadline: attr('date'),
     sha: attr('string'),
-    contributors: attr(),
+    contributors: DS.hasMany('contributor'),
     created_at: attr('date'),
     updated_at: attr('date')
 });
