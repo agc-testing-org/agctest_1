@@ -181,7 +181,7 @@ class Integrations < Sinatra::Base
                             ip: request.ip,
                             jwt: jwt
                         }
-                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -219,7 +219,7 @@ class Integrations < Sinatra::Base
                     ip: request.ip, 
                     jwt: jwt                        
                 }  
-                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                     response[:success] = true
                     response[:w7_token] = jwt
                     status 200
@@ -257,7 +257,7 @@ class Integrations < Sinatra::Base
                 update_fields = {
                     github_username: username 
                 }  
-                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => true}.to_json) && (account.update @session_hash["id"], update_fields)
+                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
                     status 200
                     return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else
@@ -287,7 +287,7 @@ class Integrations < Sinatra::Base
     account_get = lambda do
         protected!
         status 200
-        return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"]}.to_json
+        return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
     roles_get = lambda do

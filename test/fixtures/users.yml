@@ -14,6 +14,7 @@ adam_confirmed:
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>
   admin: false
+  github_username: adam_confirmed_github
 
 adam_protected:
   email: adam+protected@wired7.com

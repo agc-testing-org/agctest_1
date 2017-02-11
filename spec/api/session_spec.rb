@@ -30,6 +30,9 @@ describe "API" do
         it "should save user name in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["name"]).to eq(@mysql_client.query(@query).first["name"])
         end
+        it "should save github_username in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["github_username"]).to eq(@mysql_client.query(@query).first["github_username"])
+        end
         if @password
             it "should save new password" do
                 expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
@@ -179,10 +182,13 @@ describe "API" do
                 expect(@res["id"]).to eq(users(:adam_confirmed).id)
             end
             it "should include user admin" do
-                 expect(@res["admin"]).to eq(users(:adam_confirmed).admin)
+                expect(@res["admin"]).to eq(users(:adam_confirmed).admin)
             end
             it "should include github signed in status" do
-                 expect(@res.keys).to include("github")
+                expect(@res.keys).to include("github")
+            end
+            it "should include github_username" do
+                expect(@res.keys).to include("github_username")
             end
             it "should include user name" do
                 expect(@res["name"]).to eq(users(:adam_confirmed).name)
