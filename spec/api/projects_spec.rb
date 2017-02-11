@@ -31,21 +31,25 @@ describe "/projects" do
             :access_token => access_token
         }.to_json, object_class: OpenStruct) }
 
+        Octokit::Client.any_instance.stub(:login) { @username }
         post "/session/github", {:grant_type => "github", :auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
         res = JSON.parse(last_response.body)
         @non_admin_github_token = res["github_token"]
 
         FileUtils.rm_rf('repositories/')
-        @username = "adam_on_github"
+        @username = "ADAM123"
         %x( mkdir "test/#{@username}")
         @uri = "test/#{@username}/git-repo-log.git"
+        @uri_master = "test/ADAM123/DEMO.git"
         @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
         %x( rm -rf #{@uri})
+        %x( cp -rf test/git-repo #{@uri_master}; mv #{@uri_master}/git #{@uri_master}/.git)
         %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
 
     end
     after(:each) do
         %x( rm -rf #{@uri})
+        %x( rm -rf #{@uri_master})
         %x( rm -rf "test/#{@username}")
         %x( rm -rf repositories/*)
     end
@@ -276,7 +280,7 @@ describe "/projects" do
         it_behaves_like "sprint_timeline"
     end
 
-    describe "GET /:id/sprints/:id", :focus => true do
+    describe "GET /:id/sprints/:id" do
         fixtures :projects, :sprints, :sprint_states, :states, :contributors
         before(:each) do
             sprint = sprints(:sprint_1)
@@ -333,7 +337,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /:id/repositories" do
+    describe "POST /projects/:id/repositories" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }

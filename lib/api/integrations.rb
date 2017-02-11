@@ -359,7 +359,7 @@ class Integrations < Sinatra::Base
         authorized?
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i }
-        if @session_hash["id"]
+        if @session_hash
             sprints = issue.get_sprints query, @session_hash["id"] 
         else
             sprints = issue.get_sprints query, nil 
