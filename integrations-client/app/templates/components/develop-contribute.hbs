@@ -1,11 +1,14 @@
 <div class="text-left">
-    Commit your changes to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{repo}}/tree/{{branch}}">{{sessionAccount.account.github_username}}/{{repo}} branch {{branch}}</a> to propose a solution.  
+    Commit your changes to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{branch}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{branch}}</a> to propose a solution.  
 </div>
 <div class="text-left">
     Prefer the command line?  Clone the repo to your local computer: 
-    <div class="text-background rounded p-2">git clone -b {{branch}} https://github.com/{{sessionAccount.account.github_username}}/{{repo}}.git</div>
+    <div class="text-background rounded p-2">git clone -b {{branch}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</div>
 </div>
 <div class="text-left">
     Let us know when you're done and we will pull the changes from your repository.
 </div>
-<button class="btn btn-outline-secondary rounded" {{action "submit" project_id branch }}>Pull</button>    
+<button class="btn btn-outline-secondary rounded" {{action "submit" project_id branch }}>Pull</button>
+<div class="text-left">
+    The last commit we have pulled from your project is {{contributor.commit}} at {{contributor.updated_at}}
+</div>

@@ -127,6 +127,9 @@ class Issue
                             response[i][:sprint_states][j][:contributors][k] = {
                                 :id => c.id,
                                 :created_at => c.created_at,
+                                :updated_at => c.updated_at,
+                                :commit => c.commit,
+                                :commit_success => c.commit_success,
                                 :repo => c.repo
                             }
                         else
