@@ -8,6 +8,9 @@
 *.pid
 .DS_Store
 
+## Testing
+/repositories
+
 ## Ember
 # compiled output
 integrations-client/dist

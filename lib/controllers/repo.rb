@@ -14,14 +14,14 @@ class Repo
         end
     end
 
-    def get_repository user_id, project_id
-        begin 
-            return Contributor.joins(:project).where(:user_id => user_id, :project_id => project_id).last
-        rescue => e
-            puts e
-            return nil
-        end
-    end
+   # def get_repository user_id, project_id
+   #     begin 
+   #         return Contributor.joins(:project).where(:user_id => user_id, :project_id => project_id).last
+   #     rescue => e
+   #         puts e
+   #         return nil
+   #     end
+   # end
 
     def get_contributor query
         begin
@@ -47,7 +47,7 @@ class Repo
         end
     end
 
-    def refresh session, github_token, contributor_id, sprint_state_id, master_username, master_project, slave_username, slave_project, branch, sha
+    def refresh session, github_token, contributor_id, sprint_state_id, master_username, master_project, slave_username, slave_project, branch, sha, branch_to_push
         # create branch named after contributor_id
         # push single branch to user repo, using access token
 
@@ -72,9 +72,9 @@ class Repo
 
             if added_remote
                 checkout r, sha
-                add_branch r, sprint_state_id
-                push_remote r, sprint_state_id, sprint_state_id 
-                remote_hash = log_head_remote github_secret, slave_username, slave_project, sprint_state_id
+                add_branch r, branch_to_push
+                push_remote r, sprint_state_id, branch_to_push 
+                remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
                 return {:success => (remote_hash == local_hash), :sha => remote_hash}
             else
                 return false

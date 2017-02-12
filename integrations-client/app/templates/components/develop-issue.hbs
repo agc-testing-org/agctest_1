@@ -14,23 +14,35 @@
         </div>
         <div class="grid">
             {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
-            {{#each sprint_state.contributors as |contributor|}}
-                {{contributor.repo}}
-            {{/each}}
-            {{sprint_state.contributors.length}}
-            HERE: {{sprint_state.contributors.0.id}}
-            {{#unless sprint_state.contributors.0.repo}}
+            {{#unless sprint_state.contributors}}
             {{#unless sessionAccount.account.github}}
             {{user-login-github class="btn btn-outline-secondary rounded"}}
             {{else}}
             <button class="btn btn-outline-secondary rounded" {{action "join" model.sprint.project.id model.sprint.sprint_states }}>Join</button>        
             {{/unless}}
             {{else}}
+
+            {{#each sprint_state.contributors as |contributor|}}
+
             <div class="box">
                 <div class="point"></div>
-                {{develop-contribute repo=sprint_state.contributors.0.repo branch=sprint_state.id project_id=model.sprint.project.id}}
+                {{develop-contribute repo=contributor.repo branch=sprint_state.id project_id=model.sprint.project.id}}
             </div>
+
+            {{/each}}
+
             {{/unless}}
+            {{else}}
+
+            {{#each sprint_state.contributors as |contributor|}}
+
+            <div class="box">       
+                <div class="point"></div>
+                <a target="_blank" href="https://github.com/{{model.sprint.project.org}}/{{model.sprint.project.name}}/compare/{{sprint_state.sha}}...{{sprint_state.id}}_{{contributor.id}}">{{model.sprint.project.org}}/{{model.sprint.project.name}} branch {{sprint_state.id}}_{{contributor.id}}</a>
+            </div>                                                                  
+
+            {{/each}}         
+
             {{/if}}
         </div>
 

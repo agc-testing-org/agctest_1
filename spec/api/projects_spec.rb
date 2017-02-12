@@ -391,7 +391,7 @@ describe "/projects" do
             end
         end
     end
-    describe "PATCH /projects/:id/contributors", :focus => true do
+    describe "PATCH /projects/:id/contributors/sprint_state_id", :focus => true do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -414,7 +414,7 @@ describe "/projects" do
                 @project = projects(:demo).id
                 sprint = sprints(:sprint_1)
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
-                patch "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/projects/#{@project}/contributors/#{@sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
             end
@@ -435,7 +435,7 @@ describe "/projects" do
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99
-                patch "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/projects/#{@project}/contributors/#{@sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should return nil" do

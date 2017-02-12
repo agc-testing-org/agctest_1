@@ -490,11 +490,17 @@ class Integrations < Sinatra::Base
 
                     response[:github_signed] = true
 
-                    repository = repo.get_repository @session_hash["id"], params[:project_id]
-                    if !repository
+                    repo = Repo.new
+                    query = {:sprint_state_id => fields[:sprint_state_id], :user_id => @session_hash["id"] }
+                    contributor = repo.get_contributor query
+
+#                    repository = repo.get_repository @session_hash["id"], params[:project_id]
+                    if !contributor
                         name = repo.name
+                        created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
                     else
-                        name = repository.repo
+                        name = contributor.repo
+                        created = contributor.id
                     end
 
                     begin
@@ -503,12 +509,12 @@ class Integrations < Sinatra::Base
                         puts e
                     end
 
-                    created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
+                    #created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
                     if created
                         status 201
                         response[:id] = created
                         issue = Issue.new
-                        repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], project["org"], project["name"], username, name, "master", (issue.get_sprint_state fields[:sprint_state_id]).sha
+                        repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], project["org"], project["name"], username, name, "master", (issue.get_sprint_state fields[:sprint_state_id]).sha, fields[:sprint_state_id]
                     else
                         response[:message] = "This iteration is not available" 
                     end
@@ -530,11 +536,8 @@ class Integrations < Sinatra::Base
         response = {}
         begin
 
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-
             repo = Repo.new
-            query = {:sprint_state_id => fields[:sprint_state_id], :user_id => @session_hash["id"] }
+            query = {:sprint_state_id => params[:sprint_state_id], :user_id => @session_hash["id"] }
             contributor = repo.get_contributor query
 
             if contributor
@@ -545,7 +548,7 @@ class Integrations < Sinatra::Base
                 query = {:id => params[:project_id].to_i}
                 project = (issue.get_projects query)[0]
 
-                fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id] 
+                fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}"
 
                 if fetched
                     contributor.commit = fetched[:sha]
@@ -560,6 +563,28 @@ class Integrations < Sinatra::Base
                 response[:message] = "You have not joined yet!"
             end
 
+        rescue => e
+            puts e
+        end
+        return response.to_json
+    end
+
+    contributors_get_by_id = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+            repo = Repo.new
+            query = {:sprint_state_id => params[:sprint_state_id], :user_id => @session_hash["id"] }
+            contributor = repo.get_contributor query
+            puts contributor.inspect
+            if contributor
+                status 200
+                response = contributor
+            else
+                response[:id] = -1
+                response[:message] = "You have not joined yet!"
+            end
         rescue => e
             puts e
         end
@@ -585,8 +610,10 @@ class Integrations < Sinatra::Base
     get "/projects", &projects_get
     get "/projects/:id", &projects_get_by_id
 
+
     post "/projects/:project_id/contributors", &contributors_post
-    patch "/projects/:project_id/contributors", &contributors_patch_by_id
+    patch "/projects/:project_id/contributors/:sprint_state_id", &contributors_patch_by_id
+    get "/projects/:project_id/contributors/:sprint_state_id", &contributors_get_by_id
 
     post "/projects/:project_id/sprints", &sprints_post
     get "/projects/:project_id/sprints", &sprints_get

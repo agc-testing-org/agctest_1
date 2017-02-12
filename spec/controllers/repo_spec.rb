@@ -30,20 +30,20 @@ describe ".Repo" do
     context "#create" do
         #covered in API test
     end
-    context "#get_repository" do
-        fixtures :users, :projects
-        context "repository exists" do           
-            fixtures :contributors
-            it "should return last contribution" do
-                expect(@repo.get_repository contributors(:adam_confirmed_1).user_id, contributors(:adam_confirmed_1).project_id).to eq(contributors(:adam_confirmed_1))
-            end
-        end
-        context "repository does not exist" do
-            it "should return nil" do
-                expect(@repo.get_repository users(:adam_confirmed).id, projects(:demo).id).to eq(nil)
-            end
-        end
-    end
+#    context "#get_repository" do
+#        fixtures :users, :projects
+#        context "repository exists" do           
+#            fixtures :contributors
+#            it "should return last contribution" do
+#                expect(@repo.get_repository contributors(:adam_confirmed_1).user_id, contributors(:adam_confirmed_1).project_id).to eq(contributors(:adam_confirmed_1))
+#            end
+#        end
+#        context "repository does not exist" do
+#            it "should return nil" do
+#                expect(@repo.get_repository users(:adam_confirmed).id, projects(:demo).id).to eq(nil)
+#            end
+#       end
+#    end
 
     context "#get_contributor", :focus => true do
         fixtures :users, :projects, :sprints, :sprint_states

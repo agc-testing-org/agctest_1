@@ -432,7 +432,7 @@ button{
 
 }
 .flow .stage{
-    height:50px;        
+
 }
 .flow .stage .header{
     position:relative;
@@ -485,7 +485,6 @@ button{
 }
 .flow .text-background{
     background-color: #ededed;
-    display: inline-block;
 }
 
 ul.history{

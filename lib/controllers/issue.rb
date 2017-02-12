@@ -129,6 +129,11 @@ class Issue
                                 :created_at => c.created_at,
                                 :repo => c.repo
                             }
+                        else
+                            response[i][:sprint_states][j][:contributors][k] = {
+                                :id => c.id,
+                                :created_at => c.created_at
+                            }
                         end
                     end
                     response[i][:sprint_states][j].delete("state_id")
