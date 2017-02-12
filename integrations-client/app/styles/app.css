@@ -483,8 +483,12 @@ button{
     line-height: 16px;
     font-weight:300;
 }
+.flow .stage .instruction{
+    color: #28B6C3;
+}
 .flow .text-background{
     background-color: #ededed;
+    display: inline-block;
 }
 
 ul.history{

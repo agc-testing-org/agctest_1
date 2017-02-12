@@ -3,15 +3,13 @@
 
     <h4>{{model.sprint.description}}</h4>
 
+    <div class="stage">
+        {{develop-issue-state state=model.idea}}
+    </div>
+
     {{#each model.sprint.sprint_states as |sprint_state index|}}
     <div class="stage">
-        <div class="header pb-1 pt-2">
-            <div class="icon circular text-center"><i class="fa {{sprint_state.state.fa_icon}} fa-fw fa-2x" aria-hidden="true"></i></div>
-            <div class="info">
-                <div class="name text-capitalize">{{sprint_state.state.name}}</div>
-                <div class="description">{{sprint_state.state.description}}</div>
-            </div>
-        </div>
+        {{develop-issue-state state=sprint_state.state}}
         <div class="grid">
             {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
             {{#unless sprint_state.contributors}}
