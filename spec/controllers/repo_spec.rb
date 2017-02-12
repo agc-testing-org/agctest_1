@@ -88,6 +88,31 @@ describe ".Repo" do
             end
         end
     end
+    context "#clear_clone" do
+        before(:each) do
+            @sprint_state_id = 99
+            @contributor_id = "adam123"
+            @branch = "master"
+            @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
+            @res = @repo.clear_clone @sprint_state_id, @contributor_id
+        end
+        context "success" do
+            it "should return true" do
+                expect(@res).to be true
+            end
+            it "should clone a github repo in the repositories dir" do
+                expect(File.directory?("repositories/#{@sprint_state_id}_#{@contributor_id}")).to be false
+            end
+        end
+        context "failure" do
+            context "doesn't exist" do
+                it "should return nil" do
+                    expect(@repo.clear_clone @sprint_state_id, @contributor_id).to be true
+                end
+            end
+        end
+    end
+
     context "#checkout" do
         before(:each) do
             @sprint_state_id = 99

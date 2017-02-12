@@ -52,30 +52,35 @@ class Repo
         # push single branch to user repo, using access token
 
         begin
-            r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
-            local_hash = log_head r
+            if (clear_clone sprint_state_id, contributor_id)
+                r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
+                local_hash = log_head r
 
-            if session
-                account = Account.new
-                github_secret = account.unlock_github_token session, github_token
+                if session
+                    account = Account.new
+                    github_secret = account.unlock_github_token session, github_token
 
-                prefix = "https://#{slave_username}:#{github_secret}@github.com"
-            else
-                prefix = "https://#{slave_username}:#{ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']}@github.com"
-            end
+                    prefix = "https://#{slave_username}:#{github_secret}@github.com"
+                else
+                    prefix = "https://#{slave_username}:#{ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']}@github.com"
+                end
 
-            if ENV['RACK_ENV'] == "test"
-                prefix = "test"
-            end
+                if ENV['RACK_ENV'] == "test"
+                    prefix = "test"
+                end
 
-            added_remote = add_remote r, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
+                added_remote = add_remote r, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
 
-            if added_remote
-                checkout r, sha
-                add_branch r, branch_to_push
-                push_remote r, sprint_state_id, branch_to_push 
-                remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
-                return {:success => (remote_hash == local_hash), :sha => remote_hash}
+                if added_remote
+                    checkout r, sha
+                    add_branch r, branch_to_push
+                    push_remote r, sprint_state_id, branch_to_push 
+                    remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
+                    clear_clone sprint_state_id, contributor_id
+                    return {:success => (remote_hash == local_hash), :sha => remote_hash}
+                else
+                    return false
+                end
             else
                 return false
             end
@@ -86,8 +91,8 @@ class Repo
 
     end
 
-    def clear_clone sprint, login
-        directory = "repositories/#{sprint}_#{login}"
+    def clear_clone sprint_state_id, contributor_id
+        directory = "repositories/#{sprint_state_id}_#{contributor_id}"
         FileUtils.rm_rf(directory)
         if File.directory?(directory)
             return false

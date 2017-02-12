@@ -439,12 +439,12 @@ button{
 }
 .flow .stage .grid{
     border-left: 4px solid #ededed;
-    margin-left: 18px;
+    margin-left: 20px;
     padding-top: 10px;
     margin-top: -10px;
 }
 .flow .stage .grid .box{
-    margin-left: 28px;
+    margin-left: 29px;
     position:relative;
         
 }
@@ -458,8 +458,8 @@ button{
 }
 .flow .stage .icon{
     background-color: orange;
-    width:40px;
-    height:40px;
+    width:45px;
+    height:45px;
     color: #fff;
     display: inline-block;
     position:relative;
@@ -467,10 +467,10 @@ button{
 }
 .flow .stage .icon .fa{
     position:absolute;
-    left:0px;
+    left:2px;
     width: 40px;
     height: 40px;
-    top: 6px;
+    top: 8px;
 }
 .flow .info{
     display: inline-block;
@@ -485,6 +485,7 @@ button{
 }
 .flow .stage .instruction{
     color: #28B6C3;
+    font-weight:300;
 }
 .flow .text-background{
     background-color: #ededed;
