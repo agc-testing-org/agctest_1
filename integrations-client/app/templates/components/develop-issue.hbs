@@ -10,7 +10,7 @@
     {{#each model.sprint.sprint_states as |sprint_state index|}}
     <div class="stage">
         {{develop-issue-state state=sprint_state.state}}
-        <div class="grid">
+        <div class="grid pb-3">
             {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
             {{#unless sprint_state.contributors}}
             {{#unless sessionAccount.account.github}}
