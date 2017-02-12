@@ -4,12 +4,21 @@
     <h4>{{model.sprint.description}}</h4>
 
     <div class="stage mt-2">
+        {{#if model.sprint.sprint_states}}
         {{develop-issue-state state=model.idea}}
+        {{else}}
+        {{develop-issue-state state=model.idea instruction=true}}
+        {{/if}}
     </div>
 
     {{#each model.sprint.sprint_states as |sprint_state index|}}
     <div class="stage">
-        {{develop-issue-state state=sprint_state.state}}
+        {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
+        {{develop-issue-state state=sprint_state.state instruction=true}}
+        {{else}}
+        {{develop-issue-state state=sprint_state.state}} 
+        {{/if}}
+
         <div class="grid pb-3">
             {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
             {{#unless sprint_state.contributors}}
