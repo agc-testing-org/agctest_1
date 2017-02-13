@@ -1,0 +1,11 @@
+{{#if showComment}}
+
+{{textarea value=comment class="form-control input-lg" rows="3" placeholder="Your comment"}}
+
+<button type="button" {{action "displayComment" false}} class="btn btn-outline-secondary rounded">Cancel</button>
+<button type="button" {{action "comment" sprint resource}} class="btn btn-outline-secondary rounded">Save</button>
+
+{{else}}
+<div class="d-inline-block pr-2" {{action "displayComment" true}}><i class="fa fa-comment-o" aria-hidden="true"></i> Comment {{#if comments.length}}({{comments.length}}){{/if}}</div>
+<div class="d-inline-block" {{action "vote" true}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if votes.length}}({{votes.length}}){{/if}}</div>
+{{/if}}

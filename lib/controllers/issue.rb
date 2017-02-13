@@ -42,12 +42,13 @@ class Issue
         end
     end
 
-    def create_comment user_id, sprint_id, comment_id
+    def create_comment user_id, contributor_id, sprint_state_id, text
         begin
             comment = Comment.create({
                 user_id: user_id,
-                sprint_id: sprint_id,
-                comment_id: comment_id
+                sprint_state_id: sprint_state_id,
+                contributor_id: contributor_id,
+                text: text
             })
             return comment.id
         rescue => e
@@ -70,17 +71,10 @@ class Issue
         end
     end
 
-    def log_event user_id, project_id, sprint_id, state_id, label_id
-        after = (last_event sprint_id)
+    def log_event params 
+        after = (last_event params[:sprint_id])
         begin
-            sprint_event = SprintTimeline.create({
-                user_id: project_id,
-                project_id: project_id,
-                sprint_id: sprint_id,
-                state_id: state_id,
-                label_id: label_id,
-                after: after
-            })
+            sprint_event = SprintTimeline.create(params)
             return sprint_event.id
         rescue => e
             puts e

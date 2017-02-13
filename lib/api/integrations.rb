@@ -34,6 +34,7 @@ require_relative '../models/label.rb'
 require_relative '../models/contributor.rb'
 require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
+require_relative '../models/comment.rb'
 
 # Workers
 
@@ -398,7 +399,8 @@ class Integrations < Sinatra::Base
                 if fields[:description] && fields[:description].length > 5
                     issue = Issue.new
                     sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  params[:project_id].to_i
-                    if sprint && (issue.log_event @session_hash["id"], params[:project_id].to_i, sprint, 1, nil)
+                    log_params = {:sprint_id => sprint, :state_id => 1, :user_id => @session_hash["id"], :project_id => params[:project_id]}
+                    if sprint && (issue.log_event log_params)
                         status 201
                         response[:id] = sprint
                     end
@@ -432,8 +434,8 @@ class Integrations < Sinatra::Base
                     sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
-
-                    if sprint_state && (issue.log_event @session_hash["id"], params[:project_id].to_i, params[:id], fields[:state_id], nil)
+                    log_params = {:sprint_id => params[:id], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => params[:project_id]}
+                    if sprint_state && (issue.log_event log_params) 
                         status 201
                         response[:id] = sprint_state
                     end
@@ -446,7 +448,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    sprints_post_comments = lambda do
+    contributors_post_comments = lambda do
         protected! 
         status 400
         response = {}
@@ -456,9 +458,10 @@ class Integrations < Sinatra::Base
 
             if fields[:comment] && fields[:comment].length > 1
                 issue = Issue.new
-                comment = issue.create_comment @session_hash["id"], params[:id], fields[:comment_id]
-                if comment && (issue.log_event @session_hash["id"], params[:project_id].to_i, sprint, 1, nil)
-
+                comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:comment]
+                if comment
+                    status 200
+                    response[:id] = comment
                 end
             else
                 response[:message] = "Please enter a more detailed comment"
@@ -620,7 +623,8 @@ class Integrations < Sinatra::Base
     get "/projects/:project_id/events", &events_get
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
     patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
-    post "/projects/:project_id/sprints/:id/comments", &sprints_post_comments
+
+    post "/contributors/:id/comments", &contributors_post_comments
 
     get '/unauthorized' do
         status 401

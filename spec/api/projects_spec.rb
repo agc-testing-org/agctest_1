@@ -391,7 +391,7 @@ describe "/projects" do
             end
         end
     end
-    describe "PATCH /projects/:id/contributors/sprint_state_id", :focus => true do
+    describe "PATCH /projects/:id/contributors/sprint_state_id" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -443,5 +443,39 @@ describe "/projects" do
             end
         end
     end
-
+    describe "POST /contributors/:id/comments" do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+            @contributor_id = contributors(:adam_confirmed_1).id
+            @project = projects(:demo).id
+            sprint = sprints(:sprint_1)
+        end
+        context "valid comment" do
+            before(:each) do
+                @text = "AB"
+                post "/contributors/#{@contributor_id}/comments", {:comment => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from comments").first
+            end
+            it "should return comment id" do
+                expect(@res["id"]).to eq(1)
+            end
+            context "comment" do
+                it "should save text" do
+                    expect(@mysql["text"]).to eq(@text)
+                end
+                it "should save contributor_id" do
+                    expect(@mysql["contributor_id"]).to eq(@contributor_id)
+                end
+            end
+        end
+        context "invalid comment" do
+            it "should return error message" do
+                post "/contributors/#{@contributor_id}/comments", {:comment => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                res = JSON.parse(last_response.body)
+                expect(res["message"]).to eq("Please enter a more detailed comment")
+            end
+        end
+    end
 end
