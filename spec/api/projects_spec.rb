@@ -461,7 +461,7 @@ describe "/projects" do
         context "valid comment" do
             before(:each) do
                 @text = "AB"
-                post "/contributors/#{@contributor_id}/comments", {:comment => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/contributors/#{@contributor_id}/comments", {:text => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @mysql = @mysql_client.query("select * from comments").first
             end
@@ -479,7 +479,7 @@ describe "/projects" do
         end
         context "invalid comment" do
             it "should return error message" do
-                post "/contributors/#{@contributor_id}/comments", {:comment => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/contributors/#{@contributor_id}/comments", {:text => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 res = JSON.parse(last_response.body)
                 expect(res["message"]).to eq("Please enter a more detailed comment")
             end

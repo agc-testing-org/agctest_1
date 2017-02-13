@@ -457,9 +457,9 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            if fields[:comment] && fields[:comment].length > 1
+            if fields[:text] && fields[:text].length > 1
                 issue = Issue.new
-                comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:comment]
+                comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
                 if comment
                     status 200
                     response[:id] = comment

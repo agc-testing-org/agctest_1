@@ -1,39 +1,44 @@
 import Ember from 'ember';
 
 export default Ember.Component.extend({
-    showComment: false,
     session: Ember.inject.service('session'),
+    store: Ember.inject.service(),
+    sessionAccount: Ember.inject.service('session-account'),
+    showComment: false,
     actions: {
         displayComment(shouldDisplay){
             this.set("showComment",shouldDisplay);
         },
-        comment(sprint,resource){
-            var t = this;
+        comment(contributor_id,sprint_state_id){
+            console.log(":::"+sprint_state_id);
             var comment = this.get("comment");
             if(comment.length < 500){
-                this.get('session').authorize('authorizer:application', (headerName, headerValue) => {                            
-                    Ember.$.ajax({                                      
-                        method: "POST",                                                                     
-                        url: "/comments/"+sprint+"/"+resource,
-                        data: JSON.stringify({comment:comment}),
-                        headers: {                                                                          
-                            'Content-Type': "application/json",                                                                                     
-                            'Authorization': headerValue                                                        
-                        }                                                                                   
-                    }).then((data,text,jqXHR)=>{
-                        var parsed = JSON.parse(data);
-                        if(parsed.success){
-                            this.send("displayComment",false);
-                            this.sendAction("pullResourcesNested");
-                        }
-                    }, function(xhr, status, error) {
-                        reject(error);
-                    });
+                var store = this.get('store');
+                store.adapterFor('comment').set('namespace', 'contributors/' + contributor_id );
+
+                var feedback = store.createRecord('comment', {
+                    sprint_state_id: sprint_state_id,
+                    text: comment
+                }).save().then(function() {
+                 //   console.log("refreshing");
+                   // _this.sendAction("refresh");
                 });
+
             }
             else{
                 //comment too long
             }
         },
+        vote(contributor_id,sprint_state_id){
+            var store = this.get('store');
+            store.adapterFor('vote').set('namespace', 'contributors/' + contributor_id );
+
+            var feedback = store.createRecord('vote', {
+                sprint_state_id: sprint_state_id
+            }).save().then(function() {                                         
+                //   console.log("refreshing");                    
+                // _this.sendAction("refresh");                                  
+            });                                                                             
+        }
     }
 });

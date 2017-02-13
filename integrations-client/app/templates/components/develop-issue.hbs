@@ -46,7 +46,7 @@
             <div class="box">       
                 <div class="point"></div>
                 <a target="_blank" href="https://github.com/{{model.sprint.project.org}}/{{model.sprint.project.name}}/compare/{{sprint_state.sha}}...{{sprint_state.id}}_{{contributor.id}}">{{model.sprint.project.org}}/{{model.sprint.project.name}} branch {{sprint_state.id}}_{{contributor.id}}</a>
-                {{develop-issue-comment}}
+                {{develop-issue-comment contributor=contributor sprint_state_id=sprint_state.id}}
             </div>                                                                  
 
             {{/each}}         
