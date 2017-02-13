@@ -186,6 +186,19 @@ ActiveRecord::Schema.define(version: 20170213040302) do
 
   add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
 
+  create_table "votes", force: :cascade do |t|
+    t.integer  "user_id",         limit: 4, null: false
+    t.integer  "sprint_state_id", limit: 4, null: false
+    t.integer  "comment_id",      limit: 4
+    t.integer  "contributor_id",  limit: 4
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+  end
+
+  add_index "votes", ["contributor_id"], name: "fk_rails_ef3485c16e", using: :btree
+  add_index "votes", ["sprint_state_id"], name: "index_votes_on_sprint_state_id", using: :btree
+  add_index "votes", ["user_id"], name: "index_votes_on_user_id", using: :btree
+
   add_foreign_key "comments", "contributors"
   add_foreign_key "comments", "sprint_states"
   add_foreign_key "comments", "users"
@@ -207,4 +220,7 @@ ActiveRecord::Schema.define(version: 20170213040302) do
   add_foreign_key "user_roles", "users"
   add_foreign_key "user_skillsets", "skillsets"
   add_foreign_key "user_skillsets", "users"
+  add_foreign_key "votes", "contributors"
+  add_foreign_key "votes", "sprint_states"
+  add_foreign_key "votes", "users"
 end

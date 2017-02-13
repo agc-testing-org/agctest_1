@@ -57,6 +57,20 @@ class Issue
         end
     end
 
+    def vote user_id, contributor_id, sprint_state_id
+        begin
+            vote = Vote.find_or_initialize_by({
+                user_id: user_id,
+                sprint_state_id: sprint_state_id
+            })
+            vote.update_attributes!(:contributor_id => contributor_id)
+            return vote.id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def last_event sprint_id
         begin
             events = SprintTimeline.where(sprint_id: sprint_id)

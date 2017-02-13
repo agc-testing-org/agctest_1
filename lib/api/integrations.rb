@@ -35,6 +35,7 @@ require_relative '../models/contributor.rb'
 require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
 require_relative '../models/comment.rb'
+require_relative '../models/vote.rb'
 
 # Workers
 
@@ -471,6 +472,25 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    contributors_post_votes = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            issue = Issue.new
+            vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
+            if vote
+                status 200
+                response[:id] = vote
+            end
+
+        end
+        return response.to_json
+    end
+
     contributors_post = lambda do
         protected!
         status 400
@@ -497,7 +517,7 @@ class Integrations < Sinatra::Base
                     query = {:sprint_state_id => fields[:sprint_state_id], :user_id => @session_hash["id"] }
                     contributor = repo.get_contributor query
 
-#                    repository = repo.get_repository @session_hash["id"], params[:project_id]
+                    #                    repository = repo.get_repository @session_hash["id"], params[:project_id]
                     if !contributor
                         name = repo.name
                         created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
@@ -625,6 +645,7 @@ class Integrations < Sinatra::Base
     patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
 
     post "/contributors/:id/comments", &contributors_post_comments
+    post "/contributors/:id/votes", &contributors_post_votes
 
     get '/unauthorized' do
         status 401

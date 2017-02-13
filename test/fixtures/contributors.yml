@@ -5,3 +5,11 @@ adam_confirmed_1:
   sprint_state: sprint_1_state_1
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>
+
+adam_admin_1:
+  user: adam_admin
+  project: demo
+  repo: "git-repo-log"
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>

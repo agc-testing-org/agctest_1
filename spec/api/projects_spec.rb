@@ -246,9 +246,18 @@ describe "/projects" do
     end
 
     shared_examples_for "contributors" do
-        it "should return repo name" do
+        it "should return id" do
             @contributor_result.each_with_index do |c,i|
-                expect(@contributors[i]["repo"]).to eq(c["repo"])
+                expect(@contributors[i]["id"]).to eq(c["id"])
+            end
+        end
+        context "when owned" do
+            it "should return repo name" do
+                @contributor_result.each_with_index do |c,i|
+                    if @user == c["user_id"]
+                        expect(@contributors[i]["repo"]).to eq(c["repo"])
+                    end
+                end
             end
         end
     end
@@ -358,7 +367,6 @@ describe "/projects" do
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
-                sprint = sprints(:sprint_1)
                 post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
@@ -412,7 +420,7 @@ describe "/projects" do
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
-                sprint = sprints(:sprint_1)
+
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
                 patch "/projects/#{@project}/contributors/#{@sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
@@ -449,7 +457,6 @@ describe "/projects" do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
             @project = projects(:demo).id
-            sprint = sprints(:sprint_1)
         end
         context "valid comment" do
             before(:each) do
@@ -476,6 +483,32 @@ describe "/projects" do
                 res = JSON.parse(last_response.body)
                 expect(res["message"]).to eq("Please enter a more detailed comment")
             end
+        end
+    end
+    describe "POST /contributors/:id/votes" do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+            @contributor_id = contributors(:adam_confirmed_1).id
+            @project = projects(:demo).id
+            post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            @res = JSON.parse(last_response.body)
+            @mysql = @mysql_client.query("select * from votes").first
+        end
+        it "should return vote id" do
+            expect(@res["id"]).to eq(1)
+        end
+        context "vote" do
+            it "should save contributor_id" do
+                expect(@mysql["contributor_id"]).to eq(@contributor_id)
+            end
+        end
+        it "should only allow one vote per sprint" do
+            contributor_id = contributors(:adam_admin_1).id
+            post "/contributors/#{contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            mysql = @mysql_client.query("select * from votes")
+            expect(mysql.count).to eq(1)
+            expect(mysql.first["contributor_id"]).to eq(contributor_id)
         end
     end
 end
