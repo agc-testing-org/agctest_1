@@ -447,7 +447,10 @@ button{
 .flow .stage .grid .box{
     margin-left: 29px;
     position:relative;
-        
+
+}
+.flow .stage .grid .box.box-nested{
+    margin-left:19px;
 }
 .flow .stage .grid .box .point{
     position: absolute;
@@ -457,14 +460,18 @@ button{
     height: 4px;
     background-color: #ededed;
 }
+.flow .stage .grid .box.box-nested .point{
+    left: -19px;
+}
 .flow .stage .icon{
     background-color: orange;
     width:45px;
     height:45px;
     color: #fff;
-    display: inline-block;
-    position:relative;
+    position:absolute;
     margin-right:5px;
+    left: 0px;
+    top: 0px;
 }
 .flow .stage .icon .fa{
     position:absolute;
@@ -474,7 +481,7 @@ button{
     top: 8px;
 }
 .flow .info{
-    display: inline-block;
+    margin-left:53px;
 }
 .flow .stage .name{
     font-size:20px;
