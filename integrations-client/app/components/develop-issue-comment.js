@@ -17,11 +17,19 @@ export default Ember.Component.extend({
                 store.adapterFor('comment').set('namespace', 'contributors/' + contributor_id );
 
                 var feedback = store.createRecord('comment', {
+                    contributor_id: contributor_id,
                     sprint_state_id: sprint_state_id,
                     text: comment
-                }).save().then(function() {
+                }).save().then(function(payload) {
+                    store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
+  //                  console.log(payload);
                  //   console.log("refreshing");
                    // _this.sendAction("refresh");
+                 //   store.push({
+                   //       data: {
+                     //       id
+                      //    }
+                   // });
                 });
 
             }
@@ -34,8 +42,9 @@ export default Ember.Component.extend({
             store.adapterFor('vote').set('namespace', 'contributors/' + contributor_id );
 
             var feedback = store.createRecord('vote', {
+                contributor_id: contributor_id,
                 sprint_state_id: sprint_state_id
-            }).save().then(function() {                                         
+            }).save().then(function() {                                        
                 //   console.log("refreshing");                    
                 // _this.sendAction("refresh");                                  
             });                                                                             

@@ -462,7 +462,7 @@ class Integrations < Sinatra::Base
                 comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
                 if comment
                     status 200
-                    response[:id] = comment
+                    response = comment
                 end
             else
                 response[:message] = "Please enter a more detailed comment"

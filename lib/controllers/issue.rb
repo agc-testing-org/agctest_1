@@ -50,7 +50,7 @@ class Issue
                 contributor_id: contributor_id,
                 text: text
             })
-            return comment.id
+            return comment
         rescue => e
             puts e
             return nil
