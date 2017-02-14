@@ -1,0 +1,15 @@
+{{#if comments}}
+
+{{#each (limited sortedComments count) as |comment|}}
+<div class="text-left">{{comment.created_at}}: {{comment.text}}</div>
+{{/each}}
+
+{{#if showingAll}}
+<a {{action "showAll" false}}>Show Less</a>
+{{else}}
+{{#if (greater-than comments.length count)}}
+<a {{action "showAll" true}}>Show More</a>
+{{/if}}
+{{/if}}
+
+{{/if}}

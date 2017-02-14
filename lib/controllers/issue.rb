@@ -129,7 +129,7 @@ class Issue
                     response[i][:sprint_states][j] = ss.as_json
                     response[i][:sprint_states][j][:state] = ss.state.as_json 
                     response[i][:sprint_states][j][:contributors] = []
-                    ss.contributors.each_with_index do |c,k|
+                    ss.contributors.includes(:comments).each_with_index do |c,k|
                         response[i][:sprint_states][j][:contributors][k] = []
                         if c.user_id == user_id
                             response[i][:sprint_states][j][:contributors][k] = {
@@ -138,7 +138,8 @@ class Issue
                                 :updated_at => c.updated_at,
                                 :commit => c.commit,
                                 :commit_success => c.commit_success,
-                                :repo => c.repo
+                                :repo => c.repo,
+                                :comments => c.comments.as_json
                             }
                         else
                             response[i][:sprint_states][j][:contributors][k] = {
