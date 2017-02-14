@@ -7,5 +7,5 @@
 
 {{else}}
 <div class="d-inline-block pr-2" {{action "displayComment" true}}><i class="fa fa-comment-o" aria-hidden="true"></i> Comment {{#if contributor.comments.length}}({{contributor.comments.length}}){{/if}}</div>
-<div class="d-inline-block" {{action "vote" contributor.id sprint_state_id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if votes.length}}({{votes.length}}){{/if}}</div>
+<div class="d-inline-block" {{action "vote" contributor.id sprint_state_id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</div>
 {{/if}}

@@ -10,5 +10,5 @@ export default DS.Model.extend({
     commit_success: attr('boolean'),
     sprint_state_id: attr('number'),
     comments: DS.hasMany('comment'),
-    votes: DS.hasMany('votes')
+    votes: DS.hasMany('vote')
 });
