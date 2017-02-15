@@ -380,7 +380,7 @@ class Integrations < Sinatra::Base
         authorized?
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
-        if @session_hash["id"]
+        if @session_hash
             sprint = issue.get_sprints query,  @session_hash["id"]
         else
             sprint = issue.get_sprints query, nil
@@ -505,45 +505,51 @@ class Integrations < Sinatra::Base
             project = (issue.get_projects query)[0] 
 
             if project
-                repo = Repo.new
-                github = (repo.github_client github_authorization)
-                username = github.login
 
-                if username
+                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
 
-                    response[:github_signed] = true
+                if sprint_state && sprint_state.state && sprint_state.state.contributors
 
                     repo = Repo.new
-                    query = {:sprint_state_id => fields[:sprint_state_id], :user_id => @session_hash["id"] }
-                    contributor = repo.get_contributor query
+                    github = (repo.github_client github_authorization)
+                    username = github.login
 
-                    #                    repository = repo.get_repository @session_hash["id"], params[:project_id]
-                    if !contributor
-                        name = repo.name
-                        created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
+                    if username
+
+                        response[:github_signed] = true
+
+                        repo = Repo.new
+                        query = {:sprint_state_id => sprint_state.id, :user_id => @session_hash["id"] }
+                        contributor = repo.get_contributor query
+
+                        if !contributor
+                            name = repo.name
+                            created = repo.create @session_hash["id"], project["id"], sprint_state.id, name
+                        else
+                            name = contributor.repo
+                            created = contributor.id
+                        end
+
+                        begin
+                            github.create_repository(name)
+                        rescue => e
+                            puts e
+                        end
+
+                        if created
+                            status 201
+                            response[:id] = created
+                            issue = Issue.new
+                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", (issue.get_sprint_state sprint_state.id).sha, sprint_state.id
+                        else
+                            response[:message] = "Something has gone wrong" 
+                        end
+                        # background job
                     else
-                        name = contributor.repo
-                        created = contributor.id
+                        response[:message] = "Please sign in to Github" 
                     end
-
-                    begin
-                        github.create_repository(name)
-                    rescue => e
-                        puts e
-                    end
-
-                    #created = repo.create @session_hash["id"], params[:project_id], fields[:sprint_state_id], name
-                    if created
-                        status 201
-                        response[:id] = created
-                        issue = Issue.new
-                        repo.refresh @session, retrieve_github_token, created, fields[:sprint_state_id], project["org"], project["name"], username, name, "master", (issue.get_sprint_state fields[:sprint_state_id]).sha, fields[:sprint_state_id]
-                    else
-                        response[:message] = "This iteration is not available" 
-                    end
-                    # background job
                 else
-                    response[:message] = "Please sign in to Github" 
+                    response[:message] = "We are not accepting contributions at this time"
                 end
             else
                 response[:message] = "This project is not available"

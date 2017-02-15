@@ -4,6 +4,7 @@ idea:
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
+  contributors: true
 
 backlog:
   id: 2
@@ -11,6 +12,7 @@ backlog:
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
+  contributors: true
 
 in-requirements-design:
   id: 3

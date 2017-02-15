@@ -138,12 +138,13 @@ ActiveRecord::Schema.define(version: 20170213040302) do
   add_index "sprints", ["user_id"], name: "index_sprints_on_user_id", using: :btree
 
   create_table "states", force: :cascade do |t|
-    t.string   "name",        limit: 255,   null: false
-    t.string   "fa_icon",     limit: 255,   null: false
-    t.string   "description", limit: 255,   null: false
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
-    t.text     "instruction", limit: 65535, null: false
+    t.string   "name",         limit: 255,                   null: false
+    t.string   "fa_icon",      limit: 255,                   null: false
+    t.string   "description",  limit: 255,                   null: false
+    t.datetime "created_at",                                 null: false
+    t.datetime "updated_at",                                 null: false
+    t.text     "instruction",  limit: 65535,                 null: false
+    t.boolean  "contributors",               default: false, null: false
   end
 
   create_table "user_roles", force: :cascade do |t|

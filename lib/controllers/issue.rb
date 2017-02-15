@@ -20,7 +20,7 @@ class Issue
 
     def get_sprint_state sprint_state_id
         begin
-            return SprintState.find_by(:id => sprint_state_id)
+            return SprintState.includes(:state).find_by(:id => sprint_state_id)
         rescue => e
             puts e
             return nil

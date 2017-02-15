@@ -363,7 +363,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid sprint_state_id" do
-            fixtures :users, :sprint_states, :projects
+            fixtures :users, :sprint_states, :states, :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
@@ -396,6 +396,21 @@ describe "/projects" do
             end
             it "should return nil" do
                 expect(@res["message"]).to_not be nil
+            end
+        end
+        context "sprint_state_id with contributor = false" do
+            fixtures :users, :sprint_states, :states,  :projects
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1_no_contributors).id
+                @project = projects(:demo).id
+                post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return not return contributor id" do
+                expect(@res.keys).to_not include("id")
+            end
+            it "should return error message" do
+                expect(@res["message"]).to eq("We are not accepting contributions at this time")
             end
         end
     end

@@ -53,16 +53,17 @@ class CreateSprints < ActiveRecord::Migration
             t.datetime "created_at",             null: false
             t.datetime "updated_at",             null: false
             t.text "instruction", null: false
+            t.boolean "contributors", null: false, default: false 
         end
 
-        State.create("name": "idea", "fa_icon": "fa-lightbulb-o", "description": "introduction of a new feature proposal, task, or bug", "instruction": "Let us know if you're interested in this idea!  We want to make sure we provide value to our users.")
-        State.create("name": "requirements design", "fa_icon": "fa-location-arrow", "description": "definition of requirements / specifications", "instruction": "Show us how you would provide requirements for this idea.")
-        State.create("name": "requirements review", "fa_icon": "fa-globe", "description": "review of specifications", "instruction": "This is your chance to provide feedback (through comments and votes) on the requirements proposals above for this idea before any implementation begins.  We will reopen the stage if other proposals are needed.")
-        State.create("name": "visual design", "fa_icon": "fa-paint-brush", "description": "user interface / experience design", "instruction": "Propose a slick design or assets for this idea.")
-        State.create("name": "design review", "fa_icon": "fa-globe", "description": "review of user interface / experience", "instruction": "This is your chance to provide feedback (through comments and votes) on the design proposals above for this idea before development begins.  We will reopen the stage if other proposals are needed.")
-        State.create("name": "development", "fa_icon": "fa-code", "description": "technical implementation of requirements", "instruction": "Propose a solution that makes this idea come alive!")
-        State.create("name": "development review", "fa_icon": "fa-globe", "description": "review of technical implementation", "instruction": "This is your chance to provide feedback (through comments and votes) on the technical implementations above for this idea.  We will reopen the stage if other proposals are needed.")
-        State.create("name": "closed", "fa_icon": "fa-thumbs-o-up", "description": "completion of an idea", "instruction": "We have moved on from this idea but contributor feedback is always welcome.")
+        State.create("name": "idea", "fa_icon": "fa-lightbulb-o", "description": "introduction of a new feature proposal, task, or bug", "contributors": false, "instruction": "Let us know if you're interested in this idea!  We want to make sure we provide value to our users.")
+        State.create("name": "requirements design", "fa_icon": "fa-location-arrow", "description": "definition of requirements / specifications",  "contributors": true, "instruction": "Show us how you would provide requirements for this idea.")
+        State.create("name": "requirements review", "fa_icon": "fa-globe", "description": "review of specifications",  "contributors": false, "instruction": "This is your chance to provide feedback (through comments and votes) on the requirements proposals above for this idea before any implementation begins.  We will reopen the stage if other proposals are needed.")
+        State.create("name": "visual design", "fa_icon": "fa-paint-brush", "description": "user interface / experience design",  "contributors": true, "instruction": "Propose a slick design or assets for this idea.")
+        State.create("name": "design review", "fa_icon": "fa-globe", "description": "review of user interface / experience",  "contributors": false, "instruction": "This is your chance to provide feedback (through comments and votes) on the design proposals above for this idea before development begins.  We will reopen the stage if other proposals are needed.")
+        State.create("name": "development", "fa_icon": "fa-code", "description": "technical implementation of requirements",  "contributors": true, "instruction": "Propose a solution that makes this idea come alive!")
+        State.create("name": "development review", "fa_icon": "fa-globe", "description": "review of technical implementation",  "contributors": false, "instruction": "This is your chance to provide feedback (through comments and votes) on the technical implementations above for this idea.  We will reopen the stage if other proposals are needed.")
+        State.create("name": "closed", "fa_icon": "fa-thumbs-o-up", "description": "completion of an idea",  "contributors": false, "instruction": "We have moved on from this idea but contributor feedback is always welcome.")
 
         create_table "user_skillsets", force: :cascade do |t|
             t.integer  "user_id",       limit: 4,                null: false

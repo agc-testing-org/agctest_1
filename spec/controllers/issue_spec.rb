@@ -55,11 +55,14 @@ describe ".Issue" do
         end
     end
     context "#get_sprint_state" do
-        fixtures :sprints, :sprint_states
+        fixtures :sprints, :sprint_states, :states
         context "state exists" do
             it "should return sprint state object" do
                 expect(@issue.get_sprint_state sprint_states(:sprint_1_state_1).id).to eq(sprint_states(:sprint_1_state_1))
-            end 
+            end
+            it "should return state object" do
+                expect((@issue.get_sprint_state sprint_states(:sprint_1_state_1).id).state.id).to eq(sprint_states(:sprint_1_state_1).state_id)
+            end
         end 
     end 
 end
