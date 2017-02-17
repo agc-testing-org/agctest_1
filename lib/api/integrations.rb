@@ -461,7 +461,7 @@ class Integrations < Sinatra::Base
                 issue = Issue.new
                 comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
                 if comment
-                    status 200
+                    status 201
                     response = comment
                 end
             else
@@ -483,10 +483,28 @@ class Integrations < Sinatra::Base
             issue = Issue.new
             vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
             if vote
-                status 200
-                response[:id] = vote
+                status 201
+                response = vote
             end
 
+        end
+        return response.to_json
+    end
+
+    contributors_post_winner = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            issue = Issue.new
+            winner = issue.set_winner @session_hash["id"], params[:id], fields[:sprint_state_id]  
+            if winner
+                status 201
+                response = winner 
+            end
         end
         return response.to_json
     end
@@ -652,6 +670,7 @@ class Integrations < Sinatra::Base
 
     post "/contributors/:id/comments", &contributors_post_comments
     post "/contributors/:id/votes", &contributors_post_votes
+    post "/contributors/:id/winner", &contributors_post_winner
 
     get '/unauthorized' do
         status 401

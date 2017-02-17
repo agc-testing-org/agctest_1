@@ -21,6 +21,7 @@
 
         <div class="grid pb-3">
             {{#if (eq model.sprint.sprint_states.length (plus index 1))}}
+            {{#if sprint_state.state.contributors}}
             {{#unless sprint_state.contributors}}
             {{#unless sessionAccount.account.github}}
             {{user-login-github class="btn btn-outline-secondary rounded"}}
@@ -39,6 +40,7 @@
             {{/each}}
 
             {{/unless}}
+            {{/if}}
             {{else}}
 
             {{#each sprint_state.contributors as |contributor|}}

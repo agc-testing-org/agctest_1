@@ -63,8 +63,11 @@ class Issue
                 user_id: user_id,
                 sprint_state_id: sprint_state_id
             })
+            new_record = vote.new_record?
             vote.update_attributes!(:contributor_id => contributor_id)
-            return vote.id
+            record = vote.as_json
+            record[:created] = new_record
+            return record
         rescue => e
             puts e
             return nil
@@ -103,6 +106,18 @@ class Issue
                 name: name
             })
             return project.id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def set_winner arbiter_id, winner_id, sprint_state_id
+        begin
+            contributor = Contributor.find_by(id: winner_id)
+            winner = SprintState.find_by(id: sprint_state_id)
+            winner.update_attributes!(arbiter_id: arbiter_id, user_id: contributor.user_id )
+            return winner
         rescue => e
             puts e
             return nil

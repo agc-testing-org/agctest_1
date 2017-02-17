@@ -513,6 +513,16 @@ describe "/projects" do
         it "should return vote id" do
             expect(@res["id"]).to eq(1)
         end
+        it "should return created status true for a new vote" do
+            expect(@res["created"]).to be true
+        end
+        context "downvote" do
+            it "should return created status false for a repeat vote" do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                res = JSON.parse(last_response.body)
+                expect(res["created"]).to be false
+            end
+        end
         context "vote" do
             it "should save contributor_id" do
                 expect(@mysql["contributor_id"]).to eq(@contributor_id)
@@ -526,4 +536,27 @@ describe "/projects" do
             expect(mysql.first["contributor_id"]).to eq(contributor_id)
         end
     end
+    describe "POST /contributors/:id/winner", :focus => true do
+        fixtures :users, :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+            @contributor_id = contributors(:adam_confirmed_1).id
+            @project = projects(:demo).id
+            post "/contributors/#{@contributor_id}/winner", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            @res = JSON.parse(last_response.body)
+            @mysql = @mysql_client.query("select * from sprint_states").first
+        end
+        it "should return sprint_state id" do
+            expect(@res["id"]).to eq(@sprint_state_id)
+        end
+        context "sprint_state" do
+            it "should save user_id (winner)" do
+                expect(@mysql["user_id"]).to eq(contributors(:adam_confirmed_1).user_id)
+            end
+            it "should save arbiter (judge)" do
+                expect(@mysql["arbiter_id"]).to eq(@user)
+            end
+        end
+    end
+
 end

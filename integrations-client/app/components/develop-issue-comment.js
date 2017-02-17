@@ -10,6 +10,7 @@ export default Ember.Component.extend({
             this.set("showComment",shouldDisplay);
         },
         comment(contributor_id,sprint_state_id){
+            var _this = this;
             console.log(":::"+sprint_state_id);
             var comment = this.get("comment");
             if(comment.length < 500){
@@ -22,7 +23,9 @@ export default Ember.Component.extend({
                     text: comment
                 }).save().then(function(payload) {
                     store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
-  //                  console.log(payload);
+
+                    _this.set("showComment",false);
+                    //                  console.log(payload);
                  //   console.log("refreshing");
                    // _this.sendAction("refresh");
                  //   store.push({
@@ -44,7 +47,15 @@ export default Ember.Component.extend({
             var feedback = store.createRecord('vote', {
                 contributor_id: contributor_id,
                 sprint_state_id: sprint_state_id
-            }).save().then(function() {                                        
+            }).save().then(function(payload) {      
+                if(payload.get("created")){
+                    console.log("YES");
+                    store.peekRecord('contributor',contributor_id).get('votes').addObject(payload);
+                }else{
+                    console.log("NO");
+                    store.peekRecord('vote',payload.get("id")).deleteRecord();
+                    //store.peekRecord('contributor',contributor_id).get('votes').removeObject(payload);
+                }
                 //   console.log("refreshing");                    
                 // _this.sendAction("refresh");                                  
             });                                                                             
