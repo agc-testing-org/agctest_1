@@ -501,7 +501,15 @@ class Integrations < Sinatra::Base
 
             issue = Issue.new
             winner = issue.set_winner @session_hash["id"], params[:id], fields[:sprint_state_id]  
-            if winner
+
+            query = {:id => fields[:project_id].to_i}
+            project = (issue.get_projects query)[0]
+
+            repo = Repo.new
+            github = (repo.github_client github_authorization)
+            pr = github.create_pull_request("#{project["org"]}/#{project["name"]}", "master", "#{winner.id}_#{winner.contributor_id}", "Wired7 #{winner.id}_#{winner.contributor_id} to master", body = nil, options = {})
+            
+            if winner && pr
                 status 201
                 response = winner 
             end

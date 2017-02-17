@@ -93,20 +93,20 @@ ActiveRecord::Schema.define(version: 20170217043532) do
   add_index "sprint_skillsets", ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id", using: :btree
 
   create_table "sprint_states", force: :cascade do |t|
-    t.integer  "sprint_id",  limit: 4,   null: false
-    t.integer  "state_id",   limit: 4,   null: false
+    t.integer  "sprint_id",      limit: 4,   null: false
+    t.integer  "state_id",       limit: 4,   null: false
     t.datetime "deadline"
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
-    t.integer  "user_id",    limit: 4
-    t.string   "sha",        limit: 255
-    t.integer  "arbiter_id", limit: 4
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.integer  "contributor_id", limit: 4
+    t.string   "sha",            limit: 255
+    t.integer  "arbiter_id",     limit: 4
   end
 
   add_index "sprint_states", ["arbiter_id"], name: "fk_rails_a961915d3b", using: :btree
+  add_index "sprint_states", ["contributor_id"], name: "fk_rails_52fb9ef0eb", using: :btree
   add_index "sprint_states", ["sprint_id"], name: "index_sprint_states_on_sprint_id", using: :btree
   add_index "sprint_states", ["state_id"], name: "fk_rails_bececa531a", using: :btree
-  add_index "sprint_states", ["user_id"], name: "fk_rails_c8b217b84e", using: :btree
 
   create_table "sprint_timelines", force: :cascade do |t|
     t.integer  "sprint_id",       limit: 4, null: false
@@ -211,9 +211,9 @@ ActiveRecord::Schema.define(version: 20170217043532) do
   add_foreign_key "logins", "users"
   add_foreign_key "sprint_skillsets", "skillsets"
   add_foreign_key "sprint_skillsets", "sprints"
+  add_foreign_key "sprint_states", "contributors"
   add_foreign_key "sprint_states", "sprints"
   add_foreign_key "sprint_states", "states"
-  add_foreign_key "sprint_states", "users"
   add_foreign_key "sprint_states", "users", column: "arbiter_id"
   add_foreign_key "sprint_timelines", "comments"
   add_foreign_key "sprint_timelines", "labels"

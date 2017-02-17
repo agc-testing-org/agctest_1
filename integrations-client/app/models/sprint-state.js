@@ -3,7 +3,8 @@ import DS from 'ember-data';
 const { attr, Model } = DS;
 
 export default DS.Model.extend({
-    user_id: attr('number'),
+    contributor_id: attr('number'),
+    arbiter_id: attr('number'),
     state: DS.belongsTo('state'),
     deadline: attr('date'),
     sha: attr('string'),
