@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170217043532) do
+ActiveRecord::Schema.define(version: 20170218203026) do
 
   create_table "comments", force: :cascade do |t|
     t.integer  "user_id",         limit: 4,     null: false
@@ -101,6 +101,8 @@ ActiveRecord::Schema.define(version: 20170217043532) do
     t.integer  "contributor_id", limit: 4
     t.string   "sha",            limit: 255
     t.integer  "arbiter_id",     limit: 4
+    t.boolean  "merged"
+    t.integer  "pull_request",   limit: 4
   end
 
   add_index "sprint_states", ["arbiter_id"], name: "fk_rails_a961915d3b", using: :btree

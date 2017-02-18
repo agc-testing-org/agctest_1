@@ -463,7 +463,7 @@ describe "/projects" do
             end
         end
     end
-    describe "GET /projects/:id/contributors/:contributor_id", :focus => true do
+    describe "GET /projects/:id/contributors/:contributor_id" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @project = projects(:demo).id
@@ -608,8 +608,9 @@ describe "/projects" do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
             @project = projects(:demo).id
-
+            @pull_id = 222
             body = {
+                :id => @pull_id,
                 :name=>"1",
                 :commit=>{
                     :sha=>sprint_states(:sprint_1_state_1).sha
@@ -619,21 +620,59 @@ describe "/projects" do
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
             Octokit::Client.any_instance.stub(:create_pull_request => @body)
 
-            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from sprint_states").first
         end
-        it "should return sprint_state id" do
-            expect(@res["id"]).to eq(@sprint_state_id)
-        end
-        context "sprint_state" do
-            it "should save contributor_id (winner)" do
-                expect(@mysql["contributor_id"]).to eq(@contributor_id)
+        context "admin" do
+            it "should return sprint_state id" do
+                expect(@res["id"]).to eq(@sprint_state_id)
             end
-            it "should save arbiter (judge)" do
-                expect(@mysql["arbiter_id"]).to eq(@user)
+            context "sprint_state" do
+                it "should save contributor_id (winner)" do
+                    expect(@mysql["contributor_id"]).to eq(@contributor_id)
+                end
+                it "should save arbiter (judge)" do
+                    expect(@mysql["arbiter_id"]).to eq(users(:adam_admin).id)
+                end
+                it "should save pull request" do
+                    expect(@mysql["pull_request"]).to eq(@pull_id)
+                end
             end
         end
     end
+    describe "POST /contributors/:id/merge", :focus => true do
+        fixtures :users, :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+            @contributor_id = contributors(:adam_confirmed_1).id
+            @project = projects(:demo).id
+            @pull_id = 222
+            body = {
+                :id => @pull_id,
+                :name=>"1",
+                :commit=>{
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
+            }
 
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:create_pull_request => @body)
+             Octokit::Client.any_instance.stub(:merge_pull_request => @body)
+            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            @res = JSON.parse(last_response.body)
+            @mysql = @mysql_client.query("select * from sprint_states").first
+        end
+        context "admin" do
+            it "should return sprint_state id" do
+                expect(@res["id"]).to eq(@sprint_state_id)
+            end
+            context "sprint_state" do
+                it "should update merged" do
+                    expect(@mysql["merged"]).to eq(1) 
+                end
+            end
+        end
+    end
 end

@@ -112,10 +112,19 @@ class Issue
         end
     end
 
-    def set_winner arbiter_id, contributor_id, sprint_state_id
+    def get_winner sprint_state_id
         begin
             winner = SprintState.find_by(id: sprint_state_id)
-            winner.update_attributes!(arbiter_id: arbiter_id, contributor_id: contributor_id )
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def set_winner sprint_state_id, params 
+        begin
+            winner = SprintState.find_by(id: sprint_state_id)
+            winner.update_attributes!(params)
             return winner
         rescue => e
             puts e

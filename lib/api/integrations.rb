@@ -496,22 +496,65 @@ class Integrations < Sinatra::Base
         status 400
         response = {}
         begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if @session_hash["admin"]
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            issue = Issue.new
-            winner = issue.set_winner @session_hash["id"], params[:id], fields[:sprint_state_id]  
+                issue = Issue.new
 
-            query = {:id => fields[:project_id].to_i}
-            project = (issue.get_projects query)[0]
+                query = {:id => fields[:project_id].to_i}
+                project = (issue.get_projects query)[0]
 
-            repo = Repo.new
-            github = (repo.github_client github_authorization)
-            pr = github.create_pull_request("#{project["org"]}/#{project["name"]}", "master", "#{winner.id}_#{winner.contributor_id}", "Wired7 #{winner.id}_#{winner.contributor_id} to master", body = nil, options = {})
-            
-            if winner && pr
-                status 201
-                response = winner 
+                repo = Repo.new
+                github = (repo.github_client github_authorization)
+                pr = github.create_pull_request("#{project["org"]}/#{project["name"]}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
+
+                if pr
+                    parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.id}
+                    winner = issue.set_winner fields[:sprint_state_id], parameters
+                    status 201
+                    response = winner 
+                end
+            else
+                response[:message] = "You are not authorized to do this"
+            end
+        end
+        return response.to_json
+    end
+
+    contributors_post_merge = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+            if @session_hash["admin"]
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+                issue = Issue.new
+                
+                query = {:id => fields[:project_id].to_i}
+                project = (issue.get_projects query)[0]
+
+                winner = issue.get_winner fields[:sprint_state_id]
+
+                repo = Repo.new
+                github = (repo.github_client github_authorization)
+                pr = github.merge_pull_request("#{project["org"]}/#{project["name"]}", winner.pull_request, commit_message = "Wired7 #{winner.id}_#{winner.contributor_id} to master", options = {})
+
+                if pr
+                    parameters = {merged: true}
+                    winner = issue.set_winner fields[:sprint_state_id], parameters
+                    status 201
+                    response = winner
+                else
+                    parameters = {merged: false}
+                    winner = issue.set_winner fields[:sprint_state_id], parameters
+                    status 400
+                    response = winner
+                end
+            else
+                response[:message] = "You are not authorized to do this"
             end
         end
         return response.to_json
@@ -630,7 +673,7 @@ class Integrations < Sinatra::Base
 
             repo = Repo.new
             query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
-       
+
             contributor = (repo.get_contributor query)
 
             if contributor
@@ -717,6 +760,7 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/comments", &contributors_post_comments
     post "/contributors/:id/votes", &contributors_post_votes
     post "/contributors/:id/winner", &contributors_post_winner
+    post "/contributors/:id/merge", &contributors_post_merge
 
     get '/unauthorized' do
         status 401
