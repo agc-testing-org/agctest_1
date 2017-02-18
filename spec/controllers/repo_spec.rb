@@ -45,7 +45,7 @@ describe ".Repo" do
 #       end
 #    end
 
-    context "#get_contributor", :focus => true do
+    context "#get_contributor" do
         fixtures :users, :projects, :sprints, :sprint_states
         context "contributor exists" do
             fixtures :contributors
@@ -108,6 +108,31 @@ describe ".Repo" do
             context "doesn't exist" do
                 it "should return nil" do
                     expect(@repo.clear_clone @sprint_state_id, @contributor_id).to be true
+                end
+            end
+        end
+    end
+    context "#pull_remote", :focus => true do
+        before(:each) do
+            @sprint_state_id = 99
+            @contributor_id = "adam123"
+            @branch = "master"
+            @remote = "origin"
+            @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
+            @res = @repo.pull_remote @repository, @remote, @branch
+        end
+        context "success" do
+            it "should return true" do
+                expect(@res).to be true
+            end
+            it "should clone a github repo in the repositories dir" do
+
+            end
+        end
+        context "failure" do
+            context "doesn't exist" do
+                it "should return nil" do
+                    expect(@repo.pull_remote @repository, @remote, "non-existent").to be nil 
                 end
             end
         end

@@ -346,7 +346,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /projects/:id/contributors" do
+    describe "POST /projects/:id/contributors", :focus => true do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -384,6 +384,17 @@ describe "/projects" do
             end
             it "should return contributor id" do
                 expect(@res["id"]).to eq(@sql["id"])
+            end
+            context "repo" do
+                before(:each) do
+                    @git = %x(cd #{@uri}; git branch)
+                end
+                it "should create master branch" do
+                    expect(@git).to include("master")
+                end
+                it "should create sprint_state branch" do
+                    expect(@git).to include(@sprint_state_id.to_s)
+                end
             end
         end 
         context "invalid sprint_state_id" do
@@ -536,7 +547,7 @@ describe "/projects" do
             expect(mysql.first["contributor_id"]).to eq(contributor_id)
         end
     end
-    describe "POST /contributors/:id/winner", :focus => true do
+    describe "POST /contributors/:id/winner" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id

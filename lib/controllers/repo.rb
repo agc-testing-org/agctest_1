@@ -139,9 +139,9 @@ class Repo
     end
 
 
-    def pull_remote g, resource_id
+    def pull_remote g, remote, branch
         begin
-            g.pull(resource_id.to_s, "master")
+            g.pull(remote, branch)
             return true
         rescue => e
             puts e

@@ -566,7 +566,9 @@ class Integrations < Sinatra::Base
                             status 201
                             response[:id] = created
                             issue = Issue.new
-                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", (issue.get_sprint_state sprint_state.id).sha, sprint_state.id
+                            sha = (issue.get_sprint_state sprint_state.id).sha
+                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id
+                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master"
                         else
                             response[:message] = "Something has gone wrong" 
                         end
