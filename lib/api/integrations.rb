@@ -517,6 +517,41 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    refresh_post = lambda do
+        protected!
+        status 400
+        response = {:github_signed => false}
+        begin
+
+            issue = Issue.new
+            query = {:id => params[:project_id].to_i}
+            project = (issue.get_projects query)[0]
+
+            if project
+                repo = Repo.new
+                github = (repo.github_client github_authorization)
+                username = github.login
+                if username
+                    response[:github_signed] = true
+
+                    repo = Repo.new
+                    query = {:project_id => project["id"], :user_id => @session_hash["id"] }
+                    contributor = repo.get_contributor query
+                    repo.refresh @session, retrieve_github_token, contributor.id, contributor.sprint_state_id, project["org"], project["name"], username, contributor.repo, "master", "master", "master"
+                    status = 200
+                    response = contributor
+                else
+                    response[:message] = "Please sign in to Github"
+                end
+            else
+                response[:message] = "This project is not available"
+            end
+        rescue => e
+
+        end
+        return response.to_json
+    end
+
     contributors_post = lambda do
         protected!
         status 400
@@ -668,6 +703,7 @@ class Integrations < Sinatra::Base
     get "/projects/:id", &projects_get_by_id
 
 
+    post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
     patch "/projects/:project_id/contributors/:sprint_state_id", &contributors_patch_by_id
     get "/projects/:project_id/contributors/:sprint_state_id", &contributors_get_by_id
