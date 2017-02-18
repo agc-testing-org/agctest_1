@@ -373,7 +373,6 @@ describe "/projects" do
                 %x(cd #{@uri}; git checkout -b "nb")
                 post "/projects/#{@project}/refresh", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
-                puts @res.inspect
             end
             context "repo" do
                 before(:each) do
@@ -464,7 +463,24 @@ describe "/projects" do
             end
         end
     end
-    describe "PATCH /projects/:id/contributors/sprint_state_id" do
+    describe "GET /projects/:id/contributors/:contributor_id", :focus => true do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            @project = projects(:demo).id
+        end
+        context "valid contributor" do
+            before(:each) do
+                get "/projects/#{@project}/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return contributor id" do
+                expect(@res["id"]).to eq(@sql["id"])
+            end
+        end
+
+    end
+    describe "PATCH /projects/:id/contributors/:contributor_id" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -487,7 +503,7 @@ describe "/projects" do
                 @project = projects(:demo).id
 
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
-                patch "/projects/#{@project}/contributors/#{@sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/projects/#{@project}/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
             end
@@ -508,7 +524,7 @@ describe "/projects" do
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99
-                patch "/projects/#{@project}/contributors/#{@sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/projects/#{@project}/contributors/33", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should return nil" do

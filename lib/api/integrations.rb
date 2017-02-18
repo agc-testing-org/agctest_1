@@ -629,8 +629,9 @@ class Integrations < Sinatra::Base
         begin
 
             repo = Repo.new
-            query = {:sprint_state_id => params[:sprint_state_id], :user_id => @session_hash["id"] }
-            contributor = repo.get_contributor query
+            query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
+       
+            contributor = (repo.get_contributor query)
 
             if contributor
                 contributor.save #update timestamp
@@ -647,7 +648,7 @@ class Integrations < Sinatra::Base
                     contributor.commit_success = fetched[:success]
                     contributor.save
                     status 201
-                    response[:id] = contributor[:id]
+                    response = contributor
                 else
                     response[:message] = "An error has occurred"
                 end
@@ -667,9 +668,8 @@ class Integrations < Sinatra::Base
         response = {}
         begin
             repo = Repo.new
-            query = {:sprint_state_id => params[:sprint_state_id], :user_id => @session_hash["id"] }
+            query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
             contributor = repo.get_contributor query
-            puts contributor.inspect
             if contributor
                 status 200
                 response = contributor
@@ -705,8 +705,8 @@ class Integrations < Sinatra::Base
 
     post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
-    patch "/projects/:project_id/contributors/:sprint_state_id", &contributors_patch_by_id
-    get "/projects/:project_id/contributors/:sprint_state_id", &contributors_get_by_id
+    patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
+    get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
 
     post "/projects/:project_id/sprints", &sprints_post
     get "/projects/:project_id/sprints", &sprints_get

@@ -8,7 +8,7 @@
 <div class="text-left">
     Let us know when you're done and we will pull the changes from your repository.
 </div>
-<button class="btn btn-outline-secondary rounded" {{action "submit" project_id branch }}>Pull</button>
+<button class="btn btn-outline-secondary rounded" {{action "submit" project_id contributor.id }}>Pull</button>
 <div class="text-left">
     The last commit we have pulled from your project is {{contributor.commit}} at {{contributor.updated_at}}
 </div>
