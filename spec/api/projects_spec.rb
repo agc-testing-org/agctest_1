@@ -610,7 +610,7 @@ describe "/projects" do
             @project = projects(:demo).id
             @pull_id = 222
             body = {
-                :id => @pull_id,
+                :number => @pull_id,
                 :name=>"1",
                 :commit=>{
                     :sha=>sprint_states(:sprint_1_state_1).sha
@@ -649,7 +649,7 @@ describe "/projects" do
             @project = projects(:demo).id
             @pull_id = 222
             body = {
-                :id => @pull_id,
+                :number => @pull_id,
                 :name=>"1",
                 :commit=>{
                     :sha=>sprint_states(:sprint_1_state_1).sha

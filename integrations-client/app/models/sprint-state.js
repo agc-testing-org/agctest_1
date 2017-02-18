@@ -10,5 +10,7 @@ export default DS.Model.extend({
     sha: attr('string'),
     contributors: DS.hasMany('contributor'),
     created_at: attr('date'),
-    updated_at: attr('date')
+    updated_at: attr('date'),
+    pull_request: attr('boolean'),
+    merged: attr('boolean')
 });

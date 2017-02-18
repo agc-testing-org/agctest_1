@@ -3,16 +3,22 @@
 {{textarea value=comment class="form-control input-lg rounded" rows="3" placeholder="Your comment"}}
 
 <button type="button" {{action "displayComment" false}} class="btn btn-outline-secondary rounded">Cancel</button>
-<button type="button" {{action "comment" contributor.id sprint_state_id}} class="btn btn-outline-secondary rounded">Save</button>
+<button type="button" {{action "comment" contributor.id sprint_state.id}} class="btn btn-outline-secondary rounded">Save</button>
 
 {{else}}
 <div class="d-inline-block pr-2" {{action "displayComment" true}}><i class="fa fa-comment-o" aria-hidden="true"></i> Comment {{#if contributor.comments.length}}({{contributor.comments.length}}){{/if}}</div>
-<div class="d-inline-block" {{action "vote" contributor.id sprint_state_id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</div>
+<div class="d-inline-block" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</div>
 {{#if sessionAccount.account.admin}}
 {{#unless sessionAccount.account.github}}
 {{user-login-github class="btn btn-outline-secondary rounded"}}
 {{else}}
-<div class="d-inline-block pl-2" {{action "judge" contributor.id sprint_state_id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</div>
+{{#if sprint_state.contributor_id}}
+{{#unless sprint_state.merged}}
+<div class="d-inline-block pl-2" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</div>
+{{/unless}}
+{{else}}
+<div class="d-inline-block pl-2" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</div>
+{{/if}}
 {{/unless}}
 {{/if}}
 {{/if}}

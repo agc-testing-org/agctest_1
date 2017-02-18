@@ -153,23 +153,17 @@ class Issue
                     response[i][:sprint_states][j][:state] = ss.state.as_json 
                     response[i][:sprint_states][j][:contributors] = []
                     ss.contributors.includes(:comments,:votes).each_with_index do |c,k|
-                        response[i][:sprint_states][j][:contributors][k] = []
+                        response[i][:sprint_states][j][:contributors][k] = {
+                            :id => c.id,
+                            :created_at => c.created_at,
+                            :updated_at => c.updated_at,
+                            :comments => c.comments.as_json,
+                            :votes => c.votes.as_json
+                        }
                         if c.user_id == user_id
-                            response[i][:sprint_states][j][:contributors][k] = {
-                                :id => c.id,
-                                :created_at => c.created_at,
-                                :updated_at => c.updated_at,
-                                :commit => c.commit,
-                                :commit_success => c.commit_success,
-                                :repo => c.repo,
-                                :comments => c.comments.as_json,
-                                :votes => c.votes.as_json
-                            }
-                        else
-                            response[i][:sprint_states][j][:contributors][k] = {
-                                :id => c.id,
-                                :created_at => c.created_at
-                            }
+                            response[i][:sprint_states][j][:contributors][k][:commit] = c.commit
+                            response[i][:sprint_states][j][:contributors][k][:commit_success] =  c.commit_success
+                            response[i][:sprint_states][j][:contributors][k][:repo] = c.repo
                         end
                     end
                     response[i][:sprint_states][j].delete("state_id")

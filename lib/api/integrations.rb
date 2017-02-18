@@ -510,7 +510,7 @@ class Integrations < Sinatra::Base
                 pr = github.create_pull_request("#{project["org"]}/#{project["name"]}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
 
                 if pr
-                    parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.id}
+                    parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
                     winner = issue.set_winner fields[:sprint_state_id], parameters
                     status 201
                     response = winner 
