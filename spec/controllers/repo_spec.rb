@@ -112,7 +112,7 @@ describe ".Repo" do
             end
         end
     end
-    context "#pull_remote", :focus => true do
+    context "#pull_remote" do
         before(:each) do
             @sprint_state_id = 99
             @contributor_id = "adam123"
@@ -236,6 +236,24 @@ describe ".Repo" do
                 expect(@repo.add_branch @repository, @new_branch).to be true
             end 
         end 
+    end
+
+    context "#anonymize", :focus => true do
+        before(:each) do
+            @sprint_state_id = 99
+            @contributor_id = "adam123" 
+            @branch = "master"    
+            @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
+            @repo.anonymize @sprint_state_id, @contributor_id
+        end
+        context "commit identifiers" do
+            it "should remove email" do
+
+            end
+            it "should remove name" do
+
+            end
+        end
     end
 
     context "#push_remote" do

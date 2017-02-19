@@ -91,6 +91,11 @@ class Repo
 
     end
 
+    def anonymize sprint_state_id, contributor_id
+        directory = "repositories/#{sprint_state_id}_#{contributor_id}"
+        puts %x(cp lib/scripts/#{directory}; cd #{directory}; ./anonymize )
+    end
+
     def clear_clone sprint_state_id, contributor_id
         directory = "repositories/#{sprint_state_id}_#{contributor_id}"
         FileUtils.rm_rf(directory)
