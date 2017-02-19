@@ -497,21 +497,20 @@ button{
     left: -19px;
 }
 .flow .stage .icon{
-    background-color: orange;
     width:45px;
     height:45px;
-    color: #fff;
+    color: orange;
     position:absolute;
     margin-right:5px;
     left: 0px;
-    top: 0px;
+    top: -1px;
 }
 .flow .stage .icon .fa{
     position:absolute;
     left:2px;
     width: 40px;
     height: 40px;
-    top: 8px;
+    top: 0px;
 }
 .flow .info{
     margin-left:53px;
