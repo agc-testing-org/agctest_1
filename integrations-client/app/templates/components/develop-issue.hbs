@@ -47,9 +47,14 @@
 
             <div class="box">       
                 <div class="point"></div>
-                {{#if (eq contributor.id sprint_state.contributor_id)}}<i class="fa fa-trophy" aria-hidden="true"></i>{{#if sprint_state.merged}}MERGED{{else}}NOT MERGED{{/if}}{{/if}} <a target="_blank" href="https://github.com/{{model.sprint.project.org}}/{{model.sprint.project.name}}/compare/{{sprint_state.sha}}...{{sprint_state.id}}_{{contributor.id}}">{{model.sprint.project.org}}/{{model.sprint.project.name}} branch {{sprint_state.id}}_{{contributor.id}}</a>
+                {{#if (eq contributor.id sprint_state.contributor_id)}}<i class="fa fa-trophy" aria-hidden="true"></i> {{#if sprint_state.merged}}<span class="badge badge-default rounded">MERGED</span>{{else}}<span class="badge badge-default rounded">NOT MERGED</span>{{/if}}{{/if}} <a target="_blank" href="https://github.com/{{model.sprint.project.org}}/{{model.sprint.project.name}}/compare/{{sprint_state.sha}}...{{sprint_state.id}}_{{contributor.id}}">{{model.sprint.project.org}}/{{model.sprint.project.name}} branch {{sprint_state.id}}_{{contributor.id}}</a>
                 {{develop-issue-comments comments=contributor.comments}}
                 {{develop-issue-comment contributor=contributor sprint_state=sprint_state project=model.sprint.project.id}}
+                {{#if (eq contributor.id sprint_state.contributor_id)}}
+                    {{#unless sprint_state.merged}}
+                        {{develop-contribute contributor=contributor branch=sprint_state.id project_id=model.sprint.project.id}}
+                    {{/unless}}
+                {{/if}}
             </div>                                                                  
 
             {{/each}}         

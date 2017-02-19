@@ -1,14 +1,28 @@
-<div class="text-left">
-    Commit your changes to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{branch}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{branch}}</a> to propose a solution.  
+<div class="list-group mt-2">
+    <div class="list-group-item list-group-item-action flex-column align-items-start active">
+        <div class="d-flex w-100 justify-content-between">
+            <h4 class="mb-0">How to Contribute</h4>
+            <small><button class="btn btn-outline-secondary rounded" {{action "submit" project_id contributor.id }}>Synchronize</button></small>
+        </div>
+    </div>
+    <div class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+            <h4 class="mb-1"><span class="badge badge-default rounded">Option 1</span> Command Line</h4>
+        </div>
+        <p class="mb-0 mt-1 text-background p-2 rounded">git clone -b {{branch}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>
+    </div>
+    <div class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+            <h4 class="mb-1"><span class="badge badge-default rounded">Option 2</span> Github User Interface</h4>
+        </div>
+        <p class="mb-0 mt-1"><a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{branch}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{branch}}</a></p>
+        <small>Use this option if you're less familiar with git and the command line</small>
+    </div>
+    <div class="list-group-item list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">                                    
+            <h4 class="mb-1">Synchronize (let us know when you're done)</h4>
+        </div>                                                                                                
+        <p class="mb-0">Last Commit: {{moment-from-now contributor.updated_at}} ({{contributor.commit}})</p>
+    </div>
 </div>
-<div class="text-left">
-    Prefer the command line?  Clone the repo to your local computer: 
-    <div class="text-background rounded p-2">git clone -b {{branch}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</div>
-</div>
-<div class="text-left">
-    Let us know when you're done and we will pull the changes from your repository.
-</div>
-<button class="btn btn-outline-secondary rounded" {{action "submit" project_id contributor.id }}>Pull</button>
-<div class="text-left">
-    The last commit we have pulled from your project is {{contributor.commit}} at {{contributor.updated_at}}
-</div>
+
