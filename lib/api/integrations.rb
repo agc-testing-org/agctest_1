@@ -580,7 +580,7 @@ class Integrations < Sinatra::Base
                     repo = Repo.new
                     query = {:project_id => project["id"], :user_id => @session_hash["id"] }
                     contributor = repo.get_contributor query
-                    repo.refresh @session, retrieve_github_token, contributor.id, contributor.sprint_state_id, project["org"], project["name"], username, contributor.repo, "master", "master", "master"
+                    repo.refresh @session, retrieve_github_token, contributor.id, contributor.sprint_state_id, project["org"], project["name"], username, contributor.repo, "master", "master", "master", false
                     status = 200
                     response = contributor
                 else
@@ -645,8 +645,8 @@ class Integrations < Sinatra::Base
                             response[:id] = created
                             issue = Issue.new
                             sha = (issue.get_sprint_state sprint_state.id).sha
-                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id
-                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master"
+                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id, false
+                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
                         else
                             response[:message] = "Something has gone wrong" 
                         end
@@ -684,7 +684,7 @@ class Integrations < Sinatra::Base
                 query = {:id => params[:project_id].to_i}
                 project = (issue.get_projects query)[0]
 
-                fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}"
+                fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
 
                 if fetched
                     contributor.commit = fetched[:sha]

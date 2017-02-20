@@ -238,20 +238,30 @@ describe ".Repo" do
         end 
     end
 
-    context "#anonymize", :focus => true do
+    context "#anonymize" do
         before(:each) do
             @sprint_state_id = 99
             @contributor_id = "adam123" 
             @branch = "master"    
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
-            @repo.anonymize @sprint_state_id, @contributor_id
+            @repo.add_branch @repository, @sprint_state_id
+            @res = @repo.anonymize @sprint_state_id, @contributor_id
+        end
+        it "should return true" do
+            expect(@res).to be true
         end
         context "commit identifiers" do
             it "should remove email" do
-
+                expect(%x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git log )).to_not include("adamcockell@Adams-MacBook-Pro.local")
+            end
+            it "should replace email" do
+                 expect(%x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git log )).to include("no-reply@wired7.com")
             end
             it "should remove name" do
-
+                expect(%x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git log )).to_not include("Adam Cockell")
+            end
+            it "should replace name" do
+                expect(%x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git log )).to include("Wired7.Anonymous")
             end
         end
     end

@@ -47,7 +47,7 @@ class Repo
         end
     end
 
-    def refresh session, github_token, contributor_id, sprint_state_id, master_username, master_project, slave_username, slave_project, branch, sha, branch_to_push
+    def refresh session, github_token, contributor_id, sprint_state_id, master_username, master_project, slave_username, slave_project, branch, sha, branch_to_push, anonymous
         # create branch named after contributor_id
         # push single branch to user repo, using access token
 
@@ -74,6 +74,9 @@ class Repo
                 if added_remote
                     checkout r, sha
                     add_branch r, branch_to_push
+                    if anonymous
+                        anonymize sprint_state_id, contributor_id
+                    end
                     push_remote r, sprint_state_id, branch_to_push 
                     remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
                     clear_clone sprint_state_id, contributor_id
@@ -93,7 +96,7 @@ class Repo
 
     def anonymize sprint_state_id, contributor_id
         directory = "repositories/#{sprint_state_id}_#{contributor_id}"
-        puts %x(cp lib/scripts/#{directory}; cd #{directory}; ./anonymize )
+        return %x(cd #{directory}; git checkout #{sprint_state_id}; cd ../..; cp lib/scripts/anonymize #{directory}; cd #{directory}; ./anonymize; ).include? "rewritten"
     end
 
     def clear_clone sprint_state_id, contributor_id

@@ -658,7 +658,7 @@ describe "/projects" do
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
             Octokit::Client.any_instance.stub(:create_pull_request => @body)
-             Octokit::Client.any_instance.stub(:merge_pull_request => @body)
+            Octokit::Client.any_instance.stub(:merge_pull_request => @body)
             post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
             post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
             @res = JSON.parse(last_response.body)
