@@ -1,13 +1,7 @@
-{{#if showComment}}
+{{textarea value=comment class="form-control input-lg rounded mt-2" rows="1" placeholder="Your feedback"}}
 
-{{textarea value=comment class="form-control input-lg rounded" rows="1" placeholder="Your feedback"}}
-
-<button type="button" {{action "displayComment" false}} class="btn btn-outline-secondary rounded">Cancel</button>
-<button type="button" {{action "comment" contributor.id sprint_state.id}} class="btn btn-outline-secondary rounded">Save</button>
-
-{{else}}
-<div class="d-inline-block pr-2" {{action "displayComment" true}}><i class="fa fa-comment-o" aria-hidden="true"></i> Comment {{#if contributor.comments.length}}({{contributor.comments.length}}){{/if}}</div>
-<div class="d-inline-block" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</div>
+<a class="d-inline-block pr-2 cursor-pointer" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment-o" aria-hidden="true"></i> Post Comment</a>
+<a class="d-inline-block cursor-pointer" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</a>
 
 {{#if sessionAccount.account.admin}}
 
@@ -18,13 +12,12 @@
 {{else}}
 {{#if sprint_state.contributor_id}}
 {{#unless sprint_state.merged}}
-<div class="d-inline-block pl-2" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</div>
+<a class="d-inline-block pl-2 cursor-pointer" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</a>
 {{/unless}}
 {{else}}
-<div class="d-inline-block pl-2" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</div>
+<a class="d-inline-block pl-2 cursor-pointer" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</a>
 {{/if}}
 {{/unless}}
 
 {{/if}}
 
-{{/if}}

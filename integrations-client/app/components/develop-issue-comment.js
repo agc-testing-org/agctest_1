@@ -4,11 +4,7 @@ export default Ember.Component.extend({
     session: Ember.inject.service('session'),
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
-    showComment: true,
     actions: {
-        displayComment(shouldDisplay){
-            this.set("showComment",shouldDisplay);
-        },
         comment(contributor_id,sprint_state_id){
             var _this = this;
             console.log(":::"+sprint_state_id);
@@ -23,8 +19,7 @@ export default Ember.Component.extend({
                     text: comment
                 }).save().then(function(payload) {
                     store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
-
-                    _this.set("showComment",false);
+                    _this.set("comment",null);
                     //                  console.log(payload);
                  //   console.log("refreshing");
                    // _this.sendAction("refresh");

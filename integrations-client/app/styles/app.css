@@ -60,6 +60,9 @@ button,a{
 a {
     color: orange;
 }
+.cursor-pointer{
+    cursor:pointer;
+}
 label{
     margin-bottom:2px;
     font-weight:300;
@@ -452,8 +455,15 @@ button{
     position:relative;
 
 }
+.flow .stage .grid .box .comments a{
+    font-weight:600;
+}
+.flow .stage .grid textarea{
+    border: 1px solid #ededed !important;
+}
 .flow .stage .grid .box.box-nested{
     margin-left:19px;
+    margin-top:2px;
 }
 .flow .stage .grid .box .badge{
     font-weight: 300;
@@ -628,6 +638,8 @@ li.nav-item.timeline .change .badge{
 .form-control{
     color: #fff;
     font-weight:300;
+    font-style: italic;
+    font-size: 14px;
 }
 .form-control[disabled]{
     color: #fff;
