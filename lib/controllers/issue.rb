@@ -91,6 +91,7 @@ class Issue
     def log_event params 
         after = (last_event params[:sprint_id])
         begin
+            params[:after] = after
             sprint_event = SprintTimeline.create(params)
             return sprint_event.id
         rescue => e

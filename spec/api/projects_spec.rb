@@ -154,7 +154,7 @@ describe "/projects" do
         it_behaves_like "project"
     end
     describe "POST /:id/sprints" do
-        fixtures :projects, :states, :labels
+        fixtures :projects, :states, :labels, :sprint_timelines
         before(:each) do
             @title = "SPRINT TITLE"
             @description = "SPRINT DESCRIPTION"
@@ -193,7 +193,7 @@ describe "/projects" do
                     expect(@timeline["label_id"]).to be nil 
                 end
                 it "should include after" do
-                    expect(@timeline["after"]).to be nil
+                    expect(@timeline["after"]).to eq(sprint_timelines(:demo_2).id)
                 end
             end
             it "should return sprint id" do

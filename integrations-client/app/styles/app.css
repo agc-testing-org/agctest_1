@@ -638,8 +638,10 @@ li.nav-item.timeline .change .badge{
 .form-control{
     color: #fff;
     font-weight:300;
-    font-style: italic;
     font-size: 14px;
+}
+textarea.form-control{
+    font-style: italic;
 }
 .form-control[disabled]{
     color: #fff;
