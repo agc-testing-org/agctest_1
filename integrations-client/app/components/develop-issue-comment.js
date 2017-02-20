@@ -4,7 +4,7 @@ export default Ember.Component.extend({
     session: Ember.inject.service('session'),
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
-    showComment: false,
+    showComment: true,
     actions: {
         displayComment(shouldDisplay){
             this.set("showComment",shouldDisplay);

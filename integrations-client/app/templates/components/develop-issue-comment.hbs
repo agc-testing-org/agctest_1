@@ -1,6 +1,6 @@
 {{#if showComment}}
 
-{{textarea value=comment class="form-control input-lg rounded" rows="3" placeholder="Your comment"}}
+{{textarea value=comment class="form-control input-lg rounded" rows="1" placeholder="Your feedback"}}
 
 <button type="button" {{action "displayComment" false}} class="btn btn-outline-secondary rounded">Cancel</button>
 <button type="button" {{action "comment" contributor.id sprint_state.id}} class="btn btn-outline-secondary rounded">Save</button>

@@ -1,18 +1,19 @@
 {{#if comments}}
-
 {{#each (limited sortedComments count) as |comment|}}
 <div class="box box-nested">
     <div class="point"></div>
-    <div class="text-left">{{comment.text}} - <em>{{moment-from-now comment.created_at}}</em></div>
+    <div class="comment">{{comment.text}} <em class="text-muted">- {{moment-from-now comment.created_at}}</em></div>
 </div>
 {{/each}}
 
+<small>
 {{#if showingAll}}
 <a {{action "showAll" false}}>Show Less</a>
 {{else}}
 {{#if (greater-than comments.length count)}}
-<a {{action "showAll" true}}>Show More</a>
+<a {{action "showAll" true}}>Show More Comments ( {{comments.length}} Total )</a>
 {{/if}}
 {{/if}}
+</small>
 
 {{/if}}

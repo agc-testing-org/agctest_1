@@ -11,6 +11,6 @@ export default DS.Model.extend({
     contributors: DS.hasMany('contributor'),
     created_at: attr('date'),
     updated_at: attr('date'),
-    pull_request: attr('boolean'),
+    pull_request: attr('number'),
     merged: attr('boolean')
 });

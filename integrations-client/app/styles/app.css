@@ -57,6 +57,9 @@ h4{
 button,a{
     cursor:pointer;
 }
+a {
+    color: orange;
+}
 label{
     margin-bottom:2px;
     font-weight:300;
@@ -457,16 +460,21 @@ button{
     font-size: 12px;
 }
 
+.flow .stage .grid .box .list-group{
+    border: 3px solid #ededed;
+    border-bottom: 1px solid #ededed;
+    background-color: #ededed;
+}
+
 .flow .stage .grid .box .list-group-item{
     color: #4C4C4C;
     background-color:#fff;
     border: 1px solid #ededed;
+    margin-bottom:3px;
 }
 
 .flow .stage .grid .box .list-group-item.active{
-    background-color:orange;
-    color: #fff;
-    border: none;
+    background-color:#ededed;
 }
 .flow .stage .grid .box .list-group-item h4{
     font-weight:600;
@@ -476,9 +484,10 @@ button{
     font-weight:500;
 }
 .flow .stage .grid .box .list-group-item.active small button{
-    border: 2px solid #fff;
-    padding:4px;
-    color: #fff;
+    border: 2px solid orange;
+    padding: 4px;
+    background-color: orange;
+    color: white;
 }
 .flow .stage .grid .box .list-group-item.active small button:hover{
     background-color: #fff;
@@ -492,6 +501,9 @@ button{
     width: 10px;
     height: 4px;
     background-color: #ededed;
+}
+.flow .stage .grid .box .comment{
+    font-weight:300;
 }
 .flow .stage .grid .box.box-nested .point{
     left: -19px;
@@ -522,6 +534,7 @@ button{
     font-size: 14px;
     line-height: 16px;
     font-weight:300;
+    color: lightseagreen;
 }
 .flow .stage .instruction{
     color: #28B6C3;

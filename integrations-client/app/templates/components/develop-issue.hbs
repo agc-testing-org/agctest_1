@@ -34,7 +34,7 @@
 
             <div class="box">
                 <div class="point"></div>
-                {{develop-contribute contributor=contributor branch=sprint_state.id project_id=model.sprint.project.id}}
+                {{develop-contribute contributor=contributor sprint_state=sprint_state project=model.sprint.project}}
             </div>
 
             {{/each}}
@@ -52,7 +52,7 @@
                 {{develop-issue-comment contributor=contributor sprint_state=sprint_state project=model.sprint.project.id}}
                 {{#if (eq contributor.id sprint_state.contributor_id)}}
                     {{#unless sprint_state.merged}}
-                        {{develop-contribute contributor=contributor branch=sprint_state.id project_id=model.sprint.project.id}}
+                        {{develop-contribute contributor=contributor sprint_state=sprint_state project=model.sprint.project}}
                     {{/unless}}
                 {{/if}}
             </div>                                                                  
