@@ -191,7 +191,7 @@ class Issue
     def get_events query
         begin
             response = Array.new
-            SprintTimeline.where(query).includes(:sprint,:user,:label,:state).each_with_index do |st,i|
+            SprintTimeline.where(query).includes(:sprint,:user,:label,:state,:sprint_state).each_with_index do |st,i|
                 response[i] = {
                     :id => st.id,
                     :created_at => st.created_at,
@@ -199,6 +199,7 @@ class Issue
                     :sprint => st.sprint.as_json,
                     :label => st.label.as_json,
                     :state => st.state.as_json,
+                    :sprint_state => st.sprint_state.as_json,
                     :after => st.after
                 }
             end

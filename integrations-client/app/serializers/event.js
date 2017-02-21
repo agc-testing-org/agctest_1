@@ -5,6 +5,7 @@ export default DS.JSONSerializer.extend(DS.EmbeddedRecordsMixin, {
         sprint: { embedded: 'always' },
         state: { embedded: 'always' },
         label: { embedded: 'always' },
-        user: { embedded: 'always' }
+        user: { embedded: 'always' },
+        sprint_state: { embedded: 'always' }
     }
 });

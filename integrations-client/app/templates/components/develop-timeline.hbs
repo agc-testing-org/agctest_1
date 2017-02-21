@@ -34,7 +34,7 @@
             </div>
             {{/if}}
             <div class="change">
-                {{develop-timeline-compare event=event previous_event=(previous "event" event.after)}}
+                {{develop-timeline-compare project=model.project event=event previous_event=(previous "event" event.after)}}
             </div>
             <small class="text-muted">
                 {{moment-from-now event.created_at}}

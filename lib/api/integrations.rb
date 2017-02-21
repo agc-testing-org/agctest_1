@@ -512,8 +512,23 @@ class Integrations < Sinatra::Base
                 if pr
                     parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
                     winner = issue.set_winner fields[:sprint_state_id], parameters
-                    status 201
-                    response = winner 
+                    if winner
+
+                        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+                        if sprint_state
+                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :project_id => project["id"]}
+                            if sprint_state && (issue.log_event log_params)
+                                status 201
+                                response = winner 
+                            else
+
+                            end
+                        else
+
+                        end
+                    else
+
+                    end
                 end
             else
                 response[:message] = "You are not authorized to do this"
@@ -532,7 +547,7 @@ class Integrations < Sinatra::Base
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
 
                 issue = Issue.new
-                
+
                 query = {:id => fields[:project_id].to_i}
                 project = (issue.get_projects query)[0]
 
@@ -653,9 +668,9 @@ class Integrations < Sinatra::Base
                                 idea = issue.get_idea query
                                 github.create_contents("#{username}/#{name}",
                                                        "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
-                                                       "adding placeholder for requirements",
-                                                       "##{idea.title}\n\n###Description\n#{idea.description}",
-                                                       :branch => sprint_state.id.to_s)
+                                                           "adding placeholder for requirements",
+                                                           "##{idea.title}\n\n###Description\n#{idea.description}",
+                                                           :branch => sprint_state.id.to_s)
                             end
                         else
                             response[:message] = "Something has gone wrong" 

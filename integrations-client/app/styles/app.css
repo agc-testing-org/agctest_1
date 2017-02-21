@@ -597,6 +597,10 @@ li.nav-item.timeline .change .badge{
     font-weight:300;
     font-size:12px;
 }
+li.nav-item.timeline .change a{
+   color: orange; 
+   margin: 0px;
+}
 
 .nav-item.create a{
     color: #fff;

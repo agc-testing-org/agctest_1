@@ -1,1 +1,5 @@
+{{#if event.state.name}}
 {{develop-timeline-compare-object a=event.state.name b=previous_event.state.name attribute="stage" }}
+{{else}}
+<i aria-hidden="true" class="fa fa-trophy"></i> We have selected <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{event.sprint_state.sha}}...{{event.sprint_state.id}}_{{event.sprint_state.contributor_id}}">contributor {{event.sprint_state.contributor_id}}'s commits to {{event.sprint.title}} {{event.sprint_state.state.name}}</a> for merge
+{{/if}}
