@@ -193,7 +193,7 @@ describe "/projects" do
                 it "should include label_id" do
                     expect(@timeline["label_id"]).to be nil 
                 end
-                it "should include after", :focus => true do
+                it "should include after" do
                     expect(@timeline["after"]).to be nil 
                 end
             end
@@ -603,7 +603,7 @@ describe "/projects" do
             expect(mysql.first["contributor_id"]).to eq(contributor_id)
         end
     end
-    describe "POST /contributors/:id/winner" do
+    describe "POST /contributors/:id/winner", :focus => true do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
@@ -624,6 +624,7 @@ describe "/projects" do
             post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from sprint_states").first
+            @timeline = @mysql_client.query("select * from sprint_timelines").first
         end
         context "admin" do
             it "should return sprint_state id" do
@@ -638,6 +639,11 @@ describe "/projects" do
                 end
                 it "should save pull request" do
                     expect(@mysql["pull_request"]).to eq(@pull_id)
+                end
+            end
+            context "sprint_timeline" do
+                it "should save sprint_state_id" do
+                    expect(@timeline["sprint_state_id"]).to eq(@sprint_state_id)
                 end
             end
         end
