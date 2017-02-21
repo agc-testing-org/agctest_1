@@ -165,8 +165,9 @@ describe "/projects" do
             before(:each) do
                 post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from sprints").first
-                @timeline = @mysql_client.query("select * from sprint_timelines where project_id = #{@project_id}").first
                 @res = JSON.parse(last_response.body)
+                @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@res["id"]}").first
+                puts @timeline.inspect
             end
             context "sprint" do
                 it "should include title" do
@@ -192,8 +193,8 @@ describe "/projects" do
                 it "should include label_id" do
                     expect(@timeline["label_id"]).to be nil 
                 end
-                it "should include after" do
-                    expect(@timeline["after"]).to eq(sprint_timelines(:demo_2).id)
+                it "should include after", :focus => true do
+                    expect(@timeline["after"]).to be nil 
                 end
             end
             it "should return sprint id" do
@@ -641,7 +642,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /contributors/:id/merge", :focus => true do
+    describe "POST /contributors/:id/merge" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id

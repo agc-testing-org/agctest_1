@@ -7,17 +7,25 @@
     </div>
     <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">
-            <h4 class="mb-1"><span class="badge badge-default rounded">Option 1</span> Command Line</h4>
+            <h4 class="mb-1"><span class="badge badge-default rounded">Option 1</span> Command Line Access</h4>
         </div>
-        <p class="mb-0 mt-1 text-background p-2 rounded">git clone -b {{sprint_state.id}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>
+        <p class="mb-0 mt-1 text-background p-2 rounded">git clone -b {{sprint_state.id}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>  
     </div>
     <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">
-            <h4 class="mb-1"><span class="badge badge-default rounded">Option 2</span> Github User Interface</h4>
+            <h4 class="mb-1"><span class="badge badge-default rounded">Option 2</span> Github User Interface Access</h4>
         </div>
         <p class="mb-0 mt-1"><a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{sprint_state.id}}</a></p>
         <small>Use this option if you're less familiar with git and the command line</small>
     </div>
+    {{#if (eq sprint_state.state.name "requirements design")}}
+    <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
+        <div class="d-flex w-100 justify-content-between">
+            <h4 class="mb-1">Requirements Document Placeholder</h4>
+        </div>                              
+        <p class="mb-0 mt-1">We've created a file for your changes: <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md</a></p>
+    </div>                                                                          
+    {{/if}}
     <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
         <div class="d-flex w-100 justify-content-between">                                    
             <h4 class="mb-1">Synchronize (let us know when you're done)</h4>
