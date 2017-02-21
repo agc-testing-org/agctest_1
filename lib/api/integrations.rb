@@ -431,7 +431,7 @@ class Integrations < Sinatra::Base
 
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
-
+                    
                     sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
@@ -647,6 +647,16 @@ class Integrations < Sinatra::Base
                             sha = (issue.get_sprint_state sprint_state.id).sha
                             repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id, false
                             repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
+
+                            if sprint_state.state.name == "requirements design"
+                                query = {:id => sprint_state.sprint_id}
+                                idea = issue.get_idea query
+                                github.create_contents("#{username}/#{name}",
+                                                       "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
+                                                       "adding placeholder for requirements",
+                                                       "##{idea.title}\n\n###Description\n#{idea.description}",
+                                                       :branch => sprint_state.id.to_s)
+                            end
                         else
                             response[:message] = "Something has gone wrong" 
                         end

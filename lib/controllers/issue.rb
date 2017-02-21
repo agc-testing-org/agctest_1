@@ -142,6 +142,14 @@ class Issue
         end
     end
 
+    def get_idea query
+        begin
+            return Sprint.find_by(query)
+        rescue => e
+            return nil
+        end
+    end
+
     def get_sprints query, user_id
         begin
             response = Array.new
