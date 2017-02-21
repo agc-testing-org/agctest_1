@@ -589,7 +589,7 @@ li.nav-item.timeline .description{
     margin-bottom:5px;
 }
 li.nav-item.timeline .change{
-    color: orange;
+    color: #fff;
 }
 li.nav-item.timeline .change .badge{
     background-color: orange;

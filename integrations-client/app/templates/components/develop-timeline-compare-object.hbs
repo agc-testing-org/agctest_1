@@ -1,7 +1,9 @@
 {{#unless (eq a b)}}
 {{#unless b}}
-{{attribute}} <span class="badge badge-default rounded">{{a}}</span> created
+<span class="badge badge-default rounded">{{a}}</span> {{attribute}} assigned to issue
 {{else}}
 {{attribute}} <span class="badge badge-default rounded">{{b}}</span> changed to <span class="badge badge-default rounded">{{a}}</span>
 {{/unless}}
+{{else}}
+<span class="badge badge-default rounded">{{a}}</span> {{attribute}} restarted
 {{/unless}}

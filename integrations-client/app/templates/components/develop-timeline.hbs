@@ -25,15 +25,20 @@
     <ul class="nav nav-pills flex-column">
         {{#each sortedEvents as |event|}}
         <li class="nav-item timeline">
+            {{#if showingProject}}
             <div class="title">
                 {{event.sprint.title}}
             </div>
             <div class="description">
                 {{event.sprint.description}}
             </div>
+            {{/if}}
             <div class="change">
                 {{develop-timeline-compare event=event previous_event=(previous "event" event.after)}}
             </div>
+            <small class="text-muted">
+                {{moment-from-now event.created_at}}
+            </small>
         </li>
         {{/each}}
     </ul>

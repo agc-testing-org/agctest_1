@@ -30,7 +30,7 @@
         <div class="d-flex w-100 justify-content-between">                                    
             <h4 class="mb-1">Synchronize (let us know when you're done)</h4>
         </div>                                                                                                
-        <p class="mb-0">Last Commit: {{moment-from-now contributor.updated_at}} ({{contributor.commit}})</p>
+        <p class="mb-0">Last Commit: {{moment-from-now contributor.updated_at}} {{#if contributor.commit}}({{contributor.commit}}){{/if}}</p>
         {{#if sprint_state.pull_request}}
         {{#unless sprint_state.merged}}
         <small>Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></small>
