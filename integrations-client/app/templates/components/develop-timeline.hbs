@@ -1,4 +1,4 @@
-<nav class="col-sm-12 col-md-4 hidden-xs-down bg-faded sidebar">
+<nav class="col-sm-12 col-md-4 hidden-sm-down bg-faded sidebar">
     <ul class="nav nav-pills flex-column">
         <li class="nav-item create">
             <a class="nav-link" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create{{/if}}</a>
@@ -27,10 +27,10 @@
         <li class="nav-item timeline">
             {{#if showingProject}}
             <div class="title">
-                {{event.sprint.title}}
+                Sprint {{event.sprint.id}}
             </div>
             <div class="description">
-                {{event.sprint.description}}
+                {{event.sprint.title}}
             </div>
             {{/if}}
             <div class="change">

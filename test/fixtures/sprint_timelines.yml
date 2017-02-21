@@ -7,6 +7,15 @@ demo_1:
   label: needs-design
   created_at: <%= 5.day.ago.to_s(:db) %>
 
+demo_1b:
+  id: 4
+  user: adam_confirmed
+  project: demo
+  sprint: sprint_1b
+  state_id: 1
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
 demo_2:
   id: 2
   user: adam_confirmed

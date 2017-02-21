@@ -281,13 +281,30 @@ describe "/projects" do
 
     describe "GET /:id/events" do
         fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
-        before(:each) do
-            project_id = projects(:demo).id
-            get "/projects/#{project_id}/events"
-            @timeline = JSON.parse(last_response.body)
-            @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
+        context "no filter" do
+            before(:each) do
+                project_id = projects(:demo).id
+                get "/projects/#{project_id}/events"
+                @timeline = JSON.parse(last_response.body)
+                @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
+            end
+            it_behaves_like "sprint_timeline"
         end
-        it_behaves_like "sprint_timeline"
+        context "filter by sprint_id" do
+            before(:each) do
+                project_id = projects(:demo).id
+                @sprint_id = sprints(:sprint_1).id
+                get "/projects/#{project_id}/events?sprint_id=#{@sprint_id}"
+                @timeline = JSON.parse(last_response.body)
+                @timeline_result = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_id}")
+            end
+            it "should return only sprint_1 events" do
+                @timeline_result.each_with_index do |t,i|
+                    expect(@timeline[i]["sprint"]["id"]).to eq(@sprint_id)
+                end
+            end
+            it_behaves_like "sprint_timeline"
+        end
     end
 
     describe "GET /:id/sprints/:id" do

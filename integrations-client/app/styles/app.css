@@ -76,11 +76,14 @@ label{
 }
 .btn-outline-secondary:hover{
     color:#fff;
-    background-color: #28B6C3;
+    background-color: #28B6C3 !important;
 }
 .develop .btn-outline-secondary{
     border: 2px solid #28B6C3;
     color: #28B6C3;
+}
+.develop .btn-outline-secondary.active{
+    background-color:#fff;
 }
 .btn-outline-secondary:hover{
     color:#fff;
@@ -434,6 +437,10 @@ button{
  * Dashboard
  */
 
+.issues.flow a{
+    text-decoration: none;
+}
+
 .flow{
 
 }
@@ -465,41 +472,44 @@ button{
     margin-left:19px;
     margin-top:2px;
 }
-.flow .stage .grid .box .badge{
+.flow .badge{
     font-weight: 300;
     font-size: 12px;
 }
 
-.flow .stage .grid .box .list-group{
+.flow .list-group{
     border: 3px solid #ededed;
     border-bottom: 1px solid #ededed;
     background-color: #ededed;
 }
 
-.flow .stage .grid .box .list-group-item{
+.flow .list-group-item{
     color: #4C4C4C;
     background-color:#fff;
     border: 1px solid #ededed;
     margin-bottom:3px;
 }
+.flow.issues .list-group-item.active small{
+    line-height:29px;
+}
 
-.flow .stage .grid .box .list-group-item.active{
+.flow .list-group-item.active{
     background-color:#ededed;
 }
-.flow .stage .grid .box .list-group-item h4{
+.flow .list-group-item h4{
     font-weight:600;
 }
-.flow .stage .grid .box .list-group-item.active h4{
+.flow .list-group-item.active h4{
     line-height:29px;
     font-weight:500;
 }
-.flow .stage .grid .box .list-group-item.active small button{
+.flow .list-group-item.active small button{
     border: 2px solid orange;
     padding: 4px;
     background-color: orange;
     color: white;
 }
-.flow .stage .grid .box .list-group-item.active small button:hover{
+.flow .list-group-item.active small button:hover{
     background-color: #fff;
     color: orange;
 }
@@ -554,21 +564,16 @@ button{
     background-color: #ededed;
 }
 
-ul.history{
-    margin-left:0px;
-    padding-left:0px;
-}
-ul.history li{
-    display:inline;
-    padding:0px;
-}
-
 .develop a.nav-link {
     margin-left:0px !important;
     margin-right:8px;
     height:30px !important;
     padding-top:4px !important;
     margin-top:2px !important;
+}
+.develop .sprint-header{
+    width:100%;
+    font-weight:500;
 }
 
 li.nav-item.timeline{
@@ -598,8 +603,8 @@ li.nav-item.timeline .change .badge{
     font-size:12px;
 }
 li.nav-item.timeline .change a{
-   color: orange; 
-   margin: 0px;
+    color: orange; 
+    margin: 0px;
 }
 
 .nav-item.create a{

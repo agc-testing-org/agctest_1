@@ -372,6 +372,16 @@ class Integrations < Sinatra::Base
     events_get = lambda do
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i }
+        if params[:sprint_id] 
+            query[:sprint_id] = params[:sprint_id]
+        end
+        events = issue.get_events query
+        return events.to_json
+    end
+
+    events_get_by_sprint = lambda do
+        issue = Issue.new
+        query = {:project_id => params[:project_id].to_i }
         events = issue.get_events query
         return events.to_json
     end
@@ -431,7 +441,7 @@ class Integrations < Sinatra::Base
 
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
-                    
+
                     sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha

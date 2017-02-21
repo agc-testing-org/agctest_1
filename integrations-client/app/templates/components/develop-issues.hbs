@@ -1,25 +1,36 @@
-<div class="list-group sprint">
+<div class="issues flow">
     {{#each model.sprints as |sprint|}}
-    {{#link-to "develop.project.sprint" sprint.id class="list-group-item list-group-item-action flex-column align-items-start rounded"}}
-    <div class="d-flex w-100 justify-content-between">
-        <h5 class="mb-1">{{sprint.title}}</h5>
-        <small>{{sprint.updated_at}}</small>
-    </div>
-    <small>{{sprint.description}}</small>
-    <ul class="history">
-        {{#each sprint.sprint_states as |sprint_state|}}
-        <li><i class="fa fa-arrow-right" aria-hidden="true"></i> {{sprint_state.state.name}}</li>
-        {{/each}}
-    </ul>
-    {{/link-to}}
-    <div class="dropdown">
-        <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Transitions
-        </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            {{#each model.states as |state|}}
-            <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
+    <div class="list-group mt-2 rounded">
+        {{#link-to "develop.project.sprint" sprint.id}}
+        <div class="list-group-item list-group-item-action flex-column align-items-start active p-1 pt-0 pb-0">
+            <div class="d-flex w-100 justify-content-between">
+                <h4 class="mb-0">Sprint {{sprint.id}}</h4>
+                <small>Created {{moment-from-now sprint.updated_at}}</small>
+            </div>
+        </div>
+        {{/link-to}}
+        <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h4 class="mb-1">{{sprint.title}}</h4>
+            </div>
+            <p class="mb-0 mt-1">{{sprint.description}}</p>
+
+            {{#each sprint.sprint_states as |sprint_state|}}
+            <p class="mt-1 mb-0"><span class="badge badge-default rounded mr-1 mb-1"> {{sprint_state.state.name}} </span> - {{sprint_state.contributors.length}} contributors, <em class="text-muted">created {{moment-from-now sprint_state.created_at}}</em></p>
             {{/each}}
+
+            {{#if sessionAccount.account.admin}}
+            <div class="dropdown mt-3">
+                <button class="btn btn-outline-secondary rounded dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Transitions
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {{#each model.states as |state|}}
+                    <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
         </div>
     </div>
     {{/each}}

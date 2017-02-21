@@ -13,6 +13,9 @@ export default Ember.Route.extend({
         console.log(this.modelFor("develop.project"));
 
         return Ember.RSVP.hash({
+            events: this.store.query('event', {
+                sprint_id: params.id
+            }),
             sprint: this.store.findRecord('sprint', params.id),
             idea: this.store.peekRecord('state', 1)
         });
