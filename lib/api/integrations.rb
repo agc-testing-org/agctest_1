@@ -369,6 +369,14 @@ class Integrations < Sinatra::Base
         return sprints.to_json
     end
 
+    sprint_states_get = lambda do
+        authorized?
+        issue = Issue.new
+        query = {"sprints.project_id" => params[:project_id].to_i }
+        sprint_states = issue.get_sprint_states query
+        return sprint_states.to_json
+    end
+
     events_get = lambda do
         issue = Issue.new
         query = {:project_id => params[:project_id].to_i }
@@ -788,6 +796,7 @@ class Integrations < Sinatra::Base
 
     post "/projects/:project_id/sprints", &sprints_post
     get "/projects/:project_id/sprints", &sprints_get
+    get "/projects/:project_id/sprint-states", &sprint_states_get
     get "/projects/:project_id/events", &events_get
     get "/projects/:project_id/sprints/:id", &sprints_get_by_id
     patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id

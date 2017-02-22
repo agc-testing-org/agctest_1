@@ -1,0 +1,22 @@
+<ul class="nav nav-pills flex-column">
+    <li class="nav-item create">
+        <a class="nav-link" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create{{/if}}</a>
+    </li>
+    {{#if displayCreate}}
+    <li class="nav-item timeline p-4">
+        {{#if errorMessage}}
+        <div class="alert alert-warning rounded">{{errorMessage}}</div>
+        {{/if}}
+        <div class="form-group">
+            <label>Title</label>
+            {{input value=title placeholder="Briefly describe the request" class="form-control input-lg rounded"}}
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            {{textarea value=description placeholder="Explain the request in detail" class="form-control input-lg rounded"}}
+        </div>
+        <button {{action "createSprint"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Save Sprint</button>
+    </li>
+    {{/if}}
+</ul>

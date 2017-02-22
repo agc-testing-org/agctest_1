@@ -1,45 +1,21 @@
-<nav class="col-sm-12 col-md-4 hidden-sm-down bg-faded sidebar">
-    <ul class="nav nav-pills flex-column">
-        <li class="nav-item create">
-            <a class="nav-link" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create{{/if}}</a>
-        </li>
-        {{#if displayCreate}}
-        <li class="nav-item timeline p-4">
-            {{#if errorMessage}}
-            <div class="alert alert-warning rounded">{{errorMessage}}</div>
-            {{/if}}
-            <div class="form-group">
-                <label>Title</label>
-                {{input value=title placeholder="Briefly describe the request" class="form-control input-lg rounded"}}
-            </div>                         
-
-            <div class="form-group">           
-                <label>Description</label>
-                {{textarea value=description placeholder="Explain the request in detail" class="form-control input-lg rounded"}}
-            </div>              
-            <button {{action "createSprint"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Save Sprint</button>
-        </li>
+<ul class="nav nav-pills flex-column">
+    {{#each sortedEvents as |event|}}
+    <li class="nav-item">
+        {{#if showingProject}}
+        <div class="title">
+            Sprint {{event.sprint.id}}
+        </div>
+        <div class="description">
+            {{event.sprint.title}}
+        </div>
         {{/if}}
-    </ul>
+        <div class="change">
+            {{develop-timeline-compare project=model.project event=event previous_event=(previous "event" event.after)}}
+        </div>
+        <small class="text-muted">
+            {{moment-from-now event.created_at}}
+        </small>
+    </li>
+    {{/each}}
+</ul>
 
-    <ul class="nav nav-pills flex-column">
-        {{#each sortedEvents as |event|}}
-        <li class="nav-item timeline">
-            {{#if showingProject}}
-            <div class="title">
-                Sprint {{event.sprint.id}}
-            </div>
-            <div class="description">
-                {{event.sprint.title}}
-            </div>
-            {{/if}}
-            <div class="change">
-                {{develop-timeline-compare project=model.project event=event previous_event=(previous "event" event.after)}}
-            </div>
-            <small class="text-muted">
-                {{moment-from-now event.created_at}}
-            </small>
-        </li>
-        {{/each}}
-    </ul>
-</nav>

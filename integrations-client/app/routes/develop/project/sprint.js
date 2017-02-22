@@ -12,6 +12,7 @@ export default Ember.Route.extend({
         console.log(this.paramsFor("develop.project").org);
         console.log(this.modelFor("develop.project"));
 
+        console.log("here");
         return Ember.RSVP.hash({
             events: this.store.query('event', {
                 sprint_id: params.id

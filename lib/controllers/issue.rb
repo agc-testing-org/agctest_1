@@ -150,6 +150,19 @@ class Issue
         end
     end
 
+    def get_sprint_states query
+        begin
+            response = Array.new
+            SprintState.joins(:sprint).where(query).includes(:state,:contributors).each_with_index do |ss,i|
+                response[i] = ss.as_json
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def get_sprints query, user_id
         begin
             response = Array.new

@@ -5,6 +5,7 @@ const { attr, Model } = DS;
 export default DS.Model.extend({
     contributor_id: attr('number'),
     arbiter_id: attr('number'),
+    sprint: DS.belongsTo('sprint'),
     state: DS.belongsTo('state'),
     deadline: attr('date'),
     sha: attr('string'),
