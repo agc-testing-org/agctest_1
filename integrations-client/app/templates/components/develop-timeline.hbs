@@ -1,20 +1,32 @@
 <ul class="nav nav-pills flex-column">
     {{#each sortedEvents as |event|}}
-    <li class="nav-item">
+    <li class="nav-item stage">
         {{#if showingProject}}
-        <div class="title">
-            Sprint {{event.sprint.id}}
-        </div>
-        <div class="description">
-            {{event.sprint.title}}
+        
+
+        <div class="header">
+            <div class="icon fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-spinner fa-stack-1x fa-inverse"></i>
+            </div>
+            <div class="info">
+                {{#link-to "develop.project.sprint" event.sprint.id}}
+                <div class="name text-capitalize"> Sprint {{event.sprint.id}}</div>
+                <div class="description mb-0">{{event.sprint.title}}</div>
+                {{/link-to}}
+            </div>
         </div>
         {{/if}}
-        <div class="change">
-            {{develop-timeline-compare project=model.project event=event previous_event=(previous "event" event.after)}}
+        <div class="grid">
+            <div class="box pb-2"> 
+                <div class="change">
+                    {{develop-timeline-compare project=model.project event=event previous_event=(previous "event" event.after)}}
+                </div>
+                <small class="text-muted">
+                    {{moment-from-now event.created_at}}
+                </small>
+            </div>
         </div>
-        <small class="text-muted">
-            {{moment-from-now event.created_at}}
-        </small>
     </li>
     {{/each}}
 </ul>

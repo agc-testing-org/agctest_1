@@ -546,6 +546,9 @@ button{
 .flow .stage .name{
     font-size:20px;
 }
+.flow .stage .info a{
+    color: lightseagreen;
+}
 .flow .stage .description{
     font-size: 14px;
     line-height: 16px;
@@ -572,7 +575,6 @@ button{
     font-weight:500;
 }
 .develop li.nav-item{
-    padding:10px;
 
 }
 .sidebar li.nav-item{
@@ -585,14 +587,15 @@ button{
 .sidebar li.nav-item.create{
     padding:0px;
 }
-.sidebar li.nav-item .title{
+.sidebar li.nav-item .title, .develop li.nav-item .title{
     font-size:18px;
     line-height:20px;
-    color:#fff;
     margin-bottom:5px;
 }
-.sidebar li.nav-item .description{
-    line-height:1.3;
+.sidebar li.nav-item .title{
+     color:#fff;
+}
+.sidebar li.nav-item .description, .develop li.nav-item .description{
     margin-bottom:5px;
 }
 .sidebar li.nav-item .summary{
