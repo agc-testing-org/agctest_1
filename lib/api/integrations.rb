@@ -769,6 +769,16 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    comments_get = lambda do
+        issue = Issue.new
+        if params[:contributor_id]
+            query = {"contributors.user_id" => params[:contributor_id]}
+        else
+            query = {:user_id => params[:user_id]}
+        end
+        comments = issue.get_comments query
+        return comments.to_json
+    end
 
     #API
     post "/register", &register_post
@@ -805,6 +815,8 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/votes", &contributors_post_votes
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
+
+    get "/comments", &comments_get
 
     get '/unauthorized' do
         status 401

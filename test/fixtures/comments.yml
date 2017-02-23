@@ -1,0 +1,15 @@
+adam_confirmed_1:
+  user: adam_confirmed
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  contributor: adam_admin_1
+  text: "I really like this"
+
+adam_admin_1:
+  user: adam_admin
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  contributor: adam_confirmed_1
+  text: "this is cool"

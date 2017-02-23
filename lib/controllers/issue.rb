@@ -245,8 +245,18 @@ class Issue
 
     end
 
-    def get #all or one, leave open to filters
 
+    def get_comments query #user_id == posted comment, #contributor_id = received comment
+        response = Array.new
+        begin 
+            Comment.where(query).joins("INNER JOIN contributors ON contributors.id = comments.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |comment,i| 
+                response[i] = comment.as_json
+                response[i][:sprint_states] = comment.sprint_state.as_json
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
     end
-
 end 

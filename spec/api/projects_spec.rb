@@ -620,7 +620,7 @@ describe "/projects" do
             expect(mysql.first["contributor_id"]).to eq(contributor_id)
         end
     end
-    describe "POST /contributors/:id/winner", :focus => true do
+    describe "POST /contributors/:id/winner" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
@@ -698,5 +698,27 @@ describe "/projects" do
                 end
             end
         end
+    end
+    describe "GET /comments", :focus => true do
+        fixtures :users, :projects, :sprints, :sprint_states, :contributors, :comments
+        context "user created" do
+            before(:each) do
+                get "/comments?user_id=#{users(:adam_confirmed).id}",{}, {}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return comments based on filter" do
+                expect(@res[0]["id"]).to eq(comments(:adam_confirmed_1).id)
+            end
+        end
+        context "user received" do
+            before(:each) do
+                get "/comments?contributor_id=#{users(:adam_confirmed).id}",{}, {}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return comments based on filter" do
+                expect(@res[0]["id"]).to eq(comments(:adam_admin_1).id)
+            end
+        end
+
     end
 end
