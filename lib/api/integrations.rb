@@ -780,6 +780,17 @@ class Integrations < Sinatra::Base
         return comments.to_json
     end
 
+    votes_get = lambda do
+        issue = Issue.new
+        if params[:contributor_id]
+            query = {"contributors.user_id" => params[:contributor_id]}
+        else
+            query = {:user_id => params[:user_id]}
+        end
+        votes = issue.get_votes query
+        return votes.to_json
+    end
+
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
@@ -817,6 +828,7 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/merge", &contributors_post_merge
 
     get "/comments", &comments_get
+    get "/votes", &votes_get
 
     get '/unauthorized' do
         status 401

@@ -699,7 +699,7 @@ describe "/projects" do
             end
         end
     end
-    describe "GET /comments", :focus => true do
+    describe "GET /comments" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors, :comments
         context "user created" do
             before(:each) do
@@ -717,6 +717,28 @@ describe "/projects" do
             end
             it "should return comments based on filter" do
                 expect(@res[0]["id"]).to eq(comments(:adam_admin_1).id)
+            end
+        end
+
+    end
+    describe "GET /votes", :focus => true do
+        fixtures :users, :projects, :sprints, :sprint_states, :contributors, :votes
+        context "user created" do
+            before(:each) do
+                get "/votes?user_id=#{users(:adam_confirmed).id}",{}, {}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return votes based on filter" do
+                expect(@res[0]["id"]).to eq(votes(:adam_confirmed_1).id)
+            end
+        end
+        context "user received" do
+            before(:each) do
+                get "/votes?contributor_id=#{users(:adam_confirmed).id}",{}, {}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return votes based on filter" do
+                expect(@res[0]["id"]).to eq(votes(:adam_admin_1).id)
             end
         end
 

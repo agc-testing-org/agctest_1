@@ -259,4 +259,18 @@ class Issue
             return nil
         end
     end
+    
+    def get_votes query #user_id == posted comment, #contributor_id = received comment
+        response = Array.new
+        begin 
+            Vote.where(query).joins("INNER JOIN contributors ON contributors.id = votes.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |vote,i|
+                response[i] = vote.as_json
+                response[i][:sprint_states] = vote.sprint_state.as_json
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 end 
