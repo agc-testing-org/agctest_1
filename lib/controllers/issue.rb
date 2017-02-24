@@ -251,7 +251,10 @@ class Issue
         begin 
             Comment.where(query).joins("INNER JOIN contributors ON contributors.id = comments.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |comment,i| 
                 response[i] = comment.as_json
-                response[i][:sprint_states] = comment.sprint_state.as_json
+                response[i][:sprint_state] = comment.sprint_state.as_json
+                response[i][:sprint_state][:state] = comment.sprint_state.state.as_json
+                response[i][:sprint_state][:sprint] = comment.sprint_state.sprint.as_json
+                response[i][:sprint_state][:sprint][:project] = comment.sprint_state.sprint.project.as_json
             end
             return response
         rescue => e
@@ -259,13 +262,16 @@ class Issue
             return nil
         end
     end
-    
+
     def get_votes query #user_id == posted comment, #contributor_id = received comment
         response = Array.new
         begin 
             Vote.where(query).joins("INNER JOIN contributors ON contributors.id = votes.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |vote,i|
                 response[i] = vote.as_json
-                response[i][:sprint_states] = vote.sprint_state.as_json
+                response[i][:sprint_state] = vote.sprint_state.as_json
+                response[i][:sprint_state][:state] = vote.sprint_state.state.as_json
+                response[i][:sprint_state][:sprint] = vote.sprint_state.sprint.as_json
+                response[i][:sprint_state][:sprint][:project] = vote.sprint_state.sprint.project.as_json
             end
             return response
         rescue => e

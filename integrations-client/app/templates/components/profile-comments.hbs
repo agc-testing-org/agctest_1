@@ -1,0 +1,6 @@
+{{#each comments as |comment|}}
+<div>
+    On {{comment.sprint_state.sprint.project.org}}/{{comment.sprint_state.sprint.project.name}} Sprint {{comment.sprint_state.sprint.id}} {{comment.sprint_state.state.name}} 
+    {{comment.text}}
+</div>
+{{/each}}

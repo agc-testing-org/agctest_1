@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-route-mixin';
 
 export default Ember.Route.extend({
     store: Ember.inject.service(),
@@ -10,7 +9,12 @@ export default Ember.Route.extend({
         return Ember.RSVP.hash({
             repositories: this.store.findAll('repository'),
             //            sprints: this.store.findAll('sprint')
-
+            comments_user_id: this.store.query('comment', {
+                user_id: params.username
+            }),        
+            comments_contributor_id:this.store.query('comment', {
+                contributor_id: params.username
+            }),    
 
         });
     }

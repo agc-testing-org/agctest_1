@@ -7,6 +7,7 @@ export default DS.Model.extend({
     updated_at: attr('date'),
     contributor_id: attr('number'),
     sprint_state_id: attr('number'),
+    sprint_state: DS.belongsTo('sprint-state'),
     user_id: attr('number'),
     text: attr('string')
 });

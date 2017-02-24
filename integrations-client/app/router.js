@@ -16,6 +16,7 @@ Router.map(function() {
             this.route('sprint', {path: '/sprint/:id'}); 
         });
     });
+    this.route('profile',{ path: '/:username'});
 });
 
 export default Router;
