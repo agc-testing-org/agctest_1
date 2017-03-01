@@ -279,4 +279,26 @@ class Issue
             return nil
         end
     end
+
+    def get_contributors query, winner #query w/ sprint_state.contributor_id = user_id for is_winner?, #query w/ sprint_state.merged = 1 for merged?
+        response = Array.new
+        begin
+            if winner
+                winner_sql = "AND contributors.id = sprint_states.contributor_id"
+            else
+                winner_sql = ""
+            end
+            Contributor.where(query).joins("INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN users ON users.id = contributors.user_id #{winner_sql}").each_with_index do |contributor,i|
+                response[i] = contributor.as_json
+                response[i][:sprint_state] = contributor.sprint_state.as_json
+                response[i][:sprint_state][:state] = contributor.sprint_state.state.as_json
+                response[i][:sprint_state][:sprint] = contributor.sprint_state.sprint.as_json
+                response[i][:sprint_state][:sprint][:project] = contributor.sprint_state.sprint.project.as_json
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 end 

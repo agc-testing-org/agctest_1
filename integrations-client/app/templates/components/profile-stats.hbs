@@ -1,0 +1,36 @@
+
+{{#each states as |state|}}
+<div class="stage">
+    {{develop-issue-state state=state}}
+
+    <div class="grid pb-3">
+
+        <div class="box">
+            <div class="point"></div>
+            <span class="badge rounded mr-2">14</span>
+            Contributions 
+        </div>
+        <div class="box">
+            <div class="point"></div>
+            <span class="badge rounded mr-2">14</span>
+            Selected Contributions 
+        </div>
+        <div class="box">
+            <div class="point"></div>
+            <span class="badge rounded mr-2">3</span>
+            Positive Comments
+        </div>
+        <div class="box">
+            <div class="point"></div>
+            <span class="badge rounded mr-2">1</span>
+            Negative Comments
+        </div>
+        <div class="box">
+            <div class="point"></div>
+            <span class="badge rounded mr-2">1</span>
+            Votes
+        </div>
+    </div>
+</div>
+{{/each}}
+

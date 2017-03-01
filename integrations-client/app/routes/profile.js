@@ -14,8 +14,8 @@ export default Ember.Route.extend({
             }),        
             comments_contributor_id:this.store.query('comment', {
                 contributor_id: params.username
-            }),    
-
+            }),   
+            states: this.store.findAll('state'),
         });
     }
 });

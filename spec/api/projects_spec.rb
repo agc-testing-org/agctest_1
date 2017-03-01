@@ -721,7 +721,7 @@ describe "/projects" do
         end
 
     end
-    describe "GET /votes", :focus => true do
+    describe "GET /votes" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors, :votes
         context "user created" do
             before(:each) do
@@ -742,5 +742,27 @@ describe "/projects" do
             end
         end
 
+    end
+    describe "GET /contributors", :focus => true do
+        fixtures :users, :projects, :sprints, :sprint_states, :contributors
+        context "user created" do
+            before(:each) do
+                get "/contributors?user_id=#{users(:adam_confirmed).id}",{}, {}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return contributions based on filter" do
+                expect(@res[0]["id"]).to eq(contributors(:adam_confirmed_1).id)
+            end
+        end
+        context "user received" do
+            before(:each) do
+                @mysql_client.query("update sprint_states set contributor_id = #{contributors(:adam_confirmed_1).id}")
+                get "/contributors?user_id=#{users(:adam_confirmed).id}&contributor_id=#{users(:adam_confirmed).id}",{}, {}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return contributions based on filter" do
+                expect(@res[0]["id"]).to eq(contributors(:adam_confirmed_1).id)
+            end
+        end
     end
 end

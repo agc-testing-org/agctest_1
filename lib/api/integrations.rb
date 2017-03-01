@@ -791,6 +791,18 @@ class Integrations < Sinatra::Base
         return votes.to_json
     end
 
+    contributors_get = lambda do
+        issue = Issue.new
+        winner = false
+        query = {:user_id => params[:user_id]}
+        if params[:contributor_id] #winner
+            winner = true
+        end
+        contributors = issue.get_contributors query, winner
+        return contributors.to_json
+    end
+
+
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
@@ -829,6 +841,7 @@ class Integrations < Sinatra::Base
 
     get "/comments", &comments_get
     get "/votes", &votes_get
+    get "/contributors", &contributors_get
 
     get '/unauthorized' do
         status 401

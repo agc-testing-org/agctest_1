@@ -638,6 +638,11 @@ button{
     margin-bottom:4px;
 }
 
+/* profile */
+.flow.profile .badge{
+    background-color: #28B6C3;
+}
+
 /* Placeholders */
 .placeholders {
     padding-bottom: 3rem;
