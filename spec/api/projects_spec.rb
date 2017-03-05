@@ -699,11 +699,11 @@ describe "/projects" do
             end
         end
     end
-    describe "GET /comments" do
+    describe "GET /aggregates/aggregate-comments" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors, :comments
         context "user created" do
             before(:each) do
-                get "/comments?user_id=#{users(:adam_confirmed).id}",{}, {}
+                get "/aggregates/aggregate-comments?user_id=#{users(:adam_confirmed).id}",{}, {}
                 @res = JSON.parse(last_response.body)
             end
             it "should return comments based on filter" do
@@ -712,7 +712,7 @@ describe "/projects" do
         end
         context "user received" do
             before(:each) do
-                get "/comments?contributor_id=#{users(:adam_confirmed).id}",{}, {}
+                get "/aggregates/aggregate-comments?contributor_id=#{users(:adam_confirmed).id}",{}, {}
                 @res = JSON.parse(last_response.body)
             end
             it "should return comments based on filter" do
@@ -721,11 +721,11 @@ describe "/projects" do
         end
 
     end
-    describe "GET /votes" do
+    describe "GET /aggregates/aggregate-votes" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors, :votes
         context "user created" do
             before(:each) do
-                get "/votes?user_id=#{users(:adam_confirmed).id}",{}, {}
+                get "/aggregates/aggregate-votes?user_id=#{users(:adam_confirmed).id}",{}, {}
                 @res = JSON.parse(last_response.body)
             end
             it "should return votes based on filter" do
@@ -734,7 +734,7 @@ describe "/projects" do
         end
         context "user received" do
             before(:each) do
-                get "/votes?contributor_id=#{users(:adam_confirmed).id}",{}, {}
+                get "/aggregates/aggregate-votes?contributor_id=#{users(:adam_confirmed).id}",{}, {}
                 @res = JSON.parse(last_response.body)
             end
             it "should return votes based on filter" do
@@ -743,11 +743,11 @@ describe "/projects" do
         end
 
     end
-    describe "GET /contributors", :focus => true do
+    describe "GET /aggregates/aggregate-contributors", :focus => true do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         context "user created" do
             before(:each) do
-                get "/contributors?user_id=#{users(:adam_confirmed).id}",{}, {}
+                get "/aggregates/aggregate-contributors?user_id=#{users(:adam_confirmed).id}",{}, {}
                 @res = JSON.parse(last_response.body)
             end
             it "should return contributions based on filter" do
@@ -757,7 +757,7 @@ describe "/projects" do
         context "user received" do
             before(:each) do
                 @mysql_client.query("update sprint_states set contributor_id = #{contributors(:adam_confirmed_1).id}")
-                get "/contributors?user_id=#{users(:adam_confirmed).id}&contributor_id=#{users(:adam_confirmed).id}",{}, {}
+                get "/aggregates/aggregate-contributors?user_id=#{users(:adam_confirmed).id}&contributor_id=#{users(:adam_confirmed).id}",{}, {}
                 @res = JSON.parse(last_response.body)
             end
             it "should return contributions based on filter" do

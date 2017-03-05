@@ -1,34 +1,74 @@
 
-{{#each states as |state|}}
+{{#each model.states as |state|}}
 <div class="stage">
     {{develop-issue-state state=state}}
 
     <div class="grid pb-3">
-
         <div class="box">
             <div class="point"></div>
-            <span class="badge rounded mr-2">14</span>
+            {{#each-in model.contributor_user_id.aggregate as |aggregate|}}
+            
+                {{aggregate}}
+            {{/each-in}}
+            <span class="badge rounded mr-2">{{model.contributor_user_id.length}} This has to be per stage...</span>
             Contributions 
+            {{#each model.contributor_user_id.aggregate as |contributor|}}
+            {{#if (eq contributor.sprint_state_id state.id) }}
+            {{profile-stat model=contributor}}
+            {{/if}}
+            {{/each}}
         </div>
         <div class="box">
             <div class="point"></div>
-            <span class="badge rounded mr-2">14</span>
+            <span class="badge rounded mr-2">{{model.contributor_contributor_id.length}}</span>
             Selected Contributions 
+            {{#each model.contributors_contributor_id as |contributor|}}
+            {{#if (eq contributor.sprint_state_id state.id) }}
+            {{profile-stat model=contributor}}
+            {{/if}}                                         
+            {{/each}}  
         </div>
         <div class="box">
             <div class="point"></div>
-            <span class="badge rounded mr-2">3</span>
-            Positive Comments
+            <span class="badge rounded mr-2">{{model.comments_contributor_id.length}}</span>
+            Comments Contributed
+
+            {{#each model.comments_contributor_id as |comment|}}
+            {{#if (eq comment.sprint_state_id state.id) }}
+            {{profile-stat model=comment}}
+            {{/if}}
+            {{/each}}
         </div>
         <div class="box">
             <div class="point"></div>
-            <span class="badge rounded mr-2">1</span>
-            Negative Comments
+            <span class="badge rounded mr-2">{{model.comments_user_id.length}}</span>
+            Comments Received 
+
+            {{#each model.comments_user_id as |comment|}}
+            {{#if (eq comment.sprint_state_id state.id) }}
+            {{profile-stat model=comment}}
+            {{/if}}
+            {{/each}}
         </div>
         <div class="box">
             <div class="point"></div>
-            <span class="badge rounded mr-2">1</span>
-            Votes
+            <span class="badge rounded mr-2">{{model.votes_user_id.length}}</span>
+            Votes Contributed
+            {{#each model.votes_user_id as |vote|}}
+            {{#if (eq vote.sprint_state_id state.id) }}
+            {{profile-stat model=vote}}
+            {{/if}}
+            {{/each}}
+        </div>
+        <div class="box">
+            <div class="point"></div>
+            <span class="badge rounded mr-2">{{model.votes_contributor_id.length}}</span>
+            Votes Received
+            {{#each model.votes_contributor_id as |vote|}}
+            {{#if (eq vote.sprint_state_id state.id) }}
+            {{profile-stat model=vote}}      
+            {{/if}}                                         
+            {{/each}}    
         </div>
     </div>
 </div>

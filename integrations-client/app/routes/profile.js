@@ -4,18 +4,30 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         //var post_id = this.modelFor('post.show').get('id');
-        //        this.store.adapterFor('sprint').set('namespace', 'projects/' + 1 );
-
+     
         return Ember.RSVP.hash({
+            states: this.store.findAll('state'),
             repositories: this.store.findAll('repository'),
             //            sprints: this.store.findAll('sprint')
-            comments_user_id: this.store.query('comment', {
+            comments_user_id: this.store.queryRecord('aggregate-comment', {
                 user_id: params.username
             }),        
-            comments_contributor_id:this.store.query('comment', {
+            comments_contributor_id:this.store.queryRecord('aggregate-comment', {
                 contributor_id: params.username
-            }),   
-            states: this.store.findAll('state'),
+            }),  
+            votes_user_id: this.store.queryRecord('aggregate-vote', {
+                user_id: params.username
+            }),
+            votes_contributor_id:this.store.queryRecord('aggregate-vote', {
+                contributor_id: params.username
+            }),
+            contributor_user_id: this.store.queryRecord('aggregate-contributor', {
+                user_id: params.username
+            }),
+            contributor_contributor_id:this.store.queryRecord('aggregate-contributor', {
+                contributor_id: params.username,
+                user_id: params.username 
+            }),
         });
     }
 });

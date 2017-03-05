@@ -1,0 +1,9 @@
+<div>
+    {{#if model.text}}
+    On 
+    {{/if}}
+    {{model.sprint_state.sprint.project.org}}/{{model.sprint_state.sprint.project.name}} Sprint {{model.sprint_state.sprint.id}} {{model.sprint_state.state.name}} 
+    {{#if model.text}}
+    {{model.text}}
+    {{/if}}
+</div>

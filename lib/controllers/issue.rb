@@ -245,16 +245,25 @@ class Issue
 
     end
 
+    def object_at_index object
+        if object
+            return object
+        else
+            object = Array.new 
+        end 
+    end
 
     def get_comments query #user_id == posted comment, #contributor_id = received comment
-        response = Array.new
+        response = {} 
         begin 
             Comment.where(query).joins("INNER JOIN contributors ON contributors.id = comments.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |comment,i| 
-                response[i] = comment.as_json
-                response[i][:sprint_state] = comment.sprint_state.as_json
-                response[i][:sprint_state][:state] = comment.sprint_state.state.as_json
-                response[i][:sprint_state][:sprint] = comment.sprint_state.sprint.as_json
-                response[i][:sprint_state][:sprint][:project] = comment.sprint_state.sprint.project.as_json
+                response[comment.sprint_state.state_id] = (object_at_index response[comment.sprint_state.id])
+                index = response[comment.sprint_state.state_id].length
+                response[comment.sprint_state.state_id][index] = comment.as_json
+                response[comment.sprint_state.state_id][index][:sprint_state] = comment.sprint_state.as_json
+                response[comment.sprint_state.state_id][index][:sprint_state][:state] = comment.sprint_state.state.as_json
+                response[comment.sprint_state.state_id][index][:sprint_state][:sprint] = comment.sprint_state.sprint.as_json
+                response[comment.sprint_state.state_id][index][:sprint_state][:sprint][:project] = comment.sprint_state.sprint.project.as_json
             end
             return response
         rescue => e
@@ -264,14 +273,16 @@ class Issue
     end
 
     def get_votes query #user_id == posted comment, #contributor_id = received comment
-        response = Array.new
+        response = {} 
         begin 
             Vote.where(query).joins("INNER JOIN contributors ON contributors.id = votes.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |vote,i|
-                response[i] = vote.as_json
-                response[i][:sprint_state] = vote.sprint_state.as_json
-                response[i][:sprint_state][:state] = vote.sprint_state.state.as_json
-                response[i][:sprint_state][:sprint] = vote.sprint_state.sprint.as_json
-                response[i][:sprint_state][:sprint][:project] = vote.sprint_state.sprint.project.as_json
+                response[vote.sprint_state.state_id] = (object_at_index response[vote.sprint_state.id])
+                index = response[vote.sprint_state.state_id].length
+                response[vote.sprint_state.state_id][index] = vote.as_json
+                response[vote.sprint_state.state_id][index][:sprint_state] = vote.sprint_state.as_json
+                response[vote.sprint_state.state_id][index][:sprint_state][:state] = vote.sprint_state.state.as_json
+                response[vote.sprint_state.state_id][index][:sprint_state][:sprint] = vote.sprint_state.sprint.as_json
+                response[vote.sprint_state.state_id][index][:sprint_state][:sprint][:project] = vote.sprint_state.sprint.project.as_json
             end
             return response
         rescue => e
@@ -281,7 +292,7 @@ class Issue
     end
 
     def get_contributors query, winner #query w/ sprint_state.contributor_id = user_id for is_winner?, #query w/ sprint_state.merged = 1 for merged?
-        response = Array.new
+        response = {}
         begin
             if winner
                 winner_sql = "AND contributors.id = sprint_states.contributor_id"
@@ -289,11 +300,13 @@ class Issue
                 winner_sql = ""
             end
             Contributor.where(query).joins("INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN users ON users.id = contributors.user_id #{winner_sql}").each_with_index do |contributor,i|
-                response[i] = contributor.as_json
-                response[i][:sprint_state] = contributor.sprint_state.as_json
-                response[i][:sprint_state][:state] = contributor.sprint_state.state.as_json
-                response[i][:sprint_state][:sprint] = contributor.sprint_state.sprint.as_json
-                response[i][:sprint_state][:sprint][:project] = contributor.sprint_state.sprint.project.as_json
+                response[contributor.sprint_state.state_id] = (object_at_index response[contributor.sprint_state.id])
+                index = response[contributor.sprint_state.state_id].length
+                response[contributor.sprint_state.state_id][index] = contributor.as_json
+                response[contributor.sprint_state.state_id][index][:sprint_state] = contributor.sprint_state.as_json
+                response[contributor.sprint_state.state_id][index][:sprint_state][:state] = contributor.sprint_state.state.as_json
+                response[contributor.sprint_state.state_id][index][:sprint_state][:sprint] = contributor.sprint_state.sprint.as_json
+                response[contributor.sprint_state.state_id][index][:sprint_state][:sprint][:project] = contributor.sprint_state.sprint.project.as_json
             end
             return response
         rescue => e

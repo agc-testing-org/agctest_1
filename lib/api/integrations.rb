@@ -771,24 +771,30 @@ class Integrations < Sinatra::Base
 
     comments_get = lambda do
         issue = Issue.new
+        id = -1
         if params[:contributor_id]
             query = {"contributors.user_id" => params[:contributor_id]}
+            id = params[:contributor_id]
         else
             query = {:user_id => params[:user_id]}
+            id = params[:user_id]
         end
         comments = issue.get_comments query
-        return comments.to_json
+        return {:aggregate => comments, :id => id}.to_json
     end
 
     votes_get = lambda do
         issue = Issue.new
+        id = -1
         if params[:contributor_id]
             query = {"contributors.user_id" => params[:contributor_id]}
+            id = params[:contributor_id]
         else
             query = {:user_id => params[:user_id]}
+            id = params[:user_id]
         end
         votes = issue.get_votes query
-        return votes.to_json
+        return {:aggregate => votes, :id => id}.to_json
     end
 
     contributors_get = lambda do
@@ -799,7 +805,7 @@ class Integrations < Sinatra::Base
             winner = true
         end
         contributors = issue.get_contributors query, winner
-        return contributors.to_json
+        return {:aggregate => contributors, :id => params[:user_id]}.to_json
     end
 
 
@@ -839,9 +845,9 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
 
-    get "/comments", &comments_get
-    get "/votes", &votes_get
-    get "/contributors", &contributors_get
+    get "/aggregate-comments", &comments_get
+    get "/aggregate-votes", &votes_get
+    get "/aggregate-contributors", &contributors_get
 
     get '/unauthorized' do
         status 401

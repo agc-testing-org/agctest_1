@@ -1,11 +1,7 @@
 <div class="container flow profile">
     <div class="row">
         <div class="col-sm-12 col-md-12">
-            {{profile-stats states=model.states}}
-        </div>
-        <div class="col-sm-12 offset-md-2 col-md-8">
-            {{profile-comments comments=model.comments_contributor_id }}
-            {{profile-comments comments=model.comments_user_id }}
+            {{profile-stats model=model}}
         </div>
     </div>
 </div>
