@@ -2,25 +2,23 @@
 {{#each model.states as |state|}}
 <div class="stage">
     {{develop-issue-state state=state}}
-    {{#unless (eq state.name "idea")}}
-    {{#unless (eq state.name "closed")}}
+    {{#if state.contributors}}
     <div class="grid pb-3">
 
-        {{profile-stats aggregate=model.contributors_user_id.aggregate state=state description="Contributions"}}
+        {{profile-stats aggregate=model.contributors.author state=state description="Contributions"}}
 
-        {{profile-stats aggregate=model.contributors_contributor_id.aggregate state=state description="Selected Contributions"}}
+        {{profile-stats aggregate=model.contributors.receiver state=state description="Selected Contributions"}}
 
-        {{profile-stats aggregate=model.comments_contributor_id.aggregate state=state description="Comments Contributed"}}
+        {{profile-stats aggregate=model.comments.author state=state description="Comments Contributed"}}
 
-        {{profile-stats aggregate=model.comments_user_id.aggregate state=state description="Comments Received"}}
+        {{profile-stats aggregate=model.comments.receiver state=state description="Comments Received"}}
 
-        {{profile-stats aggregate=model.votes_user_id.aggregate state=state description="Votes Cast"}}
+        {{profile-stats aggregate=model.votes.author state=state description="Votes Cast"}}
 
-        {{profile-stats aggregate=model.votes_contributor_id.aggregate state=state description="Votes Received"}}
+        {{profile-stats aggregate=model.votes.receiver state=state description="Votes Received"}}
 
     </div>
-    {{/unless}}
-    {{/unless}}
+    {{/if}}
 </div>
 {{/each}}
 

@@ -1,13 +1,13 @@
 {{#each-in (limited values count) as |key model|}}
 <div class="box box-nested">
-    <div class="point"></div>
+    <div class="point circular"></div>
     {{#link-to "develop.project.sprint" model.sprint_state.sprint.project.org model.sprint_state.sprint.project.id model.sprint_state.sprint.id}}
     {{model.sprint_state.sprint.project.org}}/{{model.sprint_state.sprint.project.name}} Sprint {{model.sprint_state.sprint.id}} 
     {{/link-to}}
     {{#if model.text}}
-    <div class="quotation text-muted">
-        <i class="fa fa-quote-left" aria-hidden="true"></i> {{model.text}} <i class="fa fa-quote-right" aria-hidden="true"></i> - <em>{{moment-from-now model.created_at}}</em>
-    </div>
+    <span class="comment">
+        {{model.text}} - <em class="text-muted">{{moment-from-now model.created_at}}</em>
+    </span>
     {{/if}}
 </div>
 {{/each-in}}

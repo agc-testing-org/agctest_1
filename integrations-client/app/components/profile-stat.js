@@ -8,7 +8,7 @@ export default Ember.Component.extend({
     showingAll: false,
     actions: {
         showAll(yesNo){
-            var number = 3;
+            var number = 1;
             if(yesNo){
                 number = this.get("values").toArray().length;
             }

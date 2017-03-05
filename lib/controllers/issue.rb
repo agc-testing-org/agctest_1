@@ -245,11 +245,11 @@ class Issue
 
     end
 
-    def object_at_index object
-        if object
-            return object
+    def object_at_index array
+        if array
+            return array
         else
-            object = Array.new 
+            return Array.new 
         end 
     end
 
@@ -257,7 +257,7 @@ class Issue
         response = {} 
         begin 
             Comment.where(query).joins("INNER JOIN contributors ON contributors.id = comments.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |comment,i| 
-                response[comment.sprint_state.state_id] = (object_at_index response[comment.sprint_state.id])
+                response[comment.sprint_state.state_id] = (object_at_index response[comment.sprint_state.state_id])
                 index = response[comment.sprint_state.state_id].length
                 response[comment.sprint_state.state_id][index] = comment.as_json
                 response[comment.sprint_state.state_id][index][:sprint_state] = comment.sprint_state.as_json
@@ -276,7 +276,7 @@ class Issue
         response = {} 
         begin 
             Vote.where(query).joins("INNER JOIN contributors ON contributors.id = votes.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |vote,i|
-                response[vote.sprint_state.state_id] = (object_at_index response[vote.sprint_state.id])
+                response[vote.sprint_state.state_id] = (object_at_index response[vote.sprint_state.state_id])
                 index = response[vote.sprint_state.state_id].length
                 response[vote.sprint_state.state_id][index] = vote.as_json
                 response[vote.sprint_state.state_id][index][:sprint_state] = vote.sprint_state.as_json
@@ -300,7 +300,7 @@ class Issue
                 winner_sql = ""
             end
             Contributor.where(query).joins("INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN users ON users.id = contributors.user_id #{winner_sql}").each_with_index do |contributor,i|
-                response[contributor.sprint_state.state_id] = (object_at_index response[contributor.sprint_state.id])
+                response[contributor.sprint_state.state_id] = (object_at_index response[contributor.sprint_state.state_id])
                 index = response[contributor.sprint_state.state_id].length
                 response[contributor.sprint_state.state_id][index] = contributor.as_json
                 response[contributor.sprint_state.state_id][index][:sprint_state] = contributor.sprint_state.as_json

@@ -771,41 +771,37 @@ class Integrations < Sinatra::Base
 
     comments_get = lambda do
         issue = Issue.new
-        id = -1
-        if params[:contributor_id]
-            query = {"contributors.user_id" => params[:contributor_id]}
-            id = params[:contributor_id]
-        else
-            query = {:user_id => params[:user_id]}
-            id = params[:user_id]
-        end
-        comments = issue.get_comments query
-        return {:aggregate => comments, :id => id}.to_json
+
+        query = {"contributors.user_id" => params[:contributor_id]}
+        author = issue.get_comments query
+
+        query = {:user_id => params[:user_id]}
+        receiver = issue.get_comments query
+
+        return {:author => author, :receiver => receiver, :id => params[:user_id]}.to_json
     end
 
     votes_get = lambda do
         issue = Issue.new
-        id = -1
-        if params[:contributor_id]
-            query = {"contributors.user_id" => params[:contributor_id]}
-            id = params[:contributor_id]
-        else
-            query = {:user_id => params[:user_id]}
-            id = params[:user_id]
-        end
-        votes = issue.get_votes query
-        return {:aggregate => votes, :id => id}.to_json
+
+        query = {"contributors.user_id" => params[:contributor_id]}
+        author = issue.get_votes query
+
+        query = {:user_id => params[:user_id]}
+        receiver = issue.get_votes query
+
+        return {:author => author, :receiver => receiver, :id => params[:user_id]}.to_json
     end
 
     contributors_get = lambda do
         issue = Issue.new
-        winner = false
+
         query = {:user_id => params[:user_id]}
-        if params[:contributor_id] #winner
-            winner = true
-        end
-        contributors = issue.get_contributors query, winner
-        return {:aggregate => contributors, :id => params[:user_id]}.to_json
+
+        author = issue.get_contributors query, false #all contributions
+        receiver = issue.get_contributors query, true #winning contributions
+
+        return {:author => author, :receiver => receiver, :id => params[:user_id]}.to_json
     end
 
 

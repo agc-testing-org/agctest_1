@@ -24,7 +24,7 @@
             {{#if sprint_state.state.contributors}}
             {{#unless sprint_state.contributors}}
             {{#unless sessionAccount.account.github}}
-            {{user-login-github class="btn btn-outline-secondary rounded"}}
+            {{user-login-github text=" to join"}}
             {{else}}
             <button class="btn btn-outline-secondary rounded" {{action "join" model.sprint.project.id model.sprint.sprint_states }}>Join</button>        
             {{/unless}}
@@ -33,7 +33,7 @@
             {{#each sprint_state.contributors as |contributor|}}
 
             <div class="box">
-                <div class="point"></div>
+                <div class="point circular"></div>
                 {{develop-contribute contributor=contributor sprint_state=sprint_state project=model.sprint.project sprint=model.sprint}}
             </div>
 
@@ -46,7 +46,7 @@
             {{#each sprint_state.contributors as |contributor|}}
 
             <div class="box">       
-                <div class="point"></div>
+                <div class="point circular"></div>
                 {{#if (eq contributor.id sprint_state.contributor_id)}}<i class="fa fa-trophy" aria-hidden="true"></i> {{#if sprint_state.merged}}<span class="badge badge-default rounded">MERGED</span>{{else}}<span class="badge badge-default rounded">NOT MERGED</span>{{/if}}{{/if}} <a target="_blank" href="https://github.com/{{model.sprint.project.org}}/{{model.sprint.project.name}}/compare/{{sprint_state.sha}}...{{sprint_state.id}}_{{contributor.id}}">{{model.sprint.project.org}}/{{model.sprint.project.name}} branch {{sprint_state.id}}_{{contributor.id}}</a>
                 {{develop-issue-comments comments=contributor.comments}}
                 {{develop-issue-comment contributor=contributor sprint_state=sprint_state project=model.sprint.project.id class="mb-3 comments"}}

@@ -1,13 +1,13 @@
 <div class="box">
-    <div class="point"></div>
+    <div class="point circular"></div>
     {{#if (includes aggregate state.id)}}
     {{#each-in aggregate as |key values|}}
     {{#if (eq key state.id)}}
-    <div class="stat"><span class="badge rounded mr-2">{{values.length}}</span> {{description}}</div>
+    <div class="stat"><span class="badge rounded mr-1">{{values.length}}</span> {{description}}</div>
     {{profile-stat values=values}}
     {{/if}}
     {{/each-in}}
     {{else}}
-    <div class="stat"><span class="badge rounded mr-2">0</span> {{description}}</div>
+    <div class="stat"><span class="badge rounded mr-1">0</span> {{description}}</div>
     {{/if}}
 </div>
