@@ -1,0 +1,20 @@
+import Ember from 'ember';
+
+export default Ember.Component.extend({
+    session: Ember.inject.service('session'),
+    store: Ember.inject.service(),
+    sessionAccount: Ember.inject.service('session-account'),
+    count: 1,
+    showingAll: false,
+    actions: {
+        showAll(yesNo){
+            var number = 3;
+            if(yesNo){
+                number = this.get("values").toArray().length;
+            }
+            console.log(number);
+            this.set("count",number);
+            this.set("showingAll",yesNo);
+        }
+    }
+});

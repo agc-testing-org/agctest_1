@@ -3,13 +3,11 @@
     {{#if (includes aggregate state.id)}}
     {{#each-in aggregate as |key values|}}
     {{#if (eq key state.id)}}
-    <span class="badge rounded mr-2">{{values.length}}</span> {{description}} 
-    {{#each-in values as |keyb valuesb|}}
-    {{profile-stat model=valuesb}}
-    {{/each-in}}
+    <div class="stat"><span class="badge rounded mr-2">{{values.length}}</span> {{description}}</div>
+    {{profile-stat values=values}}
     {{/if}}
     {{/each-in}}
     {{else}}
-    <span class="badge rounded mr-2">0</span> {{description}}
+    <div class="stat"><span class="badge rounded mr-2">0</span> {{description}}</div>
     {{/if}}
 </div>

@@ -513,7 +513,7 @@ button{
 .flow .stage .grid .box .point{
     position: absolute;
     left: -29px;
-    top: 9px;
+    top: 10px;
     width: 10px;
     height: 4px;
     background-color: #ededed;
@@ -642,6 +642,17 @@ button{
 .flow.profile .badge{
     background-color: #28B6C3;
 }
+.flow.profile .stat{
+    font-size:18px; 
+    margin-top:6px;
+    font-weight:300;
+}
+.flow.profile .stat .badge{
+    height: 30px;
+    width: 30px;
+    line-height: 18px;
+    font-size: 20px;
+}
 
 /* Placeholders */
 .placeholders {
@@ -651,9 +662,6 @@ button{
 .placeholder img {
     padding-top: 1.5rem;
     padding-bottom: 1.5rem;
-}
-.quotation{
-
 }
 
 /* misc */

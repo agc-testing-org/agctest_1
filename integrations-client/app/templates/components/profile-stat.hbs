@@ -1,9 +1,23 @@
+{{#each-in (limited values count) as |key model|}}
 <div class="box box-nested">
     <div class="point"></div>
+    {{#link-to "develop.project.sprint" model.sprint_state.sprint.project.org model.sprint_state.sprint.project.id model.sprint_state.sprint.id}}
     {{model.sprint_state.sprint.project.org}}/{{model.sprint_state.sprint.project.name}} Sprint {{model.sprint_state.sprint.id}} 
+    {{/link-to}}
     {{#if model.text}}
     <div class="quotation text-muted">
-        <i class="fa fa-quote-left" aria-hidden="true"></i> {{model.text}} <i class="fa fa-quote-right" aria-hidden="true"></i> - <em>{{moment-from-now model.text.created_at}}</em>
+        <i class="fa fa-quote-left" aria-hidden="true"></i> {{model.text}} <i class="fa fa-quote-right" aria-hidden="true"></i> - <em>{{moment-from-now model.created_at}}</em>
     </div>
     {{/if}}
 </div>
+{{/each-in}}
+
+<small>
+    {{#if showingAll}}
+    <a {{action "showAll" false}}>Show Less</a>
+    {{else}}
+    {{#if (greater-than values.length count)}}
+    <a {{action "showAll" true}}>Show More</a>
+    {{/if}}
+    {{/if}}
+</small>
