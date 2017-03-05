@@ -21,10 +21,10 @@ export default Ember.Route.extend({
             votes_contributor_id:this.store.queryRecord('aggregate-vote', {
                 contributor_id: params.username
             }),
-            contributor_user_id: this.store.queryRecord('aggregate-contributor', {
+            contributors_user_id: this.store.queryRecord('aggregate-contributor', {
                 user_id: params.username
             }),
-            contributor_contributor_id:this.store.queryRecord('aggregate-contributor', {
+            contributors_contributor_id:this.store.queryRecord('aggregate-contributor', {
                 contributor_id: params.username,
                 user_id: params.username 
             }),

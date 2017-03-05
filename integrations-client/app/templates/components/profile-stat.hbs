@@ -1,9 +1,9 @@
-<div>
+<div class="box box-nested">
+    <div class="point"></div>
+    {{model.sprint_state.sprint.project.org}}/{{model.sprint_state.sprint.project.name}} Sprint {{model.sprint_state.sprint.id}} 
     {{#if model.text}}
-    On 
-    {{/if}}
-    {{model.sprint_state.sprint.project.org}}/{{model.sprint_state.sprint.project.name}} Sprint {{model.sprint_state.sprint.id}} {{model.sprint_state.state.name}} 
-    {{#if model.text}}
-    {{model.text}}
+    <div class="quotation text-muted">
+        <i class="fa fa-quote-left" aria-hidden="true"></i> {{model.text}} <i class="fa fa-quote-right" aria-hidden="true"></i> - <em>{{moment-from-now model.text.created_at}}</em>
+    </div>
     {{/if}}
 </div>

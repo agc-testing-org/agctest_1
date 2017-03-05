@@ -1,0 +1,26 @@
+
+{{#each model.states as |state|}}
+<div class="stage">
+    {{develop-issue-state state=state}}
+    {{#unless (eq state.name "idea")}}
+    {{#unless (eq state.name "closed")}}
+    <div class="grid pb-3">
+
+        {{profile-stats aggregate=model.contributors_user_id.aggregate state=state description="Contributions"}}
+
+        {{profile-stats aggregate=model.contributors_contributor_id.aggregate state=state description="Selected Contributions"}}
+
+        {{profile-stats aggregate=model.comments_contributor_id.aggregate state=state description="Comments Contributed"}}
+
+        {{profile-stats aggregate=model.comments_user_id.aggregate state=state description="Comments Received"}}
+
+        {{profile-stats aggregate=model.votes_user_id.aggregate state=state description="Votes Cast"}}
+
+        {{profile-stats aggregate=model.votes_contributor_id.aggregate state=state description="Votes Received"}}
+
+    </div>
+    {{/unless}}
+    {{/unless}}
+</div>
+{{/each}}
+
