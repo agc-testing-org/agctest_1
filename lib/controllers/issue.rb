@@ -20,7 +20,7 @@ class Issue
 
     def get_sprint_state sprint_state_id
         begin
-            return SprintState.includes(:state).find_by(:id => sprint_state_id)
+            return SprintState.find_by(:id => sprint_state_id)
         rescue => e
             puts e
             return nil
@@ -153,7 +153,7 @@ class Issue
     def get_sprint_states query
         begin
             response = Array.new
-            SprintState.joins(:sprint).where(query).includes(:state,:contributors).each_with_index do |ss,i|
+            SprintState.joins(:sprint).where(query).each_with_index do |ss,i|
                 response[i] = ss.as_json
             end
             return response
@@ -166,15 +166,15 @@ class Issue
     def get_sprints query, user_id
         begin
             response = Array.new
-            Sprint.where(query).includes(:project).includes(:sprint_states).each_with_index do |s,i|
+            Sprint.where(query).each_with_index do |s,i|
                 response[i] = s.as_json
                 response[i][:project] = s.project.as_json
                 response[i][:sprint_states] = []
-                s.sprint_states.includes(:state,:contributors).each_with_index do |ss,j|
+                s.sprint_states.each_with_index do |ss,j|
                     response[i][:sprint_states][j] = ss.as_json
                     response[i][:sprint_states][j][:state] = ss.state.as_json 
                     response[i][:sprint_states][j][:contributors] = []
-                    ss.contributors.includes(:comments,:votes).each_with_index do |c,k|
+                    ss.contributors.each_with_index do |c,k|
                         response[i][:sprint_states][j][:contributors][k] = {
                             :id => c.id,
                             :created_at => c.created_at,
@@ -204,7 +204,7 @@ class Issue
     def get_events query
         begin
             response = Array.new
-            SprintTimeline.where(query).includes(:sprint,:user,:label,:state,:sprint_state).each_with_index do |st,i|
+            SprintTimeline.where(query).each_with_index do |st,i|
                 response[i] = {
                     :id => st.id,
                     :created_at => st.created_at,
@@ -256,7 +256,7 @@ class Issue
     def get_comments query #user_id == posted comment, #contributor_id = received comment
         response = {} 
         begin 
-            Comment.where(query).joins("INNER JOIN contributors ON contributors.id = comments.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |comment,i| 
+            Comment.where(query).joins("INNER JOIN contributors ON contributors.id = comments.contributor_id INNER JOIN users ON users.id = contributors.user_id").each_with_index do |comment,i| 
                 response[comment.sprint_state.state_id] = (object_at_index response[comment.sprint_state.state_id])
                 index = response[comment.sprint_state.state_id].length
                 response[comment.sprint_state.state_id][index] = comment.as_json
@@ -275,7 +275,7 @@ class Issue
     def get_votes query #user_id == posted comment, #contributor_id = received comment
         response = {} 
         begin 
-            Vote.where(query).joins("INNER JOIN contributors ON contributors.id = votes.contributor_id INNER JOIN users ON users.id = contributors.user_id").includes(:sprint_state).each_with_index do |vote,i|
+            Vote.where(query).joins("INNER JOIN contributors ON contributors.id = votes.contributor_id INNER JOIN users ON users.id = contributors.user_id").each_with_index do |vote,i|
                 response[vote.sprint_state.state_id] = (object_at_index response[vote.sprint_state.state_id])
                 index = response[vote.sprint_state.state_id].length
                 response[vote.sprint_state.state_id][index] = vote.as_json
