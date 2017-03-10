@@ -3,6 +3,8 @@
 
     <h4>{{model.sprint.description}}</h4>
 
+    {{develop-issue-skillsets skillsets=model.skillsets}}
+
     <div class="stage mt-2">
         {{#if model.sprint.sprint_states}}
         {{develop-issue-state state=model.idea}}

@@ -402,6 +402,7 @@ describe "/projects" do
             end
         end
     end
+
     describe "POST /projects/:id/contributors" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
@@ -743,7 +744,7 @@ describe "/projects" do
         end
 
     end
-    describe "GET /aggregates/aggregate-contributors", :focus => true do
+    describe "GET /aggregates/aggregate-contributors" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         context "user created" do
             before(:each) do
@@ -765,4 +766,63 @@ describe "/projects" do
             end
         end
     end
+
+
+    shared_examples_for "sprint_skillset_update" do
+        context "response" do
+            it "should return skillset_id" do
+                expect(@res["skillset_id"]).to eq(@skillset_id)
+            end
+            it "should return sprint_id" do
+                expect(@res["sprint_id"]).to eq(@sprint_id)
+            end
+            it "should return active" do
+                expect(@res["active"]).to eq(@active)
+            end
+        end
+        context "sprint_skillset" do
+            it "should include most recent active" do
+                expect(@mysql["active"]).to eq(@active ? 1 : 0)
+            end
+        end
+    end
+
+    describe "PATCH /skillsets", :focus => true do
+        fixtures :skillsets, :sprints
+        before(:each) do
+            @sprint_id = sprints(:sprint_1).id
+            @skillset_id = skillsets(:skillset_1).id 
+        end
+        context "admin" do
+            context "skillset exists" do
+                fixtures :sprint_skillsets
+                before(:each) do
+                    @active = false 
+                    patch "/skillsets",{:sprint_id => @sprint_id, :skillset_id => @skillset_id, :active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
+                end
+                it_behaves_like "sprint_skillset_update"
+            end 
+            context "skillset does not exist" do
+                before(:each) do
+                    @active = true
+                    patch "/skillsets",{:sprint_id => @sprint_id, :skillset_id => @skillset_id, :active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_skillsets").first
+                end
+                it_behaves_like "sprint_skillset_update"
+            end
+        end
+        context "non-admin" do
+            before(:each) do
+                @active = false
+                patch "/skillsets",{:sprint_id => @sprint_id, :skillset_id => @skillset_id, :active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return 401" do
+                expect(last_response.status).to eq(401) 
+            end
+        end
+    end 
 end

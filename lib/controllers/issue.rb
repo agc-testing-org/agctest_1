@@ -232,17 +232,30 @@ class Issue
         end
     end
 
-    def update_skillsets sprint_id, skillset_id, active
+    def get_skillsets query
+        sql = ""
+        if query
+            puts query.inspect
+            sql = "AND sprint_skillsets.sprint_id = #{query["sprint_skillsets.sprint_id"].to_i}"
+        end
         begin
-            return role = SprintSkillset.find_or_initialize_by(:sprint_id => sprint_id, :skillset_id => skillset_id).update_attributes!(:active => active)
+            return Skillset.joins("LEFT JOIN sprint_skillsets ON skillsets.id = sprint_skillsets.skillset_id #{sql}").select("skillsets.name","sprint_skillsets.active","skillsets.id").as_json
         rescue => e
             puts e
             return nil
         end
     end
 
-    def get_skillsets
 
+    def update_skillsets sprint_id, skillset_id, active
+        begin
+            ss = SprintSkillset.find_or_initialize_by(:sprint_id => sprint_id, :skillset_id => skillset_id)
+            ss.update_attributes!(:active => active)
+            return ss
+        rescue => e
+            puts e
+            return nil
+        end
     end
 
     def object_at_index array

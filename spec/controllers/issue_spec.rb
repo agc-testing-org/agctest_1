@@ -31,7 +31,7 @@ describe ".Issue" do
     context "#log_event" do
         #covered by API test
     end
-    context "#get_state" do
+    context "#get_states" do
         fixtures :states
         context "state exists" do
             it "should return state" do
@@ -46,6 +46,32 @@ describe ".Issue" do
             end
         end
     end
+    context "#get_skillsets", :focus => true do
+        fixtures :skillsets, :sprints, :sprint_skillsets
+        context "skillset exists" do
+            context "skillset" do
+                before(:each) do
+                    @query = {"sprint_skillsets.sprint_id" => sprint_skillsets(:sprint_1_skillset_1).sprint_id}
+                end
+                it "should include name" do
+                    expect((@issue.get_skillsets @query)[0]["name"]).to eq(skillsets(:skillset_1).name)
+                end
+                it "should include id" do
+                    expect((@issue.get_skillsets @query)[0]["id"]).to eq(skillsets(:skillset_1).id)
+                end
+                it "should include active" do
+                    expect((@issue.get_skillsets @query)[0]["active"] == 1).to eq(sprint_skillsets(:sprint_1_skillset_1).active)
+                end
+            end
+        end
+        context "skillset does not exist" do
+            it "should return nil" do
+                query = {:id => 1000} 
+                expect((@issue.get_skillsets query)[0]).to be nil
+            end
+        end
+    end 
+
     context "#last_event" do
         fixtures :sprint_timelines
         context "after exists" do

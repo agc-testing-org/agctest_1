@@ -303,6 +303,34 @@ class Integrations < Sinatra::Base
         return (issue.get_states query).to_json
     end
 
+    skillsets_get = lambda do
+        issue = Issue.new
+        return (issue.get_skillsets params).to_json
+    end
+
+    skillsets_patch = lambda do
+        protected!
+        status 401          
+        response = {}  
+        if @session_hash["admin"]
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if fields[:sprint_id] && fields[:skillset_id]
+                    issue = Issue.new
+                    response = (issue.update_skillsets fields[:sprint_id], fields[:skillset_id], fields[:active])           
+                    if response
+                        status 200
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
+
     repositories_get = lambda do
         protected!
         repo = Repo.new
@@ -816,6 +844,8 @@ class Integrations < Sinatra::Base
 
     get "/roles", &roles_get
     get "/states", &states_get
+    get "/skillsets", &skillsets_get
+    patch "/skillsets", &skillsets_patch
 
     get "/repositories", &repositories_get
 
