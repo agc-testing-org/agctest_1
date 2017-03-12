@@ -232,20 +232,23 @@ class Issue
         end
     end
 
-    def get_skillsets query
-        sql = ""
-        if query
-            puts query.inspect
-            sql = "AND sprint_skillsets.sprint_id = #{query["sprint_skillsets.sprint_id"].to_i}"
-        end
+    def get_skillsets
         begin
-            return Skillset.joins("LEFT JOIN sprint_skillsets ON skillsets.id = sprint_skillsets.skillset_id #{sql}").select("skillsets.name","sprint_skillsets.active","skillsets.id").as_json
+            return Skillset.all.as_json
         rescue => e
             puts e
             return nil
         end
     end
 
+    def get_sprint_skillsets sprint_id, query
+        begin            
+            return Skillset.joins("LEFT JOIN sprint_skillsets ON sprint_skillsets.id = skillsets.id AND sprint_skillsets.sprint_id = #{sprint_id.to_i} OR sprint_skillsets.sprint_id is null").where(query).select("skillsets.id","skillsets.name","sprint_skillsets.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 
     def update_skillsets sprint_id, skillset_id, active
         begin

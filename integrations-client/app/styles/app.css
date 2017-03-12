@@ -477,6 +477,14 @@ button{
     font-size: 12px;
 }
 
+.flow .badge.selected{
+    background-color: #28B6C3; 
+}
+.flow .badge.unselected{
+    background-color: #f0f0f0;
+    color: #fff;
+}
+
 .flow .list-group{
     border: 3px solid #ededed;
     border-bottom: 1px solid #ededed;

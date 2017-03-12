@@ -7,16 +7,13 @@ export default Ember.Route.extend({
             states: this.store.findAll('state'),
             repositories: this.store.findAll('repository'),
             comments: this.store.queryRecord('aggregate-comment', {
-                user_id: params.username,
-                contributor_id: params.username
+                user_id: params.username
             }),        
             votes: this.store.queryRecord('aggregate-vote', {
-                user_id: params.username,
-                contributor_id: params.username
+                user_id: params.username
             }),
             contributors: this.store.queryRecord('aggregate-contributor', {
-                user_id: params.username,
-                contributor_id: params.username
+                user_id: params.username
             })
         });
     }

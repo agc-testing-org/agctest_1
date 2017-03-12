@@ -305,10 +305,21 @@ class Integrations < Sinatra::Base
 
     skillsets_get = lambda do
         issue = Issue.new
-        return (issue.get_skillsets params).to_json
+        return (issue.get_skillsets).to_json
     end
 
-    skillsets_patch = lambda do
+    sprint_skillsets_get = lambda do
+        issue = Issue.new
+        return (issue.get_sprint_skillsets params[:sprint_id], {}).to_json
+    end
+
+    sprint_skillsets_get_by_skillset = lambda do
+        issue = Issue.new
+        query = {:id => params[:skillset_id]}
+        return (issue.get_sprint_skillsets params[:sprint_id], query)[0].to_json
+    end
+
+    sprint_skillsets_patch = lambda do
         protected!
         status 401          
         response = {}  
@@ -317,11 +328,11 @@ class Integrations < Sinatra::Base
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:sprint_id] && fields[:skillset_id]
+                if params[:sprint_id] && params[:skillset_id]
                     issue = Issue.new
-                    response = (issue.update_skillsets fields[:sprint_id], fields[:skillset_id], fields[:active])           
+                    response = (issue.update_skillsets params[:sprint_id], params[:skillset_id], fields[:active])           
                     if response
-                        status 200
+                        status 201
                     end
                 end
             rescue => e
@@ -800,7 +811,7 @@ class Integrations < Sinatra::Base
     comments_get = lambda do
         issue = Issue.new
 
-        query = {"contributors.user_id" => params[:contributor_id]}
+        query = {"contributors.user_id" => params[:user_id]}
         author = issue.get_comments query
 
         query = {:user_id => params[:user_id]}
@@ -812,7 +823,7 @@ class Integrations < Sinatra::Base
     votes_get = lambda do
         issue = Issue.new
 
-        query = {"contributors.user_id" => params[:contributor_id]}
+        query = {"contributors.user_id" => params[:user_id]}
         author = issue.get_votes query
 
         query = {:user_id => params[:user_id]}
@@ -845,7 +856,10 @@ class Integrations < Sinatra::Base
     get "/roles", &roles_get
     get "/states", &states_get
     get "/skillsets", &skillsets_get
-    patch "/skillsets", &skillsets_patch
+
+    get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
+    get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset
+    patch "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_patch 
 
     get "/repositories", &repositories_get
 

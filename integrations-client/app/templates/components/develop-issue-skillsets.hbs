@@ -1,3 +1,11 @@
 {{#each skillsets as |skillset|}}
-<span class="badge badge-default rounded">{{skillset.name}}</span>
+{{#if sessionAccount.account.admin}}
+{{#if skillset.active}}
+<span {{action "updateSkillset" skillset.id false}} class="badge badge-default rounded selected">{{skillset.name}}</span>
+{{else}}
+<span {{action "updateSkillset" skillset.id true}} class="badge badge-default rounded unselected">{{skillset.name}}</span>
+{{/if}}
+{{else}}
+<span class="badge badge-default rounded selected">{{skillset.name}}</span>
+{{/if}}
 {{/each}}

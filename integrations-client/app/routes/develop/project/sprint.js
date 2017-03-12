@@ -12,12 +12,13 @@ export default Ember.Route.extend({
         console.log(this.paramsFor("develop.project").org);
         console.log(this.modelFor("develop.project"));
 
+        this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
         return Ember.RSVP.hash({
             events: this.store.query('event', {
                 sprint_id: params.id
             }),
             skillsets: this.store.query('skillset', {
-                "sprint_skillsets.sprint_id": params.id  
+
             }),
             sprint: this.store.findRecord('sprint', params.id),
             idea: this.store.peekRecord('state', 1)
