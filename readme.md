@@ -44,8 +44,12 @@
 
 ### Running
 
-Shell 1 (project root)
+Shell 1 (if redis server is not running)
 
+    redis-server
+
+Shell 2 (project root)
+    
     rvm use ruby-2.2.3
     bundle install
     export RACK_ENV=development
@@ -53,7 +57,7 @@ Shell 1 (project root)
     rake db:migrate
     passenger start --ssl --ssl-certificate localhost.crt --ssl-certificate-key localhost.key --port 3001 --ssl-port 3000 
 
-    Shell 2
+Shell 3
 
     cd integrations-client
     bower install

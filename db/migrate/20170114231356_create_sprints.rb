@@ -56,7 +56,7 @@ class CreateSprints < ActiveRecord::Migration
             t.boolean "contributors", null: false, default: false 
         end
 
-        State.create("name": "idea", "fa_icon": "fa-lightbulb-o", "description": "introduction of a new feature proposal, task, or bug", "contributors": false, "instruction": "Let us know if you're interested in this idea!  We want to make sure we provide value to our users.")
+        State.create("name": "idea", "fa_icon": "fa-lightbulb-o", "description": "introduction of a new feature proposal, task, or bug", "contributors": false, "instruction": "This is awaiting prioritization.")
         State.create("name": "requirements design", "fa_icon": "fa-location-arrow", "description": "definition of requirements / specifications",  "contributors": true, "instruction": "Show us how you would provide requirements for this idea.")
         State.create("name": "requirements review", "fa_icon": "fa-globe", "description": "review of specifications",  "contributors": false, "instruction": "This is your chance to provide feedback (through comments and votes) on the requirements proposals above for this idea before any implementation begins.  We will reopen the stage if other proposals are needed.")
         State.create("name": "visual design", "fa_icon": "fa-paint-brush", "description": "user interface / experience design",  "contributors": true, "instruction": "Propose a slick design or assets for this idea.")

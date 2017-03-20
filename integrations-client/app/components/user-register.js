@@ -7,6 +7,10 @@ export default Component.extend({
     store: Ember.inject.service(),
     routes: Ember.inject.service('route-injection'),
     registered: false,
+    didRender() { 
+        this._super(...arguments);
+        this.$('#register-modal').modal('show');
+    },
     actions: {
         role(obj){
             if(obj.get("active") === true){

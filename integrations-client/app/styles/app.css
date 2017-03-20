@@ -19,7 +19,7 @@ body {
     /*    -webkit-font-smoothing: subpixel-antialiased; */
 }
 .body-dark{
-   background-color: #28B6C3;
+   background-color: #333;
 }
 .rounded{
     -webkit-border-radius: 3px !important;
@@ -195,6 +195,46 @@ button{
     background-color:#fff;
     color: #28B6C3;
 }
+.modal-content{
+   background-color: #333;
+   border:0px;
+   box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+.modal.in {
+    display:block;
+}
+.modal-content{
+    padding: 25px 25px 15px 25px;
+}
+.modal-header{
+    border:0px;
+    padding:10px;
+    color: #fff;
+    padding-bottom:5px;
+}
+.modal-header .title{
+    font-size:22px; 
+}
+.modal-header.subtitle{
+    padding-top:0px;
+}
+.modal-body{
+    padding:10px;
+}
+.fullscreen {
+    position:fixed;
+    top:0px;
+    left:0px;
+    height:100%;
+    width:100%;
+    background: url("italy.jpg")no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+
 /* index */
 
 .welcome{
@@ -249,7 +289,6 @@ button{
     margin-top:-1px;
 }
 .register-form {
-    max-width: 360px;
     margin: 0 auto 0px;
     padding: 0px;
     text-align: center;
@@ -263,10 +302,13 @@ button{
 .register-form input{
     margin-bottom:10px;
     height:40px;
+    background-color: #3a3a3a;
 }
 .register-form button{
     margin-top:10px;
     width:100%;
+    background-color: orange;
+    border: none;
 }
 .register-form .btn-group label{
     margin-bottom: 10px;
@@ -275,6 +317,14 @@ button{
     -webkit-border-radius: 4px !important;
     -moz-border-radius: 4px !important;
     border-radius: 4px !important; 
+    background-color: #3a3a3a;
+    border:none;
+}
+.register-form .btn-group label:hover{
+    background-color: #28B6C3;
+}
+.register-form .btn-group label.active{
+        background-color: #28B6C3;
 }
 
 .register-form .tos{
