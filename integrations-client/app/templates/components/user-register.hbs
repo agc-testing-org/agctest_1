@@ -34,11 +34,12 @@
                     </div>
 
                     <button {{action "register"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Register</button>
-                    <h4 class="tos text-center">By registering you agree to our <br>{{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
+                    <h4 class="tos text-center">By registering you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
 
                     {{/if}}
                 </form>
             </div>
+            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "index" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
         </div>
     </div>
 </div>

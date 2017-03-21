@@ -6,6 +6,10 @@ export default Component.extend({
     session: service('session'),
     path: "/reset",
     errorMessage: null,
+    didRender() {
+        this._super(...arguments);
+        this.$('#register-modal').modal('show');
+    },
     actions: {
         reset() {
             var password = this.get("password");

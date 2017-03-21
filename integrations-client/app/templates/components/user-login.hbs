@@ -1,9 +1,27 @@
-<form class="login-form" {{action 'login' on="submit"}}>
+<div class="modal" id="register-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content rounded">
+            <div class="modal-header">
+                <div class="title">Sign In</div>
+            </div>
+            <div class="modal-header subtitle">
+                <div class="text-muted">Sign in to your Wired7 Account</div>
+            </div>
+            <div class="modal-body">
+
+                <form class="register-form" {{action 'login' on="submit"}}>
 
 
-    {{input type="email" value=email placeholder="Email" class="form-control rounded"}}
-    {{input type="password" value=password placeholder="Password" class="form-control rounded"}}
+                    {{input type="email" value=email placeholder="Email" class="form-control rounded"}}
+                    {{input type="password" value=password placeholder="Password" class="form-control rounded"}}
 
-    <button type="submit" class="btn btn-outline-secondary rounded">Sign In</button>
-    {{ link-to 'Forgot?' index }}
-</form>
+                    <button type="submit" class="btn btn-outline-secondary rounded">Sign In</button>
+                    
+                    <h4 class="tos text-center">Forget Your Password? {{ link-to 'Password Reset' "forgot" }}</h4>
+                </form>
+            </div>
+            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "register" class="text-muted"}}I'm New to Wired7{{/link-to}}</div>
+        </div>
+    </div>
+</div>
+

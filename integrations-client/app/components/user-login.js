@@ -6,6 +6,10 @@ export default Component.extend({
     session: service('session'),
     path: "/login",
     errorMessage: null,
+    didRender() {
+        this._super(...arguments);
+        this.$('#register-modal').modal('show');
+    },
     actions: {
         login() {
             var email = this.get("email");

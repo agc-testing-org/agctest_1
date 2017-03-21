@@ -6,6 +6,10 @@ export default Component.extend({
     session: service('session'),
 
     errorMessage: null,
+    didRender() {
+        this._super(...arguments);
+        this.$('#register-modal').modal('show');
+    },   
     actions: {
         reset() {
             var email = this.get("email");
@@ -19,7 +23,7 @@ export default Component.extend({
                 }).then(function(response) {
                     var res = JSON.parse(response);
                     if(res["success"] === true){
-                         this.set('errorMessage', "A reset link will be sent to "+email);
+                        this.set('errorMessage', "A reset link will be sent to "+email);
                     }
                 }, function(xhr, status, error) {
                     var response = xhr.responseText;

@@ -26,6 +26,11 @@ body {
     -moz-border-radius: 3px !important;
     border-radius: 3px !important;
 }
+.rounded-bottom{
+    -webkit-border-radius: 0px 0px 3px 3px !important;
+    -moz-border-radius: 0px 0px 3px 3px !important;
+    border-radius: 0px 0px 3px 3px !important;
+}
 .circular{
     -webkit-border-radius: 500px !important;
     -moz-border-radius: 500px !important;
@@ -196,30 +201,45 @@ button{
     color: #28B6C3;
 }
 .modal-content{
-   background-color: #333;
-   border:0px;
-   box-shadow: 0 5px 15px rgba(0,0,0,.5);
+    background-color: #333;
+    border:0px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.5);
 }
 .modal.in {
     display:block;
 }
 .modal-content{
-    padding: 25px 25px 15px 25px;
+
 }
 .modal-header{
     border:0px;
     padding:10px;
     color: #fff;
     padding-bottom:5px;
+    padding: 25px;
+    padding-bottom:0px;
 }
 .modal-header .title{
-    font-size:22px; 
+    font-size:22px;
+    font-weight:400;
 }
 .modal-header.subtitle{
     padding-top:0px;
 }
 .modal-body{
+    padding:25px;
+    padding-top:10px;
+}
+.modal-foot{
+    padding: 10px;
+    border: 0px;
+    background-color: #3a3a3a;
+}
+.modal-foot a{
+    text-decoration:none;
+    display:block;
     padding:10px;
+    font-weight:300;
 }
 .fullscreen {
     position:fixed;
@@ -267,27 +287,6 @@ button{
     -khtml-opacity: 0.70;
     opacity: 0.70;
 }
-.login-form{
-    margin-top:0px;
-}
-.login-form input{
-    display: inline-block;
-    width: 96px;
-    height: 36px;
-    margin-right: 6px;
-    border: 0px;
-    font-size:14px;
-}
-.login-form a{
-    display: inline-block;
-    color: #fff !important;
-    margin-left: 5px;
-    font-weight: 300;
-}
-.login-form button{
-    height:35px;
-    margin-top:-1px;
-}
 .register-form {
     margin: 0 auto 0px;
     padding: 0px;
@@ -309,10 +308,11 @@ button{
     width:100%;
     background-color: orange;
     border: none;
+    font-size:20px;
 }
 .register-form .btn-group label{
     margin-bottom: 10px;
-    margin-top:10px;
+    margin-top:6px;
     margin-left: 4px !important;
     -webkit-border-radius: 4px !important;
     -moz-border-radius: 4px !important;
@@ -321,16 +321,20 @@ button{
     border:none;
 }
 .register-form .btn-group label:hover{
-    background-color: #28B6C3;
+    color: #28B6C3;
 }
 .register-form .btn-group label.active{
-        background-color: #28B6C3;
+    color: #28B6C3;
 }
 
 .register-form .tos{
     margin-top:10px; 
     color: #fff;
 }
+.register-form .form-control{
+    background-color: #3a3a3a;
+}
+
 .split{
     max-width:720px;
     padding-top:0px;
