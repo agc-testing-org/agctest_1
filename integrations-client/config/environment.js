@@ -37,7 +37,8 @@ module.exports = function(environment) {
   ENV['ember-simple-auth'] = {
       authorizer: 'simple-auth-authorizer:token',
       store: 'session-store:local-storage',
-      authenticationRoute: 'index'
+      authenticationRoute: 'index',
+      routeIfAlreadyAuthenticated: 'home'
   };
 
 
