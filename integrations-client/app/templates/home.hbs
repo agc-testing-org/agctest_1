@@ -1,3 +1,11 @@
-{{user-login-github}}
-{{user-logout}}
-{{create-project repositories=model.repositories}}
+<div class="container mb-5">
+    {{user-login-github}}
+    {{create-project repositories=model.repositories}}
+</div>
+<div class="container flow profile">
+    <div class="row">
+        <div class="col-sm-12 col-md-12">
+            {{profile-aggregates model=model}}
+        </div>
+    </div>
+</div>
