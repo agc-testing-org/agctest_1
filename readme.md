@@ -61,5 +61,10 @@ Shell 3
 
     cd integrations-client
     bower install
+    npm install
     source ~/.bashrc
     ember build --watch
+
+Browser
+    
+    Go to https://localhost:3000
