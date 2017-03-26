@@ -109,6 +109,19 @@ class Integrations < Sinatra::Base
         end
     end
 
+    def default_to_signed field
+        if field
+            return field
+        else
+            if authorized?
+                return @session_hash["id"]
+            else
+                status 404
+                return nil
+            end
+        end
+    end
+
     forgot_post = lambda do
         status 400
         response = {:success => false}
@@ -809,38 +822,45 @@ class Integrations < Sinatra::Base
     end
 
     comments_get = lambda do
-        issue = Issue.new
+        user_id = (default_to_signed params[:user_id])
+        if user_id
+            issue = Issue.new
+            query = {"contributors.user_id" => user_id}
+            author = issue.get_comments query
 
-        query = {"contributors.user_id" => params[:user_id]}
-        author = issue.get_comments query
+            query = {:user_id => user_id}
+            receiver = issue.get_comments query
 
-        query = {:user_id => params[:user_id]}
-        receiver = issue.get_comments query
-
-        return {:author => author, :receiver => receiver, :id => params[:user_id]}.to_json
+            return {:author => author, :receiver => receiver, :id => user_id}.to_json
+        end
     end
 
     votes_get = lambda do
-        issue = Issue.new
+        user_id = (default_to_signed params[:user_id])
+        if user_id 
+            issue = Issue.new 
+            query = {"contributors.user_id" => user_id}
+            author = issue.get_votes query
 
-        query = {"contributors.user_id" => params[:user_id]}
-        author = issue.get_votes query
+            query = {:user_id => user_id}
+            receiver = issue.get_votes query
 
-        query = {:user_id => params[:user_id]}
-        receiver = issue.get_votes query
-
-        return {:author => author, :receiver => receiver, :id => params[:user_id]}.to_json
+            return {:author => author, :receiver => receiver, :id => user_id}.to_json
+        end
     end
 
     contributors_get = lambda do
-        issue = Issue.new
+        user_id = (default_to_signed params[:user_id])
+        if user_id 
+            issue = Issue.new 
 
-        query = {:user_id => params[:user_id]}
+            query = {:user_id => user_id}
 
-        author = issue.get_contributors query, false #all contributions
-        receiver = issue.get_contributors query, true #winning contributions
+            author = issue.get_contributors query, false #all contributions
+            receiver = issue.get_contributors query, true #winning contributions
 
-        return {:author => author, :receiver => receiver, :id => params[:user_id]}.to_json
+            return {:author => author, :receiver => receiver, :id => user_id}.to_json
+        end
     end
 
 
