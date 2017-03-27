@@ -11,7 +11,7 @@ class Issue
                 description: description,
                 project_id: project_id
             })
-            return sprint.id
+            return sprint
         rescue => e
             puts e
             return nil
@@ -254,7 +254,7 @@ class Issue
         begin
             ss = SprintSkillset.find_or_initialize_by(:sprint_id => sprint_id, :skillset_id => skillset_id)
             ss.update_attributes!(:active => active)
-            return ss
+            return {:id => ss.skillset_id}
         rescue => e
             puts e
             return nil

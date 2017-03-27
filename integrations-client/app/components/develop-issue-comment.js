@@ -7,7 +7,6 @@ export default Ember.Component.extend({
     actions: {
         comment(contributor_id,sprint_state_id){
             var _this = this;
-            console.log(":::"+sprint_state_id);
             var comment = this.get("comment");
             if(comment.length < 500){
                 var store = this.get('store');

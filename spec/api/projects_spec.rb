@@ -190,6 +190,12 @@ describe "/projects" do
             it "should return sprint id" do
                 expect(@res["id"]).to eq(@mysql["id"])
             end
+            it "should include sprint title" do
+                 expect(@res["title"]).to eq(@mysql["title"])
+            end
+            it "should include sprint description" do
+                 expect(@res["description"]).to eq(@mysql["description"])
+            end
         end
     end
     shared_examples_for "sprint" do
@@ -887,14 +893,8 @@ describe "/projects" do
 
     shared_examples_for "sprint_skillset_update" do
         context "response" do
-            it "should return skillset_id" do
-                expect(@res["skillset_id"]).to eq(@skillset_id)
-            end
-            it "should return sprint_id" do
-                expect(@res["sprint_id"]).to eq(@sprint_id)
-            end
-            it "should return active" do
-                expect(@res["active"]).to eq(@active)
+            it "should return skillset_id as id" do
+                expect(@res["id"]).to eq(@skillset_id)
             end
         end
         context "sprint_skillset" do

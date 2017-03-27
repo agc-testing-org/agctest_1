@@ -19,6 +19,7 @@ export default Ember.Component.extend({
             }
         },
         createSprint(){
+            var _this = this;
             var title = this.get("title");
             var description = this.get("description");
             if(title && title.length > 5){
@@ -27,8 +28,11 @@ export default Ember.Component.extend({
                     var sprint = store.createRecord('sprint', {
                         title: title,
                         description: description
-                    }).save().then(function(response) {
-
+                    }).save().then(function(payload) {
+                        store.peekAll('sprint').addObject(payload);
+                        _this.set("title","");
+                        _this.set("description","");
+                        _this.send("showCreate");
                     }, function(xhr, status, error) {
 
                     });
