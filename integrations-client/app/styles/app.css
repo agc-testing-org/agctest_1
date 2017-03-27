@@ -750,7 +750,7 @@ button{
     font-size: 14px;
 }
 textarea.form-control{
-    font-style: italic;
+
 }
 .form-control[disabled]{
     color: #fff;

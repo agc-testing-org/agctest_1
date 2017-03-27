@@ -243,7 +243,7 @@ class Issue
 
     def get_sprint_skillsets sprint_id, query
         begin            
-            return Skillset.joins("LEFT JOIN sprint_skillsets ON sprint_skillsets.id = skillsets.id AND sprint_skillsets.sprint_id = #{sprint_id.to_i} OR sprint_skillsets.sprint_id is null").where(query).select("skillsets.id","skillsets.name","sprint_skillsets.active").as_json
+            return Skillset.joins("LEFT JOIN sprint_skillsets ON sprint_skillsets.skillset_id = skillsets.id AND sprint_skillsets.sprint_id = #{sprint_id.to_i} OR sprint_skillsets.sprint_id is null").where(query).select("skillsets.id","skillsets.name","sprint_skillsets.active").as_json
         rescue => e
             puts e
             return nil

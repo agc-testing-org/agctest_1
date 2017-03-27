@@ -9,12 +9,15 @@ export default Ember.Service.extend({
 //    intercom: Ember.inject.service('intercom'),
 
     loadCurrentUser(shouldReload){
+        var _this = this;
         return new RSVP.Promise((resolve, reject) => {
             const authenticated = this.get('session.isAuthenticated');
             if (authenticated) {
 
                 console.log("AUTHENTICATED");
-                return this.get('store').queryRecord('account',{ reload: shouldReload }).then((account) => {
+                var store = _this.get('store');
+                store.adapterFor('account').set('namespace', ''); 
+                return store.queryRecord('account',{ reload: shouldReload }).then((account) => {
                     this.set('account',account);
 
                     /*

@@ -11,6 +11,7 @@ export default Ember.Route.extend({
     model: function(params){
         console.log(this.paramsFor("develop.project").org);
         console.log(this.modelFor("develop.project"));
+        console.log(this.modelFor("develop.project").states);
 
         this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
         return Ember.RSVP.hash({
@@ -21,7 +22,8 @@ export default Ember.Route.extend({
 
             }),
             sprint: this.store.findRecord('sprint', params.id),
-            idea: this.store.peekRecord('state', 1)
+            idea: this.store.peekRecord('state', 1),
+            states: this.modelFor("develop.project").states
         });
     }
 });

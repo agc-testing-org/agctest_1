@@ -19,9 +19,12 @@
                 </div>
             </div>
             {{else}}
+            {{#if sessionAccount.account.admin}}
+            {{develop-issue-transition sprint=model.sprint states=model.states}} 
+            {{/if}}
             {{#link-to "develop.project" model.sprint.project.org model.sprint.project.id class="btn btn-outline-secondary rounded mr-1"}}Project Home{{/link-to}}
             {{/if}}
-            
+
             {{user-logout tagName="li" class="cursor-pointer"}}
         </ul>
     </div>
