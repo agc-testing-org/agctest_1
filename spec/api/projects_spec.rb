@@ -346,9 +346,6 @@ describe "/projects" do
         end
 
         context "sprint_state" do
-            it "should create id" do
-                expect(@sprint_result["id"]).to eq(@res["id"])
-            end
             it "should save sprint_id" do
                 expect(@sprint_result["sprint_id"]).to eq(sprints(:sprint_1).id)
             end
@@ -361,10 +358,10 @@ describe "/projects" do
         end
         context "response" do
             it "should include sprint_id" do
-                expect(@res["sprint_id"]).to eq(sprints(:sprint_1).id)
+                expect(@res["id"]).to eq(sprints(:sprint_1).id)
             end
             it "should include state_id" do
-                expect(@res["state_id"]).to eq(states(:idea).id)
+                expect(@res["sprint_states"][@res["sprint_states"].length - 1]["state"]["id"]).to eq(states(:idea).id)
             end
         end
     end
@@ -801,7 +798,7 @@ describe "/projects" do
         end
     end
 
-    describe "GET /aggregate-contributors", :focus => true do
+    describe "GET /aggregate-contributors" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         context "user_id parameter" do
             before(:each) do
