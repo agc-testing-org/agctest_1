@@ -505,10 +505,10 @@ class Integrations < Sinatra::Base
                     sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
-                    log_params = {:sprint_id => params[:id], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => params[:project_id]}
+                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => params[:project_id]}
                     if sprint_state && (issue.log_event log_params) 
                         status 201
-                        response[:id] = sprint_state
+                        response = sprint_state
                     end
                 end
             end

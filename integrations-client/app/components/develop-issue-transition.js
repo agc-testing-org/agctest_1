@@ -8,7 +8,7 @@ export default Ember.Component.extend({
             var store = this.get('store');
             var sprintUpdate = store.findRecord('sprint',id).then(function(sprint) {
                 sprint.set('state_id', transition);
-                sprint.save(); 
+                sprint.save();
             });
         }
     }

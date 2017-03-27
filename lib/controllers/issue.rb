@@ -35,7 +35,16 @@ class Issue
                 state_id: state_id,
                 sha: sha
             })
-            return sprint_state.id
+            response = sprint_state.sprint.as_json
+            response[:project] = sprint_state.sprint.project.as_json
+            response[:sprint_states] = []
+            sprint_state.sprint.sprint_states.each_with_index do |ss,j|
+                response[:sprint_states][j] = ss.as_json
+                response[:sprint_states][j][:state] = ss.state.as_json
+                response[:sprint_states][j].delete("state_id")
+                response[:sprint_states][j].delete("sprint_id")
+            end
+            return response 
         rescue => e
             puts e
             return nil

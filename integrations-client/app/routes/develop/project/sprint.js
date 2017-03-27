@@ -23,7 +23,8 @@ export default Ember.Route.extend({
             }),
             sprint: this.store.findRecord('sprint', params.id),
             idea: this.store.peekRecord('state', 1),
-            states: this.modelFor("develop.project").states
+            states: this.modelFor("develop.project").states,
+            project: this.modelFor("develop.project").project
         });
     }
 });

@@ -359,6 +359,14 @@ describe "/projects" do
                 expect(@sprint_result["sha"]).to eq(sprint_states(:sprint_1_state_1).sha)
             end
         end
+        context "response" do
+            it "should include sprint_id" do
+                expect(@res["sprint_id"]).to eq(sprints(:sprint_1).id)
+            end
+            it "should include state_id" do
+                expect(@res["state_id"]).to eq(states(:idea).id)
+            end
+        end
     end
     describe "POST /projects/:id/refresh" do
         fixtures :projects, :sprints, :sprint_states, :contributors
