@@ -12,7 +12,7 @@ gem 'ldclient-rb', '2.0.3'
 gem 'git'
 
 group :development do
-    gem 'passenger'
+    gem 'passenger', '~> 5.0.30'
 end
 
 group :test do

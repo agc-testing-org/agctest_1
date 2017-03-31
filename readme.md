@@ -3,7 +3,13 @@
 
 ### Installation
     
+    Install node (https://nodejs.org/en/download/)
+
     cd integrations-client
+
+    sudo npm install n -g
+    sudo n 0.12.2
+
     sudo npm -g install npm@next
     npm install -g ember-cli@2.10
     npm install
@@ -30,10 +36,17 @@
         export INTEGRATIONS_GITHUB_URL="test"
         export INTEGRATIONS_REDIS_DB=2
         export INTEGRATIONS_EMAIL_ADDRESS="" # !!KEEP EMPTY
-    fi  
+    fi 
+
+
+    Install rvm: https://rvm.io/rvm/install
+    Install homebrew: http://brew.sh/
+    brew install mysql
+    brew install redis
 
     export RACK_ENV=test
     source ~/.bashrc
+    bundle install
     rake db:create
     rake db:migrate
 
