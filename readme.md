@@ -1,6 +1,5 @@
 # Integrations
 
-
 ### Installation
     
     Install node (https://nodejs.org/en/download/)
@@ -38,6 +37,7 @@
         export INTEGRATIONS_EMAIL_ADDRESS="" # !!KEEP EMPTY
     fi 
 
+    for INTEGRATIONS_HMAC, use the value output by: ruby -rsecurerandom -e "puts SecureRandom.hex(32)" 
 
     Install rvm: https://rvm.io/rvm/install
     Install homebrew: http://brew.sh/
@@ -54,6 +54,17 @@
     source ~/.bashrc
     rake db:create
     rake db:migrate
+
+
+### Github Setup
+
+- Create a test Github account
+- Setup a developer application for this Github account (https://github.com/settings/developers)
+- Save client ID as INTEGRATIONS_GITHUB_CLIENT_ID and client secret as INTEGRATIONS_GITHUB_CLIENT_SECRET in your ~/.bashrc (vars found below)
+- Save your username in the ~/.bashrc as INTEGRATIONS_GITHUB_ADMIN_USER
+- Setup a personal token for that user as well (https://github.com/settings/tokens)
+- Save this in the ~/.bashrc as INTEGRATIONS_GITHUB_ADMIN_SECRET
+
 
 ### Running
 
