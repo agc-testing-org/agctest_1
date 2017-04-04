@@ -60,6 +60,7 @@
 
 - Create a test Github account
 - Setup a developer application for this Github account (https://github.com/settings/developers)
+- Set authorization callback to https://localhost:3000/callback/github
 - Save client ID as INTEGRATIONS_GITHUB_CLIENT_ID and client secret as INTEGRATIONS_GITHUB_CLIENT_SECRET in your ~/.bashrc (vars found below)
 - Save your username in the ~/.bashrc as INTEGRATIONS_GITHUB_ADMIN_USER
 - Setup a personal token for that user as well (https://github.com/settings/tokens)
