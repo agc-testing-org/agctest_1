@@ -270,6 +270,15 @@ class Issue
         end
     end
 
+    def get_user_skillsets user_id, query
+        begin            
+            return Skillset.joins("LEFT JOIN user_skillsets ON user_skillsets.skillset_id = skillsets.id AND user_skillsets.user_id = #{user_id.to_i} OR user_skillsets.user_id is null").where(query).select("skillsets.id","skillsets.name","user_skillsets.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def object_at_index array
         if array
             return array

@@ -355,6 +355,17 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    user_skillsets_get = lambda do
+        issue = Issue.new
+        return (issue.get_user_skillsets params[:user_id], {}).to_json
+    end
+
+    user_skillsets_get_by_skillset = lambda do
+        issue = Issue.new
+        query = {:id => params[:skillset_id]}
+        return (issue.get_user_skillsets params[:user_id], query)[0].to_json
+    end
+
     repositories_get = lambda do
         protected!
         repo = Repo.new
@@ -872,6 +883,8 @@ class Integrations < Sinatra::Base
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
     get "/account", &account_get
+    get "/account/:user_id/skillsets", &user_skillsets_get
+    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset 
 
     get "/roles", &roles_get
     get "/states", &states_get
