@@ -305,6 +305,14 @@ class Integrations < Sinatra::Base
         return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
+    ### ISSUE #5
+    account_roles_get = lambda do
+        protected!
+        account = Account.new
+        user_id = @session_hash["id"]
+        return (account.get_account_roles params[:user_id]).to_json
+    end
+
     roles_get = lambda do
         account = Account.new
         return account.get_roles.to_json
@@ -872,6 +880,10 @@ class Integrations < Sinatra::Base
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
     get "/account", &account_get
+
+    get "/account/roles", &account_roles_get
+    # get "account/roles/:role_id", &account_roles_get_by_role
+    # patch "account/roles/:role_id", &account_roles_patch_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get

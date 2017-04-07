@@ -247,6 +247,15 @@ class Account
         end
     end
 
+    def get_account_roles user_id
+        begin 
+            return Role.find_by(user_id: user_id)
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def sign_in email, password, ip
         user = User.find_by(email: email.downcase)
         if user && user.password
