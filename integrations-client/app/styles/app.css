@@ -725,7 +725,15 @@ button{
     min-height:100%;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #28B6C3;
+    background-color: #ededed;
+}
+.main .slide .overview{
+    position:relative;
+    padding-top:50%;
+}
+.main .slide .overview .description{
+    font-weight:300;
+    margin-bottom:50px;
 }
 
 .sprint .list-group-item{
