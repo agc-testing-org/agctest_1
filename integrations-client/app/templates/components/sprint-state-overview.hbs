@@ -1,5 +1,17 @@
-<div class="footprint">{{sprint.project.org}}/{{sprint.project.name}} >> {{sprint.id}} >> Design Review</div>
+<div class="footprint">{{sprint.project.org}}/{{sprint.project.name}} >> Sprint {{sprint.id}} >> <span class="text-capitalize">{{selected-state.state.name}}</span></div>
+<div class="about">({{selected-state.state.description}})</div>
 <div class="overview text-center">
-<h1 class="text-capitalize">{{sprint.title}}</h1>
-<div class="description">{{sprint.description}}</div>
+    <h1 class="text-capitalize">{{sprint.title}}</h1>
+    <div class="description">{{sprint.description}}</div>
+    <div class="row">
+        <div class="col-md-4">
+        {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+        </div>
+        <div class="col-md-4">
+        {{sprint-state-overview-score total=selected-state.contributors.length title="comments"}}
+        </div>
+        <div class="col-md-4">
+        {{sprint-state-overview-score total=selected-state.contributors.length title="votes"}}
+        </div>
+    </div>
 </div>

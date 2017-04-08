@@ -3,16 +3,9 @@ import Ember from 'ember';
 export default Ember.Route.extend({
     store: Ember.inject.service(),
     actions: {
-        refresh(){
-            console.log("refreshing router");
-            this.refresh();
-        }
+
     },
     model: function(params){
-        console.log(this.paramsFor("develop.project").org);
-        console.log(this.modelFor("develop.project"));
-        console.log(this.modelFor("develop.project").states);
-
         this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
         return Ember.RSVP.hash({
             events: this.store.query('event', {
@@ -23,9 +16,12 @@ export default Ember.Route.extend({
             }),
             sprint: this.store.findRecord('sprint', params.id),
             idea: this.store.peekRecord('state', 1),
+            
             states: this.modelFor("develop.project").states,
 
-            project: this.modelFor("develop.project").project
+            project: this.modelFor("develop.project").project,
+
+            selected_state: this.store.peekRecord('sprint-state', params.id),
         });
     }
 });
