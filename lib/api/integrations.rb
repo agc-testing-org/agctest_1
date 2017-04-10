@@ -366,6 +366,31 @@ class Integrations < Sinatra::Base
         return (issue.get_user_skillsets params[:user_id], query)[0].to_json
     end
 
+    user_skillsets_patch = lambda do
+        protected!
+        status 401
+        response = {}
+        user_id=params[:user_id]
+        if @session_hash["admin"] && @session_hash["id"].to_i.equal?(user_id.to_i)
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if params[:user_id] && params[:skillset_id]
+                    issue = Issue.new
+                    response = (issue.update_user_skillsets user_id, params[:skillset_id], fields[:active])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
+
+
     repositories_get = lambda do
         protected!
         repo = Repo.new
@@ -884,7 +909,9 @@ class Integrations < Sinatra::Base
     delete "/session", &session_delete
     get "/account", &account_get
     get "/account/:user_id/skillsets", &user_skillsets_get
-    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset 
+    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
+    patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
+
 
     get "/roles", &roles_get
     get "/states", &states_get

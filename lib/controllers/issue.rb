@@ -279,6 +279,17 @@ class Issue
         end
     end
 
+    def update_user_skillsets user_id, skillset_id, active
+        begin
+            ss = UserSkillset.find_or_initialize_by(:user_id => user_id, :skillset_id => skillset_id)
+            ss.update_attributes!(:active => active)
+            return {:id => ss.skillset_id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def object_at_index array
         if array
             return array
