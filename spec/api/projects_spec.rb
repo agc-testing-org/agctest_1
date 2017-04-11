@@ -921,8 +921,8 @@ describe "/projects" do
                 before(:each) do
                     @active = false 
                     patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-                    puts @res = JSON.parse(last_response.body)
-                    puts @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
                 end
                 it_behaves_like "sprint_skillset_update"
             end 
@@ -930,8 +930,8 @@ describe "/projects" do
                 before(:each) do
                     @active = true
                     patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-                    puts @res = JSON.parse(last_response.body)
-                   puts @mysql = @mysql_client.query("select * from sprint_skillsets").first
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_skillsets").first
                 end
                 it_behaves_like "sprint_skillset_update"
             end
