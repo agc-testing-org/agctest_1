@@ -510,9 +510,9 @@ class Integrations < Sinatra::Base
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
 
-                    sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
+                    #sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha ###TODO - UNCOMMENT ME
 
-                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
+                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id], "ADAMONPLANE"
                     log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => params[:project_id]}
                     if sprint_state && (issue.log_event log_params) 
                         status 201
