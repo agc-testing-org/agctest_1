@@ -307,10 +307,38 @@ class Integrations < Sinatra::Base
 
     ### ISSUE #5
     account_roles_get = lambda do
-        protected!
         account = Account.new
-        user_id = @session_hash["id"]
-        return (account.get_account_roles params[:user_id]).to_json
+        return (account.get_account_roles params[:user_id], {}).to_json
+    end
+
+    account_roles_get_by_role = lambda do
+        account = Account.new
+        query = {:id => params[:role_id]}
+        return (account.get_account_roles params[:user_id], query).to_json
+    end
+
+    account_roles_patch_by_id = lambda do
+        protected!
+        status 401
+        response = {}
+        user_id=params[:user_id]
+        if @session_hash["admin"] && @session_hash["id"].to_i.equal?(user_id.to_i)
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if params[:user_id] && params[:role_id]
+                    account = Account.new
+                    response = (account.update_user_role user_id, params[:role_id], fields[:active])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json    
     end
 
     roles_get = lambda do
@@ -881,9 +909,9 @@ class Integrations < Sinatra::Base
     delete "/session", &session_delete
     get "/account", &account_get
 
-    get "/account/roles", &account_roles_get
-    # get "account/roles/:role_id", &account_roles_get_by_role
-    # patch "account/roles/:role_id", &account_roles_patch_by_id
+    get "/account/:user_id/roles", &account_roles_get
+    get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
+    patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get
