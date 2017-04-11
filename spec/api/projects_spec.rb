@@ -921,8 +921,8 @@ describe "/projects" do
                 before(:each) do
                     @active = false 
                     patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-                    @res = JSON.parse(last_response.body)
-                    @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
+                    puts @res = JSON.parse(last_response.body)
+                    puts @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
                 end
                 it_behaves_like "sprint_skillset_update"
             end 
@@ -930,8 +930,8 @@ describe "/projects" do
                 before(:each) do
                     @active = true
                     patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-                    @res = JSON.parse(last_response.body)
-                    @mysql = @mysql_client.query("select * from sprint_skillsets").first
+                    puts @res = JSON.parse(last_response.body)
+                   puts @mysql = @mysql_client.query("select * from sprint_skillsets").first
                 end
                 it_behaves_like "sprint_skillset_update"
             end
@@ -1016,7 +1016,7 @@ describe "/projects" do
         end
     end
 
-    shared_examples_for "user_skillset_update" do
+     shared_examples_for "user_skillset_update" do
         context "response" do
             it "should return skillset_id as id" do
                 expect(@res["id"]).to eq(@skillset_id)
@@ -1028,5 +1028,53 @@ describe "/projects" do
             end
         end
     end
+
+    describe "PATCH user_id/skillsets" do
+        fixtures :skillsets, :users
+        before(:each) do
+            @user_id = users(:adam_admin).id
+            @skillset_id = skillsets(:skillset_1).id 
+        end
+        context "admin" do
+            context "skillset exists" do
+                before(:each) do
+                    @active = false
+                    patch "/account/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from user_skillsets").first
+                end
+                it_behaves_like "user_skillset_update"
+            end 
+            context "skillset does not exist" do
+                before(:each) do
+                    @active = true
+                    patch "/account/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from user_skillsets").first
+                end
+                it_behaves_like "user_skillset_update"
+            end
+        end
+        context "non-admin" do
+            before(:each) do
+                @active = false
+                patch "/account/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return 401" do
+                expect(last_response.status).to eq(401) 
+            end
+        end
+        context "non-authorized" do
+            before(:each) do
+                @active = false
+                patch "/account/#{users(:adam).id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                puts @res = JSON.parse(last_response.body)
+            end
+            it "should return 401" do
+                expect(last_response.status).to eq(401) 
+            end
+        end
+    end 
 end
 
