@@ -371,12 +371,12 @@ class Integrations < Sinatra::Base
         status 401
         response = {}
         user_id=params[:user_id]
-        if @session_hash["admin"] && @session_hash["id"].to_i.equal?(user_id.to_i)
+        if @session_hash["id"].to_i.equal?(user_id.to_i)
             status 400
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:user_id] && params[:skillset_id]
+                if params[:user_id] && params[:skillset_id] && fields[:active]
                     issue = Issue.new
                     response = (issue.update_user_skillsets user_id, params[:skillset_id], fields[:active])
                     if response
