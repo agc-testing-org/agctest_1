@@ -305,7 +305,6 @@ class Integrations < Sinatra::Base
         return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
-    ### ISSUE #5
     account_roles_get = lambda do
         account = Account.new
         return (account.get_account_roles params[:user_id], {}).to_json
@@ -322,7 +321,7 @@ class Integrations < Sinatra::Base
         status 401
         response = {}
         user_id=params[:user_id]
-        if @session_hash["admin"] && @session_hash["id"].to_i.equal?(user_id.to_i)
+        if @session_hash["id"].to_i.equal?(user_id.to_i)
             status 400
             begin
                 request.body.rewind
