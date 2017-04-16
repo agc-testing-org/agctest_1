@@ -1065,6 +1065,16 @@ describe "/projects" do
                 expect(last_response.status).to eq(401) 
             end
         end
+        context "lost 'active' key" do
+            before(:each) do
+                @active = false
+                patch "/account/#{@user_id}/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                puts @res = JSON.parse(last_response.body)
+            end
+            it "should return 400" do
+                expect(last_response.status).to eq(400) 
+            end
+        end
     end 
 end
 

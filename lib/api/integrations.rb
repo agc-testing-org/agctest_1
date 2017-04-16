@@ -376,7 +376,7 @@ class Integrations < Sinatra::Base
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:user_id] && params[:skillset_id] && fields[:active]
+                if params[:user_id] && params[:skillset_id] && fields.key?(:active)
                     issue = Issue.new
                     response = (issue.update_user_skillsets user_id, params[:skillset_id], fields[:active])
                     if response
