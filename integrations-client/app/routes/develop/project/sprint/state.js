@@ -7,7 +7,11 @@ export default Ember.Route.extend({
     },
     model: function(params){
         this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
-        var all_states = this.store.peekAll('sprint-state');
+        var all_states = this.modelFor("develop.project.sprint").sprint.get("sprint_states").toArray();
+        var last_state = {};
+        if(all_states.length > 0){
+            last_state = all_states[all_states.length - 1];
+        }
 
         return Ember.RSVP.hash({
             events: this.store.query('event', {
@@ -22,7 +26,10 @@ export default Ember.Route.extend({
 
             project: this.modelFor("develop.project").project,
 
-            selected_state: this.store.peekRecord('sprint-state', params.state_id)
+            selected_state: this.store.peekRecord('sprint-state', params.state_id),
+
+            last_state: last_state
+
         });
     }
 });

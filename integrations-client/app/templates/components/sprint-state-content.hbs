@@ -1,5 +1,10 @@
+{{#if (eq selected-state.id last-state.id)}}
+{{#unless (eq last-state.name "closed")}}
 <div class="overview">
     <div class="text-center">
-        <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3>
+        <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3> 
+        <h4>{{selected-state.state.instruction}}</h4>
     </div>
 </div>
+{{/unless}}
+{{/if}}
