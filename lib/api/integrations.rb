@@ -326,7 +326,7 @@ class Integrations < Sinatra::Base
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:user_id] && params[:role_id]
+                if params[:user_id] && params[:role_id] && fields.key?(:active)
                     account = Account.new
                     response = (account.update_user_role user_id, params[:role_id], fields[:active])
                     if response
