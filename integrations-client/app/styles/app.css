@@ -479,8 +479,9 @@ button{
     margin-top:2px;
     margin-bottom:2px;
 }
-.sidebar .nav a:hover{
-    color:#ededed;
+.sidebar .nav li.active{
+    background-color: #28B6C3;
+    color: #fff;
 }
 
 .sidebar button{
@@ -648,6 +649,10 @@ button{
 .develop li.nav-item{
 
 }
+.sidebar .nav a{
+    margin:0px;
+    text-decoration:none;
+}
 .sidebar li.nav-item{
     padding:10px;
     border-bottom: 1px solid #4C4C4C;
@@ -727,29 +732,32 @@ button{
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
     background-color: #ededed;
 }
-.main .slide .footprint{
+.main .footprint{
     padding:5px;
     font-weight:300;
     padding-top:10px;
     padding-bottom:2px;
 }
-.main .slide .about{
+.main .about{
     color: lightseagreen;
     padding:5px;
     padding-top:0px;
 }
-.main .slide .overview{
+.main .overview{
     position:relative;
-    padding-top:50%;
+    padding-top:40%;
 }
-.main .slide .overview .description{
+.main .still .overview{
+    margin-top:94px;
+}
+.main .overview .description{
     font-weight:300;
     margin-bottom:50px;
 }
-.main .slide .overview .score .title {
+.main .overview .score .title {
 
 }
-.main .slide .overview .score .total {
+.main .overview .score .total {
     font-weight: 500;
     font-size: 40px;
 }
