@@ -704,6 +704,17 @@ button{
     color: orange; 
     margin: 0px;
 }
+.sidebar .transition{
+    position:fixed;
+}
+.sidebar .transition .btn, .sidebar .transition .btn:active{
+    box-shadow: none;
+    border: 0px !important;
+    background-color: transparent !important;
+}
+.sidebar .transition .dropdown-menu{
+    margin-left:2px;
+}
 
 .nav-item.create a{
     color: #fff;

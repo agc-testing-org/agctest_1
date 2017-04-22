@@ -1,15 +1,29 @@
-{{#unless selected-state.contributors}}
-Review State
-{{last-contributor-state.contributors.length}}
-{{/unless}}
+{{#if selected-state.state.contributors}}
+    accept contributors |
+    {{#if (eq selected-state.id last-state.id)}}
+        last state | 
+        {{#if (eq last-state.name "closed")}}
+            closed |
+        {{else}}
+            not closed |
+            <div class="overview">
+                <div class="text-center">
+                    <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3>
+                    <h4>{{selected-state.state.instruction}}</h4>
 
-{{#if (eq selected-state.id last-state.id)}}
-{{#unless (eq last-state.name "closed")}}
-<div class="overview">
-    <div class="text-center">
-        <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3> 
-        <h4>{{selected-state.state.instruction}}</h4>
-    </div>
-</div>
-{{/unless}}
+                    {{#unless sessionAccount.account.github}}
+                        {{user-login-github text=" to join"}}
+                    {{else}}
+                        <button class="btn btn-outline-secondary rounded" {{action "join" project.id last-state.id }}>Join</button>
+                    {{/unless}}
+
+                </div>
+            </div>
+        {{/if}}
+    {{else}}
+        Review State, {{last-contributor-state.contributors.length}} contributors |
+    {{/if}}
+
+{{else}}
+    Show comments / votes |
 {{/if}}

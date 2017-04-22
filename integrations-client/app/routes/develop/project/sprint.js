@@ -15,7 +15,7 @@ export default Ember.Route.extend({
 
         this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
         return Ember.RSVP.hash({
-
+            states: this.modelFor("develop.project").states,
             sprint: this.store.findRecord('sprint', params.id),
 
         });
