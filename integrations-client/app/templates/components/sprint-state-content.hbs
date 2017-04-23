@@ -8,15 +8,24 @@
             not closed |
             <div class="overview">
                 <div class="text-center">
-                    <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3>
+                    {{#unless last-state.active_contribution_id}}
+                        <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3>
+                    {{/unless}}
                     <h4>{{selected-state.state.instruction}}</h4>
 
                     {{#unless sessionAccount.account.github}}
-                        {{user-login-github text=" to join"}}
+                        {{user-login-github text=" to participate"}}
                     {{else}}
+                        {{#if last-state.active_contribution_id}}
+                            {{#each last-state.contributors as |contributor|}}
+                                {{#if (eq contributor.id last-state.active_contribution_id)}}
+                                    {{develop-contribute contributor=contributor sprint_state=last-state project=project sprint=model.sprint}}
+                                {{/if}}
+                            {{/each}}
+                        {{else}}
                         <button class="btn btn-outline-secondary rounded" {{action "join" project.id last-state.id }}>Join</button>
+                        {{/if}}
                     {{/unless}}
-
                 </div>
             </div>
         {{/if}}

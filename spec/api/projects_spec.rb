@@ -240,6 +240,17 @@ describe "/projects" do
                 expect(@sprint_state[i]["state"]["id"]).to eq(s["state_id"])
             end
         end
+        it "should return active_contribution_id (last 'join' by signed in user)" do
+            @sprint_state_result.each_with_index do |s,i|
+                if @sprint_state[i]["contributors"].length > 0
+                    @contributor_result.each do |c|
+                        if c["user_id"] == @user
+                            expect(@sprint_state[i]["active_contribution_id"]).to eq(c["id"])
+                        end
+                    end
+                end
+            end
+        end
     end
 
     shared_examples_for "contributors" do
@@ -312,7 +323,7 @@ describe "/projects" do
             @sprint_result = @mysql_client.query("select * from sprints where id = #{sprint.id}").first
             @project_result = @mysql_client.query("select * from projects where id = #{sprint.project_id}").first
             @sprint_state_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}")
-            @contributor_result = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}")
+            @contributor_result = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}") 
             @project = res["project"]
             @sprint = res
             @sprint_state = res["sprint_states"]
@@ -332,8 +343,8 @@ describe "/projects" do
             body = { 
                 :name=>"1", 
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
+                :sha=>sprint_states(:sprint_1_state_1).sha
+            }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -374,8 +385,8 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
+                :sha=>sprint_states(:sprint_1_state_1).sha
+            }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -413,8 +424,8 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
+                :sha=>sprint_states(:sprint_1_state_1).sha
+            }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -509,8 +520,8 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
+                :sha=>sprint_states(:sprint_1_state_1).sha
+            }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -633,8 +644,8 @@ describe "/projects" do
                 :number => @pull_id,
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
+                :sha=>sprint_states(:sprint_1_state_1).sha
+            }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -678,8 +689,8 @@ describe "/projects" do
                 :number => @pull_id,
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
+                :sha=>sprint_states(:sprint_1_state_1).sha
+            }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
