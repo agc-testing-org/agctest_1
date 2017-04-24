@@ -31,8 +31,17 @@
         {{/if}}
     {{else}}
         Review State, {{last-contributor-state.contributors.length}} contributors |
+        <div class="overview">
+            <div class="text-center">
+                <h3>This sprint state is no longer open</h3>
+            </div>
+        </div>
     {{/if}}
 
 {{else}}
     Show comments / votes |
+    {{#each last-contributor-state.contributors as |contributor|}}
+        {{develop-issue-comments comments=contributor.comments}}
+        {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments"}}
+    {{/each}}
 {{/if}}

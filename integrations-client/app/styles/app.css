@@ -540,39 +540,6 @@ button{
     color: #fff;
 }
 
-.flow .list-group{
-    border: 3px solid #ededed;
-    border-bottom: 1px solid #ededed;
-    background-color: #ededed;
-}
-
-.flow .list-group-item{
-    color: #4C4C4C;
-    background-color:#fff;
-    border: 1px solid #ededed;
-    margin-bottom:3px;
-}
-.flow .list-group-item.active{
-    background-color:#ededed;
-}
-.flow .list-group-item h4{
-    font-weight:600;
-}
-.flow .list-group-item.active h4{
-    line-height:29px;
-    font-weight:500;
-}
-.flow .list-group-item.active small button{
-    border: 2px solid orange;
-    padding: 4px;
-    background-color: orange;
-    color: white;
-}
-.flow .list-group-item.active small button:hover{
-    background-color: #fff;
-    color: orange;
-}
-
 .flow .stage .grid .box .point{
     position: absolute;
     left: -41px;
@@ -773,8 +740,41 @@ button{
     font-size: 40px;
 }
 
-.sprint .list-group-item{
+.main .list-group-item{
     margin-bottom:4px;
+}
+.main .list-group{
+    border: 3px solid #ededed;
+    border-bottom: 1px solid #ededed;
+    background-color: #ededed;
+}
+
+.main .list-group-item{
+    color: #4C4C4C;
+    background-color:#fff;
+    border: 1px solid #ededed;
+    margin-bottom:3px;
+}
+.main .list-group-item.active{
+    background-color:#ededed;
+}
+.main .list-group-item h4{
+    font-weight:600;
+}
+.main .list-group-item.active h4{
+    line-height:29px;
+    font-weight:500;
+}
+.main .list-group-item small button{
+    border: 2px solid orange;
+    padding: 4px;
+    background-color: orange;
+    color: white;
+}
+.main .list-group-item small button:hover{
+    background-color: #fff !important;
+    color: orange !important;
+    border: 2px solid orange;
 }
 
 /* profile */

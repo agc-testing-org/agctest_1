@@ -1,5 +1,9 @@
 <div class="row main">
-<div class="col-md-5 col-sm-12 offset-md-1 slide">{{sprint-state-overview sprint=model.sprint selected-state=model.selected_state}}</div>
+{{#if model.selected_state.state.contributors}}
+<div class="col-md-5 col-sm-12 offset-md-1 slide">{{sprint-state-overview sprint=model.sprint selected-state=model.selected_state showing-state=model.selected_state contributors=true}}</div>
+{{else}}
+<div class="col-md-5 col-sm-12 offset-md-1 slide">{{sprint-state-overview sprint=model.sprint selected-state=model.last_contributor_state showing-state=model.selected_state contributors=false}}</div>
+{{/if}}
 <div class="col-md-5 col-sm-12 offset-md-6 still">{{sprint-state-content project=model.project selected-state=model.selected_state last-state=model.last_state last-contributor-state=model.last_contributor_state refresh="refresh"}}</div>
 </div>
 
