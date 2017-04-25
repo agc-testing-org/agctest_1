@@ -41,6 +41,18 @@
 {{else}}
     Show comments / votes |
     {{#each last-contributor-state.contributors as |contributor|}}
+
+        {{#if (eq contributor.id last-contributor-state.contributor_id)}}
+            <i class="fa fa-trophy" aria-hidden="true"></i> 
+            {{#if last-contributor-state.merged}}
+                <span class="badge badge-default rounded">MERGED</span>
+            {{else}}
+                <span class="badge badge-default rounded">NOT MERGED</span>
+            {{/if}}
+        {{/if}} 
+        
+        <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">{{project.org}}/{{project.name}} branch {{last-contributor-state.id}}_{{contributor.id}}</a>
+
         {{develop-issue-comments comments=contributor.comments}}
         {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments"}}
     {{/each}}
