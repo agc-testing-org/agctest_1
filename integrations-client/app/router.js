@@ -16,9 +16,7 @@ Router.map(function() {
     this.route('develop', {path: '/develop'}, function() {
         this.route('index', {path: '/'});
         this.route('project', {path: '/:org/:name'}, function() {
-            this.route('sprint', {path: '/sprint/:id'}, function() {
-                this.route('sprint-state', { path: '/state/:id' });
-            }); 
+            this.route('sprint', {path: '/sprint/:id'}); 
         });
     });
     this.route('profile',{ path: '/:username'});

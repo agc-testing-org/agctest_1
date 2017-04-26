@@ -653,16 +653,8 @@ button{
     border-bottom: 1px solid #4C4C4C;
     color: #cfcfcf; 
     width:100%;
-    display:block;
-    position:relative;
-}
-.sidebar li.nav-item .icon{
-    margin-bottom: 5px;
-}
-.sidebar li.nav-item a:active{
-    color:orange;
-}
 
+}
 .sidebar li.nav-item.create{
     padding:0px;
 }
@@ -711,21 +703,6 @@ button{
     margin:0px;
     min-height:49px;
     padding-left:10px;
-}
-
-.main{
-    margin:0px;
-    margin-top:-56px;
-}
-.main .slide{ /* need alternative for mobile */
-    position:fixed;
-    left:0px;
-    top:0px;
-    height:100%;
-    min-height:100%;
-    overflow-x: hidden;
-    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #28B6C3;
 }
 
 .sprint .list-group-item{
