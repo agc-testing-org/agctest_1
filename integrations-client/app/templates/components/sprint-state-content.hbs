@@ -1,17 +1,20 @@
 {{#if selected-state.state.contributors}}
-    accept contributors |
+    <div class="overview">
+
     {{#if (eq selected-state.id last-state.id)}}
-        last state | 
+
         {{#if (eq last-state.name "closed")}}
-            closed |
+              <div class="text-center header">
+                <h3>This sprint has been completed</h3>
+              </div>
         {{else}}
-            not closed |
-            <div class="overview">
+
+            
                 <div class="text-center">
                     {{#unless last-state.active_contribution_id}}
                         <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3>
                     {{/unless}}
-                    <h4>{{selected-state.state.instruction}}</h4>
+                    <h3>{{selected-state.state.instruction}}</h3>
 
                     {{#unless sessionAccount.account.github}}
                         {{user-login-github text=" to participate"}}
@@ -27,19 +30,19 @@
                         {{/if}}
                     {{/unless}}
                 </div>
-            </div>
+           
         {{/if}}
     {{else}}
-        Review State, {{last-contributor-state.contributors.length}} contributors |
-        <div class="overview">
-            <div class="text-center">
+
+            <div class="text-center header">
                 <h3>This sprint state is no longer open</h3>
             </div>
-        </div>
-    {{/if}}
 
+    {{/if}}
+    </div>
 {{else}}
-    Show comments / votes |
+    <div class="full">
+    <h3 class="mt-5">Contributions</h3>
     {{#each last-contributor-state.contributors as |contributor|}}
 
         {{#if (eq contributor.id last-contributor-state.contributor_id)}}
@@ -56,4 +59,5 @@
         {{develop-issue-comments comments=contributor.comments}}
         {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments"}}
     {{/each}}
+    </div>
 {{/if}}

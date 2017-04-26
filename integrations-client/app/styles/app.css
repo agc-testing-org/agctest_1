@@ -723,9 +723,12 @@ button{
 }
 .main .overview{
     position:relative;
-    padding-top:40%;
+    margin-top:40%;
 }
-.main .still .overview{
+.main .still .header{
+    padding-top:94px;
+}
+.main .still .full{
     margin-top:94px;
 }
 .main .overview .description{
@@ -775,6 +778,12 @@ button{
     background-color: #fff !important;
     color: orange !important;
     border: 2px solid orange;
+}
+.main a{
+    font-weight:600;
+}
+.main textarea{
+    border: 1px solid #ededed !important;
 }
 
 /* profile */
