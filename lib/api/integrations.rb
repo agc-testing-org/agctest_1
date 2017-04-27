@@ -305,6 +305,41 @@ class Integrations < Sinatra::Base
         return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
+    account_roles_get = lambda do
+        account = Account.new
+        return (account.get_account_roles params[:user_id], {}).to_json
+    end
+
+    account_roles_get_by_role = lambda do
+        account = Account.new
+        query = {:id => params[:role_id]}
+        return (account.get_account_roles params[:user_id], query).to_json
+    end
+
+    account_roles_patch_by_id = lambda do
+        protected!
+        status 401
+        response = {}
+        user_id=params[:user_id]
+        if @session_hash["id"].to_i.equal?(user_id.to_i)
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if params[:user_id] && params[:role_id] && fields.key?(:active)
+                    account = Account.new
+                    response = (account.update_user_role user_id, params[:role_id], fields[:active])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json    
+    end
+
     roles_get = lambda do
         account = Account.new
         return account.get_roles.to_json
@@ -530,7 +565,15 @@ class Integrations < Sinatra::Base
             if fields[:text] && fields[:text].length > 1
                 issue = Issue.new
                 comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
-                if comment
+                
+                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+                query = { :id => sprint_state.sprint_id }
+                sprint = issue.get_sprints query, @session_hash["id"]
+                project_id = sprint[0][:project]["id"]
+
+                log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
+
+                if comment && (issue.log_event log_params)
                     status 201
                     response = comment
                 end
@@ -552,7 +595,15 @@ class Integrations < Sinatra::Base
 
             issue = Issue.new
             vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
-            if vote
+
+            sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+            query = { :id => sprint_state.sprint_id }
+            sprint = issue.get_sprints query, @session_hash["id"]
+            project_id = sprint[0][:project]["id"]
+
+            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
+
+            if vote && (issue.log_event log_params)
                 status 201
                 response = vote
             end
@@ -872,6 +923,10 @@ class Integrations < Sinatra::Base
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
     get "/account", &account_get
+
+    get "/account/:user_id/roles", &account_roles_get
+    get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
+    patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get
