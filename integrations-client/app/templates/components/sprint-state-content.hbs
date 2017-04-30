@@ -32,7 +32,7 @@
                         {{#if last-state.active_contribution_id}}
                             {{#each last-state.contributors as |contributor|}}
                                 {{#if (eq contributor.id last-state.active_contribution_id)}}
-                                    {{develop-contribute contributor=contributor sprint_state=last-state project=project sprint=model.sprint}}
+                                    {{develop-contribute contributor=contributor sprint_state=last-state project=project sprint=sprint}}
                                 {{/if}}
                             {{/each}}
                         {{else}}

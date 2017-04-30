@@ -77,14 +77,21 @@ label{
     color:#fff;
 }
 .btn-outline-secondary{
-    border: 2px solid #fff;
-    color: #fff;
+    border: 2px solid #28B6C3;
     font-size: 14px;
-    font-weight: 300;
+    font-weight: 400;
+    color: #fff;
 }
 .btn-outline-secondary:hover{
     color:#fff !important;
     background-color: #28B6C3 !important;
+}
+.main .btn-outline-secondary{
+    color: #28B6C3 !important;   
+}
+.main .btn-outline-secondary:hover{
+    border: 2px solid #28B6C3;
+    color: #fff !important;
 }
 
 .develop .btn-outline-secondary{
@@ -715,11 +722,14 @@ button{
     font-weight:300;
     padding-top:10px;
     padding-bottom:2px;
+    color: #ccc;
 }
 .main .about{
-    color: lightseagreen;
     padding:5px;
     padding-top:0px;
+    font-weight:300;
+    margin-bottom:50px;
+    color: #28B6C3;
 }
 .main .overview{
     position:relative;
@@ -733,7 +743,7 @@ button{
 }
 .main .overview .description{
     font-weight:300;
-    margin-bottom:50px;
+    margin-bottom:10px;
 }
 .main .overview .score .title {
 
@@ -772,7 +782,7 @@ button{
     border: 2px solid orange;
     padding: 4px;
     background-color: orange;
-    color: white;
+    color: white !important;
 }
 .main .list-group-item small button:hover{
     background-color: #fff !important;
@@ -784,6 +794,11 @@ button{
 }
 .main textarea{
     border: 1px solid #ededed !important;
+}
+.main .requirements{
+    margin-top:50px;
+    background-color: #f9f9f9;
+    padding:5px;
 }
 
 /* profile */

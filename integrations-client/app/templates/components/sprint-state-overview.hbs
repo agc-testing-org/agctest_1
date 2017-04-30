@@ -1,8 +1,8 @@
-<div class="footprint">{{sprint.project.org}}/{{sprint.project.name}}: Sprint {{sprint.id}} <span class="text-capitalize">{{showing-state.state.name}}</span></div>
-<div class="about">{{showing-state.state.description}}</div>
+<div class="footprint"><span class="text-capitalize">{{showing-state.state.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for <span class="text-uppercase">{{sprint.project.org}}/{{sprint.project.name}}</span></div>
 <div class="overview text-center">
     <h1 class="text-capitalize">{{sprint.title}}</h1>
     <div class="description">{{sprint.description}}</div>
+    <div class="about text-capitalize">{{showing-state.state.description}}</div>
     <div class="row">
         {{#unless (eq showing-state.state.name "idea")}}
         {{#if contributors}}
@@ -20,6 +20,11 @@
             {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
             </div>
         {{/if}}
+
         {{/unless}}
+
+        {{#if (greater-than sprint.sprint_states.length 2) }}
+            <div class="requirements col-md-4 offset-md-4 rounded"><a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements Document</a></div>
+        {{/if}}
     </div>
 </div>
