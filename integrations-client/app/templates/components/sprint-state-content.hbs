@@ -1,3 +1,13 @@
+{{#if (eq selected-state.state.name "idea")}}
+
+     <div class="overview">
+        <div class="text-center header">
+            <h3>Nothing to do here yet!</h3>
+        </div>
+     </div>
+
+{{else}}
+
 {{#if selected-state.state.contributors}}
     <div class="overview">
 
@@ -60,4 +70,6 @@
         {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments"}}
     {{/each}}
     </div>
+{{/if}}
+
 {{/if}}

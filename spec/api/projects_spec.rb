@@ -144,7 +144,7 @@ describe "/projects" do
         end
         it_behaves_like "project"
     end
-    describe "POST /:id/sprints" do
+    describe "POST /:id/sprints", :focus => true do
         fixtures :projects, :states, :labels, :sprint_timelines
         before(:each) do
             @title = "SPRINT TITLE"
@@ -156,6 +156,7 @@ describe "/projects" do
             before(:each) do
                 post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from sprints").first
+                @sprint_state = @mysql_client.query("select * from sprint_states").first
                 @res = JSON.parse(last_response.body)
                 @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@res["id"]}").first
             end
@@ -195,6 +196,9 @@ describe "/projects" do
             end
             it "should include sprint description" do
                  expect(@res["description"]).to eq(@mysql["description"])
+            end
+            it "should include sprint state" do
+                 expect(@res["sprint_states"][0]["id"]).to eq(@sprint_state["id"])
             end
         end
     end

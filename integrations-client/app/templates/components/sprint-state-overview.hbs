@@ -4,6 +4,7 @@
     <h1 class="text-capitalize">{{sprint.title}}</h1>
     <div class="description">{{sprint.description}}</div>
     <div class="row">
+        {{#unless (eq showing-state.state.name "idea")}}
         {{#if contributors}}
             <div class="col-md-4 offset-md-4">
             {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
@@ -19,5 +20,6 @@
             {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
             </div>
         {{/if}}
+        {{/unless}}
     </div>
 </div>
