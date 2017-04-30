@@ -476,30 +476,55 @@ button{
     padding-top: 0px;
     font-weight:300;
     min-width:100px;
+    max-width:100px;
+}
+.sidebar.hidden-md-up{
+    background-color: #333;
+    margin-top: -56px;
+    padding:0px;
+    position:relative;
+    min-width:100%;
+    max-width:100%;
 }
 
-.sidebar .nav {
-    margin-bottom: 20px;
+.sidebar .nav, .sidebar.hidden-md-up .nav {
+ 
 }
-.sidebar .nav a{
+.sidebar.hidden-md-up .nav li{
+    text-align:left !important;
+}
+.sidebar .nav li, .sidebar.hidden-md-up .nav li{
     color: #28B6C3;
-    margin:10px;
-    margin-top:2px;
-    margin-bottom:2px;
+    margin:0px;
+    padding:10px;
+    border-bottom: 1px solid #4C4C4C;
+    color: #cfcfcf;
+    width:100%;
+    display:block;
+    position:relative;
 }
-.sidebar .nav li.active{
+.sidebar .nav li.active,.sidebar.hidden-md-up .nav li.active{
     background-color: #28B6C3;
     color: #fff;
 }
 
 .sidebar button{
-    width:100%;
+    padding: 8px; 
 }
 .sidebar button:hover{
     background-color:transparent;
     color: #ccc;
 }
+.sidebar .dropdown, .sidebar.hidden-md-up .dropdown{
+    color: #fff;
+    cursor:pointer;
+    margin:5px;
+    margin-top:20px !important;
+}
+.sidebar .show, .sidebar.hidden-md-up .show{
+    position:fixed;
 
+}
 /*
  * Dashboard
  */
@@ -624,89 +649,11 @@ button{
 .develop li.nav-item{
 
 }
-.sidebar .nav a{
-    margin:0px;
-    text-decoration:none;
-}
-.sidebar li.nav-item{
-    padding:10px;
-    border-bottom: 1px solid #4C4C4C;
-    color: #cfcfcf; 
-    width:100%;
-    display:block;
-    position:relative;
-}
 .sidebar li.nav-item .icon{
     margin-bottom: 5px;
 }
-.sidebar li.nav-item a:active{
-    color:orange;
-}
-
-.sidebar li.nav-item.create{
-    padding:0px;
-}
-.sidebar li.nav-item .title, .develop li.nav-item .title{
-    font-size:18px;
-    line-height:20px;
-    margin-bottom:5px;
-}
-.sidebar li.nav-item .title{
-    color:#fff;
-}
-.sidebar li.nav-item .description, .develop li.nav-item .description{
-    margin-bottom:5px;
-}
-.sidebar li.nav-item .summary{
-    line-height:1.3;
-    margin-bottom:5px;
-    color: lightseagreen;
-}
-.sidebar li.nav-item .change{
-    color: #fff;
-}
-.sidebar li.nav-item .change .badge{
-    background-color: orange;
-    color: #fff;
-    font-weight:300;
-    font-size:12px;
-}
-.sidebar li.nav-item a{
-    margin:0px;
-
-}
-.sidebar li.nav-item .change a{
-    color: orange; 
-    margin: 0px;
-}
-.sidebar .transition{
-    position:fixed;
-}
-.sidebar .transition .btn, .sidebar .transition .btn:active{
-    box-shadow: none;
-    border: 0px !important;
-    background-color: transparent !important;
-}
-.sidebar .transition .dropdown-menu{
-    margin-left:2px;
-}
-
-.nav-item.create a{
-    color: #fff;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
-    border-radius: 0px !important;
-    font-weight: 500;
-    font-size: 18px;
-    background-color:#28B6C3;
-    margin:0px;
-    min-height:49px;
-    padding-left:10px;
-}
-
 .main{
     margin:0px;
-    margin-top:-56px;
 }
 .main .slide{ /* need alternative for mobile */
     position:fixed;
@@ -714,9 +661,14 @@ button{
     top:0px;
     height:100%;
     min-height:100%;
+    margin-left: 100px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
     background-color: #ededed;
+}
+.main .slide.hidden-md-up{
+    position:relative;
+    margin-left:0px;
 }
 .main .footprint{
     padding:5px;
@@ -732,9 +684,23 @@ button{
     margin-bottom:50px;
     color: #28B6C3;
 }
+.main .slide.hidden-md-up .about{
+    margin-bottom:10px;
+}
 .main .overview{
     position:relative;
     margin-top:40%;
+}
+.main .slide.hidden-md-up .overview{
+    margin-top:20px;
+}
+.main .still{
+    margin-top:-56px;
+    padding-left:60px;
+    padding-right:60px;
+}
+.main .still.hidden-md-up{
+     margin-top:0px;
 }
 .main .still .header{
     padding-top:94px;
@@ -745,6 +711,9 @@ button{
 .main .overview .description{
     font-weight:300;
     margin-bottom:10px;
+}
+.main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name{
+    text-align:left !important;   
 }
 .main .overview .score .title {
 
@@ -800,6 +769,9 @@ button{
     margin-top:50px;
     background-color: #f9f9f9;
     padding:5px;
+}
+.main .hidden-md-up .requirements{
+    margin-bottom:10px;
 }
 
 /* profile */
