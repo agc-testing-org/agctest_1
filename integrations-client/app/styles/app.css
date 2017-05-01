@@ -734,6 +734,23 @@ button{
 .main .still .full{
     margin-top:94px;
 }
+.main .still .contribution{
+    border-bottom: 1px solid #ededed;
+}
+.main .still .contribution .comment{
+    font-weight:300;
+}
+.main .still .contribution .comment .text-muted{
+    color: #ccc !important;
+    font-size:12px;
+}
+.main .still .contribution .comments .action{
+    color: #28B6C3;
+}
+.main .still .contribution .more{
+    color: #ccc;
+    font-weight: 400;
+}
 .main .overview .description{
     font-weight:300;
     margin-bottom:10px;

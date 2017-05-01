@@ -54,7 +54,7 @@
     <div class="full">
     <h3 class="mt-5">Contributions</h3>
     {{#each last-contributor-state.contributors as |contributor|}}
-
+    <div class="contribution">
         {{#if (eq contributor.id last-contributor-state.contributor_id)}}
             <i class="fa fa-trophy" aria-hidden="true"></i> 
             {{#if last-contributor-state.merged}}
@@ -68,6 +68,7 @@
 
         {{develop-issue-comments comments=contributor.comments}}
         {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments"}}
+    </div>
     {{/each}}
     </div>
 {{/if}}
