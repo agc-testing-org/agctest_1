@@ -7,7 +7,7 @@ export default Ember.Route.extend({
     },
 
     model: function(params){
-        //    this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
+        this.store.adapterFor('skillset').set('namespace', ''); // unset from sprint
         var all_states = this.modelFor("develop.project.sprint").sprint.get("sprint_states").toArray();
         var last_state = {};
         var last_contributor_state = {};
@@ -40,6 +40,8 @@ export default Ember.Route.extend({
                 sprint: this.modelFor("develop.project.sprint").sprint,
 
                 states: this.modelFor("develop.project").states,
+
+                skillsets: this.modelFor("develop.project.sprint").skillsets,
 
                 project: this.modelFor("develop.project").project,
 

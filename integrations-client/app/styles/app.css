@@ -497,12 +497,34 @@ button{
     color: #28B6C3;
     margin:0px;
     padding:10px;
-    border-bottom: 1px solid #4C4C4C;
+    background-color: #4C4C4C;
+    border-bottom: 0px solid #333;
     color: #cfcfcf;
     width:100%;
     display:block;
     position:relative;
 }
+
+.sidebar .nav .menu{
+    padding-bottom:20px;
+    border-bottom: 1px solid #4C4C4C;
+}
+.sidebar.hidden-md-up .nav .menu{
+    padding-bottom:0px;
+}
+
+.sidebar .nav .menu li, .sidebar.hidden-md-up .nav .menu li{
+    color: #28B6C3;
+    margin:0px;
+    padding:10px;
+    border-bottom: 0px;
+    color: #cfcfcf;     
+    width:100%;
+    background-color: #333;
+    display:block;              
+    position:relative;              
+} 
+
 .sidebar .nav li.active,.sidebar.hidden-md-up .nav li.active{
     background-color: #28B6C3;
     color: #fff;
@@ -559,18 +581,6 @@ button{
 .flow .stage .grid .box.box-nested{
     margin-left:19px;
     margin-top:2px;
-}
-.flow .badge{
-    font-weight: 300;
-    font-size: 12px;
-}
-
-.flow .badge.selected{
-    background-color: #28B6C3; 
-}
-.flow .badge.unselected{
-    background-color: #f0f0f0;
-    color: #fff;
 }
 
 .flow .stage .grid .box .point{
@@ -681,7 +691,23 @@ button{
     padding:5px;
     padding-top:0px;
     font-weight:300;
-    margin-bottom:50px;
+    margin-bottom:10px;
+    color: #28B6C3;
+}
+.main .slide .skillsets{
+    margin-bottom:20px;
+}
+
+.main .slide .skillsets .badge{
+    font-weight: 300;
+    font-size: 12px;
+}
+
+.main .slide .skillsets .badge.selected{
+    background-color: #28B6C3;
+}
+.main .slide .skillsets .badge.unselected{
+    background-color: #fff;
     color: #28B6C3;
 }
 .main .slide.hidden-md-up .about{
@@ -691,7 +717,7 @@ button{
     position:relative;
     margin-top:40%;
 }
-.main .slide.hidden-md-up .overview{
+.main .hidden-md-up .overview{
     margin-top:20px;
 }
 .main .still{
@@ -700,7 +726,7 @@ button{
     padding-right:60px;
 }
 .main .still.hidden-md-up{
-     margin-top:0px;
+    margin-top:0px;
 }
 .main .still .header{
     padding-top:94px;

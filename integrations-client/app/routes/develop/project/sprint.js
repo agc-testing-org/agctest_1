@@ -13,6 +13,9 @@ export default Ember.Route.extend({
         return Ember.RSVP.hash({
             states: this.modelFor("develop.project").states,
             sprint: this.store.findRecord('sprint', params.id),
+            skillsets: this.store.query('skillset', {
+
+            }),
         });
     }
 

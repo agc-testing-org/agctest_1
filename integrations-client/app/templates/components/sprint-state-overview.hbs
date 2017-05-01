@@ -3,6 +3,7 @@
     <h1 class="name text-capitalize">{{sprint.title}}</h1>
     <div class="description">{{sprint.description}}</div>
     <div class="about text-capitalize">{{showing-state.state.description}}</div>
+    {{develop-issue-skillsets skillsets=skillsets class="skillsets"}}
     <div class="row">
         {{#unless (eq showing-state.state.name "idea")}}
         {{#if contributors}}
