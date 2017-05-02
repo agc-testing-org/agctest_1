@@ -260,7 +260,18 @@ button{
     -o-background-size: cover;
     background-size: cover;
 }
-
+.vertical-align-hold{
+    display: table;
+    position: absolute;
+    left:0px;
+    top:0px;
+    height: 100%;
+    width: 100%;    
+}
+.vertical-align-cell{
+    display: table-cell;
+    vertical-align: middle;
+}
 
 /* index */
 
@@ -488,7 +499,7 @@ button{
 }
 
 .sidebar .nav, .sidebar.hidden-md-up .nav {
- 
+
 }
 .sidebar.hidden-md-up .nav li{
     text-align:left !important;
@@ -505,9 +516,8 @@ button{
     position:relative;
 }
 
-.sidebar .nav .menu{
-    padding-bottom:20px;
-    border-bottom: 1px solid #4C4C4C;
+.sidebar .nav .menu{ 
+    border-bottom: 2px solid #4C4C4C;
 }
 .sidebar.hidden-md-up .nav .menu{
     padding-bottom:0px;
@@ -714,8 +724,7 @@ button{
     margin-bottom:10px;
 }
 .main .overview{
-    position:relative;
-    margin-top:40%;
+    padding:20px;
 }
 .main .hidden-md-up .overview{
     margin-top:20px;
