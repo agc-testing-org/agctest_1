@@ -1,0 +1,76 @@
+{{#if (eq selected-state.state.name "idea")}}
+
+     <div class="overview">
+        <div class="text-center header">
+            <h3>Nothing to do here yet!</h3>
+        </div>
+     </div>
+
+{{else}}
+
+{{#if selected-state.state.contributors}}
+    <div class="overview">
+
+    {{#if (eq selected-state.id last-state.id)}}
+
+        {{#if (eq last-state.name "closed")}}
+              <div class="text-center header">
+                <h3>This sprint has been completed</h3>
+              </div>
+        {{else}}
+
+            
+                <div class="text-center">
+                    {{#unless last-state.active_contribution_id}}
+                        <h3><span class="text-capitalize">{{sessionAccount.account.name}}</span>, want to propose a solution?</h3>
+                    {{/unless}}
+                    <h3>{{selected-state.state.instruction}}</h3>
+
+                    {{#unless sessionAccount.account.github}}
+                        {{user-login-github text=" to participate"}}
+                    {{else}}
+                        {{#if last-state.active_contribution_id}}
+                            {{#each last-state.contributors as |contributor|}}
+                                {{#if (eq contributor.id last-state.active_contribution_id)}}
+                                    {{develop-contribute contributor=contributor sprint_state=last-state project=project sprint=sprint}}
+                                {{/if}}
+                            {{/each}}
+                        {{else}}
+                        <button class="btn btn-outline-secondary rounded" {{action "join" project.id last-state.id }}>Join</button>
+                        {{/if}}
+                    {{/unless}}
+                </div>
+           
+        {{/if}}
+    {{else}}
+
+            <div class="text-center header">
+                <h3>This sprint state is no longer open</h3>
+            </div>
+
+    {{/if}}
+    </div>
+{{else}}
+    <div class="full">
+    <h3 class="mt-5">Contributions</h3>
+    {{#each last-contributor-state.contributors as |contributor|}}
+    <div class="contribution">
+        {{#if (eq contributor.id last-contributor-state.contributor_id)}}
+            <i class="fa fa-trophy" aria-hidden="true"></i> 
+            {{#if last-contributor-state.merged}}
+                <span class="badge badge-default rounded">MERGED</span>
+            {{else}}
+                <span class="badge badge-default rounded">NOT MERGED</span>
+            {{/if}}
+        {{/if}} 
+        
+        <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">{{project.org}}/{{project.name}} branch {{last-contributor-state.id}}_{{contributor.id}}</a>
+
+        {{develop-issue-comments comments=contributor.comments}}
+        {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments"}}
+    </div>
+    {{/each}}
+    </div>
+{{/if}}
+
+{{/if}}

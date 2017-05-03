@@ -34,3 +34,5 @@ adam_admin:
   admin: true
   confirmed: true
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
+
+

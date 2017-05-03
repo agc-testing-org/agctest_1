@@ -77,14 +77,21 @@ label{
     color:#fff;
 }
 .btn-outline-secondary{
-    border: 2px solid #fff;
-    color: #fff;
+    border: 2px solid #28B6C3;
     font-size: 14px;
-    font-weight: 300;
+    font-weight: 400;
+    color: #fff;
 }
 .btn-outline-secondary:hover{
     color:#fff !important;
     background-color: #28B6C3 !important;
+}
+.main .btn-outline-secondary{
+    color: #28B6C3 !important;   
+}
+.main .btn-outline-secondary:hover{
+    border: 2px solid #28B6C3;
+    color: #fff !important;
 }
 
 .develop .btn-outline-secondary{
@@ -253,7 +260,18 @@ button{
     -o-background-size: cover;
     background-size: cover;
 }
-
+.vertical-align-hold{
+    display: table;
+    position: absolute;
+    left:0px;
+    top:0px;
+    height: 100%;
+    width: 100%;    
+}
+.vertical-align-cell{
+    display: table-cell;
+    vertical-align: middle;
+}
 
 /* index */
 
@@ -468,29 +486,77 @@ button{
     padding-right: 0px;
     padding-top: 0px;
     font-weight:300;
+    min-width:100px;
+    max-width:100px;
+}
+.sidebar.hidden-md-up{
+    background-color: #333;
+    margin-top: -56px;
+    padding:0px;
+    position:relative;
+    min-width:100%;
+    max-width:100%;
 }
 
-.sidebar .nav {
-    margin-bottom: 20px;
+.sidebar .nav, .sidebar.hidden-md-up .nav {
+
 }
-.sidebar .nav a{
+.sidebar.hidden-md-up .nav li{
+    text-align:left !important;
+}
+.sidebar .nav li, .sidebar.hidden-md-up .nav li{
     color: #28B6C3;
-    margin:10px;
-    margin-top:2px;
-    margin-bottom:2px;
+    margin:0px;
+    padding:10px;
+    background-color: #4C4C4C;
+    border-bottom: 0px solid #333;
+    color: #cfcfcf;
+    width:100%;
+    display:block;
+    position:relative;
 }
-.sidebar .nav a:hover{
-    color:#ededed;
+
+.sidebar .nav .menu{ 
+    border-bottom: 2px solid #4C4C4C;
+}
+.sidebar.hidden-md-up .nav .menu{
+    padding-bottom:0px;
+}
+
+.sidebar .nav .menu li, .sidebar.hidden-md-up .nav .menu li{
+    color: #28B6C3;
+    margin:0px;
+    padding:10px;
+    border-bottom: 0px;
+    color: #cfcfcf;     
+    width:100%;
+    background-color: #333;
+    display:block;              
+    position:relative;              
+} 
+
+.sidebar .nav li.active,.sidebar.hidden-md-up .nav li.active{
+    background-color: #28B6C3;
+    color: #fff;
 }
 
 .sidebar button{
-    width:100%;
+    padding: 8px; 
 }
 .sidebar button:hover{
     background-color:transparent;
     color: #ccc;
 }
+.sidebar .dropdown, .sidebar.hidden-md-up .dropdown{
+    color: #fff;
+    cursor:pointer;
+    margin:5px;
+    margin-top:20px !important;
+}
+.sidebar .show, .sidebar.hidden-md-up .show{
+    position:fixed;
 
+}
 /*
  * Dashboard
  */
@@ -525,51 +591,6 @@ button{
 .flow .stage .grid .box.box-nested{
     margin-left:19px;
     margin-top:2px;
-}
-.flow .badge{
-    font-weight: 300;
-    font-size: 12px;
-}
-
-.flow .badge.selected{
-    background-color: #28B6C3; 
-}
-.flow .badge.unselected{
-    background-color: #f0f0f0;
-    color: #fff;
-}
-
-.flow .list-group{
-    border: 3px solid #ededed;
-    border-bottom: 1px solid #ededed;
-    background-color: #ededed;
-}
-
-.flow .list-group-item{
-    color: #4C4C4C;
-    background-color:#fff;
-    border: 1px solid #ededed;
-    margin-bottom:3px;
-}
-.flow .list-group-item.active{
-    background-color:#ededed;
-}
-.flow .list-group-item h4{
-    font-weight:600;
-}
-.flow .list-group-item.active h4{
-    line-height:29px;
-    font-weight:500;
-}
-.flow .list-group-item.active small button{
-    border: 2px solid orange;
-    padding: 4px;
-    background-color: orange;
-    color: white;
-}
-.flow .list-group-item.active small button:hover{
-    background-color: #fff;
-    color: orange;
 }
 
 .flow .stage .grid .box .point{
@@ -648,65 +669,161 @@ button{
 .develop li.nav-item{
 
 }
-.sidebar li.nav-item{
-    padding:10px;
-    border-bottom: 1px solid #4C4C4C;
-    color: #cfcfcf; 
-    width:100%;
-
+.sidebar li.nav-item .icon{
+    margin-bottom: 5px;
 }
-.sidebar li.nav-item.create{
-    padding:0px;
+.main{
+    margin:0px;
 }
-.sidebar li.nav-item .title, .develop li.nav-item .title{
-    font-size:18px;
-    line-height:20px;
-    margin-bottom:5px;
+.main .slide{ /* need alternative for mobile */
+    position:fixed;
+    left:0px;
+    top:0px;
+    height:100%;
+    min-height:100%;
+    margin-left: 100px;
+    overflow-x: hidden;
+    overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
+    background-color: #ededed;
 }
-.sidebar li.nav-item .title{
-    color:#fff;
+.main .slide.hidden-md-up{
+    position:relative;
+    margin-left:0px;
 }
-.sidebar li.nav-item .description, .develop li.nav-item .description{
-    margin-bottom:5px;
-}
-.sidebar li.nav-item .summary{
-    line-height:1.3;
-    margin-bottom:5px;
-    color: lightseagreen;
-}
-.sidebar li.nav-item .change{
-    color: #fff;
-}
-.sidebar li.nav-item .change .badge{
-    background-color: orange;
-    color: #fff;
+.main .footprint{
+    padding:5px;
     font-weight:300;
+    padding-top:10px;
+    padding-bottom:2px;
+    color: #ccc;
+}
+.main .about{
+    padding:5px;
+    padding-top:0px;
+    font-weight:300;
+    margin-bottom:10px;
+    color: #28B6C3;
+}
+.main .slide .skillsets{
+    margin-bottom:20px;
+}
+
+.main .slide .skillsets .badge{
+    font-weight: 300;
+    font-size: 12px;
+}
+
+.main .slide .skillsets .badge.selected{
+    background-color: #28B6C3;
+}
+.main .slide .skillsets .badge.unselected{
+    background-color: #fff;
+    color: #28B6C3;
+}
+.main .slide.hidden-md-up .about{
+    margin-bottom:10px;
+}
+.main .overview{
+    padding:20px;
+}
+.main .hidden-md-up .overview{
+    margin-top:20px;
+}
+.main .still{
+    margin-top:-56px;
+    padding-left:60px;
+    padding-right:60px;
+}
+.main .still.hidden-md-up{
+    margin-top:0px;
+}
+.main .still .header{
+    padding-top:94px;
+}
+.main .still .full{
+    margin-top:94px;
+}
+.main .still .contribution{
+    border-bottom: 1px solid #ededed;
+}
+.main .still .contribution .comment{
+    font-weight:300;
+}
+.main .still .contribution .comment .text-muted{
+    color: #ccc !important;
     font-size:12px;
 }
-.sidebar li.nav-item a{
-    margin:0px;
+.main .still .contribution .comments .action{
+    color: #28B6C3;
+}
+.main .still .contribution .more{
+    color: #ccc;
+    font-weight: 400;
+}
+.main .overview .description{
+    font-weight:300;
+    margin-bottom:10px;
+}
+.main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name{
+    text-align:left !important;   
+}
+.main .overview .score .title {
 
 }
-.sidebar li.nav-item .change a{
-    color: orange; 
-    margin: 0px;
-}
-
-.nav-item.create a{
-    color: #fff;
-    -webkit-border-radius: 0px !important;
-    -moz-border-radius: 0px !important;
-    border-radius: 0px !important;
+.main .overview .score .total {
     font-weight: 500;
-    font-size: 18px;
-    background-color:#28B6C3;
-    margin:0px;
-    min-height:49px;
-    padding-left:10px;
+    font-size: 40px;
 }
 
-.sprint .list-group-item{
+.main .list-group-item{
     margin-bottom:4px;
+}
+.main .list-group{
+    border: 3px solid #ededed;
+    border-bottom: 1px solid #ededed;
+    background-color: #ededed;
+}
+
+.main .list-group-item{
+    color: #4C4C4C;
+    background-color:#fff;
+    border: 1px solid #ededed;
+    margin-bottom:3px;
+}
+.main .list-group-item.active{
+    background-color:#ededed;
+}
+.main .list-group-item h4{
+    font-weight:600;
+}
+.main .list-group-item.active h4{
+    line-height:29px;
+    font-weight:500;
+}
+.main .list-group-item small button{
+    border: 2px solid orange;
+    padding: 4px;
+    background-color: orange;
+    color: white !important;
+}
+.main .list-group-item small button:hover{
+    background-color: #fff !important;
+    color: orange !important;
+    border: 2px solid orange;
+}
+.main a{
+    font-weight:600;
+}
+.main textarea{
+    border: 1px solid #ededed !important;
+}
+.main .requirements{
+    margin-top:50px;
+    background-color: #f9f9f9;
+    padding:5px;
+}
+.main .hidden-md-up .requirements{
+    margin-bottom:10px;
 }
 
 /* profile */

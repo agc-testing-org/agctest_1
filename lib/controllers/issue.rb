@@ -182,6 +182,7 @@ class Issue
                 s.sprint_states.each_with_index do |ss,j|
                     response[i][:sprint_states][j] = ss.as_json
                     response[i][:sprint_states][j][:state] = ss.state.as_json 
+                    response[i][:sprint_states][j][:active_contribution_id] = nil
                     response[i][:sprint_states][j][:contributors] = []
                     ss.contributors.each_with_index do |c,k|
                         response[i][:sprint_states][j][:contributors][k] = {
@@ -195,6 +196,7 @@ class Issue
                             response[i][:sprint_states][j][:contributors][k][:commit] = c.commit
                             response[i][:sprint_states][j][:contributors][k][:commit_success] =  c.commit_success
                             response[i][:sprint_states][j][:contributors][k][:repo] = c.repo
+                            response[i][:sprint_states][j][:active_contribution_id] = c.id
                         end
                     end
                     response[i][:sprint_states][j].delete("state_id")
@@ -262,6 +264,26 @@ class Issue
     def update_skillsets sprint_id, skillset_id, active
         begin
             ss = SprintSkillset.find_or_initialize_by(:sprint_id => sprint_id, :skillset_id => skillset_id)
+            ss.update_attributes!(:active => active)
+            return {:id => ss.skillset_id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_skillsets user_id, query
+        begin            
+            return Skillset.joins("LEFT JOIN user_skillsets ON user_skillsets.skillset_id = skillsets.id AND user_skillsets.user_id = #{user_id.to_i} OR user_skillsets.user_id is null").where(query).select("skillsets.id","skillsets.name","user_skillsets.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_skillsets user_id, skillset_id, active
+        begin
+            ss = UserSkillset.find_or_initialize_by(:user_id => user_id, :skillset_id => skillset_id)
             ss.update_attributes!(:active => active)
             return {:id => ss.skillset_id}
         rescue => e

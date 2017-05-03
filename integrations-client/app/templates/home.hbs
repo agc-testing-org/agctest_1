@@ -1,12 +1,21 @@
-<div class="container mb-5">
-    {{user-logout}}
-    {{user-login-github}}
-    {{create-project repositories=model.repositories}}
-</div>
-<div class="container flow profile">
-    <div class="row">
-        <div class="col-sm-12 col-md-12">
-            {{profile-aggregates model=model}}
+<div class="main">
+    <div class="container mb-5">
+        {{user-logout}}
+        {{user-login-github}}
+        {{create-project repositories=model.repositories}}
+        Projects
+        {{#each model.projects as |project|}}
+        <div>
+        {{#link-to "develop.project" project.org project.id}}{{project.org}}/{{project.id}}-{{project.name}}{{/link-to}}
+        </div>
+        {{/each}}
+
+    </div>
+    <div class="container flow profile">
+        <div class="row">
+            <div class="col-sm-12 col-md-12">
+                {{profile-aggregates model=model}}
+            </div>
         </div>
     </div>
 </div>
