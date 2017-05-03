@@ -1,0 +1,12 @@
+<div class="row main">
+{{#if model.selected_state.state.contributors}}
+<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{sprint-state-overview skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.selected_state showing-state=model.selected_state contributors=true}}</div>
+<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{sprint-state-overview skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.selected_state showing-state=model.selected_state contributors=true}}</div>
+{{else}}
+<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{sprint-state-overview skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.last_contributor_state showing-state=model.selected_state contributors=false}}</div>
+<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{sprint-state-overview skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.last_contributor_state showing-state=model.selected_state contributors=false}}</div>
+{{/if}}
+<div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{sprint-state-content sprint=model.sprint project=model.project selected-state=model.selected_state last-state=model.last_state last-contributor-state=model.last_contributor_state refresh="refresh"}}</div>
+<div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{sprint-state-content sprint=model.sprint project=model.project selected-state=model.selected_state last-state=model.last_state last-contributor-state=model.last_contributor_state refresh="refresh"}}</div>
+</div>
+

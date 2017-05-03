@@ -182,6 +182,7 @@ class Issue
                 s.sprint_states.each_with_index do |ss,j|
                     response[i][:sprint_states][j] = ss.as_json
                     response[i][:sprint_states][j][:state] = ss.state.as_json 
+                    response[i][:sprint_states][j][:active_contribution_id] = nil
                     response[i][:sprint_states][j][:contributors] = []
                     ss.contributors.each_with_index do |c,k|
                         response[i][:sprint_states][j][:contributors][k] = {
@@ -195,6 +196,7 @@ class Issue
                             response[i][:sprint_states][j][:contributors][k][:commit] = c.commit
                             response[i][:sprint_states][j][:contributors][k][:commit_success] =  c.commit_success
                             response[i][:sprint_states][j][:contributors][k][:repo] = c.repo
+                            response[i][:sprint_states][j][:active_contribution_id] = c.id
                         end
                     end
                     response[i][:sprint_states][j].delete("state_id")
