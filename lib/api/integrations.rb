@@ -533,7 +533,7 @@ class Integrations < Sinatra::Base
                 
                 sprint_state = issue.get_sprint_state fields[:sprint_state_id]
                 query = { :id => sprint_state.sprint_id }
-                sprint = issue.get_sprints query, @session_hash["id"]
+                sprint = issue.get_sprints query, nil
                 project_id = sprint[0][:project]["id"]
 
                 log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
@@ -557,13 +557,20 @@ class Integrations < Sinatra::Base
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
+            created = fields[:created]
+            puts "if created"
+            puts created
+            puts "fields"
+            puts fields
+            puts "sprint_state_id"
+            puts fields[:sprint_state_id]
 
             issue = Issue.new
             vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
 
             sprint_state = issue.get_sprint_state fields[:sprint_state_id]
             query = { :id => sprint_state.sprint_id }
-            sprint = issue.get_sprints query, @session_hash["id"]
+            sprint = issue.get_sprints query, nil
             project_id = sprint[0][:project]["id"]
 
             log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
