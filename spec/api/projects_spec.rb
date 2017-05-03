@@ -630,6 +630,11 @@ describe "/projects" do
                 res = JSON.parse(last_response.body)
                 expect(res["created"]).to be false
             end
+            it "should not save vote_id in sprint_timelines" do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                timeline = @mysql_client.query("select * from sprint_timelines")
+                expect(timeline.count).to eq(1)
+            end
         end
         context "vote" do
             it "should save contributor_id" do
