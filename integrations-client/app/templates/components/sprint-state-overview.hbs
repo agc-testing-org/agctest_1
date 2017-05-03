@@ -1,0 +1,35 @@
+<div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for <span class="text-uppercase">{{sprint.project.org}}/{{sprint.project.name}}</span></div>
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview text-center">
+            <h1 class="name text-capitalize">{{sprint.title}}</h1>
+            <div class="description">{{sprint.description}}</div>
+            <div class="about text-capitalize">{{showing-state.state.description}}</div>
+            {{sprint-state-overview-skillsets skillsets=skillsets class="skillsets"}}
+            <div class="row">
+                {{#unless (eq showing-state.state.name "idea")}}
+                {{#if contributors}}
+                <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
+                    {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                </div>
+                {{else}}
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "comments") title="comments"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
+                </div>
+                {{/if}}
+
+                {{/unless}}
+
+                {{#if (greater-than sprint.sprint_states.length 2) }}
+                <div class="requirements col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2 rounded"><a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements Document</a></div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>

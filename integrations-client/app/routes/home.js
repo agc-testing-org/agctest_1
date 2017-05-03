@@ -10,6 +10,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
         return Ember.RSVP.hash({
             states: this.store.findAll('state'),
+            projects: this.store.findAll('project'),
             repositories: this.store.findAll('repository'),
             comments: this.store.queryRecord('aggregate-comment', {
              

@@ -355,6 +355,42 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    user_skillsets_get = lambda do
+        issue = Issue.new
+        return (issue.get_user_skillsets params[:user_id], {}).to_json
+    end
+
+    user_skillsets_get_by_skillset = lambda do
+        issue = Issue.new
+        query = {:id => params[:skillset_id]}
+        return (issue.get_user_skillsets params[:user_id], query)[0].to_json
+    end
+
+    user_skillsets_patch = lambda do
+        protected!
+        status 401
+        response = {}
+        user_id=params[:user_id]
+        if @session_hash["id"].to_i.equal?(user_id.to_i)
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if params[:user_id] && params[:skillset_id] && fields.key?(:active)
+                    issue = Issue.new
+                    response = (issue.update_user_skillsets user_id, params[:skillset_id], fields[:active])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
+
+
     repositories_get = lambda do
         protected!
         repo = Repo.new
@@ -470,10 +506,11 @@ class Integrations < Sinatra::Base
                 if fields[:description] && fields[:description].length > 5
                     issue = Issue.new
                     sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  params[:project_id].to_i
+                    sprint_state = issue.create_sprint_state sprint.id, 1, nil
                     log_params = {:sprint_id => sprint.id, :state_id => 1, :user_id => @session_hash["id"], :project_id => params[:project_id]}
-                    if sprint && (issue.log_event log_params)
+                    if sprint && sprint_state && (issue.log_event log_params)
                         status 201
-                        response = sprint
+                        response = sprint_state
                     end
                 else
                     response[:message] = "Please enter a more detailed description"                    
@@ -895,6 +932,10 @@ class Integrations < Sinatra::Base
     post "/session/:provider", &session_provider_post
     delete "/session", &session_delete
     get "/account", &account_get
+    get "/account/:user_id/skillsets", &user_skillsets_get
+    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
+    patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
+
 
     get "/roles", &roles_get
     get "/states", &states_get
