@@ -247,6 +247,26 @@ class Account
         end
     end
 
+    def get_account_roles user_id, query
+        begin            
+            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_role user_id, role_id, active
+        begin
+            user_role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
+            user_role.update_attributes!(:active => active)
+            return {:id => user_role.role_id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def sign_in email, password, ip
         user = User.find_by(email: email.downcase)
         if user && user.password

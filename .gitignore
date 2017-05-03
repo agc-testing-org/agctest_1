@@ -28,4 +28,4 @@ integrations-client/libpeerconnection.log
 integrations-client/npm-debug.log*
 integrations-client/testem.log
 
-
+*.rdb
