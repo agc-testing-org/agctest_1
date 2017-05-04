@@ -14,7 +14,7 @@ describe "/projects" do
         post "/login", { :password => admin_password, :email => email }.to_json
         res = JSON.parse(last_response.body)
         @non_admin_w7_token = res["w7_token"]
-    
+
         code = "123"
         access_token = "ACCESS123"
 
@@ -144,7 +144,7 @@ describe "/projects" do
         end
         it_behaves_like "project"
     end
-    describe "POST /:id/sprints", :focus => true do
+    describe "POST /:id/sprints" do
         fixtures :projects, :states, :labels, :sprint_timelines
         before(:each) do
             @title = "SPRINT TITLE"
@@ -192,13 +192,13 @@ describe "/projects" do
                 expect(@res["id"]).to eq(@mysql["id"])
             end
             it "should include sprint title" do
-                 expect(@res["title"]).to eq(@mysql["title"])
+                expect(@res["title"]).to eq(@mysql["title"])
             end
             it "should include sprint description" do
-                 expect(@res["description"]).to eq(@mysql["description"])
+                expect(@res["description"]).to eq(@mysql["description"])
             end
             it "should include sprint state" do
-                 expect(@res["sprint_states"][0]["id"]).to eq(@sprint_state["id"])
+                expect(@res["sprint_states"][0]["id"]).to eq(@sprint_state["id"])
             end
         end
     end
@@ -347,8 +347,8 @@ describe "/projects" do
             body = { 
                 :name=>"1", 
                 :commit=>{
-                :sha=>sprint_states(:sprint_1_state_1).sha
-            }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -389,8 +389,8 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                :sha=>sprint_states(:sprint_1_state_1).sha
-            }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -428,8 +428,8 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                :sha=>sprint_states(:sprint_1_state_1).sha
-            }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -524,8 +524,8 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                :sha=>sprint_states(:sprint_1_state_1).sha
-            }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -601,7 +601,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /contributors/:id/votes" do
+    describe "POST /contributors/:id/votes", :focus => true do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
@@ -617,24 +617,46 @@ describe "/projects" do
         it "should return created status true for a new vote" do
             expect(@res["created"]).to be true
         end
-        context "downvote" do
-            it "should return created status false for a repeat vote" do
-                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-                res = JSON.parse(last_response.body)
-                expect(res["created"]).to be false
-            end
-        end
-        context "vote" do
+        context "votes" do
             it "should save contributor_id" do
                 expect(@mysql["contributor_id"]).to eq(@contributor_id)
             end
+            it "should save sprint_state_id" do
+                expect(@mysql["sprint_state_id"]).to eq(@sprint_state_id)
+            end
         end
-        it "should only allow one vote per sprint" do
-            contributor_id = contributors(:adam_admin_1).id
-            post "/contributors/#{contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-            mysql = @mysql_client.query("select * from votes")
-            expect(mysql.count).to eq(1)
-            expect(mysql.first["contributor_id"]).to eq(contributor_id)
+        context "duplicate vote" do
+            before(:each) do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)    
+                @mysql = @mysql_client.query("select * from votes")
+            end
+            it "should return created status false" do
+                expect(@res["created"]).to be false
+            end
+            it "should not create a new vote" do
+                expect(@mysql.count).to eq(1)
+            end
+        end
+        context "different vote" do
+            before(:each) do
+                @new_contributor_id = contributors(:adam_admin_1).id
+                post "/contributors/#{@new_contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @mysql = @mysql_client.query("select * from votes")
+                @res = JSON.parse(last_response.body)
+            end
+            it "should update the contributor_id" do
+                 expect(@mysql.first["contributor_id"]).to eq(@new_contributor_id)
+            end
+            it "should return created status true" do
+                 expect(@res["created"]).to be true
+            end
+            it "should not create a new vote" do
+                expect(@mysql.count).to eq(1)
+            end
+            it "should return previous vote" do
+                expect(@res["previous"]).to eq(@contributor_id)
+            end
         end
     end
     describe "POST /contributors/:id/winner" do
@@ -648,8 +670,8 @@ describe "/projects" do
                 :number => @pull_id,
                 :name=>"1",
                 :commit=>{
-                :sha=>sprint_states(:sprint_1_state_1).sha
-            }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -693,8 +715,8 @@ describe "/projects" do
                 :number => @pull_id,
                 :name=>"1",
                 :commit=>{
-                :sha=>sprint_states(:sprint_1_state_1).sha
-            }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
             }
 
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
@@ -1031,7 +1053,7 @@ describe "/projects" do
         end
     end
 
-     shared_examples_for "user_skillset_update" do
+    shared_examples_for "user_skillset_update" do
         context "response" do
             it "should return skillset_id as id" do
                 expect(@res["id"]).to eq(@skillset_id)
@@ -1091,7 +1113,7 @@ describe "/projects" do
             end
         end
     end 
-    
+
     shared_examples_for "user_roles" do
         context "all" do
             it "should return all roles" do
