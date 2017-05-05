@@ -632,7 +632,6 @@ class Integrations < Sinatra::Base
 
             issue = Issue.new
             vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
-            created = vote[:created]
 
             sprint_state = issue.get_sprint_state fields[:sprint_state_id]
             query = { :id => sprint_state.sprint_id }
@@ -642,7 +641,7 @@ class Integrations < Sinatra::Base
             log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
 
             if vote 
-                if created == true
+                if vote[:created]
                     (issue.log_event log_params)
                 end
                 status 201
