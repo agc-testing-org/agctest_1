@@ -81,6 +81,7 @@ label{
     font-size: 14px;
     font-weight: 400;
     color: #fff;
+    text-transform: capitalize;
 }
 .btn-outline-secondary:hover{
     color:#fff !important;

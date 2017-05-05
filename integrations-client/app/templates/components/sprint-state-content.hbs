@@ -27,7 +27,7 @@
                     <h3>{{selected-state.state.instruction}}</h3>
 
                     {{#unless sessionAccount.account.github}}
-                        {{user-login-github text=" to participate"}}
+                        {{user-login-oauth text=" to participate" provider="github"}}
                     {{else}}
                         {{#if last-state.active_contribution_id}}
                             {{#each last-state.contributors as |contributor|}}

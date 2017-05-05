@@ -26,7 +26,7 @@
             {{#if sprint_state.state.contributors}}
             {{#unless sprint_state.contributors}}
             {{#unless sessionAccount.account.github}}
-            {{user-login-github text=" to join"}}
+            {{user-login-oauth text=" to join" provider="github"}}
             {{else}}
             <button class="btn btn-outline-secondary rounded" {{action "join" model.sprint.project.id model.sprint.sprint_states }}>Join</button>        
             {{/unless}}
