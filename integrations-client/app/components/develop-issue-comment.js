@@ -37,21 +37,18 @@ export default Ember.Component.extend({
         vote(contributor_id,sprint_state_id){
             var store = this.get('store');
             store.adapterFor('vote').set('namespace', 'contributors/' + contributor_id );
-
             var feedback = store.createRecord('vote', {
                 contributor_id: contributor_id,
                 sprint_state_id: sprint_state_id
             }).save().then(function(payload) {      
                 if(payload.get("created")){
-                    console.log("YES");
+                    if(payload.get("previous")){
+                        var previous_contributor = store.peekRecord('contributor',payload.get("previous")).get('votes');
+                        var previous_vote = previous_contributor.findBy("id",payload.get("id"));
+                        previous_contributor.removeObject(previous_vote);
+                    }
                     store.peekRecord('contributor',contributor_id).get('votes').addObject(payload);
-                }else{
-                    console.log("NO");
-                    store.peekRecord('vote',payload.get("id")).deleteRecord();
-                    //store.peekRecord('contributor',contributor_id).get('votes').removeObject(payload);
                 }
-                //   console.log("refreshing");                    
-                // _this.sendAction("refresh");                                  
             });                                                                             
         },
         judge(contributor_id,sprint_state_id,project_id){
