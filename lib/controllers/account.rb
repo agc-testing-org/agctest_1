@@ -3,16 +3,55 @@ class Account
 
     end
 
-    def get_provider_by_name name
+    def linkedin_client access_token
+        return LinkedIn::API.new(access_token)
+    end
+
+    def pull_linkedin_profile client
+        return client.profile(fields: ["headline", "location","summary","positions"])
+    end
+
+    def post_linkedin_profile user_id, profile
         begin
-            return Provider.find_by(name: name)
+            return UserProfile.create({
+                user_id: user_id,
+                headline: profile.headline,
+                location_country_code: profile.location.country.code,
+                location_name: profile.location.name
+            }).id
         rescue => e
             puts e
             return nil
         end
     end
 
-    def code_for_token code
+    def post_linkedin_profile_positions profile_id, profile_position
+        begin
+            return UserPosition.create({
+                user_profile_id: profile_id,
+                title: profile_position.title,
+                size: profile_position.company["size"], # size symbol retrieves the obj length
+                start_year: profile_position.start_date.year,
+                end_year: (profile_position.end_date.year if profile_position.end_date),
+                company: profile_position.company.name,
+                industry: profile_position.company.industry
+            }).id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def linkedin_code_for_token code
+        begin 
+            return LinkedIn::OAuth2.new.get_access_token(code).token
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def github_code_for_token code
         begin
             return Octokit.exchange_code_for_token(code, ENV['INTEGRATIONS_GITHUB_CLIENT_ID'], ENV['INTEGRATIONS_GITHUB_CLIENT_SECRET'])[:access_token]
         rescue => e

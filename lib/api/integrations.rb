@@ -13,6 +13,7 @@ require 'pony'
 require 'octokit'
 require 'ldclient-rb'
 require 'git'
+require 'linkedin-oauth2'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -36,6 +37,8 @@ require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
 require_relative '../models/comment.rb'
 require_relative '../models/vote.rb'
+require_relative '../models/user_profile.rb'
+require_relative '../models/user_position.rb'
 
 # Workers
 
@@ -52,6 +55,12 @@ class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
 
+    LinkedIn.configure do |config|
+        config.client_id     = ENV["INTEGRATIONS_LINKEDIN_CLIENT_ID"]
+        config.client_secret = ENV["INTEGRATIONS_LINKEDIN_CLIENT_SECRET"]
+        config.redirect_uri  = "#{ENV['INTEGRATIONS_HOST']}/callback/linkedin"
+    end
+
     def protected!
         return if authorized?
         redirect to("/unauthorized")
@@ -62,20 +71,20 @@ class Integrations < Sinatra::Base
         if @session
             account = Account.new
             begin
-            session_hash = account.get_key "session", @session
-            @session_hash = JSON.parse(session_hash)
-            if @session_hash
-                @key = @session_hash["key"]
-                puts "::unlocking token"
-                @jwt_hash = account.validate_token @session, @key
-                if @jwt_hash
-                    return true
+                session_hash = account.get_key "session", @session
+                @session_hash = JSON.parse(session_hash)
+                if @session_hash
+                    @key = @session_hash["key"]
+                    puts "::unlocking token"
+                    @jwt_hash = account.validate_token @session, @key
+                    if @jwt_hash
+                        return true
+                    else
+                        return false
+                    end
                 else
                     return false
                 end
-            else
-                return false
-            end
             rescue => e
                 puts e
                 return false
@@ -250,7 +259,47 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    session_provider_post = lambda do
+    session_provider_linkedin_post = lambda do
+        protected!
+        status 400
+
+        response = {:success => false, :w7_token => @session}.to_json
+
+        begin 
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            account = Account.new 
+            access_token = account.linkedin_code_for_token(fields[:auth_code])
+
+            #Skip storing linkedin token.. 
+            #for now just pull what we can from the service and drop the token
+
+            linkedin = (account.linkedin_client access_token)
+            pulled = account.pull_linkedin_profile linkedin
+           
+            if pulled
+
+                profile_id = account.post_linkedin_profile @session_hash["id"], pulled
+
+                if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
+                    status 201 
+                    return {:success => true, :w7_token => @session}.to_json
+                else
+                    return response.to_json
+                end
+            else
+                return response.to_json
+            end
+
+        rescue => e
+            puts e
+            return response.to_json
+        end
+
+    end
+
+    session_provider_github_post = lambda do
         protected!
         status 400
         response = {:success => false}
@@ -262,7 +311,7 @@ class Integrations < Sinatra::Base
             account = Account.new
 
             if fields[:grant_type]
-                access_token = account.code_for_token(fields[:auth_code])
+                access_token = account.github_code_for_token(fields[:auth_code])
 
                 repo = Repo.new
                 github = (repo.github_client access_token)
@@ -941,7 +990,8 @@ class Integrations < Sinatra::Base
     post "/forgot", &forgot_post
     post "/reset", &reset_post
     post "/login", &login_post
-    post "/session/:provider", &session_provider_post
+    post "/session/github", &session_provider_github_post
+    post "/session/linkedin", &session_provider_linkedin_post
     delete "/session", &session_delete
     get "/account", &account_get
     get "/account/:user_id/skillsets", &user_skillsets_get

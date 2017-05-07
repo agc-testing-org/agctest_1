@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170218203026) do
+ActiveRecord::Schema.define(version: 20170506225820) do
 
   create_table "comments", force: :cascade do |t|
     t.integer  "user_id",         limit: 4,     null: false
@@ -150,6 +150,27 @@ ActiveRecord::Schema.define(version: 20170218203026) do
     t.datetime "updated_at",                                 null: false
     t.text     "instruction",  limit: 65535,                 null: false
     t.boolean  "contributors",               default: false, null: false
+  end
+
+  create_table "user_positions", force: :cascade do |t|
+    t.integer  "user_profile_id", limit: 4,   null: false
+    t.string   "title",           limit: 255
+    t.string   "size",            limit: 255
+    t.integer  "start_year",      limit: 4
+    t.integer  "end_year",        limit: 4
+    t.string   "company",         limit: 255
+    t.string   "industry",        limit: 255
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+  end
+
+  create_table "user_profiles", force: :cascade do |t|
+    t.integer  "user_id",               limit: 4,   null: false
+    t.string   "headline",              limit: 255
+    t.string   "location_country_code", limit: 255
+    t.string   "location_name",         limit: 255
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
   end
 
   create_table "user_roles", force: :cascade do |t|
