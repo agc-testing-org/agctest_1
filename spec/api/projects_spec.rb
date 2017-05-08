@@ -274,6 +274,34 @@ describe "/projects" do
         end
     end
 
+    shared_examples_for "contributor_comments" do
+        it "should return id" do
+            @contributor_comment_result.each_with_index do |c,i|
+                expect(@contributor_comments[i]["id"]).to eq(c["id"])
+            end
+        end
+        it "should return text" do
+            @contributor_comment_result.each_with_index do |c,i|
+                expect(@contributor_comments[i]["text"]).to eq(c["text"])
+            end
+        end
+    end
+
+    shared_examples_for "comment_profile" do
+        it "should return location" do
+            expect(@contributor_comments[0]["user_profile"]["location"]).to eq(@profile.location_name)
+        end
+        it "should return title" do
+            expect(@contributor_comments[0]["user_profile"]["title"]).to eq(@position.title)
+        end
+        it "should return industry" do
+            expect(@contributor_comments[0]["user_profile"]["industry"]).to eq(@position.industry)
+        end
+        it "should return size" do
+            expect(@contributor_comments[0]["user_profile"]["size"]).to eq(@position.size)
+        end
+    end
+
     describe "GET /:id/sprints" do
         fixtures :projects, :sprints
         before(:each) do
@@ -319,7 +347,7 @@ describe "/projects" do
     end
 
     describe "GET /:id/sprints/:id" do
-        fixtures :projects, :sprints, :sprint_states, :states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :states, :contributors, :comments, :user_profiles, :user_positions
         before(:each) do
             sprint = sprints(:sprint_1)
             get "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
@@ -332,13 +360,18 @@ describe "/projects" do
             @sprint = res
             @sprint_state = res["sprint_states"]
             @contributors = res["sprint_states"][0]["contributors"]
-            #            puts res.inspect
+            @contributor_comment_result = @mysql_client.query("select * from comments where sprint_state_id = #{sprint_states(:sprint_1_state_1).id} and contributor_id = #{res["sprint_states"][0]["contributors"][0]["id"]}")
+            @contributor_comments = res["sprint_states"][0]["contributors"][0]["comments"]
+            @profile = user_profiles(:adam_confirmed)
+            @position = user_positions(:adam_confirmed)
         end
 
         it_behaves_like "project"
         it_behaves_like "sprint"
         it_behaves_like "sprint_states"
         it_behaves_like "contributors"
+        it_behaves_like "contributor_comments"
+        it_behaves_like "comment_profile"
     end
 
     describe "PATCH /:id/sprints/:id" do
@@ -646,10 +679,10 @@ describe "/projects" do
                 @res = JSON.parse(last_response.body)
             end
             it "should update the contributor_id" do
-                 expect(@mysql.first["contributor_id"]).to eq(@new_contributor_id)
+                expect(@mysql.first["contributor_id"]).to eq(@new_contributor_id)
             end
             it "should return created status true" do
-                 expect(@res["created"]).to be true
+                expect(@res["created"]).to be true
             end
             it "should not create a new vote" do
                 expect(@mysql.count).to eq(1)

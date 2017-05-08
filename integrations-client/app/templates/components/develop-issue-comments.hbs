@@ -1,7 +1,10 @@
 {{#if comments}}
 {{#each (limited sortedComments count) as |comment|}}
 <div>
-    <div class="comment"><i class="fa fa-genderless" aria-hidden="true"></i> {{comment.text}} <em class="text-muted">- {{moment-from-now comment.created_at}}</em></div>
+    <div class="comment">
+        <i class="fa fa-genderless" aria-hidden="true"></i> {{comment.text}} 
+        <em class="text-muted">- {{comment.user_profile.title}} in {{comment.user_profile.industry}} ({{comment.user_profile.location}}) {{moment-from-now comment.created_at}}</em>
+    </div>
 </div>
 {{/each}}
 

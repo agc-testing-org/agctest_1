@@ -193,11 +193,25 @@ class Issue
                     response[i][:sprint_states][j][:active_contribution_id] = nil
                     response[i][:sprint_states][j][:contributors] = []
                     ss.contributors.each_with_index do |c,k|
+                        comments = c.comments.as_json
+                        c.comments.each_with_index do |com,x|
+                            if com.user.user_profile
+                                comments[x][:user_profile] = {
+                                    :id => com.user.user_profile.id,
+                                    :location => com.user.user_profile.location_name,
+                                    :title => com.user.user_profile.user_position.title,
+                                    :industry => com.user.user_profile.user_position.industry,
+                                    :size => com.user.user_profile.user_position.size,
+                                    :created_at => com.user.user_profile.created_at
+
+                                }
+                            end
+                        end
                         response[i][:sprint_states][j][:contributors][k] = {
                             :id => c.id,
                             :created_at => c.created_at,
                             :updated_at => c.updated_at,
-                            :comments => c.comments.as_json,
+                            :comments => comments,
                             :votes => c.votes.as_json
                         }
                         if c.user_id == user_id
