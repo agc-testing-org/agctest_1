@@ -1,14 +1,1 @@
-<nav class="col-sm-12 col-md-3 hidden-sm-down bg-faded sidebar">
-    {{develop-timeline-create}}
-    {{develop-issues model=model}}
-</nav>
-<main class="col-sm-12 col-md-9 offset-md-3 pt-3">
-<div class="container-fluid">
-    {{develop-nav model=model showingProject=true}}
-    <div class="row">
-        <div class="col-sm-12 col-md-12 develop flow">
-            {{develop-timeline model=model showingProject=true}}
-        </div>
-    </div>
-</div>
-</main>
+{{outlet}}
