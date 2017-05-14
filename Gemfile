@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 gem 'sinatra', '1.4.7'
 gem 'sinatra-activerecord'
+gem 'sinatra-strong-params'
 gem 'mysql2', '0.4.4'
 gem 'rake'
 gem 'redis', '~>3.2'

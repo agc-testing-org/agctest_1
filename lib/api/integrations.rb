@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'mysql2'
 require 'sinatra/activerecord'
+require 'sinatra/strong-params'
 require 'json'
 require 'sinatra/base'
 require 'redis'
@@ -60,6 +61,8 @@ class Integrations < Sinatra::Base
         config.client_secret = ENV["INTEGRATIONS_LINKEDIN_CLIENT_SECRET"]
         config.redirect_uri  = "#{ENV['INTEGRATIONS_HOST']}/callback/linkedin"
     end
+
+    register Sinatra::StrongParams
 
     def protected!
         return if authorized?
@@ -131,6 +134,7 @@ class Integrations < Sinatra::Base
         end
     end
 
+    # API
     forgot_post = lambda do
         status 400
         response = {:success => false}
@@ -277,7 +281,7 @@ class Integrations < Sinatra::Base
 
             linkedin = (account.linkedin_client access_token)
             pulled = account.pull_linkedin_profile linkedin
-           
+
             if pulled
 
                 profile_id = account.post_linkedin_profile @session_hash["id"], pulled
@@ -496,7 +500,7 @@ class Integrations < Sinatra::Base
 
     projects_get = lambda do
         issue = Issue.new
-        projects = issue.get_projects nil
+        projects = issue.get_projects nil 
         return projects.to_json
     end
 
@@ -530,13 +534,15 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get = lambda do
+        puts "_____START_____"
+        puts @_params.inspect
+        puts params.inspect
         authorized?
         issue = Issue.new
-        query = {:project_id => params[:project_id].to_i }
         if @session_hash
-            sprints = issue.get_sprints query, @session_hash["id"] 
+            sprints = issue.get_sprints params, @session_hash["id"] 
         else
-            sprints = issue.get_sprints query, nil 
+            sprints = issue.get_sprints params, nil 
         end
         return sprints.to_json
     end
@@ -569,11 +575,11 @@ class Integrations < Sinatra::Base
     sprints_get_by_id = lambda do
         authorized?
         issue = Issue.new
-        query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
+
         if @session_hash
-            sprint = issue.get_sprints query,  @session_hash["id"]
+            sprint = issue.get_sprints params,  @session_hash["id"]
         else
-            sprint = issue.get_sprints query, nil
+            sprint = issue.get_sprints params, nil
         end
         return sprint[0].to_json
     end
@@ -589,9 +595,9 @@ class Integrations < Sinatra::Base
             if fields[:title] && fields[:title].length > 5
                 if fields[:description] && fields[:description].length > 5
                     issue = Issue.new
-                    sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  params[:project_id].to_i
+                    sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
                     sprint_state = issue.create_sprint_state sprint.id, 1, nil
-                    log_params = {:sprint_id => sprint.id, :state_id => 1, :user_id => @session_hash["id"], :project_id => params[:project_id]}
+                    log_params = {:sprint_id => sprint.id, :state_id => 1, :user_id => @session_hash["id"], :project_id => fields[:project_id]}
                     if sprint && sprint_state && (issue.log_event log_params)
                         status 201
                         response = sprint_state
@@ -617,7 +623,7 @@ class Integrations < Sinatra::Base
                 if fields[:state_id]
 
                     issue = Issue.new
-                    query = {:id => params[:project_id].to_i}
+                    query = {:id => fields[:project_id].to_i}
                     project = (issue.get_projects query)[0]
 
                     repo = Repo.new
@@ -626,7 +632,7 @@ class Integrations < Sinatra::Base
                     sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
-                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => params[:project_id]}
+                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => fields[:project_id]}
                     if sprint_state && (issue.log_event log_params) 
                         status 201
                         response = sprint_state
@@ -984,7 +990,6 @@ class Integrations < Sinatra::Base
         end
     end
 
-
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
@@ -1017,18 +1022,18 @@ class Integrations < Sinatra::Base
     get "/projects", &projects_get
     get "/projects/:id", &projects_get_by_id
 
-
     post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
     patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
     get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
 
-    post "/projects/:project_id/sprints", &sprints_post
-    get "/projects/:project_id/sprints", &sprints_get
+    get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
+    get "/sprints/:id", allows: [:id], &sprints_get_by_id
+    patch "/sprints/:id", &sprints_patch_by_id
+    post "/sprints", &sprints_post
+
     get "/projects/:project_id/sprint-states", &sprint_states_get
     get "/projects/:project_id/events", &events_get
-    get "/projects/:project_id/sprints/:id", &sprints_get_by_id
-    patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
 
     post "/contributors/:id/comments", &contributors_post_comments
     post "/contributors/:id/votes", &contributors_post_votes
@@ -1044,9 +1049,12 @@ class Integrations < Sinatra::Base
         return {:message => "Looks like we went too far?"}.to_json
     end
 
-    #Ember
+    error RequiredParamMissing do
+        [400, env['sinatra.error'].message]
+    end
+
+    # Ember
     get "*" do
         send_file File.expand_path('index.html',settings.public_folder)
     end
-
 end

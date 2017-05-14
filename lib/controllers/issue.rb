@@ -183,7 +183,7 @@ class Issue
     def get_sprints query, user_id
         begin
             response = Array.new
-            Sprint.where(query).each_with_index do |s,i|
+            Sprint.joins("INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state INNER JOIN sprint_states ON sprint_states.id = last_sprint_state.last_id AND sprint_states.sprint_id = sprints.id").where(query).each_with_index do |s,i|
                 response[i] = s.as_json
                 response[i][:project] = s.project.as_json
                 response[i][:sprint_states] = []
