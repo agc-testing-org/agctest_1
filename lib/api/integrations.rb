@@ -534,9 +534,6 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get = lambda do
-        puts "_____START_____"
-        puts @_params.inspect
-        puts params.inspect
         authorized?
         issue = Issue.new
         if @session_hash

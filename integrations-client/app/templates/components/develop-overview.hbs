@@ -1,0 +1,16 @@
+<div class="footprint hidden-sm-down">Showing Sprints in <span class="text-capitalize">{{model.state.name}} Phase</span></div>
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview text-center">
+            <h1 class="name text-capitalize">{{model.project.org}}/{{model.project.name}}</h1>
+            <div class="about text-capitalize">{{model.state.description}}</div>
+            <div class="row">
+                <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
+                    {{sprint-state-overview-score total=model.sprints.length title="Sprints"}}
+                </div>
+            </div>
+            <a class="requirements col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2 rounded" target="_blank" href="https://github.com/{{model.project.org}}/{{model.project.name}}/tree/master">View on Github</a>
+            {{develop-timeline-create}}
+        </div>
+    </div>
+</div>
