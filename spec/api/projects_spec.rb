@@ -568,7 +568,7 @@ describe "/projects" do
         end
     end
     describe "POST /contributors/:id/comments" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
@@ -580,6 +580,7 @@ describe "/projects" do
                 post "/contributors/#{@contributor_id}/comments", {:text => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @mysql = @mysql_client.query("select * from comments").first
+                @timeline = @mysql_client.query("select * from sprint_timelines").first
             end
             it "should return comment id" do
                 expect(@res["id"]).to eq(1)
@@ -592,6 +593,11 @@ describe "/projects" do
                     expect(@mysql["contributor_id"]).to eq(@contributor_id)
                 end
             end
+            context "sprint_timeline" do
+                it "should save comment_id" do
+                    expect(@timeline["comment_id"]).to eq(@res["id"])
+                end
+            end
         end
         context "invalid comment" do
             it "should return error message" do
@@ -600,9 +606,10 @@ describe "/projects" do
                 expect(res["message"]).to eq("Please enter a more detailed comment")
             end
         end
-    end
+    end 
+
     describe "POST /contributors/:id/votes", :focus => true do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
@@ -610,12 +617,25 @@ describe "/projects" do
             post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from votes").first
+            @timeline = @mysql_client.query("select * from sprint_timelines").first
         end
         it "should return vote id" do
             expect(@res["id"]).to eq(1)
         end
         it "should return created status true for a new vote" do
             expect(@res["created"]).to be true
+        end
+        context "downvote" do
+            it "should return created status false for a repeat vote" do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                res = JSON.parse(last_response.body)
+                expect(res["created"]).to be false
+            end
+            it "should not save vote_id in sprint_timelines" do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                timeline = @mysql_client.query("select * from sprint_timelines")
+                expect(timeline.count).to eq(1)
+            end
         end
         context "votes" do
             it "should save contributor_id" do
@@ -658,7 +678,13 @@ describe "/projects" do
                 expect(@res["previous"]).to eq(@contributor_id)
             end
         end
+        context "sprint_timeline" do
+            it "should save vote_id" do
+                expect(@timeline["vote_id"]).to eq(@res["id"])
+            end
+        end
     end
+
     describe "POST /contributors/:id/winner" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         before(:each) do
@@ -704,6 +730,7 @@ describe "/projects" do
             end
         end
     end
+    
     describe "POST /contributors/:id/merge" do
         fixtures :users, :projects, :sprints, :sprint_states, :contributors
         before(:each) do
