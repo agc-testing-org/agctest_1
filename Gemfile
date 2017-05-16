@@ -10,6 +10,9 @@ gem 'pony'
 gem 'octokit', '~> 4.6.0'
 gem 'ldclient-rb', '2.0.3'
 gem 'git'
+gem 'sidekiq'
+gem 'sidekiq-client-cli'
+gem 'whenever', :require => false
 
 group :development do
     gem 'passenger', '~> 5.0.30'

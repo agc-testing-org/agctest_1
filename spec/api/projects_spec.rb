@@ -581,6 +581,7 @@ describe "/projects" do
                 @res = JSON.parse(last_response.body)
                 @mysql = @mysql_client.query("select * from comments").first
                 @timeline = @mysql_client.query("select * from sprint_timelines").first
+                @user_contributor = @mysql_client.query("select * from user_contributors").first
             end
             it "should return comment id" do
                 expect(@res["id"]).to eq(1)
@@ -596,6 +597,17 @@ describe "/projects" do
             context "sprint_timeline" do
                 it "should save comment_id" do
                     expect(@timeline["comment_id"]).to eq(@res["id"])
+                end
+                it "should save contributor_id" do
+                    expect(@timeline["contributor_id"]).to eq(@res["contributor_id"])
+                end
+            end
+            context "user_contributor" do
+                it "should save user_id" do
+                    expect(@user_contributor["user_id"]).to eq(@res["user_id"])
+                end
+                it "should save contributor_id" do
+                    expect(@user_contributor["contributors_id"]).to eq(@res["contributor_id"])
                 end
             end
         end
@@ -681,6 +693,9 @@ describe "/projects" do
         context "sprint_timeline" do
             it "should save vote_id" do
                 expect(@timeline["vote_id"]).to eq(@res["id"])
+            end
+            it "should save contributor_id" do
+                    expect(@timeline["contributor_id"]).to eq(@res["contributor_id"])
             end
         end
     end

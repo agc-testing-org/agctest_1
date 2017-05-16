@@ -59,6 +59,12 @@ class Issue
                 contributor_id: contributor_id,
                 text: text
             })
+
+            user_contributor = UserContributor.create({
+                user_id: user_id,
+                contributors_id: contributor_id
+            })
+
             return comment
         rescue => e
             puts e
@@ -84,6 +90,12 @@ class Issue
             record = vote.as_json
             record[:previous] = previous_record
             record[:created] = new_record #created = false would mean no change to the frontend
+
+            user_contributor = UserContributor.create({
+                user_id: user_id,
+                contributors_id: contributor_id
+            })
+
             return record
         rescue => e
             puts e
@@ -369,4 +381,135 @@ class Issue
             return nil
         end
     end
-end 
+
+        def recently_changed_sprint?
+        begin
+            if defined?Notification.last.sprint_timeline_id
+                id = Notification.last.sprint_timeline_id
+            else 
+                id = 0
+            end
+            response = SprintTimeline.where("id > ?", id)
+            response.each do |x|
+                if x.comment_id != nil
+                    notification = Notification.create({
+                        sprint_id: x.sprint_id,
+                        sprint_state_id: x.state_id,
+                        user_id: x.user_id,
+                        sprint_timeline_id: x.id,
+                        contributor_id: x.contributor_id,
+                        subject: 'Sprint commented',
+                        body: 'Sprint commented'
+                        })
+                elsif x.vote_id != nil
+                    notification = Notification.create({
+                        sprint_id: x.sprint_id,
+                        sprint_state_id: x.state_id,
+                        user_id: x.user_id,
+                        sprint_timeline_id: x.id,
+                        contributor_id: x.contributor_id,
+                        subject: 'Sprint voted',
+                        body: 'Sprint voted'
+                        })
+                else x.vote_id == nil and x.comment_id == nil
+                    notification = Notification.create({
+                        sprint_id: x.sprint_id,
+                        sprint_state_id: x.state_id,
+                        user_id: x.user_id,
+                        sprint_timeline_id: x.id,
+                        contributor_id: x.contributor_id,
+                        subject: 'Sprint state changed',
+                        body: 'Sprint state changed'
+                        })
+                end
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_user_notification
+        begin
+            if UserNotification.maximum(:notifications_id) != nil
+                id = UserNotification.maximum(:notifications_id)
+            else 
+                id = 0
+            end
+            skillset_user_notification = SprintSkillset.joins("INNER JOIN notifications ON sprint_skillsets.sprint_id=notifications.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1 and notifications.contributor_id is NULL").select("user_skillsets.user_id","notifications.id")
+            roles_user_notification = UserRole.joins("CROSS JOIN notifications").where("((user_roles.active=1 and user_roles.role_id=1 and notifications.sprint_state_id=2) or (user_roles.active=1 and user_roles.role_id=4 and notifications.sprint_state_id=4) or (user_roles.active=1 and user_roles.role_id=3 and notifications.sprint_state_id=6) or (user_roles.active != 'NULL' and notifications.sprint_state_id NOT IN (2,4,6))) and notifications.contributor_id is NULL").select("user_roles.user_id","notifications.id")
+            comments_and_votes_user_notifications = UserContributor.joins("Join notifications").where("user_contributors.contributors_id = notifications.contributor_id and user_contributors.user_id != notifications.user_id").select("user_contributors.user_id", "notifications.id")
+
+            response = skillset_user_notification + roles_user_notification + comments_and_votes_user_notifications
+            response.each do |x|
+                if x[:id] > id
+                    user_notifications = UserNotification.create({
+                    notifications_id: x[:id],
+                    user_id: x[:user_id]
+                    })
+                end
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_connection_request user_id, contact_id
+        begin
+            connection_request = UserConnection.create({
+                user_id: user_id,
+                contact_id: contact_id,
+            })
+
+            return connection_request 
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_connections query
+        begin      
+            return UserConnection.where(query)
+           
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_connections_read contact_id, user_id, read
+        begin
+            ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
+            ss.update_attributes!(:read => read)
+            return {:id => ss.contact_id, :user_id => ss.user_id, :read => ss.read}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_connections_confirmed contact_id, user_id, confirmed
+        begin
+            ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
+            ss.update_attributes!(:confirmed => confirmed)
+            return {:id => ss.contact_id, :user_id => ss.user_id, :confirmed => ss.confirmed}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_info user_id
+        begin      
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} user_connections.contact_id=users.id and user_connections.confirmed=2").select("users.name, users.email")
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+end
+

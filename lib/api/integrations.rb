@@ -13,6 +13,8 @@ require 'pony'
 require 'octokit'
 require 'ldclient-rb'
 require 'git'
+require 'sidekiq'
+require 'whenever'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -36,9 +38,14 @@ require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
 require_relative '../models/comment.rb'
 require_relative '../models/vote.rb'
-
+require_relative '../models/notification.rb'
+require_relative '../models/user_notification.rb'
+require_relative '../models/user_contributor.rb'
+require_relative '../models/user_connection.rb'
+require_relative '../models/connection_state.rb'
+ 
 # Workers
-
+require_relative '../workers/notification_worker.rb'
 
 set :database, {
     adapter: "mysql2",  
@@ -608,7 +615,7 @@ class Integrations < Sinatra::Base
                 sprint = issue.get_sprints query, nil
                 project_id = sprint[0][:project]["id"]
 
-                log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
+                log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id]}
 
                 if comment && (issue.log_event log_params)
                     status 201
@@ -638,7 +645,7 @@ class Integrations < Sinatra::Base
             sprint = issue.get_sprints query, nil
             project_id = sprint[0][:project]["id"]
 
-            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
+            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id]}
 
             if vote 
                 if vote[:created]
@@ -804,7 +811,8 @@ class Integrations < Sinatra::Base
 
                         if !contributor
                             name = repo.name
-                            created = repo.create @session_hash["id"], project["id"], sprint_state.id, name
+                            query = {:id => sprint_state.sprint_id}
+                            created = repo.create @session_hash["id"], project["id"], sprint_state.id, name, query
                         else
                             name = contributor.repo
                             created = contributor.id
@@ -954,6 +962,98 @@ class Integrations < Sinatra::Base
         end
     end
 
+    connections_request_post = lambda do
+    protected!
+    status 401
+    response = {}
+    if @session_hash["id"]
+      status 400
+      begin
+        request.body.rewind
+        fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+        if fields[:contact_id]
+          issue = Issue.new
+          connection_request = issue.create_connection_request @session_hash["id"], fields[:contact_id]
+
+          if connection_request
+            status 201
+            response = connection_request
+          end
+        else
+          status 400
+        end
+      end
+      return response.to_json
+    end
+  end
+
+  connections_get = lambda do
+    user_id = (default_to_signed params[:user_id])
+    if user_id
+      issue = Issue.new
+      query = {"user_connections.contact_id" => user_id}
+      connections = issue.get_user_connections query
+      return connections.to_json
+    end
+  end
+
+  user_connections_patch_read = lambda do
+    protected!
+    status 401
+    response = {}
+    if @session_hash["id"]
+      status 400
+      begin
+        request.body.rewind
+        fields = JSON.parse(request.body.read, :symbolize_names => true)
+        if fields[:user_id] && fields[:read]
+          issue = Issue.new
+          response = (issue.update_user_connections_read @session_hash["id"], fields[:user_id], fields[:read])
+          puts response
+          if response
+            status 201
+          end
+        end
+      rescue => e
+        puts e
+      end
+    end
+    return response.to_json
+  end
+
+  user_connections_patch_confirmed = lambda do
+    protected!
+    status 401
+    response = {}
+    if @session_hash["id"]
+      status 400
+      begin
+        request.body.rewind
+        fields = JSON.parse(request.body.read, :symbolize_names => true)
+        if fields[:user_id] && fields[:confirmed]
+          issue = Issue.new
+          response = (issue.update_user_connections_confirmed @session_hash["id"], fields[:user_id], fields[:confirmed])
+          puts response
+          if response
+            status 201
+          end
+        end
+      rescue => e
+        puts e
+      end
+    end
+    return response.to_json
+  end
+
+  get_user_info = lambda do
+    user_id = (default_to_signed params[:user_id])
+    if user_id
+      issue = Issue.new
+      user_info = issue.get_user_info user_id
+      return user_info.to_json
+    end
+  end
 
     #API
     post "/register", &register_post
@@ -967,6 +1067,11 @@ class Integrations < Sinatra::Base
     get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
     patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
 
+    post "/account/connections", &connections_request_post
+    get "/account/connections", &connections_get
+    get "/account/connections/confirmed", &get_user_info
+    patch "/account/connections/read", &user_connections_patch_read
+    patch "/account/connections/confirmed", &user_connections_patch_confirmed
 
     get "/account/:user_id/roles", &account_roles_get
     get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
