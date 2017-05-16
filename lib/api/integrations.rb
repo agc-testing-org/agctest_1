@@ -620,16 +620,16 @@ class Integrations < Sinatra::Base
                 if fields[:state_id]
 
                     issue = Issue.new
-                    query = {:id => fields[:project_id].to_i}
-                    project = (issue.get_projects query)[0]
+                    sprint = (issue.get_sprint params[:id])
 
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
 
-                    sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
+                    sha = github.branch("#{sprint.project.org}/#{sprint.project.name}","master").commit.sha
 
                     sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
-                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => fields[:project_id]}
+
+                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => sprint.project.id}
                     if sprint_state && (issue.log_event log_params) 
                         status 201
                         response = sprint_state
@@ -858,8 +858,7 @@ class Integrations < Sinatra::Base
                             repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
 
                             if sprint_state.state.name == "requirements design"
-                                query = {:id => sprint_state.sprint_id}
-                                idea = issue.get_idea query
+                                idea = issue.get_sprint sprint_state.sprint_id 
                                 github.create_contents("#{username}/#{name}",
                                                        "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                                            "adding placeholder for requirements",

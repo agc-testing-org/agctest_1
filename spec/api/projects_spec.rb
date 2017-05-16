@@ -144,7 +144,7 @@ describe "/projects" do
         end
         it_behaves_like "project"
     end
-    describe "POST /:id/sprints" do
+    describe "POST /sprints" do
         fixtures :projects, :states, :labels, :sprint_timelines
         before(:each) do
             @title = "SPRINT TITLE"
@@ -154,7 +154,7 @@ describe "/projects" do
         end
         context "valid fields" do
             before(:each) do
-                post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                post "sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from sprints").first
                 @sprint_state = @mysql_client.query("select * from sprint_states").first
                 @res = JSON.parse(last_response.body)
@@ -224,7 +224,7 @@ describe "/projects" do
     end
     shared_examples_for "sprints" do
         it "should return more than one result" do
-            expect(@sprints[0]["id"]).to eq(@sprint_results.first["id"])
+            expect(@sprints.length).to be > 0
         end
     end
 
@@ -302,11 +302,11 @@ describe "/projects" do
         end
     end
 
-    describe "GET /:id/sprints" do
-        fixtures :projects, :sprints
+    describe "GET /sprints", :focus => true do
+        fixtures :projects, :sprints, :sprint_states
         before(:each) do
             project_id = projects(:demo).id
-            get "/projects/#{project_id}/sprints"
+            get "/sprints?project_id=#{project_id}"
             res = JSON.parse(last_response.body)
             @sprint_results = @mysql_client.query("select * from sprints where project_id = #{project_id}")
             @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
@@ -346,11 +346,11 @@ describe "/projects" do
         end
     end
 
-    describe "GET /:id/sprints/:id" do
+    describe "GET /sprints/:id" do
         fixtures :projects, :sprints, :sprint_states, :states, :contributors, :comments, :user_profiles, :user_positions
         before(:each) do
             sprint = sprints(:sprint_1)
-            get "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            get "/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             res = JSON.parse(last_response.body)
             @sprint_result = @mysql_client.query("select * from sprints where id = #{sprint.id}").first
             @project_result = @mysql_client.query("select * from projects where id = #{sprint.project_id}").first
@@ -374,7 +374,7 @@ describe "/projects" do
         it_behaves_like "comment_profile"
     end
 
-    describe "PATCH /:id/sprints/:id" do
+    describe "PATCH /sprints/:id" do
         fixtures :projects, :sprints, :sprint_states, :states
         before(:each) do
             body = { 
@@ -388,7 +388,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
 
             sprint = sprints(:sprint_1)
-            patch "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+            patch "/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
             @res = JSON.parse(last_response.body)
             @sprint_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id} ORDER BY id DESC").first 
         end
@@ -634,7 +634,7 @@ describe "/projects" do
             end
         end
     end
-    describe "POST /contributors/:id/votes", :focus => true do
+    describe "POST /contributors/:id/votes" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id

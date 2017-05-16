@@ -159,14 +159,6 @@ class Issue
         end
     end
 
-    def get_idea query
-        begin
-            return Sprint.find_by(query)
-        rescue => e
-            return nil
-        end
-    end
-
     def get_sprint_states query
         begin
             response = Array.new
@@ -180,10 +172,18 @@ class Issue
         end
     end
 
-    def get_sprints query, user_id
+    def get_sprint id # This only returns the sprint
+        begin
+            return Sprint.joins(:project).find_by(id: id)
+        rescue => e
+            return nil
+        end
+    end
+
+    def get_sprints query, user_id # This returns A LOT
         begin
             response = Array.new
-            Sprint.joins("INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state INNER JOIN sprint_states ON sprint_states.id = last_sprint_state.last_id AND sprint_states.sprint_id = sprints.id").where(query).each_with_index do |s,i|
+            Sprint.joins("INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id").where(query).each_with_index do |s,i|
                 response[i] = s.as_json
                 response[i][:project] = s.project.as_json
                 response[i][:sprint_states] = []
