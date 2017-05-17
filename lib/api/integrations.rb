@@ -602,7 +602,15 @@ class Integrations < Sinatra::Base
             if fields[:text] && fields[:text].length > 1
                 issue = Issue.new
                 comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
-                if comment
+                
+                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+                query = { :id => sprint_state.sprint_id }
+                sprint = issue.get_sprints query, nil
+                project_id = sprint[0][:project]["id"]
+
+                log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
+
+                if comment && (issue.log_event log_params)
                     status 201
                     response = comment
                 end
@@ -624,7 +632,18 @@ class Integrations < Sinatra::Base
 
             issue = Issue.new
             vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
-            if vote
+
+            sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+            query = { :id => sprint_state.sprint_id }
+            sprint = issue.get_sprints query, nil
+            project_id = sprint[0][:project]["id"]
+
+            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"]}
+
+            if vote 
+                if vote[:created]
+                    (issue.log_event log_params)
+                end
                 status 201
                 response = vote
             end

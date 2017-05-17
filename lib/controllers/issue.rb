@@ -68,14 +68,22 @@ class Issue
 
     def vote user_id, contributor_id, sprint_state_id
         begin
-            vote = Vote.find_or_initialize_by({
+            vote = Vote.find_or_initialize_by({ # get or create vote by sprint state for specific user
                 user_id: user_id,
                 sprint_state_id: sprint_state_id
             })
-            new_record = vote.new_record?
-            vote.update_attributes!(:contributor_id => contributor_id)
+        
+            new_record = false
+            previous_record = vote.contributor_id
+            
+            if previous_record != contributor_id.to_i # if vote is new or different (let the frontend know votes will change with new_record)
+                vote.update_attributes!(:contributor_id => contributor_id)
+                new_record = true
+            end
+
             record = vote.as_json
-            record[:created] = new_record
+            record[:previous] = previous_record
+            record[:created] = new_record #created = false would mean no change to the frontend
             return record
         rescue => e
             puts e
