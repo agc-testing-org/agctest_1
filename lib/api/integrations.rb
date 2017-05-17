@@ -462,15 +462,10 @@ class Integrations < Sinatra::Base
 
     projects_post = lambda do
         protected!
-        puts "1"
         status 400
-        puts "1"
         response = {}
-        puts "1"
         if @session_hash["admin"]
-            puts "1"
             account = Account.new
-            puts "1"
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
