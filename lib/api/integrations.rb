@@ -36,6 +36,8 @@ require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
 require_relative '../models/comment.rb'
 require_relative '../models/vote.rb'
+require_relative '../models/team.rb'
+require_relative '../models/user_team.rb'
 
 # Workers
 
@@ -460,10 +462,15 @@ class Integrations < Sinatra::Base
 
     projects_post = lambda do
         protected!
+        puts "1"
         status 400
+        puts "1"
         response = {}
+        puts "1"
         if @session_hash["admin"]
+            puts "1"
             account = Account.new
+            puts "1"
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
@@ -475,6 +482,28 @@ class Integrations < Sinatra::Base
                         status 201
                     end
                 end
+            end
+        end
+        return response.to_json
+    end
+
+    teams_post = lambda do
+        protected!
+        status 400
+        response = {}
+        account = Account.new
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if fields[:name] && fields[:name].length > 4
+                issue = Issue.new
+                team = issue.create_team fields[:name], @session_hash["id"]
+                if team 
+                    response[:id] = team
+                    status 201
+                end
+            else
+                response[:message] = "Please enter a more descriptive team name"
             end
         end
         return response.to_json
@@ -986,6 +1015,7 @@ class Integrations < Sinatra::Base
     get "/projects", &projects_get
     get "/projects/:id", &projects_get_by_id
 
+    post "/teams", &teams_post
 
     post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post

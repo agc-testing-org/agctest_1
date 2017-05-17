@@ -130,6 +130,16 @@ class Issue
         end
     end
 
+    def create_team name, owner_id
+        begin
+            team = Team.create({ name: name, owner: owner_id })
+            return team.id
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def get_winner sprint_state_id
         begin
             winner = SprintState.find_by(id: sprint_state_id)
