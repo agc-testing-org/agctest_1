@@ -35,4 +35,23 @@ adam_admin:
   confirmed: true
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
 
+masha_post_connection_request:
+  id: 1000000000
+  name: masha
+  email: masha@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: WDX
+
+masha_get_connection_request:
+  id: 2000000000
+  name: masha2
+  email: masha2@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: XYZ
+
+
+
+
 

@@ -1,0 +1,6 @@
+user_2_connection_1:
+  user_id: 1000000000
+  contact_id: 2000000000
+  read: true
+  confirmed: 2
+

@@ -464,7 +464,7 @@ class Issue
                 contact_id: contact_id,
             })
 
-            return connection_request 
+            return connection_request.as_json
         rescue => e
             puts e
             return nil
@@ -473,7 +473,7 @@ class Issue
 
     def get_user_connections query
         begin      
-            return UserConnection.where(query)
+            return UserConnection.where(query).as_json
            
         rescue => e
             puts e
@@ -505,7 +505,7 @@ class Issue
 
     def get_user_info user_id
         begin      
-            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} user_connections.contact_id=users.id and user_connections.confirmed=2").select("users.name, users.email")
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("users.name, users.email").as_json
         rescue => e
             puts e
             return nil

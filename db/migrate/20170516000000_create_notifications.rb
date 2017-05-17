@@ -8,6 +8,7 @@ class CreateNotifications < ActiveRecord::Migration
             t.integer "contributor_id",          null: true
             t.integer  "user_id",                null: true
             t.integer "sprint_timeline_id",      null: false
+            t.integer "sprint_id",               null: false
         end
 
         create_table "user_notifications", force: :cascade do |t|
