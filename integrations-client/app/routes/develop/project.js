@@ -11,9 +11,9 @@ export default Ember.Route.extend({
             states: this.store.findAll('state'),
             project: this.store.find('project',params.name.split("-")[0]),
             events: this.store.findAll('event'),
-            sprints: this.store.query('sprint', {
-                project_id: params.name.split("-")[0] 
-            })
+//            sprints: this.store.query('sprint', {
+//                project_id: params.name.split("-")[0] 
+//            })
         });
     }
 });

@@ -6,7 +6,10 @@ export default Ember.Route.extend({
         if(params.id === "all"){
             return Ember.RSVP.hash({
                 project: this.modelFor("develop.project").project,
-                sprints: this.modelFor("develop.project").sprints,
+//                sprints: this.modelFor("develop.project").sprints,
+                sprints: this.store.query('sprint', {
+                    project_id: this.modelFor("develop.project").project.id
+                }),
                 states: this.modelFor("develop.project").states,
                 state: {name: "any"}
             });

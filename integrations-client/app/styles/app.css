@@ -741,6 +741,12 @@ button{
 .main .still.hidden-md-up{
     margin-top:0px;
 }
+.main .still.hidden-sm-down{
+    min-height: 100%;
+    position: fixed;
+    height: 100%;
+    overflow: scroll;
+}
 .main .still .header{
     padding-top:94px;
 }
@@ -754,14 +760,14 @@ button{
     margin-bottom:20px;
 }
 .main .still .sprint .title{
-   
+
 }
 .main .still .sprint .description{
     margin-bottom:10px; 
 }
 .main .still .sprint .date{
-     margin-bottom:10px;
-     font-size:10px;
+    margin-bottom:10px;
+    font-size:10px;
 }
 .main .still .contribution .comment{
     font-weight:300;
