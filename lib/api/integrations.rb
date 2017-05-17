@@ -486,7 +486,6 @@ class Integrations < Sinatra::Base
         protected!
         status 400
         response = {}
-        account = Account.new
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
