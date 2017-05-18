@@ -1,3 +1,8 @@
 sprint_1_skillset_1:
   skillset: skillset_1
   sprint: sprint_1
+
+notification_skillset:
+  skillset_id: 1
+  sprint_id: 1
+  active: 1

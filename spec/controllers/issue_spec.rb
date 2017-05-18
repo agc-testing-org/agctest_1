@@ -170,7 +170,7 @@ describe ".Issue" do
     end 
 
     context "#create_entry_in_notifications_table", :focus => true do
-        fixtures :sprint_timelines, :notifications
+        fixtures :sprint_timelines
         context "create_entry" do
             before(:each) do
                 @res = (@issue.recently_changed_sprint?)
@@ -232,7 +232,7 @@ describe ".Issue" do
                 end
             end
             context "entry for sprint vote" do
-                 it "should include sprint_id" do
+                it "should include sprint_id" do
                     expect(@vote_notification["sprint_id"]).to eq(sprint_timelines(:demo_6).sprint_id)
                 end
                 it "should include sprint_state_id" do
@@ -254,8 +254,71 @@ describe ".Issue" do
                     expect(@vote_notification["body"]).to eq("Sprint voted")
                 end
             end
+        end
+    end 
+
+    context "#create_entry_in_user_notifications_table", :focus => true do
+        fixtures :notifications, :users, :sprint_skillsets, :user_skillsets, :user_roles, :user_contributors
+        context "create_entry" do
+            before(:each) do
+                @res = (@issue.create_user_notification)
+                @skillset_notification =  @mysql_client.query("select * from user_notifications where notifications_id=1").first
+                @roles_notification_product =  @mysql_client.query("select * from user_notifications where notifications_id=2").first
+                @roles_notification_design =  @mysql_client.query("select * from user_notifications where notifications_id=3 ORDER BY ID DESC").first
+                @roles_notification_development =  @mysql_client.query("select * from user_notifications where notifications_id=4 ORDER BY ID DESC").first
+                @comment_notification =  @mysql_client.query("select * from user_notifications where notifications_id=5").first
+                @votes_notification =  @mysql_client.query("select * from user_notifications where notifications_id=6").first
 
 
+            end
+            context "skillset_notification" do
+                it "should include user_id" do
+                    expect(@skillset_notification["user_id"]).to eq(users(:masha_post_connection_request).id)
+                end
+                it "should include notification_id" do
+                    expect(@skillset_notification["notifications_id"]).to eq(notifications(:skillset_notification).id)
+                end
+            end
+            context "roles_notification_product" do
+                it "should include user_id" do
+                    expect(@roles_notification_product["user_id"]).to eq(users(:masha_post_connection_request).id)
+                end
+                it "should include notification_id" do
+                    expect(@roles_notification_product["notifications_id"]).to eq(notifications(:roles_notification_product).id)
+                end
+            end
+            context "roles_notification_design" do
+                it "should include user_id" do
+                    expect(@roles_notification_design["user_id"]).to eq(users(:masha_get_connection_request).id)
+                end
+                it "should include notification_id" do
+                    expect(@roles_notification_design["notifications_id"]).to eq(notifications(:roles_notification_design).id)
+                end
+            end
+            context "roles_notification_development" do
+                it "should include user_id" do
+                    expect(@roles_notification_development["user_id"]).to eq(users(:masha_notifications).id)
+                end
+                it "should include notification_id" do
+                    expect(@roles_notification_development["notifications_id"]).to eq(notifications(:roles_notification_development).id)
+                end
+            end
+            context "roles_notification_comment" do
+                it "should include user_id" do
+                    expect(@comment_notification["user_id"]).to eq(users(:masha_get_connection_request).id)
+                end
+                it "should include notification_id" do
+                    expect(@comment_notification["notifications_id"]).to eq(notifications(:comments_notification).id)
+                end
+            end
+            context "roles_notification_vote" do
+                it "should include user_id" do
+                    expect(@votes_notification["user_id"]).to eq(users(:masha_get_connection_request).id)
+                end
+                it "should include notification_id" do
+                    expect(@votes_notification["notifications_id"]).to eq(notifications(:votes_notification).id)
+                end
+            end
         end
     end 
 end

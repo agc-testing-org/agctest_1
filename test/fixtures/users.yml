@@ -51,6 +51,22 @@ masha_get_connection_request:
   created_at: <%= 5.day.ago.to_s(:db) %>
   token: XYZ
 
+masha_notifications:
+  id: 2000000001
+  name: masha3
+  email: masha3@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: ZYX
+
+masha_notifications_skillsets:
+  id: 2000000002
+  name: masha4
+  email: masha4@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: XZY
+
 
 
 
