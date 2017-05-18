@@ -8,63 +8,64 @@ export default Ember.Route.extend({
 
     model: function(params){
 
-        return new Ember.RSVP.Promise((resolve) => {
+        /*       
+                 var allStatesPromise = this.store.findRecord('sprint', this.modelFor("develop.project.sprint").id);
+                 return Ember.RSVP.hash({
+                 review: allStatesPromise,
+                 user: allStatesPromise.then(allStates => {
+                 console.log(allStates.get("sprint_states"));
+                 return allStates.get("sprint_states").toArray();
+                 })
+                 });
+         */
 
-            this.store.adapterFor('skillset').set('namespace', ''); // unset from sprint
 
-            this.modelFor("develop.project.sprint").then((sprint) => {
+        this.store.adapterFor('skillset').set('namespace', ''); // unset from sprint
 
-                sprint.get("sprint_states").toArray();
-                alert(sprint);
-                var last_state = {};
-                var last_contributor_state = {};
-                var valid_sprint_state = false;
+        var valid_state = false;
+        var last_contributor_state = {};
+        var last_state = {};
+        var ss = this.store.peekAll("sprint-state").toArray();
 
-                if(all_states.length > 0){
-                    last_state = all_states[all_states.length - 1];
+        if(ss.length > 0){
+            last_state = ss[ss.length - 1];
+        }
 
-                    for(var i = 0; i < all_states.length; i++){
-                        if(all_states[i].id === params.state_id){
-                            valid_sprint_state = true;
-                            if(i > 0){
-                                last_contributor_state = all_states[i - 1]; // state before current 
-                            }
-                        }
-                    }
+        for(var i = 0; i < ss.length; i++){
+            console.log(ss.length+" "+ss[i].id+" "+params.state_id);
+            if(ss[i].id === params.state_id){
+                valid_state = true;
+                if(i > 0){
+                    last_contributor_state = ss[i - 1];
                 }
+            }
+        }
 
-                if(valid_sprint_state){
+        if(valid_state){
 
-                    return Ember.RSVP.hash({
-                        /*
-                           events: this.store.query('event', {
-                           sprint_id: params.id
-                           }),
-                           skillsets: this.store.query('skillset', {
+            return Ember.RSVP.hash({
 
-                           }),
-                         */
-                        sprint: this.modelFor("develop.project.sprint").sprint,
+                sprint: this.modelFor("develop.project.sprint").sprint,
 
-                        states: this.modelFor("develop.project").states,
+                states: this.modelFor("develop.project").states,
 
-                        skillsets: this.modelFor("develop.project.sprint").skillsets,
+                skillsets: this.modelFor("develop.project.sprint").skillsets,
 
-                        project: this.modelFor("develop.project").project,
+                project: this.modelFor("develop.project").project,
 
-                        selected_state: this.store.peekRecord('sprint-state', params.state_id),
+                selected_state: this.store.peekRecord("sprint-state",params.state_id),
 
-                        last_state: last_state,
+                last_state: last_state,
 
-                        last_contributor_state: last_contributor_state
+                last_contributor_state: last_contributor_state
 
-                    });
-
-                }
-                else {
-                    this.transitionTo('develop.project.sprint.state',all_states[all_states.length - 1].id);
-                }
             });
-        });
+
+
+        }
+        else {
+//            this.transitionTo('develop.project.sprint.state',ss[ss.length - 1].id);
+        }
+
     }
 });

@@ -11,6 +11,11 @@
 
 {{else}}
 
+            ABCD
+                        {{selected-state.id}}
+                                    {{last-state.id}}
+
+
 {{#if selected-state.state.contributors}}
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
@@ -58,6 +63,7 @@
     </div>
 </div>
 {{else}}
+{{#if last-contributor-state.contributors.length}}
 <div class="full">
     <h3 class="mt-5">Contributions</h3>
     {{#each last-contributor-state.contributors as |contributor|}}
@@ -78,6 +84,17 @@
     </div>
     {{/each}}
 </div>
+{{else}}
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview">
+            <div class="text-center">
+                <h3>No one has contributed.</h3>
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
 {{/if}}
 
 {{/if}}
