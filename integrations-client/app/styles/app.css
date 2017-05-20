@@ -164,11 +164,6 @@ label{
     box-shadow:none;
 }
 
-.navbar-collapse.collapse.show{
-    padding:10px;
-    text-align:center;
-}
-
 .body-dark .navbar-default .navbar-nav > li > a {
     border: 0px solid #fff;
     color: #fff;
@@ -557,10 +552,6 @@ button{
     margin:5px;
     margin-top:20px !important;
 }
-.sidebar .show, .sidebar.hidden-md-up .show{
-    position:fixed;
-
-}
 /*
  * Dashboard
  */
@@ -844,6 +835,13 @@ button{
     margin-top:50px;
     background-color: #f9f9f9;
     padding:20px;
+}
+.main .transition{
+    text-align:center;
+    cursor:pointer;
+}
+.main .transition .dropdown-menu{
+    width:100%;
 }
 .main .hidden-md-up .requirements{
     margin-bottom:10px;

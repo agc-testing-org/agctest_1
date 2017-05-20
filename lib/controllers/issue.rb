@@ -159,11 +159,41 @@ class Issue
         end
     end
 
-    def get_sprint_states query
+    def get_sprint_states query, user_id
         begin
             response = Array.new
             SprintState.joins(:sprint).where(query).each_with_index do |ss,i|
                 response[i] = ss.as_json
+                response[i][:active_contribution_id] = nil
+                response[i][:contributors] = []
+                ss.contributors.each_with_index do |c,k|
+                    comments = c.comments.as_json
+                    c.comments.each_with_index do |com,x|
+                        if com.user.user_profile
+                            comments[x][:user_profile] = {
+                                :id => com.user.user_profile.id,
+                                :location => com.user.user_profile.location_name,
+                                :title => com.user.user_profile.user_position.title,
+                                :industry => com.user.user_profile.user_position.industry,
+                                :size => com.user.user_profile.user_position.size,
+                                :created_at => com.user.user_profile.created_at
+                            }
+                        end
+                    end
+                    response[i][:contributors][k] = {
+                        :id => c.id,
+                        :created_at => c.created_at,
+                        :updated_at => c.updated_at,
+                        :comments => comments,
+                        :votes => c.votes.as_json
+                    }
+                    if c.user_id == user_id
+                        response[i][:contributors][k][:commit] = c.commit
+                        response[i][:contributors][k][:commit_success] =  c.commit_success
+                        response[i][:contributors][k][:repo] = c.repo
+                        response[i][:active_contribution_id] = c.id
+                    end
+                end
             end
             return response
         rescue => e
@@ -180,52 +210,15 @@ class Issue
         end
     end
 
-    def get_sprints query, user_id # This returns A LOT
+    def get_sprints query
         begin
             response = Array.new
             Sprint.joins("INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id").where(query).each_with_index do |s,i|
                 response[i] = s.as_json
-                response[i][:project] = s.project.as_json
                 response[i][:sprint_states] = []
                 s.sprint_states.each_with_index do |ss,j|
                     response[i][:sprint_states][j] = ss.as_json
-                    response[i][:sprint_states][j][:state] = ss.state.as_json 
-                    response[i][:sprint_states][j][:active_contribution_id] = nil
-                    response[i][:sprint_states][j][:contributors] = []
-                    ss.contributors.each_with_index do |c,k|
-                        comments = c.comments.as_json
-                        c.comments.each_with_index do |com,x|
-                            if com.user.user_profile
-                                comments[x][:user_profile] = {
-                                    :id => com.user.user_profile.id,
-                                    :location => com.user.user_profile.location_name,
-                                    :title => com.user.user_profile.user_position.title,
-                                    :industry => com.user.user_profile.user_position.industry,
-                                    :size => com.user.user_profile.user_position.size,
-                                    :created_at => com.user.user_profile.created_at
-
-                                }
-                            end
-                        end
-                        response[i][:sprint_states][j][:contributors][k] = {
-                            :id => c.id,
-                            :created_at => c.created_at,
-                            :updated_at => c.updated_at,
-                            :comments => comments,
-                            :votes => c.votes.as_json
-                        }
-                        if c.user_id == user_id
-                            response[i][:sprint_states][j][:contributors][k][:commit] = c.commit
-                            response[i][:sprint_states][j][:contributors][k][:commit_success] =  c.commit_success
-                            response[i][:sprint_states][j][:contributors][k][:repo] = c.repo
-                            response[i][:sprint_states][j][:active_contribution_id] = c.id
-                        end
-                    end
-                    response[i][:sprint_states][j].delete("state_id")
-                    response[i][:sprint_states][j].delete("sprint_id")
                 end
-
-                response[i].delete("project_id")
             end
             return response
         rescue => e

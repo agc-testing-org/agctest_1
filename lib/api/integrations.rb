@@ -534,21 +534,19 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get = lambda do
-        authorized?
         issue = Issue.new
-        if @session_hash
-            sprints = issue.get_sprints params, @session_hash["id"] 
-        else
-            sprints = issue.get_sprints params, nil 
-        end
+        sprints = issue.get_sprints params
         return sprints.to_json
     end
 
     sprint_states_get = lambda do
         authorized?
         issue = Issue.new
-        query = {"sprints.project_id" => params[:project_id].to_i }
-        sprint_states = issue.get_sprint_states query
+         if @session_hash
+            sprint_states = issue.get_sprint_states params, @session_hash["id"]
+         else
+            sprint_states = issue.get_sprint_states params, nil
+         end
         return sprint_states.to_json
     end
 
@@ -570,15 +568,15 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get_by_id = lambda do
-        authorized?
+        status 404
         issue = Issue.new
-
-        if @session_hash
-            sprint = issue.get_sprints params,  @session_hash["id"]
+        sprint = issue.get_sprints params
+        if sprint[0]
+            status 200
+            return sprint[0].to_json
         else
-            sprint = issue.get_sprints params, nil
+            return {}
         end
-        return sprint[0].to_json
     end
 
     sprints_post = lambda do
@@ -1028,7 +1026,8 @@ class Integrations < Sinatra::Base
     patch "/sprints/:id", &sprints_patch_by_id
     post "/sprints", &sprints_post
 
-    get "/projects/:project_id/sprint-states", &sprint_states_get
+    get "/sprint-states", allows: [:sprint_id], &sprint_states_get
+
     get "/projects/:project_id/events", &events_get
 
     post "/contributors/:id/comments", &contributors_post_comments
@@ -1053,4 +1052,4 @@ class Integrations < Sinatra::Base
     get "*" do
         send_file File.expand_path('index.html',settings.public_folder)
     end
-end
+    end

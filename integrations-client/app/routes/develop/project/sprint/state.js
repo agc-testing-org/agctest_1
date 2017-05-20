@@ -15,20 +15,25 @@ export default Ember.Route.extend({
             states: this.modelFor("develop.project").states,
             skillsets: this.modelFor("develop.project.sprint").skillsets,
             project: this.modelFor("develop.project").project,
-            selected_state: this.store.peekRecord("sprint-state",params.state_id),
-            state_id: params.state_id
+            sprint_states: this.modelFor("develop.project.sprint").sprint_states,
+            selected_state: this.store.peekRecord("sprint-state",params.state_id)
         });
-    },
-    afterModel(model, transition) {
-
-        // We could handle this w/ error handling for a 404
-        //        if(!this.store.peekRecord("sprint-state",model.state_id)){
-        //   this.transitionTo('develop.project.sprint.state',ss[ss.length - 1]);
-        //      }
     },
 
     setupController(controller, model) {
         // Call _super for default behavior
         this._super(controller, model);
+        var all_states = model.sprint_states.toArray();
+        controller.set("last_state",all_states[all_states.length - 1]);
+
+        var last_contributor_state = {};
+        for(var i = 0; i < all_states.length; i++){
+            if(all_states[i].id === this.paramsFor("develop.project.sprint.state").state_id){
+                if(i > 0){                                  
+                    last_contributor_state = all_states[i - 1];                                                                
+                }                                                                                   
+            }                                                           
+        }
+        controller.set("last_contributor_state",last_contributor_state); 
     }
 });

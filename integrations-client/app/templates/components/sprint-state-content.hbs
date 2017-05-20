@@ -1,4 +1,4 @@
-{{#if (eq selected-state.state.name "idea")}}
+{{#if (eq selected-state.state_id.name "idea")}}
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview">
@@ -11,14 +11,14 @@
 
 {{else}}
 
-{{#if selected-state.state.contributors}}
+{{#if selected-state.state_id.contributors}}
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview">
 
             {{#if (eq selected-state.id last-state.id)}}
 
-            {{#if (eq last-state.name "closed")}}
+            {{#if (eq last-state.state_id.name "closed")}}
             <div class="text-center">
                 <h3>This sprint has been completed</h3>
             </div>

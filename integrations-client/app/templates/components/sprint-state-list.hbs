@@ -7,9 +7,9 @@
     {{#each sprint_states as |sprint_state|}}
     {{#link-to "develop.project.sprint.state" sprint_state.id tagName='li' href=false class="cursor-pointer nav-item stage text-center text-capitalize" }}
     <div class="icon hidden-sm-down">
-        <i class="fa fa-fw fa-2x {{sprint_state.state.fa_icon}}"></i>
+        <i class="fa fa-fw fa-2x {{sprint_state.state_id.fa_icon}}"></i>
     </div>
-    {{sprint_state.state.name}}
+    {{sprint_state.state_id.name}}
     {{/link-to}}
     {{/each}}
 </ul>

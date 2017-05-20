@@ -1,14 +1,12 @@
 {{#if sessionAccount.account.admin}}
-<ul class="nav nav-pills flex-column timeline">
-    <div class="dropdown mt-0 mr-1">
-        <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Transitions
-        </div>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-            {{#each states as |state|}}
-            <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
-            {{/each}}
-        </div>
+<div class="dropdown mt-0 mr-1">
+    <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Transitions
     </div>
-</ul>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        {{#each states as |state|}}
+        <button class="dropdown-item" {{action "transition" sprint.id state.id}}>{{state.name}}</button>
+        {{/each}}
+    </div>
+</div>
 {{/if}}
