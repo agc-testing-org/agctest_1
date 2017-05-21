@@ -20,7 +20,7 @@ describe ".Issue" do
         #covered by API test
     end
     context "#get_sprint" do
-        # NOT COVERED 
+        #covered by API test
     end
     context "#log_event" do
         #covered by API test

@@ -499,9 +499,15 @@ class Integrations < Sinatra::Base
     end
 
     projects_get = lambda do
+        status 500
         issue = Issue.new
         projects = issue.get_projects nil 
-        return projects.to_json
+        if projects
+            status 200
+            return projects.to_json
+        else
+            return {}
+        end
     end
 
     projects_get_by_id = lambda do
@@ -520,8 +526,8 @@ class Integrations < Sinatra::Base
     projects_post = lambda do
         protected!
         status 400
-        response = {}
         if @session_hash["admin"]
+            response = {}
             account = Account.new
             begin
                 request.body.rewind
@@ -530,13 +536,15 @@ class Integrations < Sinatra::Base
                     issue = Issue.new
                     project = issue.create_project fields[:org], fields[:name]
                     if project 
-                        response[:id] = project 
+                        response = project 
                         status 201
                     end
                 end
             end
+            return response.to_json
+        else
+            redirect to("/unauthorized") 
         end
-        return response.to_json
     end
 
     sprints_get = lambda do
@@ -1047,7 +1055,7 @@ class Integrations < Sinatra::Base
 
     get '/unauthorized' do
         status 401
-        return {:message => "Looks like we went too far?"}.to_json
+        return {:error => "unauthorized"}.to_json
     end
 
     error RequiredParamMissing do

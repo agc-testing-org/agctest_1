@@ -114,7 +114,7 @@ class Issue
                 org: org,
                 name: name
             })
-            return project.id
+            return project
         rescue => e
             puts e
             return nil
