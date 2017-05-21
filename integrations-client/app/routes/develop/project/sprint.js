@@ -5,7 +5,7 @@ export default Ember.Route.extend({
     actions: {
         error(error, transition) {
             console.log(error);
-            if (error && error.errors[0].status === '404') {
+            if (error && error.errors && error.errors[0].status === '404') {
                 this.transitionTo('develop.project',this.paramsFor('develop.project').name); 
             } else {
                 return true;
@@ -21,6 +21,7 @@ export default Ember.Route.extend({
 
         return Ember.RSVP.hash({
             id: params.id,
+            project: this.modelFor("develop.project").project,
             states: this.modelFor("develop.project").states,
             sprint: this.store.findRecord('sprint', params.id),
             skillsets: this.store.query('skillset', {

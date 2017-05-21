@@ -31,9 +31,6 @@ export default Ember.Component.extend({
                         description: description,
                         project_id: projectId
                     }).save().then(function(payload) {
-                        _this.set("title","");
-                        _this.set("description","");
-                        _this.send("showCreate");
                         _this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
                     }, function(xhr, status, error) {
 

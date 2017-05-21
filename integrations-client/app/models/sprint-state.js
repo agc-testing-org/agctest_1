@@ -8,6 +8,8 @@ export default DS.Model.extend({
     arbiter_id: attr('number'),
     sprint_id: DS.belongsTo('sprint'),
     state_id: DS.belongsTo('state'),
+    sprint: attr('number'),
+    state: attr('number'),
     deadline: attr('date'),
     sha: attr('string'),
     contributors: DS.hasMany('contributor'),

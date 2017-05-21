@@ -265,7 +265,7 @@ button{
     display: table;
     position: absolute;
     left:0px;
-    top:0px;
+    top:40px;
     height: 100%;
     width: 100%;    
 }
@@ -521,7 +521,10 @@ button{
 .sidebar.hidden-md-up .nav .menu{
     padding-bottom:0px;
 }
-
+.sidebar .nav .menu li.active{
+    background-color: #333;
+    color: #cfcfcf;
+}
 .sidebar .nav .menu li, .sidebar.hidden-md-up .nav .menu li{
     color: #28B6C3;
     margin:0px;

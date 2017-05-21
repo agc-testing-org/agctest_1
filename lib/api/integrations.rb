@@ -595,7 +595,7 @@ class Integrations < Sinatra::Base
                     log_params = {:sprint_id => sprint.id, :state_id => 1, :user_id => @session_hash["id"], :project_id => fields[:project_id]}
                     if sprint && sprint_state && (issue.log_event log_params)
                         status 201
-                        response = sprint_state
+                        response = sprint
                     end
                 else
                     response[:message] = "Please enter a more detailed description"                    
@@ -607,7 +607,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    sprints_patch_by_id = lambda do
+    sprint_states_post = lambda do
         protected!
         if @session_hash["admin"]
             status 400
@@ -615,19 +615,19 @@ class Integrations < Sinatra::Base
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:state_id]
+                if fields[:state]
 
                     issue = Issue.new
-                    sprint = (issue.get_sprint params[:id])
+                    sprint = (issue.get_sprint fields[:sprint])
 
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
 
                     sha = github.branch("#{sprint.project.org}/#{sprint.project.name}","master").commit.sha
 
-                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
+                    sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
 
-                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => sprint.project.id}
+                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id}
                     if sprint_state && (issue.log_event log_params) 
                         status 201
                         response = sprint_state
@@ -1023,10 +1023,10 @@ class Integrations < Sinatra::Base
 
     get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
     get "/sprints/:id", allows: [:id], &sprints_get_by_id
-    patch "/sprints/:id", &sprints_patch_by_id
     post "/sprints", &sprints_post
 
     get "/sprint-states", allows: [:sprint_id], &sprint_states_get
+    post "/sprint-states", &sprint_states_post
 
     get "/projects/:project_id/events", &events_get
 
@@ -1052,4 +1052,4 @@ class Integrations < Sinatra::Base
     get "*" do
         send_file File.expand_path('index.html',settings.public_folder)
     end
-    end
+end
