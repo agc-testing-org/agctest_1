@@ -609,11 +609,16 @@ class Integrations < Sinatra::Base
                 if fields[:description] && fields[:description].length > 5
                     issue = Issue.new
                     sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
-                    sprint_state = issue.create_sprint_state sprint.id, 1, nil
-                    log_params = {:sprint_id => sprint.id, :state_id => 1, :user_id => @session_hash["id"], :project_id => fields[:project_id]}
-                    if sprint && sprint_state && (issue.log_event log_params)
-                        status 201
-                        response = sprint
+                    if sprint
+                        state = State.find_by(:name => "idea").id
+                        sprint_state = issue.create_sprint_state sprint.id, state, nil
+                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state["id"]}
+                        if sprint_state && (issue.log_event log_params) 
+                            status 201
+                            response = sprint                            
+                        end
+                    else
+                        response[:error] = "This project does not exist"
                     end
                 else
                     response[:error] = "Please enter a more detailed description"                    
@@ -1031,7 +1036,7 @@ class Integrations < Sinatra::Base
 
     post "/projects", &projects_post
     get "/projects", &projects_get
-    get "/projects/:id", &projects_get_by_id
+    get "/projects/:id", allows: [:id], &projects_get_by_id
 
     post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
