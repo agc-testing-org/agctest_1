@@ -193,7 +193,7 @@ class Issue
         end
     end
 
-    def get_sprint id # This only returns the sprint
+    def get_sprint id # This also returns the project
         begin
             return Sprint.joins(:project).find_by(id: id)
         rescue => e
@@ -203,15 +203,14 @@ class Issue
 
     def get_sprints query
         begin
-            response = Array.new
-            Sprint.joins("INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id").where(query).each_with_index do |s,i|
-                response[i] = s.as_json
-                response[i][:sprint_states] = []
-                s.sprint_states.each_with_index do |ss,j|
-                    response[i][:sprint_states][j] = ss.as_json
-                end
-            end
-            return response
+            return Sprint.joins("INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id").where(query).as_json#.each_with_index do |s,i|
+#                response[i] = s.as_json
+#                response[i][:sprint_states] = []
+#                s.sprint_states.each_with_index do |ss,j|
+#                    response[i][:sprint_states][j] = ss.as_json
+#                end
+#            end
+ #           return response
         rescue => e
             puts e
             return nil

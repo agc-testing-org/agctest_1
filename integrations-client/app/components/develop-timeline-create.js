@@ -41,7 +41,7 @@ export default Ember.Component.extend({
                 }
             }
             else {
-                this.set('errorMessage', "Please enter a longer title");
+                this.set('errorMessage', "Please enter a more descriptive title");
             }
         }
     }

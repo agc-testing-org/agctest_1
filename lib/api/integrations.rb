@@ -499,7 +499,6 @@ class Integrations < Sinatra::Base
     end
 
     projects_get = lambda do
-        status 500
         issue = Issue.new
         projects = issue.get_projects nil 
         if projects
@@ -550,7 +549,12 @@ class Integrations < Sinatra::Base
     sprints_get = lambda do
         issue = Issue.new
         sprints = issue.get_sprints params
-        return sprints.to_json
+        if sprints
+            status 200
+            return sprints.to_json
+        else
+            return {}
+        end
     end
 
     sprint_states_get = lambda do
@@ -612,10 +616,10 @@ class Integrations < Sinatra::Base
                         response = sprint
                     end
                 else
-                    response[:message] = "Please enter a more detailed description"                    
+                    response[:error] = "Please enter a more detailed description"                    
                 end
             else
-                response[:message] = "Please enter a more descriptive title"
+                response[:error] = "Please enter a more descriptive title"
             end
         end
         return response.to_json
@@ -648,11 +652,10 @@ class Integrations < Sinatra::Base
                     end
                 end
             end
+            return response.to_json
         else
-            status 401
-            response[:message] = "You are not authorized to perform this action."
+            redirect to("/unauthorized") 
         end
-        return response.to_json
     end
 
     contributors_post_comments = lambda do

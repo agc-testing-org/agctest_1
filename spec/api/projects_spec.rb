@@ -2,6 +2,7 @@ require_relative '../spec_helper'
 require_relative '../api_spec_helper'
 
 describe "/projects" do
+
     fixtures :users
 
     shared_examples_for "project" do
