@@ -3,45 +3,42 @@ require_relative '../api_spec_helper'
 
 describe "/sprints" do
     
-    fixtures :users
-
-    shared_examples_for "sprint" do
-        it "should return id" do
-            expect(@sprint["id"]).to eq(@sprint_result["id"])
-        end
-        it "should return user_id" do
-            expect(@sprint["user_id"]).to eq(@sprint_result["user_id"])
-        end
-        it "should return title" do
-            expect(@sprint["title"]).to eq(@sprint_result["title"])
-        end
-        it "should return description" do
-            expect(@sprint["description"]).to eq(@sprint_result["description"])
-        end
-        it "should return sha" do
-            expect(@sprint["sha"]).to eq(@sprint_result["sha"])
-        end
-        it "should return winnder_id" do
-            expect(@sprint["winner_id"]).to eq(@sprint_result["winner_id"])
-        end
-    end
+    fixtures :users, :projects, :states
 
     shared_examples_for "sprints" do
-        it "should return more than one result" do
-            expect(@sprints.length).to be > 0
+        it "should return id" do
+            @sprint_results.each_with_index do |sprint_result,i|
+                expect(@sprints[i]["id"]).to eq(sprint_result["id"])
+            end
         end
-
-        if @sprint_results
-            @sprint_results.each_with_index do |s,i|
-                @sprint_result = s
-                @sprint = @sprints[i]
-                it_should_behave_like "sprint"
+        it "should return user_id" do
+            @sprint_results.each_with_index do |sprint_result,i|
+                expect(@sprints[i]["user_id"]).to eq(sprint_result["user_id"])
+            end
+        end
+        it "should return title" do
+            @sprint_results.each_with_index do |sprint_result,i|
+                expect(@sprints[i]["title"]).to eq(sprint_result["title"])
+            end
+        end
+        it "should return description" do
+            @sprint_results.each_with_index do |sprint_result,i|
+                expect(@sprints[i]["description"]).to eq(sprint_result["description"])
+            end
+        end
+        it "should return sha" do
+            @sprint_results.each_with_index do |sprint_result,i|
+                expect(@sprints[i]["sha"]).to eq(sprint_result["sha"])
+            end
+        end
+        it "should return winner_id" do
+            @sprint_results.each_with_index do |sprint_result,i|
+                expect(@sprints[i]["winner_id"]).to eq(sprint_result["winner_id"])
             end
         end
     end
 
     describe "POST /" do
-        fixtures :projects, :states
         before(:each) do
             @title = "SPRINT TITLE"
             @description = "SPRINT DESCRIPTION"
@@ -78,15 +75,15 @@ describe "/sprints" do
         context "valid fields" do
             before(:each) do
                 post "sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sprint_result = @mysql_client.query("select * from sprints").first
+                @sprint_results = @mysql_client.query("select * from sprints")
                 @sprint_state = @mysql_client.query("select * from sprint_states").first
-                @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_result["id"]}").first
-                @sprint = JSON.parse(last_response.body)
+                @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_results.first["id"]}").first
+                @sprints = [JSON.parse(last_response.body)]
             end
-            it_behaves_like "sprint"
+            it_behaves_like "sprints"
             context "sprint_states" do
                 it "should include sprint_id" do
-                    expect(@sprint_state["sprint_id"]).to eq @sprint["id"]
+                    expect(@sprint_state["sprint_id"]).to eq @sprints[0]["id"]
                 end
                 it "should include idea state_id" do
                     expect(@sprint_state["state_id"]).to eq(states(:idea).id)
@@ -94,7 +91,7 @@ describe "/sprints" do
             end
             context "sprint_timeline" do
                 it "should include sprint_id" do
-                    expect(@timeline["sprint_id"]).to eq(@sprint["id"])
+                    expect(@timeline["sprint_id"]).to eq(@sprints[0]["id"])
                 end
                 it "should include idea state_id" do
                     expect(@timeline["state_id"]).to eq(states(:idea).id)
@@ -103,29 +100,26 @@ describe "/sprints" do
         end
     end
     describe "GET /" do
-        fixtures :projects, :sprints, :sprint_states, :states
-        # allows: [:id, :project_id, "sprint_states.state_id"]
+        fixtures :sprints, :sprint_states
         context "valid params" do
             context "filter by" do
-                context "project_id" do
+                context "project_id", :focus => true do
                     before(:each) do
                         project_id = projects(:demo).id
                         get "/sprints?project_id=#{project_id}"
                         @sprints = JSON.parse(last_response.body)
-                        @sprint_results = @mysql_client.query("select * from sprints where project_id = #{project_id}")
+                        @sprint_results = @mysql_client.query("select sprints.* from sprints INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id where project_id = #{project_id}")
                     end
                     it_behaves_like "sprints"
                 end
-                context "sprint_states.state_id", :focus => true do
+                context "sprint_states.state_id" do
                     before(:each) do
                         skip "this has been tested and works but activerecord does not return the queried record from rspec..."
                         state_id = sprint_states(:sprint_1_state_1).state_id
                         project_id = projects(:demo).id
                         get "/sprints?project_id=#{project_id}&sprint_states.state_id=#{state_id}"
                         @sprints = JSON.parse(last_response.body)
-                        @sprint_results = @mysql_client.query("select * from sprints JOIN sprint_states ON sprint_states.sprint_id = sprints.id where sprint_states.state_id = #{state_id} AND project_id = #{project_id}")
-                        puts @sprints.inspect
-                        puts @sprint_results.first.inspect
+                        @sprint_results = @mysql_client.query("select sprints.* from sprints INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id where sprint_states.state_id = #{state_id} AND project_id = #{project_id}")
                     end
                     it_behaves_like "sprints"
                 end
@@ -134,7 +128,7 @@ describe "/sprints" do
                         id = sprints(:sprint_1).id
                         get "/sprints?id=#{id}"
                         @sprints = JSON.parse(last_response.body)
-                        @sprint_results = @mysql_client.query("select * from sprints where id = #{id}")
+                        @sprint_results = @mysql_client.query("select sprints.* from sprints INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id where sprints.id = #{id}")
                     end
                     it_behaves_like "sprints"
                 end
@@ -142,13 +136,13 @@ describe "/sprints" do
         end
     end
     describe "GET /:id" do
-        fixtures :projects, :sprints, :sprint_states
+        fixtures :sprints, :sprint_states
         before(:each) do
             sprint = sprints(:sprint_1)
             get "/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-            @sprint = JSON.parse(last_response.body)
-            @sprint_result = @mysql_client.query("select * from sprints where id = #{sprint.id}").first
+            @sprints = [JSON.parse(last_response.body)]
+            @sprint_results = @mysql_client.query("select * from sprints where id = #{sprint.id}")
         end
-        it_behaves_like "sprint"
+        it_behaves_like "sprints"
     end
 end

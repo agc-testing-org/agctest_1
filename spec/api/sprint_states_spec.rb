@@ -3,8 +3,8 @@ require_relative '../api_spec_helper'
 
 describe "/sprints-states" do
 
-    fixtures :users
-    
+    fixtures :users, :projects, :sprints, :states
+
     shared_examples_for "sprint_state" do
         it "should return id" do
             expect(@sprint_state["id"]).to eq(@sprint_state_result["id"])
@@ -17,15 +17,6 @@ describe "/sprints-states" do
         end
         it "should return state" do
             expect(@sprint_state["state_id"]).to eq(@sprint_state_result["state_id"])
-        end
-        it "should return active_contribution_id (last 'join' by signed in user)" do
-            if @sprint_state["contributors"] && @sprint_state["contributors"].length > 0
-                @contributor_result.each do |c|
-                    if c["user_id"] == @user
-                        expect(@sprint_state["active_contribution_id"]).to eq(c["id"])
-                    end
-                end
-            end
         end
     end
 
@@ -49,9 +40,32 @@ describe "/sprints-states" do
         end
         context "when owned" do
             it "should return repo name" do
+                puts "--"
+                puts @user
+                puts @contributor_result["user_id"]
                 if @user == @contributor_result["user_id"]
+                    puts "HERE" 
                     expect(@contributor["repo"]).to eq(@contributor_result["repo"])
                 end
+            end
+            it "should return active_contribution_id (last 'join' by signed in user)" do
+                if @user == @contributor_result["user_id"]
+                    expect(@sprint_state["active_contribution_id"]).to eq(@contributor_result["id"])
+                end
+            end
+        end
+    end
+
+    shared_examples_for "contributors" do
+        it "should return more than one result" do
+            expect(@contributors.length).to be > 0
+        end
+
+        if @contributor_results
+            @contributor_results.each_with_index do |c,i|
+                @contributor_result = c
+                @contributor = @contributors[i]
+                it_should_behave_like "contributor"
             end
         end
     end
@@ -61,7 +75,21 @@ describe "/sprints-states" do
             expect(@contributor_comment["id"]).to eq(@contributor_comment_result["id"])
         end
         it "should return text" do
-            expect(@contributor_comment["text"]).to eq(contributor_comment_result["text"])
+            expect(@contributor_comment["text"]).to eq(@contributor_comment_result["text"])
+        end
+    end
+
+    shared_examples_for "contributor_comments" do
+        it "should return more than one result" do
+            expect(@contributor_comments.length).to be > 0
+        end
+
+        if @contributor_comments
+            @contributor_comments.each_with_index do |s,i|
+                @contributor_comment_result = s
+                @contributor_comment = @contributor_comments[i]
+                it_should_behave_like "contributor_comment"
+            end
         end
     end
 
@@ -81,7 +109,7 @@ describe "/sprints-states" do
     end
 
     describe "POST /" do
-        fixtures :projects, :sprints, :states, :sprint_states
+        fixtures :sprint_states
         before(:each) do
             body = { 
                 :name=>"1", 
@@ -113,18 +141,28 @@ describe "/sprints-states" do
     end
 
     describe "GET /" do
-        fixtures :projects, :sprints, :states, :sprint_states 
+        fixtures :sprint_states
         context "valid params" do
             context "filter by" do
-                context "sprint_id" do
+                context "sprint_id", :focus => true do
                     before(:each) do
-                        sprint_id = sprints(:sprint_1).id
+                        sprint_id = sprint_states(:sprint_1_state_1).sprint_id
                         get "/sprint-states?sprint_id=#{sprint_id}"
                         @sprint_states = JSON.parse(last_response.body)
                         @sprint_state_results = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint_id}")
                     end
                     it_behaves_like "sprint_states"
                 end
+            end
+            context "with contributors and comments", :focus => true do
+                fixtures :contributors, :comments
+                before(:each) do
+                    sprint_state_id = sprint_states(:sprint_1_state_1).id
+                    get "/sprint-states?id_id=#{sprint_state_id}"
+                    @contributors = JSON.parse(last_response.body)[0]["contributors"]
+                    @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id}")
+                end
+                it_behaves_like "contributors"
             end
         end
     end

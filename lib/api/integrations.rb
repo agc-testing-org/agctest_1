@@ -1047,7 +1047,7 @@ class Integrations < Sinatra::Base
     get "/sprints/:id", allows: [:id], &sprints_get_by_id
     post "/sprints", &sprints_post
 
-    get "/sprint-states", allows: [:sprint_id], &sprint_states_get
+    get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
     post "/sprint-states", &sprint_states_post
 
     get "/projects/:project_id/events", &events_get

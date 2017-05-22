@@ -5,30 +5,20 @@ describe "/projects" do
 
     fixtures :users
 
-    shared_examples_for "project" do
-        context "response should match projects table record" do
-            it "should return id" do
-                expect(@project["id"]).to eq(@project_result["id"])
-            end
-            it "should return org" do
-                expect(@project["org"]).to eq(@project_result["org"])
-            end
-            it "should return name" do
-                expect(@project["name"]).to eq(@project_result["name"])
-            end
-        end
-    end
-
     shared_examples_for "projects" do
-        it "should return more than one result" do
-            expect(@projects.length).to be > 0
+        it "should return id" do
+            @project_results.each_with_index do |project_result,i| 
+                expect(@projects[i]["id"]).to eq(project_result["id"])
+            end
         end
-
-        if @project_results
-            @project_results.each_with_index do |p,i|
-                @project_result = p
-                @project = @projects[i]
-                it_should_behave_like "project"
+        it "should return org" do
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["org"]).to eq(project_result["org"])
+            end
+        end
+        it "should return name" do
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["name"]).to eq(project_result["name"])
             end
         end
     end
@@ -56,13 +46,13 @@ describe "/projects" do
             context "valid fields" do
                 before(:each) do
                     post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                    @project_result = @mysql_client.query("select * from projects").first
-                    @project = JSON.parse(last_response.body)
+                    @project_results = @mysql_client.query("select * from projects")
+                    @projects = [JSON.parse(last_response.body)]
                 end
                 it "response should match params" do
-                    expect(@project["name"]).to eq(@name)
+                    expect(@projects[0]["name"]).to eq(@name)
                 end
-                it_should_behave_like "project"
+                it_should_behave_like "projects"
             end
         end
     end
@@ -82,9 +72,9 @@ describe "/projects" do
         before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
-            @project = JSON.parse(last_response.body)
-            @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
+            @projects = [JSON.parse(last_response.body)]
+            @project_results = @mysql_client.query("select * from projects where id = #{project_id}")
         end
-        it_should_behave_like "project"
+        it_should_behave_like "projects"
     end
 end
