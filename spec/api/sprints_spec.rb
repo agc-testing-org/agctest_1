@@ -140,16 +140,15 @@ describe "/sprints" do
                 end
             end
         end
-
-        describe "GET /:id" do
-            fixtures :projects, :sprints, :sprint_states
-            before(:each) do
-                sprint = sprints(:sprint_1)
-                get "/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sprint = JSON.parse(last_response.body)
-                @sprint_result = @mysql_client.query("select * from sprints where id = #{sprint.id}").first
-            end
-            it_behaves_like "sprint"
+    end
+    describe "GET /:id" do
+        fixtures :projects, :sprints, :sprint_states
+        before(:each) do
+            sprint = sprints(:sprint_1)
+            get "/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            @sprint = JSON.parse(last_response.body)
+            @sprint_result = @mysql_client.query("select * from sprints where id = #{sprint.id}").first
         end
+        it_behaves_like "sprint"
     end
 end
