@@ -36,7 +36,7 @@ describe "/sprints-states" do
         end
         context "when owned" do
             it "should return repo name" do
-                @contributor_results.each_with_index do |contributor_result,i|
+                @contributor_results.each_with_index do |contributor_result,i|                    
                     if @user == contributor_result["user_id"]
                         expect(@contributors[i]["repo"]).to eq(contributor_result["repo"])
                     end
@@ -122,17 +122,17 @@ describe "/sprints-states" do
                     it_behaves_like "sprint_states"
                 end
             end
-            context "with contributors and comments", :focus => true do
+            context "with contributors (owned) and comments", :focus => true do
                 fixtures :contributors, :comments
                 before(:each) do
                     sprint_state_id = sprint_states(:sprint_1_state_1).id
-                    get "/sprint-states?id_id=#{sprint_state_id}"
-                    puts last_response.body.inspect
-                    @contributors = JSON.parse(last_response.body)[0]["contributors"]
+                    get "/sprint-states?id_id=#{sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @sprint_state = JSON.parse(last_response.body)[0]
+                    @contributors = @sprint_state["contributors"]
                     @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id}")
                 end
-                #it_behaves_like "contributors" #TODO
+                it_behaves_like "contributors"
+                #it_behaves_like "contributor_comments" #TODO
             end
         end
     end
