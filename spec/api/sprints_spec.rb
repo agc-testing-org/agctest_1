@@ -2,7 +2,7 @@ require_relative '../spec_helper'
 require_relative '../api_spec_helper'
 
 describe "/sprints" do
-    
+
     fixtures :users, :projects, :states
 
     shared_examples_for "sprints" do
@@ -34,6 +34,41 @@ describe "/sprints" do
         it "should return winner_id" do
             @sprint_results.each_with_index do |sprint_result,i|
                 expect(@sprints[i]["winner_id"]).to eq(sprint_result["winner_id"])
+            end
+        end
+    end
+
+    shared_examples_for "sprint_skillsets" do 
+        context "all" do
+            it "should return all skillsets" do
+                expect(@res.length).to eq(Skillset.count)
+                Skillset.all.each_with_index do |skillset,i|           
+                    expect(@res[i]["name"]).to eq(skillset.name)                               
+                end                                                                                            
+            end                                                                    
+        end                                
+        context "sprint skillsets" do
+            it "should include active" do  
+                @res.each do |skillset|                        
+                    if SprintSkillset.count > 0                                        
+                        if skillset["id"] == sprint_skillsets(:sprint_1_skillset_1).id                             
+                            expect(skillset["active"]).to eq(sprint_skillsets(:sprint_1_skillset_1).active)                                        
+                        end                                                                                                                                                
+                    end                                                                                                                
+                end                                                                                    
+            end                                                            
+        end                                        
+    end 
+
+    shared_examples_for "sprint_skillset_update" do
+        context "response" do
+            it "should return skillset_id as id" do
+                expect(@res["id"]).to eq(@skillset_id)
+            end
+        end
+        context "sprint_skillset" do
+            it "should include most recent active" do
+                expect(@mysql["active"]).to eq(@active ? 1 : 0)
             end
         end
     end
@@ -99,6 +134,7 @@ describe "/sprints" do
             end
         end
     end
+
     describe "GET /" do
         fixtures :sprints, :sprint_states
         context "valid params" do
@@ -135,6 +171,7 @@ describe "/sprints" do
             end
         end
     end
+
     describe "GET /:id" do
         fixtures :sprints, :sprint_states
         before(:each) do
@@ -145,4 +182,91 @@ describe "/sprints" do
         end
         it_behaves_like "sprints"
     end
+
+    describe "GET /:sprint_id/skillsets" do
+        fixtures :skillsets, :sprints
+        before(:each) do
+            @sprint_id = sprints(:sprint_1).id
+        end
+        context "no sprint_skillsets" do
+            before(:each) do
+                get "/sprints/#{@sprint_id}/skillsets", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"} 
+                @res = JSON.parse(last_response.body)
+            end
+            it_behaves_like "sprint_skillsets"
+        end
+        context "sprint_skillsets" do
+            fixtures :sprint_skillsets
+            before(:each) do
+                get "/sprints/#{@sprint_id}/skillsets", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}  
+                @res = JSON.parse(last_response.body)
+            end 
+            it_behaves_like "sprint_skillsets"
+        end
+
+    end
+
+    describe "GET /:sprint_id/skillsets/:skillset_id" do
+        fixtures :skillsets, :sprints
+        before(:each) do
+            @sprint_id = sprints(:sprint_1).id
+            @skillset_id = skillsets(:skillset_1).id
+        end
+        context "no sprint_skillsets" do
+            before(:each) do
+                get "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "sprint_skillsets"
+        end
+        context "sprint_skillsets" do
+            fixtures :sprint_skillsets
+            before(:each) do
+                get "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "sprint_skillsets"
+        end
+    end
+
+
+    describe "PATCH /:sprint_id/skillsets/:skillset_id" do
+        fixtures :skillsets, :sprints
+        before(:each) do
+            @sprint_id = sprints(:sprint_1).id
+            @skillset_id = skillsets(:skillset_1).id 
+        end
+        context "admin" do
+            context "skillset exists" do
+                fixtures :sprint_skillsets
+                before(:each) do
+                    @active = false 
+                    patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
+                end
+                it_behaves_like "sprint_skillset_update"
+            end 
+            context "skillset does not exist" do
+                before(:each) do
+                    @active = true
+                    patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_skillsets").first
+                end
+                it_behaves_like "sprint_skillset_update"
+            end
+        end
+        context "non-admin" do
+            before(:each) do
+                @active = false
+                patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return 401" do
+                expect(last_response.status).to eq(401) 
+            end
+        end
+    end
+
 end
