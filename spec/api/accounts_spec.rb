@@ -4,6 +4,9 @@ require 'api_helper'
 describe "/account" do
 
     fixtures :users
+    before(:all) do
+        @CREATE_TOKENS=true
+    end
 
     shared_examples_for "user_skillsets" do
         context "all" do

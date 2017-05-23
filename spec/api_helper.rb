@@ -2,7 +2,7 @@
 
 RSpec.configure do |config|
     config.before(:each) do
-        if users(:adam_admin) # if users fixtures are loaded
+        if @CREATE_TOKENS # if users fixtures are loaded
             # admin user
             admin_password = "adam12345"
             admin_email = users(:adam_admin).email

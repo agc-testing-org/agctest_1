@@ -4,6 +4,10 @@ require 'api_helper'
 describe "/sprints-states" do
 
     fixtures :users, :projects, :sprints, :states
+    
+    before(:all) do
+        @CREATE_TOKENS=true
+    end 
 
     shared_examples_for "sprint_states" do
         it "should return id" do

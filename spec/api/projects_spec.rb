@@ -6,6 +6,7 @@ describe "/projects" do
     fixtures :users
 
     before(:all) do
+        @CREATE_TOKENS=true
         destroy_repo
     end
 

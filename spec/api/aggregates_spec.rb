@@ -4,6 +4,9 @@ require 'api_helper'
 describe "/aggregate-*" do
 
     fixtures :users
+    before(:all) do
+        @CREATE_TOKENS=true
+    end 
 
     shared_examples_for "aggregate_comments" do
         context "user created" do
