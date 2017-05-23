@@ -11,6 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+
 ActiveRecord::Schema.define(version: 20170507223642) do
 
   create_table "comments", force: :cascade do |t|
@@ -120,6 +121,7 @@ ActiveRecord::Schema.define(version: 20170507223642) do
     t.integer  "after",           limit: 4
     t.integer  "comment_id",      limit: 4
     t.integer  "sprint_state_id", limit: 4
+    t.integer  "vote_id",         limit: 4
   end
 
   add_index "sprint_timelines", ["comment_id"], name: "fk_rails_1251c5b8fd", using: :btree
@@ -127,6 +129,7 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_index "sprint_timelines", ["sprint_id"], name: "index_sprint_timelines_on_sprint_id", using: :btree
   add_index "sprint_timelines", ["sprint_state_id"], name: "fk_rails_e755d52f56", using: :btree
   add_index "sprint_timelines", ["state_id"], name: "fk_rails_c9feeeb84f", using: :btree
+  add_index "sprint_timelines", ["vote_id"], name: "fk_rails_9f8155a22b", using: :btree
 
   create_table "sprints", force: :cascade do |t|
     t.integer  "user_id",     limit: 4,     null: false
@@ -247,6 +250,7 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_foreign_key "sprint_timelines", "sprint_states"
   add_foreign_key "sprint_timelines", "sprints"
   add_foreign_key "sprint_timelines", "states"
+  add_foreign_key "sprint_timelines", "votes"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
   add_foreign_key "user_positions", "user_profiles"
