@@ -221,16 +221,9 @@ class Issue
         begin
             response = Array.new
             SprintTimeline.where(query).each_with_index do |st,i|
-                response[i] = {
-                    :id => st.id,
-                    :created_at => st.created_at,
-                    :user => {:id => st.user.id},
-                    :sprint => st.sprint.as_json,
-                    :label => st.label.as_json,
-                    :state => st.state.as_json,
-                    :sprint_state => st.sprint_state.as_json,
-                    :after => st.after
-                }
+                response[i] = st.as_json
+                response[i][:sprint] = st.sprint.as_json
+                response[i][:label] = st.label.as_json
             end
             return response
         rescue => e
