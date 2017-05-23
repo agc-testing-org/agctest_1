@@ -5,6 +5,15 @@ describe "/projects" do
 
     fixtures :users
 
+    before(:each) do
+        prepare_tokens
+        prepare_repo
+    end 
+
+    after(:each) do
+        destroy_repo
+    end
+
     shared_examples_for "projects" do
         it "should return id" do
             @project_results.each_with_index do |project_result,i| 

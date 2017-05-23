@@ -5,6 +5,10 @@ describe "/sprints" do
 
     fixtures :users, :projects, :states
 
+    before(:each) do
+        prepare_tokens
+    end 
+
     shared_examples_for "sprints" do
         it "should return id" do
             @sprint_results.each_with_index do |sprint_result,i|

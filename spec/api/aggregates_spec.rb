@@ -5,6 +5,10 @@ describe "/aggregate-*" do
 
     fixtures :users
 
+    before(:each) do
+        prepare_tokens
+    end 
+
     shared_examples_for "aggregate_comments" do
         context "user created" do
             it "should return comments based on filter" do
@@ -129,4 +133,4 @@ describe "/aggregate-*" do
             end
         end 
     end
- end
+end
