@@ -30,27 +30,31 @@ RSpec.configure do |config|
             post "/session/github", {:grant_type => "github", :auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             res = JSON.parse(last_response.body)
             @non_admin_github_token = res["github_token"]
+            @uri = "test/#{@username}/git-repo-log.git"
+            @uri_master = "test/#{@username}/DEMO.git"
+            @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
         end
     end
 end
 
 def prepare_repo
     # setup fake/local "github" repo
-    FileUtils.rm_rf('repositories/')
-    %x( mkdir "test/#{@username}")
-    @uri = "test/#{@username}/git-repo-log.git"
-    @uri_master = "test/#{@username}/DEMO.git"
-    @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
-    %x( rm -rf #{@uri})
-    %x( cp -rf test/git-repo #{@uri_master}; mv #{@uri_master}/git #{@uri_master}/.git)
-    %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
+    if @uri && @uri_master && @username
+        FileUtils.rm_rf('repositories/')
+        %x( mkdir "test/#{@username}")
+        %x( rm -rf #{@uri})
+        %x( cp -rf test/git-repo #{@uri_master}; mv #{@uri_master}/git #{@uri_master}/.git)
+        %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
+    end
 end
 
 def destroy_repo
-    %x( rm -rf #{@uri}) 
-    %x( rm -rf #{@uri_master})
-    %x( rm -rf "test/#{@username}")
-    %x( rm -rf repositories/*)
+    if @uri && @uri_master && @username
+        %x( rm -rf #{@uri}) 
+        %x( rm -rf #{@uri_master})
+        %x( rm -rf "test/#{@username}")
+        %x( rm -rf repositories/*)
+    end
 end
 
 shared_examples_for "unauthorized" do
