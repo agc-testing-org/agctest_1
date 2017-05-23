@@ -1,5 +1,5 @@
-require_relative '../spec_helper'
-require_relative '../api_spec_helper'
+require 'spec_helper'
+require 'api_spec_helper'
 
 describe "/sprints-states" do
 
