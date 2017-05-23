@@ -5,10 +5,6 @@ describe "/contributors" do
 
     fixtures :users
 
-    before(:each) do
-        prepare_tokens
-    end 
-
     describe "POST /:id/comments" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do

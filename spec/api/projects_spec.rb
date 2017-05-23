@@ -5,8 +5,11 @@ describe "/projects" do
 
     fixtures :users
 
+    before(:all) do
+        destroy_repo
+    end
+
     before(:each) do
-        prepare_tokens
         prepare_repo
     end 
 

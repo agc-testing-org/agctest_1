@@ -5,10 +5,6 @@ describe "/account" do
 
     fixtures :users
 
-    before(:each) do
-        prepare_tokens
-    end
-
     shared_examples_for "user_skillsets" do
         context "all" do
             it "should return all skillsets" do
