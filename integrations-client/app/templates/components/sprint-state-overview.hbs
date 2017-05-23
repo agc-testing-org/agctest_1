@@ -5,7 +5,7 @@
             <h1 class="name text-capitalize">{{sprint.title}}</h1>
             <div class="description">{{sprint.description}}</div>
             <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
-            {{sprint-state-overview-skillsets skillsets=skillsets class="skillsets"}}
+            {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets"}}
             <div class="row">
                 {{#unless (eq showing-state.state_id.name "idea")}}
                 {{#if contributors}}

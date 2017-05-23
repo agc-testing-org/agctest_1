@@ -5,9 +5,11 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     actions: {
-        updateSkillset(id,active){
+        updateSkillset(id,sprintId,active){
 
             var store = this.get('store');
+
+            store.adapterFor('skillset').set('namespace', 'sprints/' + sprintId ); 
 
             var skillsetUpdate = store.findRecord('skillset',id).then(function(skillset) {
                 skillset.set('active', active);
