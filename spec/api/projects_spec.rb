@@ -1,99 +1,42 @@
-require_relative '../spec_helper'
+require 'spec_helper'
+require 'api_helper'
 
 describe "/projects" do
+
     fixtures :users
+
+    before(:all) do
+        @CREATE_TOKENS=true
+        destroy_repo
+    end
+
     before(:each) do
-        admin_password = "adam12345"
-        admin_email = users(:adam_admin).email
-        post "/login", { :password => admin_password, :email => admin_email }.to_json
-        res = JSON.parse(last_response.body)
-        @admin_w7_token = res["w7_token"]
+        prepare_repo
+    end 
 
-        @user = users(:adam_confirmed).id
-        email = users(:adam_confirmed).email
-        post "/login", { :password => admin_password, :email => email }.to_json
-        res = JSON.parse(last_response.body)
-        @non_admin_w7_token = res["w7_token"]
-
-        code = "123"
-        access_token = "ACCESS123"
-
-        Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
-            :access_token => access_token
-        }.to_json, object_class: OpenStruct) }
-
-        @username = "ADAM123"
-        Octokit::Client.any_instance.stub(:login) { @username }
-        post "/session/github", {:grant_type => "github", :auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-        res = JSON.parse(last_response.body)
-        @non_admin_github_token = res["github_token"]
-
-        FileUtils.rm_rf('repositories/')
-        %x( mkdir "test/#{@username}")
-        @uri = "test/#{@username}/git-repo-log.git"
-        @uri_master = "test/ADAM123/DEMO.git"
-        @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
-        %x( rm -rf #{@uri})
-        %x( cp -rf test/git-repo #{@uri_master}; mv #{@uri_master}/git #{@uri_master}/.git)
-        %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
-
-    end
     after(:each) do
-        %x( rm -rf #{@uri})
-        %x( rm -rf #{@uri_master})
-        %x( rm -rf "test/#{@username}")
-        %x( rm -rf repositories/*)
+        destroy_repo
     end
 
-    describe "POST /" do
-        before(:each) do
-            @org = "AGC_ORG" 
-            @name = "NEW PROJECT"
-        end
-        context "non-admin" do
-            before(:each) do
-                post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @mysql = @mysql_client.query("select * from projects").first
-                @res = JSON.parse(last_response.body)
-            end
-            it "should not return an id" do
-                expect(@res.keys).to_not include("id")
-            end
-
-        end
-        context "admin" do
-            context "valid fields" do
-                before(:each) do
-                    post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                    @mysql = @mysql_client.query("select * from projects").first
-                    @res = JSON.parse(last_response.body)
-                end
-                context "project" do
-                    it "should include name" do
-                        expect(@mysql["name"]).to eq(@name)
-                    end
-                    it "should include org" do
-                        expect(@mysql["org"]).to eq(@org)
-                    end
-                end
-                it "should return project id" do
-                    expect(@res["id"]).to eq(@mysql["id"])  
-                end 
-            end
-        end
-    end
-    shared_examples_for "project" do
+    shared_examples_for "projects" do
         it "should return id" do
-            expect(@project["id"]).to eq(@project_result["id"])
+            @project_results.each_with_index do |project_result,i| 
+                expect(@projects[i]["id"]).to eq(project_result["id"])
+            end
         end
         it "should return org" do
-            expect(@project["org"]).to eq(@project_result["org"])           
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["org"]).to eq(project_result["org"])
+            end
         end
         it "should return name" do
-            expect(@project["name"]).to eq(@project_result["name"])
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["name"]).to eq(project_result["name"])
+            end
         end
     end
-    shared_examples_for "sprint_timeline" do
+
+    shared_examples_for "sprint_timelines" do
         it "should return the sprint_id" do
             @timeline_result.each_with_index do |t,i|
                 expect(@timeline[i]["sprint"]["id"]).to eq(t["sprint_id"])
@@ -101,12 +44,12 @@ describe "/projects" do
         end
         it "should return the user_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@timeline[i]["user"]["id"]).to eq(t["user_id"])
+                expect(@timeline[i]["user_id"]).to eq(t["user_id"])
             end
         end
         it "should return the state_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@timeline[i]["state"]["id"]).to eq(t["state_id"])
+                expect(@timeline[i]["state_id"]).to eq(t["state_id"])
             end
         end
         it "should return the label_id" do
@@ -120,11 +63,41 @@ describe "/projects" do
             end
         end
     end
-    shared_examples_for "projects" do
-        it "should return more than one result" do
-            expect(@projects[0]["id"]).to eq(@project_results.first["id"])
+
+    describe "POST /" do
+        before(:each) do
+            @org = "AGC_ORG" 
+            @name = "NEW PROJECT"
+        end
+        context "non-admin" do
+            before(:each) do
+                post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @mysql = @mysql_client.query("select * from projects")
+            end
+            context "response" do
+                it_should_behave_like "unauthorized"
+            end
+            context "projects table" do
+                it "should not include an id" do
+                    expect(@mysql.count).to eq 0
+                end 
+            end 
+        end
+        context "admin" do
+            context "valid fields" do
+                before(:each) do
+                    post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @project_results = @mysql_client.query("select * from projects")
+                    @projects = [JSON.parse(last_response.body)]
+                end
+                it "response should match params" do
+                    expect(@projects[0]["name"]).to eq(@name)
+                end
+                it_should_behave_like "projects"
+            end
         end
     end
+
     describe "GET /" do
         fixtures :projects
         before(:each) do
@@ -132,166 +105,23 @@ describe "/projects" do
             @projects = JSON.parse(last_response.body)
             @project_results = @mysql_client.query("select * from projects")
         end
-        it_behaves_like "projects"
+        it_should_behave_like "projects"
     end 
+
     describe "GET /:id" do
         fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
         before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
-            @project = JSON.parse(last_response.body)
-            @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
+            @projects = [JSON.parse(last_response.body)]
+            @project_results = @mysql_client.query("select * from projects where id = #{project_id}")
         end
-        it_behaves_like "project"
-    end
-    describe "POST /:id/sprints" do
-        fixtures :projects, :states, :labels, :sprint_timelines
-        before(:each) do
-            @title = "SPRINT TITLE"
-            @description = "SPRINT DESCRIPTION"
-            @project_id = projects(:demo).id
-            @sha = "SHA"
-        end
-        context "valid fields" do
-            before(:each) do
-                post "/projects/#{@project_id}/sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @mysql = @mysql_client.query("select * from sprints").first
-                @sprint_state = @mysql_client.query("select * from sprint_states").first
-                @res = JSON.parse(last_response.body)
-                @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@res["id"]}").first
-            end
-            context "sprint" do
-                it "should include title" do
-                    expect(@mysql["title"]).to eq(@title)
-                end
-                it "should include description" do
-                    expect(@mysql["description"]).to eq(@description)
-                end
-                it "should include project_id" do
-                    expect(@mysql["project_id"]).to eq(@project_id)
-                end
-                it "should include user_id" do
-                    expect(@mysql["user_id"]).to eq(@user)
-                end
-            end
-            context "sprint_timeline" do
-                it "should include sprint_id" do
-                    expect(@timeline["sprint_id"]).to eq(@res["id"])
-                end
-                it "should include state_id" do
-                    expect(@timeline["state_id"]).to eq(states(:idea).id)
-                end
-                it "should include label_id" do
-                    expect(@timeline["label_id"]).to be nil 
-                end
-                it "should include after" do
-                    expect(@timeline["after"]).to be nil 
-                end
-            end
-            it "should return sprint id" do
-                expect(@res["id"]).to eq(@mysql["id"])
-            end
-            it "should include sprint title" do
-                expect(@res["title"]).to eq(@mysql["title"])
-            end
-            it "should include sprint description" do
-                expect(@res["description"]).to eq(@mysql["description"])
-            end
-            it "should include sprint state" do
-                expect(@res["sprint_states"][0]["id"]).to eq(@sprint_state["id"])
-            end
-        end
-    end
-    shared_examples_for "sprint" do
-        it "should return id" do
-            expect(@sprint["id"]).to eq(@sprint_result["id"])
-        end
-        it "should return user_id" do
-            expect(@sprint["user_id"]).to eq(@sprint_result["user_id"])
-        end
-        it "should return title" do
-            expect(@sprint["title"]).to eq(@sprint_result["title"])
-        end
-        it "should return description" do
-            expect(@sprint["description"]).to eq(@sprint_result["description"])
-        end
-        it "should return sha" do
-            expect(@sprint["sha"]).to eq(@sprint_result["sha"])
-        end
-        it "should return winnder_id" do
-            expect(@sprint["winner_id"]).to eq(@sprint_result["winner_id"])
-        end 
-    end
-    shared_examples_for "sprints" do
-        it "should return more than one result" do
-            expect(@sprints[0]["id"]).to eq(@sprint_results.first["id"])
-        end
+        it_should_behave_like "projects"
     end
 
-    shared_examples_for "sprint_states" do
-        it "should return id" do
-            @sprint_state_result.each_with_index do |s,i|
-                expect(@sprint_state[i]["id"]).to eq(s["id"])
-            end
-        end
-        it "should return deadline" do
-            @sprint_state_result.each_with_index do |s,i|
-                expect(@sprint_state[i]["deadline"]).to_not be nil
-            end
-        end
-        it "should return state" do
-            @sprint_state_result.each_with_index do |s,i|
-                expect(@sprint_state[i]["state"]["id"]).to eq(s["state_id"])
-            end
-        end
-        it "should return active_contribution_id (last 'join' by signed in user)" do
-            @sprint_state_result.each_with_index do |s,i|
-                if @sprint_state[i]["contributors"].length > 0
-                    @contributor_result.each do |c|
-                        if c["user_id"] == @user
-                            expect(@sprint_state[i]["active_contribution_id"]).to eq(c["id"])
-                        end
-                    end
-                end
-            end
-        end
-    end
-
-    shared_examples_for "contributors" do
-        it "should return id" do
-            @contributor_result.each_with_index do |c,i|
-                expect(@contributors[i]["id"]).to eq(c["id"])
-            end
-        end
-        context "when owned" do
-            it "should return repo name" do
-                @contributor_result.each_with_index do |c,i|
-                    if @user == c["user_id"]
-                        expect(@contributors[i]["repo"]).to eq(c["repo"])
-                    end
-                end
-            end
-        end
-    end
-
-    describe "GET /:id/sprints" do
-        fixtures :projects, :sprints
-        before(:each) do
-            project_id = projects(:demo).id
-            get "/projects/#{project_id}/sprints"
-            res = JSON.parse(last_response.body)
-            @sprint_results = @mysql_client.query("select * from sprints where project_id = #{project_id}")
-            @project_result = @mysql_client.query("select * from projects where id = #{project_id}").first
-            @project = res[0]["project"]
-            @sprints = res
-        end
-
-        it_behaves_like "project"
-        it_behaves_like "sprints"
-    end
 
     describe "GET /:id/events" do
-        fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
+        fixtures :sprints, :labels, :states, :projects, :sprint_timelines
         context "no filter" do
             before(:each) do
                 project_id = projects(:demo).id
@@ -299,7 +129,7 @@ describe "/projects" do
                 @timeline = JSON.parse(last_response.body)
                 @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
             end
-            it_behaves_like "sprint_timeline"
+            it_behaves_like "sprint_timelines"
         end
         context "filter by sprint_id" do
             before(:each) do
@@ -314,73 +144,11 @@ describe "/projects" do
                     expect(@timeline[i]["sprint"]["id"]).to eq(@sprint_id)
                 end
             end
-            it_behaves_like "sprint_timeline"
+            it_behaves_like "sprint_timelines"
         end
     end
 
-    describe "GET /:id/sprints/:id" do
-        fixtures :projects, :sprints, :sprint_states, :states, :contributors
-        before(:each) do
-            sprint = sprints(:sprint_1)
-            get "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-            res = JSON.parse(last_response.body)
-            @sprint_result = @mysql_client.query("select * from sprints where id = #{sprint.id}").first
-            @project_result = @mysql_client.query("select * from projects where id = #{sprint.project_id}").first
-            @sprint_state_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id}")
-            @contributor_result = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}") 
-            @project = res["project"]
-            @sprint = res
-            @sprint_state = res["sprint_states"]
-            @contributors = res["sprint_states"][0]["contributors"]
-            #            puts res.inspect
-        end
-
-        it_behaves_like "project"
-        it_behaves_like "sprint"
-        it_behaves_like "sprint_states"
-        it_behaves_like "contributors"
-    end
-
-    describe "PATCH /:id/sprints/:id" do
-        fixtures :projects, :sprints, :sprint_states, :states
-        before(:each) do
-            body = { 
-                :name=>"1", 
-                :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
-                }
-            }
-
-            @body = JSON.parse(body.to_json, object_class: OpenStruct)
-            Octokit::Client.any_instance.stub(:branch => @body)
-
-            sprint = sprints(:sprint_1)
-            patch "/projects/#{sprint.project_id}/sprints/#{sprint.id}", {:state_id => states(:idea).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-            @res = JSON.parse(last_response.body)
-            @sprint_result = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint.id} ORDER BY id DESC").first 
-        end
-
-        context "sprint_state" do
-            it "should save sprint_id" do
-                expect(@sprint_result["sprint_id"]).to eq(sprints(:sprint_1).id)
-            end
-            it "should save state_id" do
-                expect(@sprint_result["state_id"]).to eq(states(:idea).id)
-            end
-            it "should save sha" do
-                expect(@sprint_result["sha"]).to eq(sprint_states(:sprint_1_state_1).sha)
-            end
-        end
-        context "response" do
-            it "should include sprint_id" do
-                expect(@res["id"]).to eq(sprints(:sprint_1).id)
-            end
-            it "should include state_id" do
-                expect(@res["sprint_states"][@res["sprint_states"].length - 1]["state"]["id"]).to eq(states(:idea).id)
-            end
-        end
-    end
-    describe "POST /projects/:id/refresh" do
+    describe "POST /:id/refresh" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -419,7 +187,7 @@ describe "/projects" do
         end
     end
 
-    describe "POST /projects/:id/contributors" do
+    describe "POST /:id/contributors" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -469,7 +237,7 @@ describe "/projects" do
                     expect(@git).to include(@sprint_state_id.to_s)
                 end
             end
-        end 
+        end
         context "invalid sprint_state_id" do
             fixtures :users, :projects
             before(:each) do
@@ -498,7 +266,8 @@ describe "/projects" do
             end
         end
     end
-    describe "GET /projects/:id/contributors/:contributor_id" do
+
+    describe "GET /:id/contributors/:contributor_id" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @project = projects(:demo).id
@@ -513,9 +282,9 @@ describe "/projects" do
                 expect(@res["id"]).to eq(@sql["id"])
             end
         end
-
     end
-    describe "PATCH /projects/:id/contributors/:contributor_id" do
+
+    describe "PATCH /:id/contributors/:contributor_id" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
@@ -547,7 +316,7 @@ describe "/projects" do
                     expect(@sql["commit"]).to eq(@sha)
                 end
                 it "should include commit_success" do
-                    expect(@sql["commit_success"]).to eq(1) 
+                    expect(@sql["commit_success"]).to eq(1)
                 end
             end
             it "should return contributor id" do
@@ -567,6 +336,7 @@ describe "/projects" do
             end
         end
     end
+
     describe "POST /contributors/:id/comments" do
         fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
@@ -1265,4 +1035,3 @@ describe "/projects" do
         end
     end
 end
-

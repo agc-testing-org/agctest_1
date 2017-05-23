@@ -1,13 +1,13 @@
-<div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for <span class="text-uppercase">{{sprint.project.org}}/{{sprint.project.name}}</span></div>
+<div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state_id.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for {{#link-to "develop.project" project.id}}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview text-center">
             <h1 class="name text-capitalize">{{sprint.title}}</h1>
             <div class="description">{{sprint.description}}</div>
-            <div class="about text-capitalize">{{showing-state.state.description}}</div>
-            {{sprint-state-overview-skillsets skillsets=skillsets class="skillsets"}}
+            <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
+            {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets"}}
             <div class="row">
-                {{#unless (eq showing-state.state.name "idea")}}
+                {{#unless (eq showing-state.state_id.name "idea")}}
                 {{#if contributors}}
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
                     {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
@@ -27,8 +27,10 @@
                 {{/unless}}
 
                 {{#if (greater-than sprint.sprint_states.length 2) }}
-                <div class="requirements col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2 rounded"><a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements Document</a></div>
+                <a class="requirements col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2 rounded" target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements Document</a>
                 {{/if}}
+
+                {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="create transition col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2"}}
             </div>
         </div>
     </div>

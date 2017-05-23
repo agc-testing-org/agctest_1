@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'mysql2'
 require 'sinatra/activerecord'
+require 'sinatra/strong-params'
 require 'json'
 require 'sinatra/base'
 require 'redis'
@@ -13,10 +14,7 @@ require 'pony'
 require 'octokit'
 require 'ldclient-rb'
 require 'git'
-
-
-
-
+require 'linkedin-oauth2'
 require 'sidekiq'
 require 'whenever'
 
@@ -42,12 +40,8 @@ require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
 require_relative '../models/comment.rb'
 require_relative '../models/vote.rb'
-
-
-
-
-
-
+require_relative '../models/user_profile.rb'
+require_relative '../models/user_position.rb'
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_contributor.rb'
@@ -69,6 +63,14 @@ class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
 
+    LinkedIn.configure do |config|
+        config.client_id     = ENV["INTEGRATIONS_LINKEDIN_CLIENT_ID"]
+        config.client_secret = ENV["INTEGRATIONS_LINKEDIN_CLIENT_SECRET"]
+        config.redirect_uri  = "#{ENV['INTEGRATIONS_HOST']}/callback/linkedin"
+    end
+
+    register Sinatra::StrongParams
+
     def protected!
         return if authorized?
         redirect to("/unauthorized")
@@ -79,20 +81,20 @@ class Integrations < Sinatra::Base
         if @session
             account = Account.new
             begin
-            session_hash = account.get_key "session", @session
-            @session_hash = JSON.parse(session_hash)
-            if @session_hash
-                @key = @session_hash["key"]
-                puts "::unlocking token"
-                @jwt_hash = account.validate_token @session, @key
-                if @jwt_hash
-                    return true
+                session_hash = account.get_key "session", @session
+                @session_hash = JSON.parse(session_hash)
+                if @session_hash
+                    @key = @session_hash["key"]
+                    puts "::unlocking token"
+                    @jwt_hash = account.validate_token @session, @key
+                    if @jwt_hash
+                        return true
+                    else
+                        return false
+                    end
                 else
                     return false
                 end
-            else
-                return false
-            end
             rescue => e
                 puts e
                 return false
@@ -139,6 +141,7 @@ class Integrations < Sinatra::Base
         end
     end
 
+    # API
     forgot_post = lambda do
         status 400
         response = {:success => false}
@@ -267,7 +270,47 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    session_provider_post = lambda do
+    session_provider_linkedin_post = lambda do
+        protected!
+        status 400
+
+        response = {:success => false, :w7_token => @session}.to_json
+
+        begin 
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+
+            account = Account.new 
+            access_token = account.linkedin_code_for_token(fields[:auth_code])
+
+            #Skip storing linkedin token.. 
+            #for now just pull what we can from the service and drop the token
+
+            linkedin = (account.linkedin_client access_token)
+            pulled = account.pull_linkedin_profile linkedin
+
+            if pulled
+
+                profile_id = account.post_linkedin_profile @session_hash["id"], pulled
+
+                if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
+                    status 201 
+                    return {:success => true, :w7_token => @session}.to_json
+                else
+                    return response.to_json
+                end
+            else
+                return response.to_json
+            end
+
+        rescue => e
+            puts e
+            return response.to_json
+        end
+
+    end
+
+    session_provider_github_post = lambda do
         protected!
         status 400
         response = {:success => false}
@@ -279,7 +322,7 @@ class Integrations < Sinatra::Base
             account = Account.new
 
             if fields[:grant_type]
-                access_token = account.code_for_token(fields[:auth_code])
+                access_token = account.github_code_for_token(fields[:auth_code])
 
                 repo = Repo.new
                 github = (repo.github_client access_token)
@@ -464,22 +507,33 @@ class Integrations < Sinatra::Base
 
     projects_get = lambda do
         issue = Issue.new
-        projects = issue.get_projects nil
-        return projects.to_json
+        projects = issue.get_projects nil 
+        if projects
+            status 200
+            return projects.to_json
+        else
+            return {}
+        end
     end
 
     projects_get_by_id = lambda do
+        status 404
         issue = Issue.new
         query = {:id => params[:id].to_i}
         project = issue.get_projects query
-        return project[0].to_json
+        if project[0]
+            status 200
+            return project[0].to_json
+        else
+            return {}
+        end
     end
 
     projects_post = lambda do
         protected!
         status 400
-        response = {}
         if @session_hash["admin"]
+            response = {}
             account = Account.new
             begin
                 request.body.rewind
@@ -488,32 +542,36 @@ class Integrations < Sinatra::Base
                     issue = Issue.new
                     project = issue.create_project fields[:org], fields[:name]
                     if project 
-                        response[:id] = project 
+                        response = project 
                         status 201
                     end
                 end
             end
+            return response.to_json
+        else
+            redirect to("/unauthorized") 
         end
-        return response.to_json
     end
 
     sprints_get = lambda do
-        authorized?
         issue = Issue.new
-        query = {:project_id => params[:project_id].to_i }
-        if @session_hash
-            sprints = issue.get_sprints query, @session_hash["id"] 
+        sprints = issue.get_sprints params
+        if sprints
+            status 200
+            return sprints.to_json
         else
-            sprints = issue.get_sprints query, nil 
+            return {}
         end
-        return sprints.to_json
     end
 
     sprint_states_get = lambda do
         authorized?
         issue = Issue.new
-        query = {"sprints.project_id" => params[:project_id].to_i }
-        sprint_states = issue.get_sprint_states query
+         if @session_hash
+            sprint_states = issue.get_sprint_states params, @session_hash["id"]
+         else
+            sprint_states = issue.get_sprint_states params, nil
+         end
         return sprint_states.to_json
     end
 
@@ -535,15 +593,15 @@ class Integrations < Sinatra::Base
     end
 
     sprints_get_by_id = lambda do
-        authorized?
+        status 404
         issue = Issue.new
-        query = {:project_id => params[:project_id].to_i, :id => params[:id].to_i } 
-        if @session_hash
-            sprint = issue.get_sprints query,  @session_hash["id"]
+        sprint = issue.get_sprints params
+        if sprint[0]
+            status 200
+            return sprint[0].to_json
         else
-            sprint = issue.get_sprints query, nil
+            return {}
         end
-        return sprint[0].to_json
     end
 
     sprints_post = lambda do
@@ -557,24 +615,29 @@ class Integrations < Sinatra::Base
             if fields[:title] && fields[:title].length > 5
                 if fields[:description] && fields[:description].length > 5
                     issue = Issue.new
-                    sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  params[:project_id].to_i
-                    sprint_state = issue.create_sprint_state sprint.id, 1, nil
-                    log_params = {:sprint_id => sprint.id, :state_id => 1, :user_id => @session_hash["id"], :project_id => params[:project_id]}
-                    if sprint && sprint_state && (issue.log_event log_params)
-                        status 201
-                        response = sprint_state
+                    sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
+                    if sprint
+                        state = State.find_by(:name => "idea").id
+                        sprint_state = issue.create_sprint_state sprint.id, state, nil
+                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state["id"]}
+                        if sprint_state && (issue.log_event log_params) 
+                            status 201
+                            response = sprint                            
+                        end
+                    else
+                        response[:error] = "This project does not exist"
                     end
                 else
-                    response[:message] = "Please enter a more detailed description"                    
+                    response[:error] = "Please enter a more detailed description"                    
                 end
             else
-                response[:message] = "Please enter a more descriptive title"
+                response[:error] = "Please enter a more descriptive title"
             end
         end
         return response.to_json
     end
 
-    sprints_patch_by_id = lambda do
+    sprint_states_post = lambda do
         protected!
         if @session_hash["admin"]
             status 400
@@ -582,30 +645,29 @@ class Integrations < Sinatra::Base
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:state_id]
+                if fields[:state]
 
                     issue = Issue.new
-                    query = {:id => params[:project_id].to_i}
-                    project = (issue.get_projects query)[0]
+                    sprint = (issue.get_sprint fields[:sprint])
 
                     repo = Repo.new
                     github = (repo.github_client github_authorization)
 
-                    sha = github.branch("#{project["org"]}/#{project["name"]}","master").commit.sha
+                    sha = github.branch("#{sprint.project.org}/#{sprint.project.name}","master").commit.sha
 
-                    sprint_state = issue.create_sprint_state params[:id], fields[:state_id], sha
-                    log_params = {:sprint_id => sprint_state["id"], :state_id => fields[:state_id], :user_id => @session_hash["id"], :project_id => params[:project_id]}
+                    sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
+
+                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id}
                     if sprint_state && (issue.log_event log_params) 
                         status 201
                         response = sprint_state
                     end
                 end
             end
+            return response.to_json
         else
-            status 401
-            response[:message] = "You are not authorized to perform this action."
+            redirect to("/unauthorized") 
         end
-        return response.to_json
     end
 
     contributors_post_comments = lambda do
@@ -843,8 +905,7 @@ class Integrations < Sinatra::Base
                             repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
 
                             if sprint_state.state.name == "requirements design"
-                                query = {:id => sprint_state.sprint_id}
-                                idea = issue.get_idea query
+                                idea = issue.get_sprint sprint_state.sprint_id 
                                 github.create_contents("#{username}/#{name}",
                                                        "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                                            "adding placeholder for requirements",
@@ -972,79 +1033,6 @@ class Integrations < Sinatra::Base
         end
     end
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     connections_request_post = lambda do
     protected!
     status 401
@@ -1143,7 +1131,8 @@ class Integrations < Sinatra::Base
     post "/forgot", &forgot_post
     post "/reset", &reset_post
     post "/login", &login_post
-    post "/session/:provider", &session_provider_post
+    post "/session/github", &session_provider_github_post
+    post "/session/linkedin", &session_provider_linkedin_post
     delete "/session", &session_delete
     get "/account", &account_get
     get "/account/:user_id/skillsets", &user_skillsets_get
@@ -1172,20 +1161,21 @@ class Integrations < Sinatra::Base
 
     post "/projects", &projects_post
     get "/projects", &projects_get
-    get "/projects/:id", &projects_get_by_id
-
+    get "/projects/:id", allows: [:id], &projects_get_by_id
 
     post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
     patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
     get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
 
-    post "/projects/:project_id/sprints", &sprints_post
-    get "/projects/:project_id/sprints", &sprints_get
-    get "/projects/:project_id/sprint-states", &sprint_states_get
+    get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
+    get "/sprints/:id", allows: [:id], &sprints_get_by_id
+    post "/sprints", &sprints_post
+
+    get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
+    post "/sprint-states", &sprint_states_post
+
     get "/projects/:project_id/events", &events_get
-    get "/projects/:project_id/sprints/:id", &sprints_get_by_id
-    patch "/projects/:project_id/sprints/:id", &sprints_patch_by_id
 
     post "/contributors/:id/comments", &contributors_post_comments
     post "/contributors/:id/votes", &contributors_post_votes
@@ -1198,12 +1188,15 @@ class Integrations < Sinatra::Base
 
     get '/unauthorized' do
         status 401
-        return {:message => "Looks like we went too far?"}.to_json
+        return {:error => "unauthorized"}.to_json
     end
 
-    #Ember
+    error RequiredParamMissing do
+        [400, env['sinatra.error'].message]
+    end
+
+    # Ember
     get "*" do
         send_file File.expand_path('index.html',settings.public_folder)
     end
-
 end

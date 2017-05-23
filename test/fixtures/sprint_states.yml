@@ -1,6 +1,6 @@
 sprint_1_state_1:
   sprint: sprint_1
-  state_id: 1 
+  state: idea 
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   deadline: <%= 5.day.ago.to_s(:db) %>
@@ -8,14 +8,14 @@ sprint_1_state_1:
 
 sprint_1_state_2:
   sprint: sprint_1
-  state_id: 2
+  state: backlog 
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   deadline: <%= 5.day.ago.to_s(:db) %>
 
 sprint_1_no_contributors:
   sprint: sprint_1
-  state_id: 9
+  state: closed
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   deadline: <%= 5.day.ago.to_s(:db) %>

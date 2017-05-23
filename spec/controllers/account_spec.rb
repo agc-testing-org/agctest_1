@@ -4,7 +4,67 @@ describe ".Account" do
     before(:each) do
         @account = Account.new
     end   
-    context "#code_for_token" do
+    context "#linkedin_code_for_token" do
+        before(:each) do
+            @code = "123"
+            @access_token = "ACCESS123"
+        end
+        context "service error" do
+            before(:each) do
+                LinkedIn::OAuth2.any_instance.stub(:get_access_token) { JSON.parse({
+                    :error => true
+                }.to_json, object_class: OpenStruct) }
+                @res = @account.linkedin_code_for_token @code
+            end
+            it "should return nil" do
+                expect(@res).to be nil
+            end
+        end
+        context "service success" do
+            before(:each) do
+                LinkedIn::OAuth2.any_instance.stub(:get_access_token) { JSON.parse({
+                    :token => @access_token
+                }.to_json, object_class: OpenStruct) }
+                @res = @account.linkedin_code_for_token @code
+            end
+            it "should return access_token" do
+                expect(@res).to eq(@access_token)
+            end
+        end
+    end
+    context "linkedin_profile" do
+        before(:each) do 
+            @headline = "headline"
+            @location = {:country => {:code => "US"}, :name => "San Francisco Bay"}
+            @summary = "summary"
+            LinkedIn::API.any_instance.stub(:profile) { JSON.parse({
+                :headline => @headline,
+                :location => @location,
+                :summary => @summary,
+                :positions => @positions
+            }.to_json, object_class: OpenStruct) }
+            client = LinkedIn::API.new("123")
+            @pull = @account.pull_linkedin_profile client
+        end
+        context "#pull_linkedin_profile" do
+            it "should return headline" do
+                expect(@pull.headline).to eq @headline
+            end
+            it "should return location.country.code" do
+                expect(@pull.location.country.code).to eq @location[:country][:code]
+            end
+            it "should return location.name" do
+                expect(@pull.location.name).to eq @location[:name]
+            end
+            it "should return summary" do
+                expect(@pull.summary).to eq @summary
+            end
+            it "should return positions" do
+                expect(@pull.positions).to eq @positions
+            end
+        end
+    end
+    context "#github_code_for_token" do
         before(:each) do
             @code = "123"
             @access_token = "ACCESS123"
@@ -14,9 +74,7 @@ describe ".Account" do
                 Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({      
                     :error => true 
                 }.to_json, object_class: OpenStruct) }
-                @res = @account.code_for_token @code
-
-                @account.code_for_token @code
+                @res = @account.github_code_for_token @code
             end
             it "should return nil" do
                 expect(@res).to be nil
@@ -27,7 +85,7 @@ describe ".Account" do
                 Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({ 
                     :access_token => @access_token
                 }.to_json, object_class: OpenStruct) }
-                @res = @account.code_for_token @code
+                @res = @account.github_code_for_token @code
             end
             it "should return access_token" do
                 expect(@res).to eq(@access_token)
@@ -173,7 +231,7 @@ describe ".Account" do
             @session = "ABC"
             @provider_token = @account.create_token @id, @key, @access_token
             @account.save_token "session", @session, {:key => @key}.to_json
-            
+
         end
         context "valid token" do
             it "should return access_token" do

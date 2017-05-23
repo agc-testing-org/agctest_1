@@ -1,18 +1,25 @@
 {{#if comments}}
 {{#each (limited sortedComments count) as |comment|}}
 <div>
-    <div class="comment"><i class="fa fa-genderless" aria-hidden="true"></i> {{comment.text}} <em class="text-muted">- {{moment-from-now comment.created_at}}</em></div>
+    <div class="comment">
+        <i class="fa fa-genderless" aria-hidden="true"></i> {{comment.text}} 
+        {{#if comment.user_profile}}
+        <em class="text-muted">- {{comment.user_profile.title}} in {{comment.user_profile.industry}} ({{comment.user_profile.location}}) {{moment-from-now comment.created_at}}</em>
+        {{else}}
+        <em class="text-muted">- {{moment-from-now comment.created_at}}</em>
+        {{/if}}
+    </div>
 </div>
 {{/each}}
 
 <small class="more">
-{{#if showingAll}}
-<a {{action "showAll" false}}>Show Less</a>
-{{else}}
-{{#if (greater-than comments.length count)}}
-<a {{action "showAll" true}}>Show More Comments ( {{comments.length}} Total )</a>
-{{/if}}
-{{/if}}
+    {{#if showingAll}}
+    <a {{action "showAll" false}}>Show Less</a>
+    {{else}}
+    {{#if (greater-than comments.length count)}}
+    <a {{action "showAll" true}}>Show More Comments ( {{comments.length}} Total )</a>
+    {{/if}}
+    {{/if}}
 </small>
 
 {{/if}}

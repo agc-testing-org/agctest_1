@@ -1,15 +1,15 @@
 <ul class="nav nav-pills flex-column timeline">
     <div class="menu">
         {{#link-to "home" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-        <i class="fa fa-fw fa-home"></i>Home
+        <i class="fa fa-fw fa-user"></i>Profile
         {{/link-to}}
     </div>
     {{#each sprint_states as |sprint_state|}}
     {{#link-to "develop.project.sprint.state" sprint_state.id tagName='li' href=false class="cursor-pointer nav-item stage text-center text-capitalize" }}
     <div class="icon hidden-sm-down">
-        <i class="fa fa-fw fa-2x {{sprint_state.state.fa_icon}}"></i>
+        <i class="fa fa-fw fa-2x {{sprint_state.state_id.fa_icon}}"></i>
     </div>
-    {{sprint_state.state.name}}
+    {{sprint_state.state_id.name}}
     {{/link-to}}
     {{/each}}
 </ul>
