@@ -13,6 +13,10 @@ require 'pony'
 require 'octokit'
 require 'ldclient-rb'
 require 'git'
+
+
+
+
 require 'sidekiq'
 require 'whenever'
 
@@ -38,6 +42,12 @@ require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
 require_relative '../models/comment.rb'
 require_relative '../models/vote.rb'
+
+
+
+
+
+
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_contributor.rb'
@@ -961,6 +971,76 @@ class Integrations < Sinatra::Base
             return {:author => author, :receiver => receiver, :id => user_id}.to_json
         end
     end
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     connections_request_post = lambda do
     protected!
