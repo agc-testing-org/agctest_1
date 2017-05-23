@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'api_spec_helper'
+require 'api_helper'
 
 describe "/contributors" do
 
