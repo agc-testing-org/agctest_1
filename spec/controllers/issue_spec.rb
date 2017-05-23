@@ -82,10 +82,10 @@ describe ".Issue" do
                 @res = (@issue.get_user_connections query).first
             end
             it "should include user_id" do
-                expect(@res["user_id"]).to eq(user_connections(:user_2_connection_1).user_id)
+                expect(@res["user_id"]).to eq(users(:masha_post_connection_request).id)
             end
             it "should include contact_id" do
-                expect(@res["contact_id"]).to eq(user_connections(:user_2_connection_1).contact_id)
+                expect(@res["contact_id"]).to eq(users(:masha_get_connection_request).id)
             end
             it "should include read" do
                 expect(@res["read"]).to eq(user_connections(:user_2_connection_1).read)

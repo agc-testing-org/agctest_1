@@ -36,7 +36,6 @@ adam_admin:
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
 
 masha_post_connection_request:
-  id: 1000000000
   name: masha
   email: masha@wired7.com
   updated_at: <%= 2.day.ago.to_s(:db) %>
@@ -44,7 +43,6 @@ masha_post_connection_request:
   token: WDX
 
 masha_get_connection_request:
-  id: 2000000000
   name: masha2
   email: masha2@wired7.com
   updated_at: <%= 2.day.ago.to_s(:db) %>
@@ -52,7 +50,6 @@ masha_get_connection_request:
   token: XYZ
 
 masha_notifications:
-  id: 2000000001
   name: masha3
   email: masha3@wired7.com
   updated_at: <%= 2.day.ago.to_s(:db) %>
@@ -60,7 +57,6 @@ masha_notifications:
   token: ZYX
 
 masha_notifications_skillsets:
-  id: 2000000002
   name: masha4
   email: masha4@wired7.com
   updated_at: <%= 2.day.ago.to_s(:db) %>

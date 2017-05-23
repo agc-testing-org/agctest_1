@@ -1,6 +1,6 @@
 skillset_notification:
   id: 1
-  sprint_id: 1
+  sprint_id: sprint_1
   sprint_state_id: 1
   user_id: adam_confirmed
   subject: 'Sprint state changed'
@@ -9,7 +9,7 @@ skillset_notification:
 
 roles_notification_product:
   id: 2
-  sprint_id: 1
+  sprint_id: sprint_1
   sprint_state_id: 2
   user_id: adam_confirmed
   subject: 'Sprint state changed'
@@ -18,7 +18,7 @@ roles_notification_product:
 
 roles_notification_design:
   id: 3
-  sprint_id: 1
+  sprint_id: sprint_1
   sprint_state_id: 4
   user_id: adam_confirmed
   subject: 'Sprint state changed'
@@ -27,7 +27,7 @@ roles_notification_design:
 
 roles_notification_development:
   id: 4
-  sprint_id: 1
+  sprint_id: sprint_1
   sprint_state_id: 6
   user_id: adam_confirmed
   subject: 'Sprint state changed'
