@@ -134,4 +134,43 @@ describe "/projects" do
             it_behaves_like "sprint_timelines"
         end
     end
+
+    describe "POST /:id/refresh" do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            Octokit::Client.any_instance.stub(:login) { @username }
+            Octokit::Client.any_instance.stub(:create_repository) { {} }
+
+            body = {
+                :name=>"1",
+                :commit=>{
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
+            }
+
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:branch => @body)
+        end
+        context "valid project" do
+            fixtures :users, :sprint_states, :states, :projects
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1_state_1).id
+                @project = projects(:demo).id
+                post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                %x(cd #{@uri_master}; git checkout master; echo "changing" > newfile; git add .; git commit -m"new commit")
+                @head = %x(cd #{@uri_master}; git log)
+                %x(cd #{@uri}; git checkout -b "nb")
+                post "/projects/#{@project}/refresh", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            context "repo" do
+                before(:each) do
+                    @git = %x(cd #{@uri}; git checkout master; git log)
+                end
+                it "should update head" do
+                    expect(@git).to eq(@head)
+                end
+            end
+        end
+    end
 end
