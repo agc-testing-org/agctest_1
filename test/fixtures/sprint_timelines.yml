@@ -34,3 +34,27 @@ demob_1:
   state_id: 1
   label: needs-design
   created_at: <%= 5.day.ago.to_s(:db) %>
+
+demo_5:
+  id: 5
+  user: adam_confirmed
+  project: demo
+  sprint: sprint_1
+  state_id: 1
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  after: 1
+  comment_id: 1
+  contributor_id: 1
+
+demo_6:
+  id: 6
+  user: adam_confirmed
+  project: demo
+  sprint: sprint_1
+  state_id: 1
+  label: needs-design
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  after: 1
+  vote_id: 1
+  contributor_id: 1

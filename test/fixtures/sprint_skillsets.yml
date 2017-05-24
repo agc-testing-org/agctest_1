@@ -1,3 +1,5 @@
 sprint_1_skillset_1:
   skillset: skillset_1
   sprint: sprint_1
+  active: 1
+
