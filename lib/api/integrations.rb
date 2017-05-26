@@ -1126,6 +1126,15 @@ class Integrations < Sinatra::Base
     end
   end
 
+  get_user_notifications = lambda do
+    user_id = (default_to_signed params[:user_id])
+    if user_id
+      issue = Issue.new
+      user_notification = issue.get_user_notifications user_id
+      return user_notification.to_json
+    end
+  end
+
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
@@ -1141,9 +1150,10 @@ class Integrations < Sinatra::Base
 
     post "/account/connections", &connections_request_post
     get "/account/connections", &connections_get
-    get "/account/connections/confirmed", &get_user_info
+    get "/account/confirmed/connections", &get_user_info
     patch "/account/connections/read", &user_connections_patch_read
     patch "/account/connections/confirmed", &user_connections_patch_confirmed
+    get "/notifications", &get_user_notifications
 
     get "/account/:user_id/roles", &account_roles_get
     get "/account/:user_id/roles/:role_id", &account_roles_get_by_role

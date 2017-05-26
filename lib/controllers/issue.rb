@@ -495,7 +495,16 @@ class Issue
 
     def get_user_info user_id
         begin      
-            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("users.name, users.email").as_json
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.name, users.email").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_notifications user_id
+        begin      
+            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.subject, notifications.body").as_json
         rescue => e
             puts e
             return nil
