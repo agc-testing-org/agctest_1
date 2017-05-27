@@ -1,4 +1,4 @@
-class AddArbiterId < ActiveRecord::Migration
+class AddArbiterId < ActiveRecord::Migration[4.2]
     def change
         rename_column :sprint_states, :user_id, :contributor_id
         add_column :sprint_states, :arbiter_id, :integer, :null => true

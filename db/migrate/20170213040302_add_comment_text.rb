@@ -1,4 +1,4 @@
-class AddCommentText < ActiveRecord::Migration
+class AddCommentText < ActiveRecord::Migration[4.2]
     def change
         add_column :comments, :text, :text, :null => false
 
