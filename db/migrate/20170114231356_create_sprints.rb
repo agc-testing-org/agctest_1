@@ -1,4 +1,4 @@
-class CreateSprints < ActiveRecord::Migration
+class CreateSprints < ActiveRecord::Migration[4.2]
     def change
 
         create_table "skillsets", force: :cascade do |t|

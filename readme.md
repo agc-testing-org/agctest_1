@@ -7,11 +7,12 @@
     cd integrations-client
 
     sudo npm install n -g
-    sudo n 0.12.2
+    sudo n 7.10.0
 
     sudo npm -g install npm@next
-    npm install -g ember-cli@2.10
+    npm install -g ember-cli@2.13
     npm install
+    npm install -g bower
 
     vi ~/.bashrc
     
@@ -45,18 +46,20 @@
     Install homebrew: http://brew.sh/
     brew install mysql
     brew install redis
+    gem install bundler
 
     export RACK_ENV=test
     source ~/.bashrc
     bundle install
-    rake db:create
-    rake db:migrate
+    bundle exec rake db:create
+    bundle exec rake db:migrate
 
     export RACK_ENV=development
     source ~/.bashrc
-    rake db:create
-    rake db:migrate
+    bundle exec rake db:create
+    bundle exec rake db:migrate
 
+    NOTE: to create a project in the application, you must be an admin user.  Doing this as a normal user will return a 401 and redirect you to the login page.
 
 ### Github Setup
 
@@ -77,11 +80,11 @@ Shell 1 (if redis server is not running)
 
 Shell 2 (project root)
     
-    rvm use ruby-2.2.3
+    rvm use ruby-2.4.0
     bundle install
     export RACK_ENV=development
     source ~/.bashrc
-    rake db:migrate
+    bundle exec rake db:migrate
     passenger start --ssl --ssl-certificate localhost.crt --ssl-certificate-key localhost.key --port 3001 --ssl-port 3000 
 
 Shell 3

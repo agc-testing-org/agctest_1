@@ -1,4 +1,4 @@
-class CreateInitial < ActiveRecord::Migration
+class CreateInitial < ActiveRecord::Migration[4.2]
     def change
         create_table "users", force: :cascade do |t|
             t.string   "email",      limit: 255,                   null: false
