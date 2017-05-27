@@ -11,8 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-
-ActiveRecord::Schema.define(version: 20170507223642) do
+ActiveRecord::Schema.define(version: 20170516000000) do
 
   create_table "comments", force: :cascade do |t|
     t.integer  "user_id",         limit: 4,     null: false
@@ -27,6 +26,10 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_index "comments", ["contributor_id"], name: "fk_rails_a1385053cc", using: :btree
   add_index "comments", ["sprint_state_id"], name: "index_comments_on_sprint_state_id", using: :btree
   add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
+
+  create_table "connection_states", force: :cascade do |t|
+    t.string "name", limit: 255, null: false
+  end
 
   create_table "contributors", force: :cascade do |t|
     t.integer  "user_id",         limit: 4,   null: false
@@ -62,6 +65,18 @@ ActiveRecord::Schema.define(version: 20170507223642) do
 
   add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
   add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
+
+  create_table "notifications", force: :cascade do |t|
+    t.string  "subject",            limit: 255, null: false
+    t.text    "body",               limit: 255, null: false
+    t.integer "sprint_state_id",    limit: 4
+    t.integer "contributor_id",     limit: 4
+    t.integer "user_id",            limit: 4
+    t.integer "sprint_timeline_id", limit: 4,   null: false
+    t.integer "sprint_id",          limit: 4,   null: false
+  end
+
+  add_index "notifications", ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true, using: :btree
 
   create_table "projects", force: :cascade do |t|
     t.string   "org",        limit: 255, null: false
@@ -122,9 +137,11 @@ ActiveRecord::Schema.define(version: 20170507223642) do
     t.integer  "comment_id",      limit: 4
     t.integer  "sprint_state_id", limit: 4
     t.integer  "vote_id",         limit: 4
+    t.integer  "contributor_id",  limit: 4
   end
 
   add_index "sprint_timelines", ["comment_id"], name: "fk_rails_1251c5b8fd", using: :btree
+  add_index "sprint_timelines", ["contributor_id"], name: "fk_rails_c3269fa3ec", using: :btree
   add_index "sprint_timelines", ["label_id"], name: "fk_rails_1b320ef958", using: :btree
   add_index "sprint_timelines", ["sprint_id"], name: "index_sprint_timelines_on_sprint_id", using: :btree
   add_index "sprint_timelines", ["sprint_state_id"], name: "fk_rails_e755d52f56", using: :btree
@@ -154,6 +171,34 @@ ActiveRecord::Schema.define(version: 20170507223642) do
     t.text     "instruction",  limit: 65535,                 null: false
     t.boolean  "contributors",               default: false, null: false
   end
+
+  create_table "user_connections", force: :cascade do |t|
+    t.integer "user_id",    limit: 4,                 null: false
+    t.integer "contact_id", limit: 4,                 null: false
+    t.integer "confirmed",  limit: 4, default: 1
+    t.boolean "read",                 default: false
+  end
+
+  add_index "user_connections", ["contact_id"], name: "index_user_connections_on_contact_id", using: :btree
+  add_index "user_connections", ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true, using: :btree
+  add_index "user_connections", ["user_id"], name: "index_user_connections_on_user_id", using: :btree
+
+  create_table "user_contributors", force: :cascade do |t|
+    t.integer "user_id",         limit: 4, null: false
+    t.integer "contributors_id", limit: 4, null: false
+  end
+
+  add_index "user_contributors", ["user_id", "contributors_id"], name: "index_contributors_id_and_user_id_on_user_contributor", unique: true, using: :btree
+
+  create_table "user_notifications", force: :cascade do |t|
+    t.integer "user_id",          limit: 4,                 null: false
+    t.integer "notifications_id", limit: 4,                 null: false
+    t.boolean "read",                       default: false
+  end
+
+  add_index "user_notifications", ["notifications_id"], name: "index_user_notifications_on_notifications_id", using: :btree
+  add_index "user_notifications", ["user_id", "notifications_id"], name: "index_notification_id_and_user_id_on_user_notification", unique: true, using: :btree
+  add_index "user_notifications", ["user_id"], name: "index_user_notifications_on_user_id", using: :btree
 
   create_table "user_positions", force: :cascade do |t|
     t.integer  "user_profile_id", limit: 4,   null: false
@@ -246,6 +291,7 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_foreign_key "sprint_states", "states"
   add_foreign_key "sprint_states", "users", column: "arbiter_id"
   add_foreign_key "sprint_timelines", "comments"
+  add_foreign_key "sprint_timelines", "contributors"
   add_foreign_key "sprint_timelines", "labels"
   add_foreign_key "sprint_timelines", "sprint_states"
   add_foreign_key "sprint_timelines", "sprints"
@@ -253,6 +299,8 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_foreign_key "sprint_timelines", "votes"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
+  add_foreign_key "user_notifications", "notifications", column: "notifications_id"
+  add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"
   add_foreign_key "user_profiles", "users"
   add_foreign_key "user_roles", "roles"
