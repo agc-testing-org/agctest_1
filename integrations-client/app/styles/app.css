@@ -73,14 +73,14 @@ a:hover {
 }
 label{
     margin-bottom:2px;
-    font-weight:300;
-    color:#fff;
+    font-weight:400;
 }
 .btn-outline-secondary{
     border: 2px solid #28B6C3;
     font-size: 14px;
     font-weight: 400;
     color: #fff;
+    text-transform: capitalize;
 }
 .btn-outline-secondary:hover{
     color:#fff !important;
@@ -164,11 +164,6 @@ label{
     box-shadow:none;
 }
 
-.navbar-collapse.collapse.show{
-    padding:10px;
-    text-align:center;
-}
-
 .body-dark .navbar-default .navbar-nav > li > a {
     border: 0px solid #fff;
     color: #fff;
@@ -198,9 +193,15 @@ input, textarea{
     background-color: #f9f9f9;
     color:#28B6C3 !important;
 }
-button{
-
+input{
+    margin-bottom:10px;
+    height:40px;
 }
+button{ 
+    border: none;   
+}    
+
+
 .input-group-addon{
     background-color:#fff;
     border:0px solid #fff !important;
@@ -264,7 +265,7 @@ button{
     display: table;
     position: absolute;
     left:0px;
-    top:0px;
+    top:40px;
     height: 100%;
     width: 100%;    
 }
@@ -317,15 +318,13 @@ button{
 
 }
 .register-form input{
-    margin-bottom:10px;
-    height:40px;
     background-color: #3a3a3a;
 }
 .register-form button{
+    width:100%; 
     margin-top:10px;
-    width:100%;
     background-color: orange;
-    border: none;
+    border: 0px;
     font-size:20px;
 }
 .register-form .btn-group label{
@@ -522,7 +521,10 @@ button{
 .sidebar.hidden-md-up .nav .menu{
     padding-bottom:0px;
 }
-
+.sidebar .nav .menu li.active{
+    background-color: #333;
+    color: #cfcfcf;
+}
 .sidebar .nav .menu li, .sidebar.hidden-md-up .nav .menu li{
     color: #28B6C3;
     margin:0px;
@@ -552,10 +554,6 @@ button{
     cursor:pointer;
     margin:5px;
     margin-top:20px !important;
-}
-.sidebar .show, .sidebar.hidden-md-up .show{
-    position:fixed;
-
 }
 /*
  * Dashboard
@@ -737,14 +735,33 @@ button{
 .main .still.hidden-md-up{
     margin-top:0px;
 }
+.main .still.hidden-sm-down{
+    min-height: 100%;
+    position: fixed;
+    height: 100%;
+    overflow: scroll;
+}
 .main .still .header{
     padding-top:94px;
 }
 .main .still .full{
     margin-top:94px;
 }
-.main .still .contribution{
+.main .still .contribution, .main .still .sprint{
     border-bottom: 1px solid #ededed;
+}
+.main .still .sprint{
+    margin-bottom:20px;
+}
+.main .still .sprint .title{
+
+}
+.main .still .sprint .description{
+    margin-bottom:10px; 
+}
+.main .still .sprint .date{
+    margin-bottom:10px;
+    font-size:10px;
 }
 .main .still .contribution .comment{
     font-weight:300;
@@ -814,16 +831,40 @@ button{
 .main a{
     font-weight:600;
 }
-.main textarea{
+.main textarea, .main input{
     border: 1px solid #ededed !important;
 }
 .main .requirements{
     margin-top:50px;
     background-color: #f9f9f9;
-    padding:5px;
+    padding:20px;
+}
+.main .transition{
+    text-align:center;
+    cursor:pointer;
+}
+.main .transition .dropdown-menu{
+    width:100%;
 }
 .main .hidden-md-up .requirements{
     margin-bottom:10px;
+}
+
+.main .create{
+    background-color: #f9f9f9;
+    padding: 20px;
+    margin-top: 16px;
+    box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+.main .create .label{
+
+}
+.main .create button{
+    width:100%;
+}
+.main .create a, .main a.requirements{
+    display:block;
 }
 
 /* profile */

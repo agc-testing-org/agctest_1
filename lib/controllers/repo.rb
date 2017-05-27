@@ -32,7 +32,7 @@ class Repo
         end
     end
 
-    def create user_id, project_id, sprint_state_id, repo
+    def create user_id, project_id, sprint_state_id, repo, query
         begin
             repo = Contributor.create({
                 user_id: user_id,
@@ -40,6 +40,17 @@ class Repo
                 sprint_state_id: sprint_state_id,
                 repo: repo
             })
+
+            contributor_subscribe = UserContributor.create({
+                user_id: user_id,
+                contributors_id: repo.id
+            })
+            sprint_owner = Sprint.find_by(query)
+            sprint_owner_subscribe = UserContributor.create({
+                user_id: sprint_owner.user_id,
+                contributors_id: repo.id
+            })
+
             return repo.id
         rescue => e
             puts e

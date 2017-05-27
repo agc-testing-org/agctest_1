@@ -9,7 +9,7 @@ sprint_1:
 
 sprint_1b:
   user: adam_confirmed
-  title: "TITLE"
+  title: "TITLEB"
   description: "DESCRIPTION"
   sha: "SHABCDE"
   project: demo

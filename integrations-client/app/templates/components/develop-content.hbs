@@ -1,0 +1,23 @@
+{{#if model.sprints}}
+<div class="full">
+    {{#each model.sprints as |sprint|}}
+    <div class="sprint">
+        <h3 class="title text-capitalize">
+            {{#link-to "develop.project.sprint" sprint.id}}{{sprint.title}}{{/link-to}}
+        </h3>
+        <div class="description">{{sprint.description}}</div>
+        <div class="date text-muted">{{moment-from-now sprint.created_at}}</div>
+    </div>
+    {{/each}}
+</div>
+{{else}}
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview">
+            <div class="text-center">
+                <h3>No sprints currently in this phase of development</h3>
+            </div>      
+        </div>
+    </div>
+</div>
+{{/if}}

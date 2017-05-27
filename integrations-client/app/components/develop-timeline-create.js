@@ -4,6 +4,7 @@ export default Ember.Component.extend({
     session: Ember.inject.service('session'),
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
+    routes: Ember.inject.service('route-injection'),
     displayCreate: null,
     errorMessage: null,
     init() {
@@ -18,7 +19,7 @@ export default Ember.Component.extend({
                 this.set("displayCreate",true);
             }
         },
-        createSprint(){
+        createSprint(projectId){
             var _this = this;
             var title = this.get("title");
             var description = this.get("description");
@@ -27,12 +28,10 @@ export default Ember.Component.extend({
                     var store = this.get('store');
                     var sprint = store.createRecord('sprint', {
                         title: title,
-                        description: description
+                        description: description,
+                        project_id: projectId
                     }).save().then(function(payload) {
-                        store.peekAll('sprint').addObject(payload);
-                        _this.set("title","");
-                        _this.set("description","");
-                        _this.send("showCreate");
+                        _this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
                     }, function(xhr, status, error) {
 
                     });
@@ -42,7 +41,7 @@ export default Ember.Component.extend({
                 }
             }
             else {
-                this.set('errorMessage', "Please enter a longer title");
+                this.set('errorMessage', "Please enter a more descriptive title");
             }
         }
     }

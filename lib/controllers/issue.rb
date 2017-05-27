@@ -35,16 +35,7 @@ class Issue
                 state_id: state_id,
                 sha: sha
             })
-            response = sprint_state.sprint.as_json
-            response[:project] = sprint_state.sprint.project.as_json
-            response[:sprint_states] = []
-            sprint_state.sprint.sprint_states.each_with_index do |ss,j|
-                response[:sprint_states][j] = ss.as_json
-                response[:sprint_states][j][:state] = ss.state.as_json
-                response[:sprint_states][j].delete("state_id")
-                response[:sprint_states][j].delete("sprint_id")
-            end
-            return response 
+            return sprint_state.as_json 
         rescue => e
             puts e
             return nil
@@ -59,6 +50,12 @@ class Issue
                 contributor_id: contributor_id,
                 text: text
             })
+
+            user_contributor = UserContributor.create({
+                user_id: user_id,
+                contributors_id: contributor_id
+            })
+
             return comment
         rescue => e
             puts e
@@ -84,6 +81,12 @@ class Issue
             record = vote.as_json
             record[:previous] = previous_record
             record[:created] = new_record #created = false would mean no change to the frontend
+
+            user_contributor = UserContributor.create({
+                user_id: user_id,
+                contributors_id: contributor_id
+            })
+
             return record
         rescue => e
             puts e
@@ -123,7 +126,7 @@ class Issue
                 org: org,
                 name: name
             })
-            return project.id
+            return project
         rescue => e
             puts e
             return nil
@@ -169,19 +172,41 @@ class Issue
         end
     end
 
-    def get_idea query
-        begin
-            return Sprint.find_by(query)
-        rescue => e
-            return nil
-        end
-    end
-
-    def get_sprint_states query
+    def get_sprint_states query, user_id
         begin
             response = Array.new
             SprintState.joins(:sprint).where(query).each_with_index do |ss,i|
                 response[i] = ss.as_json
+                response[i][:active_contribution_id] = nil
+                response[i][:contributors] = []
+                ss.contributors.each_with_index do |c,k|
+                    comments = c.comments.as_json
+                    c.comments.each_with_index do |com,x|
+                        if com.user.user_profile
+                            comments[x][:user_profile] = {
+                                :id => com.user.user_profile.id,
+                                :location => com.user.user_profile.location_name,
+                                :title => com.user.user_profile.user_position.title,
+                                :industry => com.user.user_profile.user_position.industry,
+                                :size => com.user.user_profile.user_position.size,
+                                :created_at => com.user.user_profile.created_at
+                            }
+                        end
+                    end
+                    response[i][:contributors][k] = {
+                        :id => c.id,
+                        :created_at => c.created_at,
+                        :updated_at => c.updated_at,
+                        :comments => comments,
+                        :votes => c.votes.as_json
+                    }
+                    if c.user_id == user_id
+                        response[i][:contributors][k][:commit] = c.commit
+                        response[i][:contributors][k][:commit_success] =  c.commit_success
+                        response[i][:contributors][k][:repo] = c.repo
+                        response[i][:active_contribution_id] = c.id
+                    end
+                end
             end
             return response
         rescue => e
@@ -190,40 +215,24 @@ class Issue
         end
     end
 
-    def get_sprints query, user_id
+    def get_sprint id # This also returns the project
         begin
-            response = Array.new
-            Sprint.where(query).each_with_index do |s,i|
-                response[i] = s.as_json
-                response[i][:project] = s.project.as_json
-                response[i][:sprint_states] = []
-                s.sprint_states.each_with_index do |ss,j|
-                    response[i][:sprint_states][j] = ss.as_json
-                    response[i][:sprint_states][j][:state] = ss.state.as_json 
-                    response[i][:sprint_states][j][:active_contribution_id] = nil
-                    response[i][:sprint_states][j][:contributors] = []
-                    ss.contributors.each_with_index do |c,k|
-                        response[i][:sprint_states][j][:contributors][k] = {
-                            :id => c.id,
-                            :created_at => c.created_at,
-                            :updated_at => c.updated_at,
-                            :comments => c.comments.as_json,
-                            :votes => c.votes.as_json
-                        }
-                        if c.user_id == user_id
-                            response[i][:sprint_states][j][:contributors][k][:commit] = c.commit
-                            response[i][:sprint_states][j][:contributors][k][:commit_success] =  c.commit_success
-                            response[i][:sprint_states][j][:contributors][k][:repo] = c.repo
-                            response[i][:sprint_states][j][:active_contribution_id] = c.id
-                        end
-                    end
-                    response[i][:sprint_states][j].delete("state_id")
-                    response[i][:sprint_states][j].delete("sprint_id")
-                end
+            return Sprint.joins(:project).find_by(id: id)
+        rescue => e
+            return nil
+        end
+    end
 
-                response[i].delete("project_id")
-            end
-            return response
+    def get_sprints query
+        begin
+            return Sprint.joins("INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id").where(query).as_json#.each_with_index do |s,i|
+#                response[i] = s.as_json
+#                response[i][:sprint_states] = []
+#                s.sprint_states.each_with_index do |ss,j|
+#                    response[i][:sprint_states][j] = ss.as_json
+#                end
+#            end
+ #           return response
         rescue => e
             puts e
             return nil
@@ -234,16 +243,9 @@ class Issue
         begin
             response = Array.new
             SprintTimeline.where(query).each_with_index do |st,i|
-                response[i] = {
-                    :id => st.id,
-                    :created_at => st.created_at,
-                    :user => {:id => st.user.id},
-                    :sprint => st.sprint.as_json,
-                    :label => st.label.as_json,
-                    :state => st.state.as_json,
-                    :sprint_state => st.sprint_state.as_json,
-                    :after => st.after
-                }
+                response[i] = st.as_json
+                response[i][:sprint] = st.sprint.as_json
+                response[i][:label] = st.label.as_json
             end
             return response
         rescue => e
@@ -379,4 +381,135 @@ class Issue
             return nil
         end
     end
-end 
+
+        def recently_changed_sprint?
+        begin
+            if defined?Notification.last.sprint_timeline_id
+                id = Notification.last.sprint_timeline_id
+            else 
+                id = 0
+            end
+            response = SprintTimeline.where("id > ?", id)
+            response.each do |x|
+                if x.comment_id != nil
+                    notification = Notification.create({
+                        sprint_id: x.sprint_id,
+                        sprint_state_id: x.state_id,
+                        user_id: x.user_id,
+                        sprint_timeline_id: x.id,
+                        contributor_id: x.contributor_id,
+                        subject: 'Sprint commented',
+                        body: 'Sprint commented'
+                        })
+                elsif x.vote_id != nil
+                    notification = Notification.create({
+                        sprint_id: x.sprint_id,
+                        sprint_state_id: x.state_id,
+                        user_id: x.user_id,
+                        sprint_timeline_id: x.id,
+                        contributor_id: x.contributor_id,
+                        subject: 'Sprint voted',
+                        body: 'Sprint voted'
+                        })
+                else x.vote_id == nil and x.comment_id == nil
+                    notification = Notification.create({
+                        sprint_id: x.sprint_id,
+                        sprint_state_id: x.state_id,
+                        user_id: x.user_id,
+                        sprint_timeline_id: x.id,
+                        contributor_id: x.contributor_id,
+                        subject: 'Sprint state changed',
+                        body: 'Sprint state changed'
+                        })
+                end
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_user_notification
+        begin
+            if UserNotification.maximum(:notifications_id) != nil
+                id = UserNotification.maximum(:notifications_id)
+            else 
+                id = 0
+            end
+            skillset_user_notification = SprintSkillset.joins("INNER JOIN notifications ON sprint_skillsets.sprint_id=notifications.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1 and notifications.contributor_id is NULL").select("user_skillsets.user_id","notifications.id")
+            roles_user_notification = UserRole.joins("CROSS JOIN notifications").where("((user_roles.active=1 and user_roles.role_id=1 and notifications.sprint_state_id=2) or (user_roles.active=1 and user_roles.role_id=4 and notifications.sprint_state_id=4) or (user_roles.active=1 and user_roles.role_id=3 and notifications.sprint_state_id=6) or (user_roles.active != 'NULL' and notifications.sprint_state_id NOT IN (2,4,6))) and notifications.contributor_id is NULL").select("user_roles.user_id","notifications.id")
+            comments_and_votes_user_notifications = UserContributor.joins("Join notifications").where("user_contributors.contributors_id = notifications.contributor_id and user_contributors.user_id != notifications.user_id").select("user_contributors.user_id", "notifications.id")
+
+            response = skillset_user_notification + roles_user_notification + comments_and_votes_user_notifications
+            response.each do |x|
+                if x[:id] > id
+                    user_notifications = UserNotification.create({
+                    notifications_id: x[:id],
+                    user_id: x[:user_id]
+                    })
+                end
+            end
+            return response
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_connection_request user_id, contact_id
+        begin
+            connection_request = UserConnection.create({
+                user_id: user_id,
+                contact_id: contact_id,
+            })
+
+            return connection_request.as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_connections query
+        begin      
+            return UserConnection.where(query).as_json
+           
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_connections_read contact_id, user_id, read
+        begin
+            ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
+            ss.update_attributes!(:read => read)
+            return {:id => ss.contact_id, :user_id => ss.user_id, :read => ss.read}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_connections_confirmed contact_id, user_id, confirmed
+        begin
+            ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
+            ss.update_attributes!(:confirmed => confirmed)
+            return {:id => ss.contact_id, :user_id => ss.user_id, :confirmed => ss.confirmed}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_info user_id
+        begin      
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("users.name, users.email").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+end
+

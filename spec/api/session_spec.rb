@@ -1,13 +1,15 @@
-require_relative '../spec_helper'
+require 'spec_helper'
 
 describe "API" do
-    shared_examples_for "new_session" do
+    shared_examples_for "session_response" do
         it "should return success = true" do
             expect(@res["success"]).to eq(true)
         end
         it "should return w7 token" do
             expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["w7_token"])
         end
+    end
+    shared_examples_for "new_session" do
         it "should save w7 token in redis" do
             expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
         end
@@ -134,6 +136,7 @@ describe "API" do
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
+            it_behaves_like "session_response"
             it_behaves_like "new_session"
         end
         context "invalid" do
@@ -209,6 +212,7 @@ describe "API" do
                         @res = JSON.parse(last_response.body)
                         @query = "select * from users where id = #{users(:adam_confirmed).id}"
                     end
+                    it_behaves_like "session_response"
                     it_behaves_like "new_session"
                 end
                 context "protected account" do
@@ -222,6 +226,7 @@ describe "API" do
                     it "should set protected to false" do
                         expect(@mysql_client.query("select * from users where email = '#{users(:adam_protected).email}'").first["protected"]).to eq(0)
                     end
+                    it_behaves_like "session_response"
                     it_behaves_like "new_session"
                 end
             end
@@ -259,7 +264,7 @@ describe "API" do
         end
     end
 
-    describe "POST /session/:provider" do
+    describe "POST /session/github" do
         fixtures :users
         before(:each) do
             @password = "adam12345"
@@ -283,6 +288,7 @@ describe "API" do
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
+            it_behaves_like "session_response"
             it_behaves_like "new_session"
             it "should return github token" do
                 account = Account.new
@@ -292,6 +298,85 @@ describe "API" do
             context "users table" do
                 it "should save github_username" do
                     expect(@mysql_client.query("select * from users").first["github_username"]).to eq(@username)
+                end
+            end
+        end
+    end
+
+    describe "POST /session/linkedin", :focus => true do
+        fixtures :users
+        before(:each) do
+            @password = "adam12345"
+            @email = users(:adam_confirmed).email
+            post "/login", { :password => @password, :email => @email }.to_json
+            res = JSON.parse(last_response.body)
+            @w7_token = res["w7_token"]
+        end
+        context "linkedin" do
+            before(:each) do
+                access_token = "ABC"
+                code = "123"
+                @headline = "headline"
+                @location = {:country => {:code => "US"}, :name => "San Francisco Bay"}
+                @summary = "summary"
+                @positions = {:all => [{:title => "Engineer", :company => {:name => "COMPANY", :size => "120-500", :industry => "Software"}, :start_date => {:year => 2000}, :end_date => {:year => 2006}}]}
+                LinkedIn::OAuth2.any_instance.stub(:get_access_token) { JSON.parse({
+                    :token => access_token
+                }.to_json, object_class: OpenStruct) }
+                LinkedIn::API.any_instance.stub(:profile) { JSON.parse({
+                    :headline => @headline,
+                    :location => @location,
+                    :summary => @summary,
+                    :positions => @positions
+                }.to_json, object_class: OpenStruct) }
+                post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it_behaves_like "session_response"
+            context "user_profile" do
+                before(:each) do
+                    @user_profiles = @mysql_client.query("select * from user_profiles").first
+                end
+                context "user_profiles" do
+                    it "should include user_id" do
+                        expect(@user_profiles["user_id"]).to eq users(:adam_confirmed).id
+                    end
+                    it "should include headline" do
+                        expect(@user_profiles["headline"]).to eq @headline
+                    end
+                    it "should include location_country_code" do
+                        expect(@user_profiles["location_country_code"]).to eq @location[:country][:code]
+                    end
+                    it "should include location_name" do
+                        expect(@user_profiles["location_name"]).to eq @location[:name]
+                    end
+                end
+            end
+            context "user_position" do
+                before(:each) do
+                    @user_positions = @mysql_client.query("select * from user_positions").first
+                end
+                it "should include user_profile_id" do
+                    expect(@user_positions["user_profile_id"]).to eq(1)
+                end
+                it "should include title" do
+                    expect(@user_positions["title"]).to eq @positions[:all][0][:title]
+                end
+                it "should include size" do
+                    expect(@user_positions["size"]).to eq @positions[:all][0][:company][:size]
+                end
+                it "should include start_year" do
+                    expect(@user_positions["start_year"]).to eq @positions[:all][0][:start_date][:year]
+                end
+                it "should include end_year" do
+                    expect(@user_positions["end_year"]).to eq @positions[:all][0][:end_date][:year]
+                end
+                it "should include company" do
+                    expect(@user_positions["company"]).to eq @positions[:all][0][:company][:name]
+                end
+                it "should include industry" do
+                    expect(@user_positions["industry"]).to eq @positions[:all][0][:company][:industry]
                 end
             end
         end

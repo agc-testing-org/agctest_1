@@ -11,6 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+
 ActiveRecord::Schema.define(version: 20170510212531) do
 
   create_table "comments", force: :cascade do |t|
@@ -154,12 +155,40 @@ ActiveRecord::Schema.define(version: 20170510212531) do
     t.boolean  "contributors",               default: false, null: false
   end
 
+
   create_table "teams", force: :cascade do |t|
     t.string   "name",       limit: 255, null: false
     t.string   "owner",      limit: 255, null: false
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
   end
+
+
+  create_table "user_positions", force: :cascade do |t|
+    t.integer  "user_profile_id", limit: 4,   null: false
+    t.string   "title",           limit: 255
+    t.string   "size",            limit: 255
+    t.integer  "start_year",      limit: 4
+    t.integer  "end_year",        limit: 4
+    t.string   "company",         limit: 255
+    t.string   "industry",        limit: 255
+    t.datetime "created_at",                  null: false
+    t.datetime "updated_at",                  null: false
+  end
+
+  add_index "user_positions", ["user_profile_id"], name: "fk_rails_a62e6232fa", using: :btree
+
+  create_table "user_profiles", force: :cascade do |t|
+    t.integer  "user_id",               limit: 4,   null: false
+    t.string   "headline",              limit: 255
+    t.string   "location_country_code", limit: 255
+    t.string   "location_name",         limit: 255
+    t.datetime "created_at",                        null: false
+    t.datetime "updated_at",                        null: false
+  end
+
+  add_index "user_profiles", ["user_id"], name: "fk_rails_87a6352e58", using: :btree
+
 
   create_table "user_roles", force: :cascade do |t|
     t.integer  "user_id",    limit: 4,                 null: false
@@ -246,6 +275,8 @@ ActiveRecord::Schema.define(version: 20170510212531) do
   add_foreign_key "sprint_timelines", "votes"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
+  add_foreign_key "user_positions", "user_profiles"
+  add_foreign_key "user_profiles", "users"
   add_foreign_key "user_roles", "roles"
   add_foreign_key "user_roles", "users"
   add_foreign_key "user_skillsets", "skillsets"

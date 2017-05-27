@@ -1,0 +1,9 @@
+adam_confirmed:
+  user_profile: adam_confirmed
+  title: "hat wearer"
+  size: "11-50"
+  start_year: 1996
+  company: "ATeam Technologies"
+  industry: "Software"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

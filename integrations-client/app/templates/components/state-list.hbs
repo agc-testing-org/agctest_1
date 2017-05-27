@@ -1,0 +1,22 @@
+<ul class="nav nav-pills flex-column timeline">
+    <div class="menu">
+        {{#link-to "home" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+        <i class="fa fa-fw fa-user"></i>Profile
+        {{/link-to}}
+    </div>
+    {{#link-to "develop.project.state" "all" tagName='li' href=false class="cursor-pointer nav-item stage text-center text-capitalize" }} 
+        <div class="icon hidden-sm-down">
+            <i class="fa fa-fw fa-2x fa-clone"></i>
+        </div>
+        All
+    {{/link-to}}
+    {{#each states as |state|}}
+    {{#link-to "develop.project.state" state.id tagName='li' href=false class="cursor-pointer nav-item stage text-center text-capitalize" }}
+    <div class="icon hidden-sm-down">
+        <i class="fa fa-fw fa-2x {{state.fa_icon}}"></i>
+    </div>
+    {{state.name}}
+    {{/link-to}}
+    {{/each}}
+</ul>
+

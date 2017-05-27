@@ -1,9 +1,8 @@
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item create">
-        <a class="nav-link" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create{{/if}}</a>
-    </li>
-    {{#if displayCreate}}
-    <li class="nav-item timeline p-4">
+<div class="create rounded col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2">
+    <a {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create Sprint{{/if}}</a>
+    <div class="text-left">
+        {{#if displayCreate}}
+
         {{#if errorMessage}}
         <div class="alert alert-warning rounded">{{errorMessage}}</div>
         {{/if}}
@@ -14,9 +13,10 @@
 
         <div class="form-group">
             <label>Description</label>
-            {{textarea value=description placeholder="Explain the request in detail" class="form-control input-lg rounded"}}
+            {{textarea rows=5 value=description placeholder="Explain the request in detail" class="form-control input-lg rounded"}}
         </div>
-        <button {{action "createSprint"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Save Sprint</button>
-    </li>
-    {{/if}}
-</ul>
+        <button {{action "createSprint" project_id}} type="submit" class="btn btn-outline-secondary reversed btn-lg rounded">Save Sprint</button>
+
+        {{/if}}
+    </div>
+</div>

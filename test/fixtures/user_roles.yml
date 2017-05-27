@@ -1,4 +1,19 @@
-user_1_role_1:
-  role: product 
-  user_id: 1
+#user_1_role_1:
+  #role: product 
+  #user_id: 1
+  #active: 1
+
+notification_role_product:
+  user: masha_post_connection_request
+  role_id: 1
+  active: 1
+
+notification_role_design:
+  user: masha_get_connection_request
+  role_id: 4
+  active: 1
+
+notification_role_development:
+  user: masha_notifications
+  role_id: 3
   active: 1
