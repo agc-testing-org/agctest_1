@@ -10,7 +10,7 @@ describe "/contributors" do
     end 
 
     describe "POST /:id/comments" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
@@ -45,7 +45,7 @@ describe "/contributors" do
     end
 
     describe "POST /:id/votes" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
