@@ -1,4 +1,4 @@
-class CreateUserProfile < ActiveRecord::Migration
+class CreateUserProfile < ActiveRecord::Migration[4.2]
     def change
         create_table "user_profiles", force: :cascade do |t|
             t.integer  "user_id",       limit: 4,   null: false
