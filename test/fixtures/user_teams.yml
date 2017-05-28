@@ -1,0 +1,15 @@
+adam_confirmed:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: ateam
+  accepted: true
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+adam_invited:
+  sender: adam_confirmed
+  user: adam
+  team: ateam
+  accepted: false
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

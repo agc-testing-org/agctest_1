@@ -239,12 +239,16 @@ ActiveRecord::Schema.define(version: 20170516000000) do
   end
 
   create_table "user_teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "user_id", null: false
+    t.integer "user_id"
+    t.integer "sender_id", null: false
+    t.string "user_email"
     t.integer "team_id", null: false
     t.boolean "accepted", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["sender_id"], name: "fk_rails_58c1498938"
     t.index ["team_id"], name: "fk_rails_64c25f3fe6"
+    t.index ["user_id", "sender_id"], name: "index_sender_id_and_user_id_on_user_teams", unique: true
     t.index ["user_id"], name: "index_user_team_on_user"
   end
 
@@ -308,6 +312,7 @@ ActiveRecord::Schema.define(version: 20170516000000) do
   add_foreign_key "user_skillsets", "users"
   add_foreign_key "user_teams", "teams"
   add_foreign_key "user_teams", "users"
+  add_foreign_key "user_teams", "users", column: "sender_id"
   add_foreign_key "votes", "contributors"
   add_foreign_key "votes", "sprint_states"
   add_foreign_key "votes", "users"

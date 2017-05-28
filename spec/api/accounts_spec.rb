@@ -245,5 +245,18 @@ describe "/account" do
             end
         end
     end
+
+    describe "POST /teams" do
+        fixtures :users, :teams
+        before(:each) do
+            @team = teams(:ateam).id
+        end
+        context "invite exists" do
+
+        end
+        context "invite does not exist" do
+
+        end
+    end
 end
 

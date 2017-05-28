@@ -1,6 +1,19 @@
 class Account
+
     def initialize
 
+    end
+
+    def join_team user_id, team_id
+        begin
+            return UserTeam.create({
+                user_id: user_id,
+                team_id: team_id
+            })
+        rescue => e
+            puts e
+            return nil
+        end 
     end
 
     def linkedin_client access_token

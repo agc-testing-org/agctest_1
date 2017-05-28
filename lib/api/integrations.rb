@@ -1140,88 +1140,141 @@ class Integrations < Sinatra::Base
     return response.to_json
   end
 
-  get_user_info = lambda do
-    user_id = (default_to_signed params[:user_id])
-    if user_id
-      issue = Issue.new
-      user_info = issue.get_user_info user_id
-      return user_info.to_json
+  account_teams_post = lambda do
+    protected!
+    status 400
+    response = {}
+    begin
+        request.body.rewind
+        fields = JSON.parse(request.body.read, :symbolize_names => true)
+        if fields[:id]
+            account = Account.new
+            team = account.join_team @session_hash["id"], fields[:id]
+            if team
+                status 201
+                response = team
+            else
+                response[:error] = "An error has occurred"
+            end
+        else
+            response[:error] = "Team not specified"
+        end
     end
+    return response.to_json
   end
 
-    #API
-    post "/register", &register_post
-    post "/forgot", &forgot_post
-    post "/reset", &reset_post
-    post "/login", &login_post
-    post "/session/github", &session_provider_github_post
-    post "/session/linkedin", &session_provider_linkedin_post
-    delete "/session", &session_delete
-    get "/account", &account_get
-    get "/account/:user_id/skillsets", &user_skillsets_get
-    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
-    patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
+  invites_teams_post = lambda do
+      protected!
+      status 400
+      response = {} 
+      begin
+          request.body.rewind
+          fields = JSON.parse(request.body.read, :symbolize_names => true)
+          if fields[:id] && (fields[:email] || fields[:user_id])
+              team = Organization.new
+              if team.member? fields[:id], @session_hash["id"]
+                  invitation = team.invite_member fields[:id], @session_hash["id"], fields[:user_id], fields[:email]
+                  if invitation
+                      status 201
+                      response = invitation
+                  else
+                      response[:error] = "An error has occurred"
+                  end
+              else
+                  redirect to("/unauthorized")
+              end
+          end
+      end
+      return response.to_json
+  end
 
-    post "/account/connections", &connections_request_post
-    get "/account/connections", &connections_get
-    get "/account/connections/confirmed", &get_user_info
-    patch "/account/connections/read", &user_connections_patch_read
-    patch "/account/connections/confirmed", &user_connections_patch_confirmed
+  get_user_info = lambda do
+      user_id = (default_to_signed params[:user_id])
+      if user_id
+          issue = Issue.new
+          user_info = issue.get_user_info user_id
+          return user_info.to_json
+      end
+  end
 
-    get "/account/:user_id/roles", &account_roles_get
-    get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
-    patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
+  #API
+  post "/register", &register_post
+  post "/forgot", &forgot_post
+  post "/reset", &reset_post
+  post "/login", &login_post
+  post "/session/github", &session_provider_github_post
+  post "/session/linkedin", &session_provider_linkedin_post
+  delete "/session", &session_delete
+  get "/account", &account_get
+  get "/account/:user_id/skillsets", &user_skillsets_get
+  get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
+  patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
 
-    get "/roles", &roles_get
-    get "/states", &states_get
-    get "/skillsets", &skillsets_get
+  post "/account/connections", &connections_request_post
+  get "/account/connections", &connections_get
+  get "/account/connections/confirmed", &get_user_info
+  patch "/account/connections/read", &user_connections_patch_read
+  patch "/account/connections/confirmed", &user_connections_patch_confirmed
 
-    get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
-    get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset
-    patch "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_patch 
+  post "/account/teams", allows: [:id], &account_teams_post
 
-    get "/repositories", &repositories_get
+  get "/account/:user_id/roles", &account_roles_get
+  get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
+  patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
 
-    post "/projects", &projects_post
-    get "/projects", &projects_get
-    get "/projects/:id", allows: [:id], &projects_get_by_id
+  get "/roles", &roles_get
+  get "/states", &states_get
+  get "/skillsets", &skillsets_get
 
-    post "/projects/:project_id/refresh", &refresh_post
-    post "/projects/:project_id/contributors", &contributors_post
-    patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
-    get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
+  get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
+  get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset
+  patch "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_patch 
 
-    get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
-    get "/sprints/:id", allows: [:id], &sprints_get_by_id
-    post "/sprints", &sprints_post
+  get "/repositories", &repositories_get
 
-    get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
-    post "/sprint-states", &sprint_states_post
+  post "/projects", &projects_post
+  get "/projects", &projects_get
+  get "/projects/:id", allows: [:id], &projects_get_by_id
 
-    get "/projects/:project_id/events", &events_get
+  post "/projects/:project_id/refresh", &refresh_post
+  post "/projects/:project_id/contributors", &contributors_post
+  patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
+  get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
 
-    post "/contributors/:id/comments", &contributors_post_comments
-    post "/contributors/:id/votes", &contributors_post_votes
-    post "/contributors/:id/winner", &contributors_post_winner
-    post "/contributors/:id/merge", &contributors_post_merge
+  get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
+  get "/sprints/:id", allows: [:id], &sprints_get_by_id
+  post "/sprints", &sprints_post
 
-    get "/aggregate-comments", &comments_get
-    get "/aggregate-votes", &votes_get
-    get "/aggregate-contributors", &contributors_get
+  get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
+  post "/sprint-states", &sprint_states_post
 
-    post "/teams", allows: [:name], &teams_post
+  get "/projects/:project_id/events", &events_get
 
-    get '/unauthorized' do
-        status 401
-        return {:error => "unauthorized"}.to_json
-    end
+  post "/contributors/:id/comments", &contributors_post_comments
+  post "/contributors/:id/votes", &contributors_post_votes
+  post "/contributors/:id/winner", &contributors_post_winner
+  post "/contributors/:id/merge", &contributors_post_merge
 
-    error RequiredParamMissing do
-        [400, env['sinatra.error'].message]
-    end
+  get "/aggregate-comments", &comments_get
+  get "/aggregate-votes", &votes_get
+  get "/aggregate-contributors", &contributors_get
 
-    # Ember
-    get "*" do
-        send_file File.expand_path('index.html',settings.public_folder)
-    end
+  post "/teams", allows: [:name], &teams_post
+
+  post "/invites/teams", &invites_teams_post
+  #TODO post "/invites/accounts"
+
+  get '/unauthorized' do
+      status 401
+      return {:error => "unauthorized"}.to_json
+  end
+
+  error RequiredParamMissing do
+      [400, env['sinatra.error'].message]
+  end
+
+  # Ember
+  get "*" do
+      send_file File.expand_path('index.html',settings.public_folder)
+  end
 end
