@@ -21,6 +21,7 @@ require 'whenever'
 require_relative '../controllers/account.rb'
 require_relative '../controllers/issue.rb'
 require_relative '../controllers/repo.rb'
+require_relative '../controllers/organization.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -562,14 +563,14 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             if fields[:name] && fields[:name].length > 4
-                issue = Issue.new
-                team = issue.create_team fields[:name], @session_hash["id"]
+                org = Organization.new
+                team = org.create_team fields[:name], @session_hash["id"]
                 if team 
-                    response[:id] = team
+                    response = team
                     status 201
                 end
             else
-                response[:message] = "Please enter a more descriptive team name"
+                response[:error] = "Please enter a more descriptive team name"
             end
         end
         return response.to_json
@@ -1208,7 +1209,7 @@ class Integrations < Sinatra::Base
     get "/aggregate-votes", &votes_get
     get "/aggregate-contributors", &contributors_get
 
-    post "/teams", &teams_post
+    post "/teams", allows: [:name], &teams_post
 
     get '/unauthorized' do
         status 401
