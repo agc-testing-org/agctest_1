@@ -2,8 +2,8 @@
     <div class="container mb-5">
         <h2>List of Connections</h2>
         <ul>
-            {{#each connections as |connection|}}
-            <li>{{connection}}</li>
+            {{#each model.connections as |connection|}}
+            <li>Username:{{connection.name}} Email:{{connection.email}}</li>
             {{/each}}
         </ul>
     </div>

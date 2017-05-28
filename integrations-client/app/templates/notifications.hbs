@@ -2,8 +2,8 @@
     <div class="container mb-5">
         <h2>List of Notifications</h2>
         <ul>
-            {{#each model as |notification|}}
-            <li>{{notification}}</li>
+            {{#each model.notifications as |notification|}}
+            <li>Sprint id:{{notification.sprint_id}} Subject:{{notification.subject}} Body:{{notification.body}}</li>
             {{/each}}
         </ul>
     </div>

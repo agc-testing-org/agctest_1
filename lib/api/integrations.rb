@@ -1153,7 +1153,7 @@ class Integrations < Sinatra::Base
     get "/account/confirmed/connections", &get_user_info
     patch "/account/connections/read", &user_connections_patch_read
     patch "/account/connections/confirmed", &user_connections_patch_confirmed
-    get "/notifications", &get_user_notifications
+    get "/account/notifications", &get_user_notifications
 
     get "/account/:user_id/roles", &account_roles_get
     get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
