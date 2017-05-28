@@ -521,8 +521,7 @@ class Integrations < Sinatra::Base
     projects_get_by_id = lambda do
         status 404
         issue = Issue.new
-        query = {:id => params[:id].to_i}
-        project = issue.get_projects query
+        project = issue.get_projects params
         if project[0]
             status 200
             return project[0].to_json
