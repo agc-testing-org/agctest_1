@@ -24,7 +24,7 @@ group :test do
     gem 'rspec'
     gem 'rspec-rails'
     gem 'rack-test'
-    gem 'watir-webdriver'
+    gem 'watir'
     gem 'selenium-webdriver'
     gem 'database_cleaner'
     gem 'webmock'
