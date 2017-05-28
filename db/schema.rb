@@ -163,11 +163,11 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.boolean "contributors", default: false, null: false
   end
 
-  create_table "teams", force: :cascade do |t|
-    t.string   "name",       limit: 255, null: false
-    t.string   "owner",      limit: 255, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+  create_table "teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.string "owner", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -218,8 +218,6 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.index ["user_id"], name: "fk_rails_87a6352e58"
   end
 
-  add_index "user_profiles", ["user_id"], name: "fk_rails_87a6352e58", using: :btree
-
   create_table "user_roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
     t.integer "role_id", null: false
@@ -240,20 +238,15 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.index ["user_id"], name: "index_user_skillsets_on_user_id"
   end
 
-  add_index "user_skillsets", ["skillset_id"], name: "index_user_skillsets_on_skillset_id", using: :btree
-  add_index "user_skillsets", ["user_id"], name: "index_user_skillsets_on_user_id", using: :btree
-
-  create_table "user_teams", force: :cascade do |t|
-    t.integer  "user_id",      limit: 4,                   null: false
-    t.integer  "team_id",      limit: 4,                   null: false
-    t.string   "invite_token", limit: 255
-    t.boolean  "accepted",                 default: false
-    t.datetime "created_at",                               null: false
-    t.datetime "updated_at",                               null: false
+  create_table "user_teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "team_id", null: false
+    t.boolean "accepted", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["team_id"], name: "fk_rails_64c25f3fe6"
+    t.index ["user_id"], name: "index_user_team_on_user"
   end
-
-  add_index "user_teams", ["team_id"], name: "fk_rails_64c25f3fe6", using: :btree
-  add_index "user_teams", ["user_id"], name: "index_user_team_on_user", using: :btree
 
   create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "email", null: false

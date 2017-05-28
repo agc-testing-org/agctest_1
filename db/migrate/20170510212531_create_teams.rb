@@ -1,4 +1,4 @@
-class CreateTeams < ActiveRecord::Migration
+class CreateTeams < ActiveRecord::Migration[4.2]
     def change
         create_table "teams", force: :cascade do |t|
             t.string   "name",       limit: 255, null: false
@@ -10,7 +10,6 @@ class CreateTeams < ActiveRecord::Migration
         create_table "user_teams", force: :cascade do |t|
             t.integer  "user_id",       limit: 4,        null: false
             t.integer  "team_id",       limit: 4,        null: false
-            t.string   "invite_token",  limit: 255,      null: true
             t.boolean  "accepted",      default: false
             t.datetime "created_at",                     null: false
             t.datetime "updated_at",                     null: false
