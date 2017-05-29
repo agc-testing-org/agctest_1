@@ -6,10 +6,16 @@ class Account
 
     def join_team user_id, team_id
         begin
-            return UserTeam.create({
+            invite = UserTeam.find_by({ #assumes you must have an account to join...
                 user_id: user_id,
                 team_id: team_id
             })
+            if invite
+                invite.update_attributes!({accepted: true})
+                return invite.as_json
+            else
+                return nil
+            end
         rescue => e
             puts e
             return nil

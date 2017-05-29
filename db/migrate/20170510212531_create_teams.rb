@@ -22,6 +22,6 @@ class CreateTeams < ActiveRecord::Migration[4.2]
         add_foreign_key "user_teams", "users", column: "sender_id"
         add_foreign_key "user_teams", "teams", column: "team_id"
 
-        add_index "user_teams", ["user_id", "sender_id"], unique: true, name: 'index_sender_id_and_user_id_on_user_teams'
+        #add_index "user_teams", ["user_id", "sender_id"], unique: true, name: 'index_sender_id_and_user_id_on_user_teams'
     end
 end

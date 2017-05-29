@@ -29,4 +29,9 @@ describe ".Organization" do
             end 
         end
     end
+    context "#add_owner" do
+        fixtures :users, :teams
+
+        # covered by POST /teams
+    end
 end

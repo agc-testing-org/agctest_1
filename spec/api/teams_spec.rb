@@ -39,6 +39,21 @@ describe "/teams" do
                 @teams = [JSON.parse(last_response.body)]
             end
             it_behaves_like "teams"
+
+            context "user_teams" do
+                before(:each) do
+                    @user_team_result = @mysql_client.query("select * from user_teams").first
+                end
+                it "saves owner as sender_id" do
+                    expect(@user_team_result["sender_id"]).to eq(@user)
+                end
+                it "saves owner as user_id" do
+                    expect(@user_team_result["user_id"]).to eq(@user)
+                end 
+                it "saves accepted as true" do
+                    expect(@user_team_result["accepted"]).to eq 1 
+                end
+            end
         end
         context "invalid fields" do
             context "name < 5 char"

@@ -565,9 +565,12 @@ class Integrations < Sinatra::Base
             if fields[:name] && fields[:name].length > 4
                 org = Organization.new
                 team = org.create_team fields[:name], @session_hash["id"]
-                if team 
+
+                if team && (org.add_owner @session_hash["id"], team["id"])
                     response = team
                     status 201
+                else
+                    response[:error] = "An error has occurred"
                 end
             else
                 response[:error] = "Please enter a more descriptive team name"
@@ -1154,7 +1157,7 @@ class Integrations < Sinatra::Base
                 status 201
                 response = team
             else
-                response[:error] = "An error has occurred"
+                response[:error] = "This invite is invalid or has expired"
             end
         else
             response[:error] = "Team not specified"
@@ -1216,7 +1219,7 @@ class Integrations < Sinatra::Base
   patch "/account/connections/read", &user_connections_patch_read
   patch "/account/connections/confirmed", &user_connections_patch_confirmed
 
-  post "/account/teams", allows: [:id], &account_teams_post
+  post "/account/teams", &account_teams_post
 
   get "/account/:user_id/roles", &account_roles_get
   get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
@@ -1259,7 +1262,7 @@ class Integrations < Sinatra::Base
   get "/aggregate-votes", &votes_get
   get "/aggregate-contributors", &contributors_get
 
-  post "/teams", allows: [:name], &teams_post
+  post "/teams", &teams_post
 
   post "/invites/teams", &invites_teams_post
   #TODO post "/invites/accounts"

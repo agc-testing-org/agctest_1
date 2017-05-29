@@ -15,8 +15,8 @@ describe "/invites" do
         it "should return accepted = false" do
             expect(@res["accepted"]).to be false
         end 
-        it "should return invited_by id" do
-            expect(@res["invited_by"]).to eq(@team_invite_result["invited_by"])
+        it "should return sender_id" do
+            expect(@res["sender_id"]).to eq(@team_invite_result["sender_id"])
         end 
     end
 
@@ -67,9 +67,9 @@ describe "/invites" do
                     end
                     context "valid user_id" do
                         before(:each) do
-                            post "/invites/teams", { :user_id => @user_id, :id => @team }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                            post "/invites/teams", { :user_id => users(:adam_protected).id, :id => @team }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                             @res = JSON.parse(last_response.body)
-                            @team_invite_result = @mysql_client.query("select * from user_teams where user_id = #{@user_id}").first
+                            @team_invite_result = @mysql_client.query("select * from user_teams where user_id = #{users(:adam_protected).id}").first
                         end
                         it "should return user_id" do
                             expect(@res["user_id"]).to eq(@team_invite_result["user_id"])

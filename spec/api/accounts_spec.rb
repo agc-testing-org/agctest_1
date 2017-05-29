@@ -246,16 +246,28 @@ describe "/account" do
         end
     end
 
-    describe "POST /teams" do
-        fixtures :users, :teams
+    describe "POST /teams", :focus => true do
+        fixtures :users, :teams, :user_teams
         before(:each) do
-            @team = teams(:ateam).id
+            @team = user_teams(:adam_invited).team.id
         end
         context "invite exists" do
-
+            before(:each) do
+                post "/account/teams", {:id => @team}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should set accepted = true" do
+                expect(@res["accepted"]).to be true
+            end
         end
         context "invite does not exist" do
-
+            before(:each) do
+                post "/account/teams", {:id => 12}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return error message" do
+                expect(@res["error"]).to eq("This invite is invalid or has expired")
+            end
         end
     end
 end

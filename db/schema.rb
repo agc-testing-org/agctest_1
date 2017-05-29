@@ -248,7 +248,6 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.datetime "updated_at", null: false
     t.index ["sender_id"], name: "fk_rails_58c1498938"
     t.index ["team_id"], name: "fk_rails_64c25f3fe6"
-    t.index ["user_id", "sender_id"], name: "index_sender_id_and_user_id_on_user_teams", unique: true
     t.index ["user_id"], name: "index_user_team_on_user"
   end
 
