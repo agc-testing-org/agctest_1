@@ -1,10 +1,45 @@
-<div class="main">
-    <div class="container mb-5">
-        <h2>List of Connections</h2>
-        <ul>
-            {{#each model.connections as |connection|}}
-            <li>Username:{{connection.name}} Email:{{connection.email}}</li>
-            {{/each}}
+<div class="container-fluid pl-0 pr-0">
+    <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
+        <ul class="nav nav-pills flex-column timeline">
+            <div class="menu">
+                <li>{{#link-to "notifications" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-envelope"></i>Notifications
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "connections" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user-plus"></i>Contacts
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "home" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user"></i>Profile
+                    {{/link-to}}
+                </li>
+            </div>
         </ul>
+    </nav>
+</div>
+<div class="row main">
+    <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">
+    </div>
+
+    <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">
+        <br>
+        <h5>Contacts</h5>
+        <br>
+        {{#each model.connections as |connection|}}
+        {{connection.name}}<br>
+        E:{{connection.email}}
+        <hr>
+        {{/each}}
     </div>
 </div>
+
+
+

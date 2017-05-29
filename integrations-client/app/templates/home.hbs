@@ -1,22 +1,24 @@
-<div class="main">
-    <div class="container mb-5">
-        {{user-logout}}
-        {{user-login-oauth provider="github"}}
-        {{user-login-oauth provider="linkedin"}}
-        {{create-project repositories=model.repositories}}
-        Projects
-        {{#each model.projects as |project|}}
-        <div>
-        {{#link-to "develop.project" project.org project.id}}{{project.org}}/{{project.id}}-{{project.name}}{{/link-to}}
-        </div>
-        {{/each}}
-
-    </div>
-    <div class="container flow profile">
-        <div class="row">
-            <div class="col-sm-12 col-md-12">
-                {{profile-aggregates model=model}}
+<div class="container-fluid pl-0 pr-0">
+    <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
+        <ul class="nav nav-pills flex-column timeline">
+            <div class="menu">
+                <li>{{#link-to "notifications" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-envelope"></i>Notifications
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "connections" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user-plus"></i>Contacts
+                    {{/link-to}}
+                </li>
             </div>
-        </div>
+        </ul>
+    </nav>
+</div>
+<div class="row main">
+    <div class="col-sm-12 offset-md-0 slide hidden-sm-down">
     </div>
 </div>

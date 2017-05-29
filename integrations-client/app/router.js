@@ -25,6 +25,7 @@ Router.map(function() {
   this.route('profile',{ path: '/:username'});
   this.route('notifications');
   this.route('connections');
+  this.route('home2');
 });
 
 export default Router;
