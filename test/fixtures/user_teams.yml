@@ -3,6 +3,7 @@ adam_confirmed:
   user: adam_confirmed
   team: ateam
   accepted: true
+  token: "ABC"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 
@@ -11,5 +12,7 @@ adam_invited:
   user: adam
   team: ateam
   accepted: false
+  user_email: "adam+12345@wired7.com"
+  token: "123"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

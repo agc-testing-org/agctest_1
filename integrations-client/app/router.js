@@ -10,7 +10,7 @@ Router.map(function() {
     this.route('index', {path: '/'});
     this.route('home');
     this.route('forgot');
-    this.route('register');
+    this.route('register', { path: '/register/:id'});
     this.route('token',{ path: '/token/:id' });
     this.route('forgot');
     this.route('develop', {path: '/develop'}, function() {

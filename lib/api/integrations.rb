@@ -562,7 +562,7 @@ class Integrations < Sinatra::Base
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:name] && fields[:name].length > 4
+            if fields[:name] && fields[:name].length > 2
                 org = Organization.new
                 team = org.create_team fields[:name], @session_hash["id"]
 
@@ -1166,7 +1166,7 @@ class Integrations < Sinatra::Base
     return response.to_json
   end
 
-  invites_teams_post = lambda do
+  team_invites_post = lambda do
       protected!
       status 400
       response = {} 
@@ -1189,6 +1189,22 @@ class Integrations < Sinatra::Base
           end
       end
       return response.to_json
+  end
+
+  team_invites_get = lambda do
+      status 404
+      team = Organization.new
+      invite = team.get_member_invite params[:token]
+      if invite
+          return {
+              id: invite.id,
+              name: invite.team.name,
+              email: invite.user_email,
+              sender: invite.user.name
+          }.to_json
+      else
+          return {}.to_json
+      end
   end
 
   get_user_info = lambda do
@@ -1264,7 +1280,8 @@ class Integrations < Sinatra::Base
 
   post "/teams", &teams_post
 
-  post "/invites/teams", &invites_teams_post
+  post "/team-invites", &team_invites_post
+  get "/team-invites/:token", &team_invites_get
   #TODO post "/invites/accounts"
 
   get '/unauthorized' do

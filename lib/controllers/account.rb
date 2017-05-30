@@ -194,7 +194,7 @@ class Account
         end
     end
 
-    def safe_string string, length
+    def safe_string string, length #TODO - make sure we use this EVERYWHERE we accept input
         if string =~ /^[a-zA-Z0-9\-]{#{length},}$/
             return true
         else

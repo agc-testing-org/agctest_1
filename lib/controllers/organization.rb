@@ -1,21 +1,21 @@
 class Organization
-    
+
     def initialize
 
     end
 
     def member? team_id, user_id
         begin
-           return !UserTeam.find_by({team_id: team_id, user_id: user_id, accepted: true}).nil?
+            return !UserTeam.find_by({team_id: team_id, user_id: user_id, accepted: true}).nil?
         rescue => e
             puts e
             return false
         end
     end
 
-    def create_team name, owner_id
+    def create_team name, user_id
         begin
-            return Team.create({ name: name, owner: owner_id }).as_json
+            return Team.create({ name: name, user_id: user_id }).as_json
         rescue => e
             puts e
             return nil
@@ -28,7 +28,8 @@ class Organization
                 accepted: true,
                 team_id: team_id, 
                 user_id: user_id, 
-                sender_id: user_id
+                sender_id: user_id,
+                token: SecureRandom.hex(32)
             }).as_json
         rescue => e
             puts e
@@ -38,12 +39,19 @@ class Organization
 
     def invite_member team_id, sender_id, user_id, user_email
         begin
-            invitation = UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email })
-            puts invitation.persisted?
-            puts invitation.id
+            invitation = UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32)}).as_json
+            invitation.delete("token") #don't return token
             return invitation
         rescue => e
             puts e
+            return nil
+        end
+    end
+
+    def get_member_invite token
+        begin
+            return UserTeam.joins(:team,"INNER JOIN users on users.id = user_teams.user_id").find_by(:token => token)
+        rescue => e
             return nil
         end
     end

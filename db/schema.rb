@@ -165,7 +165,7 @@ ActiveRecord::Schema.define(version: 20170516000000) do
 
   create_table "teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
-    t.string "owner", null: false
+    t.string "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -244,6 +244,7 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.string "user_email"
     t.integer "team_id", null: false
     t.boolean "accepted", default: false
+    t.string "token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sender_id"], name: "fk_rails_58c1498938"

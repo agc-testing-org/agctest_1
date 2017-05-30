@@ -12,6 +12,7 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
+            invite: this.store.find('team-invite',params.id),
             roles: this.store.findAll('role'),
         });
     }

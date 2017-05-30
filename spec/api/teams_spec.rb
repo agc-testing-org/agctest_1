@@ -22,7 +22,8 @@ describe "/teams" do
         end 
         it "should return owner" do
             @team_results.each_with_index do |team_result,i|
-                expect(@teams[i]["name"]).to eq(team_result["name"])
+                expect(@teams[i]["user_id"]).to_not be nil
+                expect(@teams[i]["user_id"]).to eq(team_result["user_id"])
             end                                                    
         end 
     end
@@ -56,9 +57,9 @@ describe "/teams" do
             end
         end
         context "invalid fields" do
-            context "name < 5 char"
+            context "name < 3 char"
             before(:each) do
-                post "/teams", { :name => "1234" }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                post "/teams", { :name => "12" }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @team_results = @mysql_client.query("select * from teams")
                 @error = JSON.parse(last_response.body)
             end
