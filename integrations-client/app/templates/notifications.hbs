@@ -33,10 +33,12 @@
         <h5>Notifications</h5>
         <br>
         {{#each model.notifications as |notification|}}
-        Sprint {{#link-to "notifications"}}
-        {{notification.sprint_id}}
-        {{/link-to}} {{notification.body}}
-        <hr>
+            <h3 class="title text-capitalize">
+                {{notification.project}}
+            </h3>
+            Sprint {{notification.sprint_id}} {{notification.sprint_name}} {{notification.body}}<br>
+            <div class="date text-muted">{{moment-from-now notification.created_at}}</div>
+            <hr>
         {{/each}}
     </div>
 </div>
