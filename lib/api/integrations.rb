@@ -1196,11 +1196,12 @@ class Integrations < Sinatra::Base
       team = Organization.new
       invite = team.get_member_invite params[:token]
       if invite
+          status 200
           return {
               id: invite.id,
               name: invite.team.name,
               email: invite.user_email,
-              sender: invite.user.name
+              sender: invite.sender.name
           }.to_json
       else
           return {}.to_json

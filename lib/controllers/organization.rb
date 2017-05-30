@@ -28,8 +28,7 @@ class Organization
                 accepted: true,
                 team_id: team_id, 
                 user_id: user_id, 
-                sender_id: user_id,
-                token: SecureRandom.hex(32)
+                sender_id: user_id
             }).as_json
         rescue => e
             puts e
@@ -50,7 +49,7 @@ class Organization
 
     def get_member_invite token
         begin
-            return UserTeam.joins(:team,"INNER JOIN users on users.id = user_teams.user_id").find_by(:token => token)
+            return UserTeam.find_by(:token => token)
         rescue => e
             return nil
         end

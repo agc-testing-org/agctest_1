@@ -115,7 +115,7 @@ describe "/team-invites" do
                 expect(@res["email"]).to eq @invite.user_email
             end
             it "should return sender name" do
-                expect(@res["sender"]).to eq @invite.user.name
+                expect(@res["sender"]).to eq @invite.sender.name
             end
         end 
     end
