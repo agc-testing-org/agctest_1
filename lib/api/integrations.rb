@@ -1135,6 +1135,30 @@ class Integrations < Sinatra::Base
     end
   end
 
+  user_notifications_read = lambda do
+    protected!
+    status 401
+    response = {}
+    if @session_hash["id"]
+      status 400
+      begin
+        request.body.rewind
+        fields = JSON.parse(request.body.read, :symbolize_names => true)
+        if params[:id] && fields[:read]
+          issue = Issue.new
+          response = (issue.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+          puts response
+          if response
+            status 201
+          end
+        end
+      rescue => e
+        puts e
+      end
+    end
+    return response.to_json
+  end
+
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
@@ -1154,6 +1178,7 @@ class Integrations < Sinatra::Base
     patch "/account/connections/read", &user_connections_patch_read
     patch "/account/connections/confirmed", &user_connections_patch_confirmed
     get "/account/notifications", &get_user_notifications
+    patch "/account/read/notifications/:id", &user_notifications_read 
 
     get "/account/:user_id/roles", &account_roles_get
     get "/account/:user_id/roles/:role_id", &account_roles_get_by_role

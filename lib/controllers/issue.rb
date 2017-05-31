@@ -382,7 +382,7 @@ class Issue
 
             response = SprintTimeline.where("id > ?", id)
             response.each do |x|
-                project = Project.where("id = ?", x.project_id).select("org", "name").as_json
+                project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
                 state = State.where("id = ?", x.state_id).select("name").as_json
                 sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
                 user = User.where("id = ?", x.user_id).select("name").as_json
@@ -402,8 +402,10 @@ class Issue
                         subject: 'Sprint commented',
                         body: 'Sprint commented by'+' '+user_name,
                         created_at: x.created_at,
-                        project: project_org+'/'+project_name,
-                        sprint_name: '('+ sprint_title +')'
+                        project_org: project_org,
+                        project_name: project_name,
+                        project_id: x.project_id,
+                        sprint_name: sprint_title
                         })
                 elsif x.vote_id != nil
                     notification = Notification.create({
@@ -415,8 +417,10 @@ class Issue
                         subject: 'Sprint voted',
                         body: 'Sprint voted by'+' '+user_name,
                         created_at: x.created_at,
-                        project: project_org+'/'+project_name,
-                        sprint_name: '('+ sprint_title +')'
+                        project_org: project_org,
+                        project_name: project_name,
+                        project_id: x.project_id,
+                        sprint_name: sprint_title
                         })
                 else
                     x.vote_id == nil and x.comment_id == nil
@@ -429,8 +433,10 @@ class Issue
                         subject: 'Sprint state changed',
                         body: 'state changed to'+' '+state_name,
                         created_at: x.created_at,
-                        project: project_org+'/'+project_name,
-                        sprint_name: '('+ sprint_title +')'
+                        project_org: project_org,
+                        project_name: project_name,
+                        project_id: x.project_id,
+                        sprint_name: sprint_title
                         })
                 end
             end
@@ -457,8 +463,7 @@ class Issue
                 if x[:id] > id
                     user_notifications = UserNotification.create({
                     notifications_id: x[:id],
-                    user_id: x[:user_id],
-                    read: 0
+                    user_id: x[:user_id]
                     })
                 end
             end
@@ -469,12 +474,22 @@ class Issue
         end
     end
 
+    def read_user_notifications user_id, id, read
+        begin
+            ss = UserNotification.find_or_initialize_by(:user_id => user_id, :id => id)
+            ss.update_attributes!(:read => read)
+            return {:id => ss.id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def create_connection_request user_id, contact_id
         begin
             connection_request = UserConnection.create({
                 user_id: user_id,
-                contact_id: contact_id,
-                read: 0
+                contact_id: contact_id
             })
 
             return connection_request.as_json
@@ -527,7 +542,7 @@ class Issue
 
     def get_user_notifications user_id
         begin      
-            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project, notifications.created_at, notifications.sprint_name, user_notifications.read").as_json
+            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read").as_json
         rescue => e
             puts e
             return nil
