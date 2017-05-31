@@ -342,7 +342,8 @@ describe ".Account" do
         context "account exists" do
             fixtures :users
             before(:each) do
-                @res = @account.get users(:adam).id
+                params = {:id => users(:adam).id}
+                @res = @account.get params
             end
             context "object" do
                 it "should include email" do
@@ -358,7 +359,8 @@ describe ".Account" do
         end
         context "account does not exist" do
             before(:each) do
-                @res = @account.get 2
+                params = {:id => 2}
+                @res = @account.get params
             end
             it "should return nil" do
                 expect(@res).to be nil

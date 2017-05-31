@@ -32,7 +32,7 @@ describe "/team-invites" do
             fixtures :teams
             before(:each) do
                 @team = teams(:ateam).id
-                @email = "adam+12345@wired7.com"
+                @email = "adam+gets+invited@wired7.com"
                 @user_id = users(:adam).id
             end
             context "non-member" do
@@ -57,35 +57,6 @@ describe "/team-invites" do
                     end
                     it_behaves_like "invites_teams"
                 end 
-                context "with user_id" do
-                    context "invalid user_id" do
-                        before(:each) do
-                            post "/team-invites", { :user_id => 93, :id => @team }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                            @res = JSON.parse(last_response.body)
-                            @team_invite_result = @mysql_client.query("select * from user_teams where user_id = 93")
-                        end
-                        it "should not save the result" do
-                            expect(@team_invite_result.count).to eq(0)
-                        end
-                        it "should return error message" do
-                            expect(@res["error"]).to eq("An error has occurred")
-                        end
-                    end
-                    context "valid user_id" do
-                        before(:each) do
-                            post "/team-invites", { :user_id => users(:adam_protected).id, :id => @team }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                            @res = JSON.parse(last_response.body)
-                            @team_invite_result = @mysql_client.query("select * from user_teams where user_id = #{users(:adam_protected).id}").first
-                        end
-                        it "should return user_id" do
-                            expect(@res["user_id"]).to eq(@team_invite_result["user_id"])
-                        end
-                        it "should return email = null" do
-                            expect(@res["email"]).to be nil
-                        end
-                        it_behaves_like "invites_teams"
-                    end 
-                end
             end
         end
         context "invalid team_id" do
@@ -115,7 +86,7 @@ describe "/team-invites" do
                 expect(@res["email"]).to eq @invite.user_email
             end
             it "should return sender name" do
-                expect(@res["sender"]).to eq @invite.sender.name
+                expect(@res["sender"]).to eq @invite.sender.first_name
             end
         end 
     end

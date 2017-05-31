@@ -169,17 +169,16 @@ class Account
 
     def create email, name, ip
         begin
+            if name
+                name = name.downcase
+            end
             user = User.create({
                 email: email.downcase,
-                name: name.downcase,
+                first_name: name,
                 token: SecureRandom.hex(32),
                 ip: ip
             })
-            if user.id
-                return user
-            else
-                return nil
-            end
+            return user
         rescue => e
             puts e
             return nil
@@ -202,9 +201,9 @@ class Account
         end
     end
 
-    def get id
+    def get params
         begin
-            user = User.find_by(id: id)
+            user = User.find_by(params)
             if user
                 return user
             else

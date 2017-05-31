@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170516000000) do
+ActiveRecord::Schema.define(version: 20170531022856) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -254,7 +254,7 @@ ActiveRecord::Schema.define(version: 20170516000000) do
 
   create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "email", null: false
-    t.string "name", null: false
+    t.string "first_name"
     t.boolean "admin", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -266,6 +266,7 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.boolean "confirmed", default: false
     t.string "token"
     t.string "github_username"
+    t.string "last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

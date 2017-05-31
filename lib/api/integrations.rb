@@ -177,8 +177,8 @@ class Integrations < Sinatra::Base
                 if (account.valid_email fields[:email]) 
                     user = account.create fields[:email], fields[:name], request.ip
                     if user # send welcome email with token
-                        account.create_email fields[:email], fields[:name], user.token
-                        if fields[:roles].length < 10
+                        account.create_email fields[:email], fields[:name], user.token #TODO - change email now that confirmation is set at invite accept
+                        if fields[:roles].length < 10 #accept roles from people that sign up without an invite
                             fields[:roles].each do |r|
                                 account.update_role user.id, r[:id], r[:active]
                             end
@@ -1173,10 +1173,20 @@ class Integrations < Sinatra::Base
       begin
           request.body.rewind
           fields = JSON.parse(request.body.read, :symbolize_names => true)
-          if fields[:id] && (fields[:email] || fields[:user_id])
+          if fields[:id] && fields[:email]
               team = Organization.new
               if team.member? fields[:id], @session_hash["id"]
-                  invitation = team.invite_member fields[:id], @session_hash["id"], fields[:user_id], fields[:email]
+                  account = Account.new
+ 
+                  query = {:email => fields[:email]}
+                  user = account.get query
+ 
+                  if !user
+                    user = account.create fields[:email], nil, request.ip
+                  end
+                  
+                  invitation = team.invite_member fields[:id], @session_hash["id"], user[:id], user[:email]
+
                   if invitation
                       status 201
                       response = invitation
@@ -1201,7 +1211,7 @@ class Integrations < Sinatra::Base
               id: invite.id,
               name: invite.team.name,
               email: invite.user_email,
-              sender: invite.sender.name
+              sender: invite.sender.first_name
           }.to_json
       else
           return {}.to_json
