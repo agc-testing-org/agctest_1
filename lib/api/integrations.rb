@@ -12,7 +12,6 @@ require 'uri'
 require 'bcrypt'
 require 'pony'
 require 'octokit'
-require 'ldclient-rb'
 require 'git'
 require 'linkedin-oauth2'
 require 'sidekiq'
@@ -519,8 +518,7 @@ class Integrations < Sinatra::Base
     projects_get_by_id = lambda do
         status 404
         issue = Issue.new
-        query = {:id => params[:id].to_i}
-        project = issue.get_projects query
+        project = issue.get_projects params
         if project[0]
             status 200
             return project[0].to_json
@@ -684,8 +682,8 @@ class Integrations < Sinatra::Base
                 
                 sprint_state = issue.get_sprint_state fields[:sprint_state_id]
                 query = { :id => sprint_state.sprint_id }
-                sprint = issue.get_sprints query, nil
-                project_id = sprint[0][:project]["id"]
+                sprint = issue.get_sprints query
+                project_id = sprint[0]["project_id"]
 
                 log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id]}
 
@@ -714,8 +712,8 @@ class Integrations < Sinatra::Base
 
             sprint_state = issue.get_sprint_state fields[:sprint_state_id]
             query = { :id => sprint_state.sprint_id }
-            sprint = issue.get_sprints query, nil
-            project_id = sprint[0][:project]["id"]
+            sprint = issue.get_sprints query 
+            project_id = sprint[0]["project_id"]
 
             log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id]}
 

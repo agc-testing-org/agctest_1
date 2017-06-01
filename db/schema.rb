@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -11,227 +10,255 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+ActiveRecord::Schema.define(version: 20170516000000) do
 
-ActiveRecord::Schema.define(version: 20170507223642) do
-
-  create_table "comments", force: :cascade do |t|
-    t.integer  "user_id",         limit: 4,     null: false
-    t.integer  "sprint_state_id", limit: 4,     null: false
-    t.integer  "comment_id",      limit: 4
-    t.integer  "contributor_id",  limit: 4
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-    t.text     "text",            limit: 65535, null: false
+  create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "sprint_state_id", null: false
+    t.integer "comment_id"
+    t.integer "contributor_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "text", null: false
+    t.index ["contributor_id"], name: "fk_rails_a1385053cc"
+    t.index ["sprint_state_id"], name: "index_comments_on_sprint_state_id"
+    t.index ["user_id"], name: "index_comments_on_user_id"
   end
 
-  add_index "comments", ["contributor_id"], name: "fk_rails_a1385053cc", using: :btree
-  add_index "comments", ["sprint_state_id"], name: "index_comments_on_sprint_state_id", using: :btree
-  add_index "comments", ["user_id"], name: "index_comments_on_user_id", using: :btree
-
-  create_table "contributors", force: :cascade do |t|
-    t.integer  "user_id",         limit: 4,   null: false
-    t.integer  "sprint_state_id", limit: 4,   null: false
-    t.string   "repo",            limit: 255, null: false
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
-    t.string   "commit",          limit: 255
-    t.string   "commit_remote",   limit: 255
-    t.boolean  "commit_success"
-    t.integer  "insertions",      limit: 4
-    t.integer  "deletions",       limit: 4
-    t.integer  "lines",           limit: 4
-    t.integer  "files",           limit: 4
-    t.string   "project_id",      limit: 255, null: false
+  create_table "connection_states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
   end
 
-  add_index "contributors", ["sprint_state_id"], name: "index_contributors_on_sprint_state_id", using: :btree
-  add_index "contributors", ["user_id"], name: "index_contributors_on_user_id", using: :btree
-
-  create_table "labels", force: :cascade do |t|
-    t.string   "name",       limit: 255, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+  create_table "contributors", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "sprint_state_id", null: false
+    t.string "repo", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "commit"
+    t.string "commit_remote"
+    t.boolean "commit_success"
+    t.integer "insertions"
+    t.integer "deletions"
+    t.integer "lines"
+    t.integer "files"
+    t.string "project_id", null: false
+    t.index ["sprint_state_id"], name: "index_contributors_on_sprint_state_id"
+    t.index ["user_id"], name: "index_contributors_on_user_id"
   end
 
-  create_table "logins", force: :cascade do |t|
-    t.integer  "user_id",    limit: 4,   null: false
-    t.string   "ip",         limit: 255, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+  create_table "labels", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  add_index "logins", ["ip"], name: "index_logins_on_ip", using: :btree
-  add_index "logins", ["user_id"], name: "index_logins_on_user", using: :btree
-
-  create_table "projects", force: :cascade do |t|
-    t.string   "org",        limit: 255, null: false
-    t.string   "name",       limit: 255, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+  create_table "logins", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.string "ip", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ip"], name: "index_logins_on_ip"
+    t.index ["user_id"], name: "index_logins_on_user"
   end
 
-  create_table "roles", force: :cascade do |t|
-    t.string   "name",       limit: 255, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+  create_table "notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "subject", null: false
+    t.text "body", limit: 255, null: false
+    t.integer "sprint_state_id"
+    t.integer "contributor_id"
+    t.integer "user_id"
+    t.integer "sprint_timeline_id", null: false
+    t.integer "sprint_id", null: false
+    t.index ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true
   end
 
-  create_table "skillsets", force: :cascade do |t|
-    t.string   "name",       limit: 255, null: false
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+  create_table "projects", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "org", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "sprint_skillsets", force: :cascade do |t|
-    t.integer  "skillset_id", limit: 4,                null: false
-    t.integer  "sprint_id",   limit: 4,                null: false
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.boolean  "active",                default: true, null: false
+  create_table "roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  add_index "sprint_skillsets", ["skillset_id"], name: "index_sprint_skillsets_on_skillset_id", using: :btree
-  add_index "sprint_skillsets", ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id", using: :btree
+  create_table "skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
-  create_table "sprint_states", force: :cascade do |t|
-    t.integer  "sprint_id",      limit: 4,   null: false
-    t.integer  "state_id",       limit: 4,   null: false
+  create_table "sprint_skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "skillset_id", null: false
+    t.integer "sprint_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "active", default: true, null: false
+    t.index ["skillset_id"], name: "index_sprint_skillsets_on_skillset_id"
+    t.index ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id"
+  end
+
+  create_table "sprint_states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "sprint_id", null: false
+    t.integer "state_id", null: false
     t.datetime "deadline"
-    t.datetime "created_at",                 null: false
-    t.datetime "updated_at",                 null: false
-    t.integer  "contributor_id", limit: 4
-    t.string   "sha",            limit: 255
-    t.integer  "arbiter_id",     limit: 4
-    t.boolean  "merged"
-    t.integer  "pull_request",   limit: 4
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "contributor_id"
+    t.string "sha"
+    t.integer "arbiter_id"
+    t.boolean "merged"
+    t.integer "pull_request"
+    t.index ["arbiter_id"], name: "fk_rails_a961915d3b"
+    t.index ["contributor_id"], name: "fk_rails_52fb9ef0eb"
+    t.index ["sprint_id"], name: "index_sprint_states_on_sprint_id"
+    t.index ["state_id"], name: "fk_rails_bececa531a"
   end
 
-  add_index "sprint_states", ["arbiter_id"], name: "fk_rails_a961915d3b", using: :btree
-  add_index "sprint_states", ["contributor_id"], name: "fk_rails_52fb9ef0eb", using: :btree
-  add_index "sprint_states", ["sprint_id"], name: "index_sprint_states_on_sprint_id", using: :btree
-  add_index "sprint_states", ["state_id"], name: "fk_rails_bececa531a", using: :btree
-
-  create_table "sprint_timelines", force: :cascade do |t|
-    t.integer  "sprint_id",       limit: 4, null: false
-    t.integer  "state_id",        limit: 4
-    t.integer  "label_id",        limit: 4
-    t.datetime "created_at",                null: false
-    t.integer  "project_id",      limit: 4, null: false
-    t.integer  "user_id",         limit: 4, null: false
-    t.integer  "after",           limit: 4
-    t.integer  "comment_id",      limit: 4
-    t.integer  "sprint_state_id", limit: 4
-    t.integer  "vote_id",         limit: 4
+  create_table "sprint_timelines", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "sprint_id", null: false
+    t.integer "state_id"
+    t.integer "label_id"
+    t.datetime "created_at", null: false
+    t.integer "project_id", null: false
+    t.integer "user_id", null: false
+    t.integer "after"
+    t.integer "comment_id"
+    t.integer "sprint_state_id"
+    t.integer "vote_id"
+    t.integer "contributor_id"
+    t.index ["comment_id"], name: "fk_rails_1251c5b8fd"
+    t.index ["contributor_id"], name: "fk_rails_c3269fa3ec"
+    t.index ["label_id"], name: "fk_rails_1b320ef958"
+    t.index ["sprint_id"], name: "index_sprint_timelines_on_sprint_id"
+    t.index ["sprint_state_id"], name: "fk_rails_e755d52f56"
+    t.index ["state_id"], name: "fk_rails_c9feeeb84f"
+    t.index ["vote_id"], name: "fk_rails_9f8155a22b"
   end
 
-  add_index "sprint_timelines", ["comment_id"], name: "fk_rails_1251c5b8fd", using: :btree
-  add_index "sprint_timelines", ["label_id"], name: "fk_rails_1b320ef958", using: :btree
-  add_index "sprint_timelines", ["sprint_id"], name: "index_sprint_timelines_on_sprint_id", using: :btree
-  add_index "sprint_timelines", ["sprint_state_id"], name: "fk_rails_e755d52f56", using: :btree
-  add_index "sprint_timelines", ["state_id"], name: "fk_rails_c9feeeb84f", using: :btree
-  add_index "sprint_timelines", ["vote_id"], name: "fk_rails_9f8155a22b", using: :btree
-
-  create_table "sprints", force: :cascade do |t|
-    t.integer  "user_id",     limit: 4,     null: false
-    t.integer  "project_id",  limit: 4,     null: false
-    t.string   "title",       limit: 255
-    t.text     "description", limit: 65535
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+  create_table "sprints", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "project_id", null: false
+    t.string "title"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.datetime "deadline"
-    t.string   "sha",         limit: 255
+    t.string "sha"
+    t.index ["project_id"], name: "index_sprints_on_project_id"
+    t.index ["user_id"], name: "index_sprints_on_user_id"
   end
 
-  add_index "sprints", ["project_id"], name: "index_sprints_on_project_id", using: :btree
-  add_index "sprints", ["user_id"], name: "index_sprints_on_user_id", using: :btree
-
-  create_table "states", force: :cascade do |t|
-    t.string   "name",         limit: 255,                   null: false
-    t.string   "fa_icon",      limit: 255,                   null: false
-    t.string   "description",  limit: 255,                   null: false
-    t.datetime "created_at",                                 null: false
-    t.datetime "updated_at",                                 null: false
-    t.text     "instruction",  limit: 65535,                 null: false
-    t.boolean  "contributors",               default: false, null: false
+  create_table "states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.string "fa_icon", null: false
+    t.string "description", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "instruction", null: false
+    t.boolean "contributors", default: false, null: false
   end
 
-  create_table "user_positions", force: :cascade do |t|
-    t.integer  "user_profile_id", limit: 4,   null: false
-    t.string   "title",           limit: 255
-    t.string   "size",            limit: 255
-    t.integer  "start_year",      limit: 4
-    t.integer  "end_year",        limit: 4
-    t.string   "company",         limit: 255
-    t.string   "industry",        limit: 255
-    t.datetime "created_at",                  null: false
-    t.datetime "updated_at",                  null: false
+  create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "contact_id", null: false
+    t.integer "confirmed", default: 1
+    t.boolean "read", default: false
+    t.index ["contact_id"], name: "index_user_connections_on_contact_id"
+    t.index ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true
+    t.index ["user_id"], name: "index_user_connections_on_user_id"
   end
 
-  add_index "user_positions", ["user_profile_id"], name: "fk_rails_a62e6232fa", using: :btree
-
-  create_table "user_profiles", force: :cascade do |t|
-    t.integer  "user_id",               limit: 4,   null: false
-    t.string   "headline",              limit: 255
-    t.string   "location_country_code", limit: 255
-    t.string   "location_name",         limit: 255
-    t.datetime "created_at",                        null: false
-    t.datetime "updated_at",                        null: false
+  create_table "user_contributors", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "contributors_id", null: false
+    t.index ["user_id", "contributors_id"], name: "index_contributors_id_and_user_id_on_user_contributor", unique: true
   end
 
-  add_index "user_profiles", ["user_id"], name: "fk_rails_87a6352e58", using: :btree
-
-  create_table "user_roles", force: :cascade do |t|
-    t.integer  "user_id",    limit: 4,                 null: false
-    t.integer  "role_id",    limit: 4,                 null: false
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.boolean  "active",               default: false
+  create_table "user_notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "notifications_id", null: false
+    t.boolean "read", default: false
+    t.index ["notifications_id"], name: "index_user_notifications_on_notifications_id"
+    t.index ["user_id", "notifications_id"], name: "index_notification_id_and_user_id_on_user_notification", unique: true
+    t.index ["user_id"], name: "index_user_notifications_on_user_id"
   end
 
-  add_index "user_roles", ["role_id"], name: "fk_rails_3369e0d5fc", using: :btree
-  add_index "user_roles", ["user_id"], name: "index_user_roles_on_user", using: :btree
-
-  create_table "user_skillsets", force: :cascade do |t|
-    t.integer  "user_id",     limit: 4,                null: false
-    t.integer  "skillset_id", limit: 4,                null: false
-    t.datetime "created_at",                           null: false
-    t.datetime "updated_at",                           null: false
-    t.boolean  "active",                default: true, null: false
+  create_table "user_positions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_profile_id", null: false
+    t.string "title"
+    t.string "size"
+    t.integer "start_year"
+    t.integer "end_year"
+    t.string "company"
+    t.string "industry"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_profile_id"], name: "fk_rails_a62e6232fa"
   end
 
-  add_index "user_skillsets", ["skillset_id"], name: "index_user_skillsets_on_skillset_id", using: :btree
-  add_index "user_skillsets", ["user_id"], name: "index_user_skillsets_on_user_id", using: :btree
-
-  create_table "users", force: :cascade do |t|
-    t.string   "email",           limit: 255,                   null: false
-    t.string   "name",            limit: 255,                   null: false
-    t.boolean  "admin",                         default: false
-    t.datetime "created_at",                                    null: false
-    t.datetime "updated_at",                                    null: false
-    t.text     "jwt",             limit: 65535
-    t.string   "ip",              limit: 255
-    t.boolean  "lock",                          default: false
-    t.boolean  "protected",                     default: false
-    t.string   "password",        limit: 255
-    t.boolean  "confirmed",                     default: false
-    t.string   "token",           limit: 255
-    t.string   "github_username", limit: 255
+  create_table "user_profiles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.string "headline"
+    t.string "location_country_code"
+    t.string "location_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "fk_rails_87a6352e58"
   end
 
-  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
-
-  create_table "votes", force: :cascade do |t|
-    t.integer  "user_id",         limit: 4, null: false
-    t.integer  "sprint_state_id", limit: 4, null: false
-    t.integer  "comment_id",      limit: 4
-    t.integer  "contributor_id",  limit: 4
-    t.datetime "created_at",                null: false
-    t.datetime "updated_at",                null: false
+  create_table "user_roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "role_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "active", default: false
+    t.index ["role_id"], name: "fk_rails_3369e0d5fc"
+    t.index ["user_id"], name: "index_user_roles_on_user"
   end
 
-  add_index "votes", ["contributor_id"], name: "fk_rails_ef3485c16e", using: :btree
-  add_index "votes", ["sprint_state_id"], name: "index_votes_on_sprint_state_id", using: :btree
-  add_index "votes", ["user_id"], name: "index_votes_on_user_id", using: :btree
+  create_table "user_skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "skillset_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "active", default: true, null: false
+    t.index ["skillset_id"], name: "index_user_skillsets_on_skillset_id"
+    t.index ["user_id"], name: "index_user_skillsets_on_user_id"
+  end
+
+  create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "email", null: false
+    t.string "name", null: false
+    t.boolean "admin", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "jwt"
+    t.string "ip"
+    t.boolean "lock", default: false
+    t.boolean "protected", default: false
+    t.string "password"
+    t.boolean "confirmed", default: false
+    t.string "token"
+    t.string "github_username"
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  create_table "votes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "sprint_state_id", null: false
+    t.integer "comment_id"
+    t.integer "contributor_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["contributor_id"], name: "fk_rails_ef3485c16e"
+    t.index ["sprint_state_id"], name: "index_votes_on_sprint_state_id"
+    t.index ["user_id"], name: "index_votes_on_user_id"
+  end
 
   add_foreign_key "comments", "contributors"
   add_foreign_key "comments", "sprint_states"
@@ -246,6 +273,7 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_foreign_key "sprint_states", "states"
   add_foreign_key "sprint_states", "users", column: "arbiter_id"
   add_foreign_key "sprint_timelines", "comments"
+  add_foreign_key "sprint_timelines", "contributors"
   add_foreign_key "sprint_timelines", "labels"
   add_foreign_key "sprint_timelines", "sprint_states"
   add_foreign_key "sprint_timelines", "sprints"
@@ -253,6 +281,8 @@ ActiveRecord::Schema.define(version: 20170507223642) do
   add_foreign_key "sprint_timelines", "votes"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
+  add_foreign_key "user_notifications", "notifications", column: "notifications_id"
+  add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"
   add_foreign_key "user_profiles", "users"
   add_foreign_key "user_roles", "roles"

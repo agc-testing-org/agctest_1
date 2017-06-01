@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
-gem 'sinatra', '1.4.7'
-gem 'sinatra-activerecord'
+gem 'sinatra', '2.0.0'
+gem 'sinatra-activerecord', '2.0.13'
 gem 'sinatra-strong-params'
 gem 'mysql2', '0.4.4'
 gem 'rake'
@@ -9,13 +9,8 @@ gem 'jwt'
 gem 'bcrypt'
 gem 'pony'
 gem 'octokit', '~> 4.6.0'
-gem 'ldclient-rb', '2.0.3'
 gem 'git'
 gem 'linkedin-oauth2', '~> 1.0'
-
-
-
-
 gem 'sidekiq'
 gem 'sidekiq-client-cli'
 gem 'whenever', :require => false
@@ -29,7 +24,7 @@ group :test do
     gem 'rspec'
     gem 'rspec-rails'
     gem 'rack-test'
-    gem 'watir-webdriver'
+    gem 'watir'
     gem 'selenium-webdriver'
     gem 'database_cleaner'
     gem 'webmock'
