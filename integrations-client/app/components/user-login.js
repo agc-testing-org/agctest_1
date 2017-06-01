@@ -24,7 +24,7 @@ export default Component.extend({
                         this.set('errorMessage', JSON.parse(reason).message);
                     }).then(function(){
                         if(withRedirect){
-                            _this.get('routes').redirect("home");
+//                            _this.get('routes').redirect("home");
                         }
                     });
                 }

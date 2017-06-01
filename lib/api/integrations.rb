@@ -1173,9 +1173,9 @@ class Integrations < Sinatra::Base
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:id]
+            if fields[:id] #id = token
                 account = Account.new
-                team = account.join_team @session_hash["id"], fields[:id]
+                team = account.join_team fields[:id]
                 if team
                     status 201
                     response = team

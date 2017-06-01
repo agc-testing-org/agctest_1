@@ -1,0 +1,25 @@
+<div class="modal" id="register-modal" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content rounded">
+            <div class="modal-header">
+                <div class="title">
+                    Team Invitation
+                </div>
+            </div>
+            <div class="modal-header subtitle">
+                <div class="text-muted">
+                    {{invitation.sender}} would like for you to join the {{invitation.name}} team
+                </div>
+            </div>
+            <div class="modal-body">
+                <form class="register-form" {{action 'accept' invitation.id on="submit"}}>
+
+                    <button type="submit" class="btn btn-outline-secondary rounded">Accept</button>
+                    
+                </form>
+            </div>
+            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "home" class="text-muted"}}Cancel{{/link-to}}</div>
+        </div>
+    </div>
+</div>
+

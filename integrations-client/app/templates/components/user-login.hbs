@@ -2,10 +2,25 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content rounded">
             <div class="modal-header">
-                <div class="title">Sign In</div>
+                <div class="title">
+
+                    {{#if invitation}}
+                        Sign in to Accept an Invitation
+                    {{else}}
+                        Sign In
+                    {{/if}}
+
+                </div>
             </div>
             <div class="modal-header subtitle">
-                <div class="text-muted">Sign in to your Wired7 Account</div>
+                <div class="text-muted">
+
+                    {{#if invitation}}
+                        {{invitation.sender}} would like for you to join the {{invitation.name}} team
+                    {{else}}
+                        Sign in to your Wired7 Account
+                    {{/if}}
+                </div>
             </div>
             <div class="modal-body">
 
