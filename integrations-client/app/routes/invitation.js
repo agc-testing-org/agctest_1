@@ -12,7 +12,10 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
-             
+            token: params.id,
+            invitation: this.store.queryRecord('team-invite', {
+                token: params.id
+            }),
         });
     }
 });

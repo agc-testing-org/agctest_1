@@ -4,24 +4,6 @@ class Account
 
     end
 
-    def join_team user_id, team_id
-        begin
-            invite = UserTeam.find_by({ #assumes you must have an account to join...
-                user_id: user_id,
-                team_id: team_id
-            })
-            if invite
-                invite.update_attributes!({accepted: true})
-                return invite.as_json
-            else
-                return nil
-            end
-        rescue => e
-            puts e
-            return nil
-        end 
-    end
-
     def linkedin_client access_token
         return LinkedIn::API.new(access_token)
     end
@@ -257,11 +239,19 @@ class Account
             return false
         end
     end
+    
+    def get_reset_token token
+        begin
+            token = token.split("-")
+            return User.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token[1]).take
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 
-    def validate_reset_token token, password, ip
-        token = token.split("-")
-        user = User.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token[1]).take
-        if user && (Digest::MD5.hexdigest(user[:email]) == token[0])
+    def confirm_user user, password, ip
+        if user
             user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
             user[:protected] = false
@@ -297,7 +287,7 @@ class Account
 
     def update_role user_id, role_id, active
         begin
-            return role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
+            return UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
         rescue => e
             puts e
             return nil 
@@ -307,6 +297,34 @@ class Account
     def get_account_roles user_id, query
         begin            
             return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_teams user_id
+        begin 
+            return Team.joins(:user_teams).where({
+                "user_teams.user_id" => user_id
+            })
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def join_team token
+        begin
+            invite = UserTeam.find_by({
+                token: token 
+            })
+            if invite
+                invite.update_attributes!({accepted: true, token: nil})
+                return invite.as_json
+            else
+                return nil
+            end
         rescue => e
             puts e
             return nil

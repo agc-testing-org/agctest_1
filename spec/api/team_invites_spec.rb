@@ -66,14 +66,14 @@ describe "/team-invites" do
             it_behaves_like "unauthorized"
         end
     end
-    describe "GET /:token", :focus => true do
+    describe "GET /?token=", :focus => true do
         fixtures :users, :teams, :user_teams
         before(:each) do        
             @invite = user_teams(:adam_invited)
         end
         context "valid token" do
             before(:each) do
-                get "/team-invites/#{@invite.token}"
+                get "/team-invites?token=#{@invite.token}"
                 @res = JSON.parse(last_response.body)
             end
             it "should return invite id" do

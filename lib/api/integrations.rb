@@ -211,8 +211,19 @@ class Integrations < Sinatra::Base
             if fields[:token] && fields[:password]
                 password_length = fields[:password].to_s.length
                 if password_length > 7 && password_length < 31
-                    user = account.validate_reset_token fields[:token], fields[:password], request.ip
+                    user = nil                    
+                    if fields[:invitation]
+                        team = account.join_team fields[:token]
+                        if team
+                            user_params = {:id => team["user_id"]}
+                            user = account.get user_params
+                        end
+                    else
+                        user = account.get_reset_token fields[:token]
+                    end
+
                     if user
+                        account.confirm_user user, fields[:password], request.ip
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, fields[:name]
                         update_fields = {
@@ -555,6 +566,18 @@ class Integrations < Sinatra::Base
         end
     end
 
+    teams_get = lambda do
+        protected!
+        account = Account.new
+        teams = account.get_teams @session_hash["id"]
+        if teams
+            status 200
+            return teams.to_json
+        else
+            return {}
+        end
+    end
+
     teams_post = lambda do
         protected!
         status 400
@@ -593,11 +616,11 @@ class Integrations < Sinatra::Base
     sprint_states_get = lambda do
         authorized?
         issue = Issue.new
-         if @session_hash
+        if @session_hash
             sprint_states = issue.get_sprint_states params, @session_hash["id"]
-         else
+        else
             sprint_states = issue.get_sprint_states params, nil
-         end
+        end
         return sprint_states.to_json
     end
 
@@ -707,7 +730,7 @@ class Integrations < Sinatra::Base
             if fields[:text] && fields[:text].length > 1
                 issue = Issue.new
                 comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
-                
+
                 sprint_state = issue.get_sprint_state fields[:sprint_state_id]
                 query = { :id => sprint_state.sprint_id }
                 sprint = issue.get_sprints query
@@ -1060,252 +1083,254 @@ class Integrations < Sinatra::Base
     end
 
     connections_request_post = lambda do
-    protected!
-    status 401
-    response = {}
-    if @session_hash["id"]
-      status 400
-      begin
-        request.body.rewind
-        fields = JSON.parse(request.body.read, :symbolize_names => true)
+        protected!
+        status 401
+        response = {}
+        if @session_hash["id"]
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-        if fields[:contact_id]
-          issue = Issue.new
-          connection_request = issue.create_connection_request @session_hash["id"], fields[:contact_id]
+                if fields[:contact_id]
+                    issue = Issue.new
+                    connection_request = issue.create_connection_request @session_hash["id"], fields[:contact_id]
 
-          if connection_request
-            status 201
-            response = connection_request
-          end
-        else
-          status 400
-        end
-      end
-      return response.to_json
-    end
-  end
-
-  connections_get = lambda do
-    user_id = (default_to_signed params[:user_id])
-    if user_id
-      issue = Issue.new
-      query = {"user_connections.contact_id" => user_id}
-      connections = issue.get_user_connections query
-      return connections.to_json
-    end
-  end
-
-  user_connections_patch_read = lambda do
-    protected!
-    status 401
-    response = {}
-    if @session_hash["id"]
-      status 400
-      begin
-        request.body.rewind
-        fields = JSON.parse(request.body.read, :symbolize_names => true)
-        if fields[:user_id] && fields[:read]
-          issue = Issue.new
-          response = (issue.update_user_connections_read @session_hash["id"], fields[:user_id], fields[:read])
-          puts response
-          if response
-            status 201
-          end
-        end
-      rescue => e
-        puts e
-      end
-    end
-    return response.to_json
-  end
-
-  user_connections_patch_confirmed = lambda do
-    protected!
-    status 401
-    response = {}
-    if @session_hash["id"]
-      status 400
-      begin
-        request.body.rewind
-        fields = JSON.parse(request.body.read, :symbolize_names => true)
-        if fields[:user_id] && fields[:confirmed]
-          issue = Issue.new
-          response = (issue.update_user_connections_confirmed @session_hash["id"], fields[:user_id], fields[:confirmed])
-          puts response
-          if response
-            status 201
-          end
-        end
-      rescue => e
-        puts e
-      end
-    end
-    return response.to_json
-  end
-
-  account_teams_post = lambda do
-    protected!
-    status 400
-    response = {}
-    begin
-        request.body.rewind
-        fields = JSON.parse(request.body.read, :symbolize_names => true)
-        if fields[:id]
-            account = Account.new
-            team = account.join_team @session_hash["id"], fields[:id]
-            if team
-                status 201
-                response = team
-            else
-                response[:error] = "This invite is invalid or has expired"
+                    if connection_request
+                        status 201
+                        response = connection_request
+                    end
+                else
+                    status 400
+                end
             end
-        else
-            response[:error] = "Team not specified"
+            return response.to_json
         end
     end
-    return response.to_json
-  end
 
-  team_invites_post = lambda do
-      protected!
-      status 400
-      response = {} 
-      begin
-          request.body.rewind
-          fields = JSON.parse(request.body.read, :symbolize_names => true)
-          if fields[:id] && fields[:email]
-              team = Organization.new
-              if team.member? fields[:id], @session_hash["id"]
-                  account = Account.new
- 
-                  query = {:email => fields[:email]}
-                  user = account.get query
- 
-                  if !user
-                    user = account.create fields[:email], nil, request.ip
-                  end
-                  
-                  invitation = team.invite_member fields[:id], @session_hash["id"], user[:id], user[:email]
+    connections_get = lambda do
+        user_id = (default_to_signed params[:user_id])
+        if user_id
+            issue = Issue.new
+            query = {"user_connections.contact_id" => user_id}
+            connections = issue.get_user_connections query
+            return connections.to_json
+        end
+    end
 
-                  if invitation
-                      status 201
-                      response = invitation
-                  else
-                      response[:error] = "An error has occurred"
-                  end
-              else
-                  redirect to("/unauthorized")
-              end
-          end
-      end
-      return response.to_json
-  end
+    user_connections_patch_read = lambda do
+        protected!
+        status 401
+        response = {}
+        if @session_hash["id"]
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if fields[:user_id] && fields[:read]
+                    issue = Issue.new
+                    response = (issue.update_user_connections_read @session_hash["id"], fields[:user_id], fields[:read])
+                    puts response
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
 
-  team_invites_get = lambda do
-      status 404
-      team = Organization.new
-      invite = team.get_member_invite params[:token]
-      if invite
-          status 200
-          return {
-              id: invite.id,
-              name: invite.team.name,
-              email: invite.user_email,
-              sender: invite.sender.first_name
-          }.to_json
-      else
-          return {}.to_json
-      end
-  end
+    user_connections_patch_confirmed = lambda do
+        protected!
+        status 401
+        response = {}
+        if @session_hash["id"]
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if fields[:user_id] && fields[:confirmed]
+                    issue = Issue.new
+                    response = (issue.update_user_connections_confirmed @session_hash["id"], fields[:user_id], fields[:confirmed])
+                    puts response
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
 
-  get_user_info = lambda do
-      user_id = (default_to_signed params[:user_id])
-      if user_id
-          issue = Issue.new
-          user_info = issue.get_user_info user_id
-          return user_info.to_json
-      end
-  end
+    account_teams_post = lambda do
+        protected!
+        status 400
+        response = {}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if fields[:id]
+                account = Account.new
+                team = account.join_team @session_hash["id"], fields[:id]
+                if team
+                    status 201
+                    response = team
+                else
+                    response[:error] = "This invite is invalid or has expired"
+                end
+            else
+                response[:error] = "Team not specified"
+            end
+        end
+        return response.to_json
+    end
 
-  #API
-  post "/register", &register_post
-  post "/forgot", &forgot_post
-  post "/reset", &reset_post
-  post "/login", &login_post
-  post "/session/github", &session_provider_github_post
-  post "/session/linkedin", &session_provider_linkedin_post
-  delete "/session", &session_delete
-  get "/account", &account_get
-  get "/account/:user_id/skillsets", &user_skillsets_get
-  get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
-  patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
+    team_invites_post = lambda do
+        protected!
+        status 400
+        response = {} 
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if fields[:id] && fields[:email]
+                team = Organization.new
+                if team.member? fields[:id], @session_hash["id"]
+                    account = Account.new
 
-  post "/account/connections", &connections_request_post
-  get "/account/connections", &connections_get
-  get "/account/connections/confirmed", &get_user_info
-  patch "/account/connections/read", &user_connections_patch_read
-  patch "/account/connections/confirmed", &user_connections_patch_confirmed
+                    query = {:email => fields[:email]}
+                    user = account.get query
 
-  post "/account/teams", &account_teams_post
+                    if !user
+                        user = account.create fields[:email], nil, request.ip
+                    end
 
-  get "/account/:user_id/roles", &account_roles_get
-  get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
-  patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
+                    invitation = team.invite_member fields[:id], @session_hash["id"], user[:id], user[:email]
 
-  get "/roles", &roles_get
-  get "/states", &states_get
-  get "/skillsets", &skillsets_get
+                    if invitation
+                        status 201
+                        response = invitation
+                    else
+                        response[:error] = "An error has occurred"
+                    end
+                else
+                    redirect to("/unauthorized")
+                end
+            end
+        end
+        return response.to_json
+    end
 
-  get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
-  get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset
-  patch "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_patch 
+    team_invites_get = lambda do
+        status 404
+        team = Organization.new
+        invite = team.get_member_invite params[:token]
+        if invite
+            status 200
+            return {
+                id: invite.id,
+                name: invite.team.name,
+                email: invite.user_email,
+                sender: invite.sender.first_name,
+                registered: invite.user.confirmed
+            }.to_json
+        else
+            return {}.to_json
+        end
+    end
 
-  get "/repositories", &repositories_get
+    get_user_info = lambda do
+        user_id = (default_to_signed params[:user_id])
+        if user_id
+            issue = Issue.new
+            user_info = issue.get_user_info user_id
+            return user_info.to_json
+        end
+    end
 
-  post "/projects", &projects_post
-  get "/projects", &projects_get
-  get "/projects/:id", allows: [:id], &projects_get_by_id
+    #API
+    post "/register", &register_post
+    post "/forgot", &forgot_post
+    post "/reset", &reset_post
+    post "/login", &login_post
+    post "/session/github", &session_provider_github_post
+    post "/session/linkedin", &session_provider_linkedin_post
+    delete "/session", &session_delete
+    get "/account", &account_get
+    get "/account/:user_id/skillsets", &user_skillsets_get
+    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
+    patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
 
-  post "/projects/:project_id/refresh", &refresh_post
-  post "/projects/:project_id/contributors", &contributors_post
-  patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
-  get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
+    post "/account/connections", &connections_request_post
+    get "/account/connections", &connections_get
+    get "/account/connections/confirmed", &get_user_info
+    patch "/account/connections/read", &user_connections_patch_read
+    patch "/account/connections/confirmed", &user_connections_patch_confirmed
 
-  get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
-  get "/sprints/:id", allows: [:id], &sprints_get_by_id
-  post "/sprints", &sprints_post
+    post "/account/teams", &account_teams_post
 
-  get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
-  post "/sprint-states", &sprint_states_post
+    get "/account/:user_id/roles", &account_roles_get
+    get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
+    patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
 
-  get "/projects/:project_id/events", &events_get
+    get "/roles", &roles_get
+    get "/states", &states_get
+    get "/skillsets", &skillsets_get
 
-  post "/contributors/:id/comments", &contributors_post_comments
-  post "/contributors/:id/votes", &contributors_post_votes
-  post "/contributors/:id/winner", &contributors_post_winner
-  post "/contributors/:id/merge", &contributors_post_merge
+    get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
+    get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset
+    patch "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_patch 
 
-  get "/aggregate-comments", &comments_get
-  get "/aggregate-votes", &votes_get
-  get "/aggregate-contributors", &contributors_get
+    get "/repositories", &repositories_get
 
-  post "/teams", &teams_post
+    post "/projects", &projects_post
+    get "/projects", &projects_get
+    get "/projects/:id", allows: [:id], &projects_get_by_id
 
-  post "/team-invites", &team_invites_post
-  get "/team-invites/:token", &team_invites_get
-  #TODO post "/invites/accounts"
+    post "/projects/:project_id/refresh", &refresh_post
+    post "/projects/:project_id/contributors", &contributors_post
+    patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
+    get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
 
-  get '/unauthorized' do
-      status 401
-      return {:error => "unauthorized"}.to_json
-  end
+    get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
+    get "/sprints/:id", allows: [:id], &sprints_get_by_id
+    post "/sprints", &sprints_post
 
-  error RequiredParamMissing do
-      [400, env['sinatra.error'].message]
-  end
+    get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
+    post "/sprint-states", &sprint_states_post
 
-  # Ember
-  get "*" do
-      send_file File.expand_path('index.html',settings.public_folder)
-  end
+    get "/projects/:project_id/events", &events_get
+
+    post "/contributors/:id/comments", &contributors_post_comments
+    post "/contributors/:id/votes", &contributors_post_votes
+    post "/contributors/:id/winner", &contributors_post_winner
+    post "/contributors/:id/merge", &contributors_post_merge
+
+    get "/aggregate-comments", &comments_get
+    get "/aggregate-votes", &votes_get
+    get "/aggregate-contributors", &contributors_get
+
+    post "/teams", &teams_post
+    get "/teams", &teams_get
+
+    post "/team-invites", &team_invites_post
+    get "/team-invites", &team_invites_get
+    #TODO post "/invites/accounts"
+
+    get '/unauthorized' do
+        status 401
+        return {:error => "unauthorized"}.to_json
+    end
+
+    error RequiredParamMissing do
+        [400, env['sinatra.error'].message]
+    end
+
+    # Ember
+    get "*" do
+        send_file File.expand_path('index.html',settings.public_folder)
+    end
 end

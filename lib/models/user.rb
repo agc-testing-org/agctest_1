@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
     has_many :sprints
     has_many :contributors
     has_many :teams
+    has_many :user_teams
     has_many :comments
     has_many :votes
     has_one :user_profile

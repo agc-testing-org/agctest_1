@@ -15,6 +15,7 @@
         {{#each model.teams as |team|}}
         <div>
         {{team.name}}
+        {{create-team-invite team=team}} 
         </div>
         {{/each}}
         

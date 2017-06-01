@@ -10,12 +10,10 @@ Router.map(function() {
     this.route('index', {path: '/'});
     this.route('home');
     this.route('forgot');
-    this.route('register', function(){
-       this.route('index', {path: '/'});
-       this.route('invite', {path: '/invite/:id'});
-    });
-    this.route('login');
+    this.route('register');
+    this.route('login'); 
     this.route('token',{ path: '/token/:id' });
+    this.route('invitation', {path: '/invitation/:id'});
     this.route('forgot');
     this.route('develop', {path: '/develop'}, function() {
         this.route('index', {path: '/'});
