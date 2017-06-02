@@ -25,6 +25,7 @@ Router.map(function() {
   this.route('profile',{ path: '/:username'});
   this.route('notifications');
   this.route('connections');
+  this.route('requests');
   this.route('home2');
 });
 

@@ -35,23 +35,28 @@
 <div class="row main">
     <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">
     </div>
-
     <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">
-        {{#if model.connections}}
+        {{#if model.requests}}
         <br>
-        <h5>Contacts</h5>
+        <h5>Contact requests</h5>
         <br>
-        {{#each model.connections as |connection|}}
-        {{connection.name}}<br>
-        E:{{connection.email}}
-        <hr>
+        {{#each model.requests as |request|}}
+        {{#if (eq request.read "0")}}
+        {{connection-read id=request.id}}
+        <div class="main list-group-item active">
+            <p>{{request.user_name}} is interested in contacting you. Would you like to share your contact information?
+            </p>
+        </div>
+        {{else}}
+        {{connection-confirm id=request.id confirmed=request.confirmed user_name=request.user_name}}
+        {{/if}}
         {{/each}}
         {{else}}
         <div class="vertical-align-hold">
             <div class="vertical-align-cell">
                 <div class="overview">
                     <div class="text-center">
-                        <h3>There is no contacts yet</h3>
+                        <h3>There is no contact requests yet</h3>
                     </div>
                 </div>
             </div>
@@ -59,5 +64,3 @@
         {{/if}}
     </div>
 </div>
-
-

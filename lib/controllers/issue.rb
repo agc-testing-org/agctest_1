@@ -487,8 +487,11 @@ class Issue
 
     def create_connection_request user_id, contact_id
         begin
+            user = User.where("id = ?", user_id).select("name").as_json
+            user_name = user[0]["name"]            
             connection_request = UserConnection.create({
                 user_id: user_id,
+                user_name: user_name,
                 contact_id: contact_id
             })
 
@@ -513,7 +516,7 @@ class Issue
         begin
             ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
             ss.update_attributes!(:read => read)
-            return {:id => ss.contact_id, :user_id => ss.user_id, :read => ss.read}
+            return {:id => ss.id, :read => ss.read}
         rescue => e
             puts e
             return nil
@@ -524,7 +527,7 @@ class Issue
         begin
             ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
             ss.update_attributes!(:confirmed => confirmed)
-            return {:id => ss.contact_id, :user_id => ss.user_id, :confirmed => ss.confirmed}
+            return {:id => ss.id, :confirmed => ss.confirmed}
         rescue => e
             puts e
             return nil

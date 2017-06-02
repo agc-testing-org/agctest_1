@@ -1173,10 +1173,10 @@ class Integrations < Sinatra::Base
     patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
 
     post "/account/connections", &connections_request_post
-    get "/account/connections", &connections_get
+    get "/account/connections/requests", &connections_get
     get "/account/confirmed/connections", &get_user_info
-    patch "/account/connections/read", &user_connections_patch_read
-    patch "/account/connections/confirmed", &user_connections_patch_confirmed
+    patch "/account/connections/read/requests/:id", &user_connections_patch_read
+    patch "/account/connections/confirme/requests/:id", &user_connections_patch_confirmed
     get "/account/notifications", &get_user_notifications
     patch "/account/read/notifications/:id", &user_notifications_read 
 
