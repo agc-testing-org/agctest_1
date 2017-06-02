@@ -7,9 +7,9 @@ export default Ember.Component.extend({
         invite(teamId){
             var email = this.get('email');
             if(email && email.length > 4){
-                var project = this.get('store').createRecord('team-invite', {
-                    id: teamId,
-                    email: email
+                var project = this.get('store').createRecord('user-team', {
+                    team_id: teamId,
+                    user_email: email
                 });
                 project.save();
             }

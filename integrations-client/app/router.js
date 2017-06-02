@@ -14,6 +14,7 @@ Router.map(function() {
     this.route('login'); 
     this.route('token',{ path: '/token/:id' });
     this.route('invitation', {path: '/invitation/:id'});
+    this.route('registered-invitation', {path: '/registered-invitation/:id'});
     this.route('forgot');
     this.route('develop', {path: '/develop'}, function() {
         this.route('index', {path: '/'});
@@ -24,6 +25,7 @@ Router.map(function() {
             }); 
         });
     });
+    this.route('team', {path: '/team/:id'});
     this.route('profile',{ path: '/:username'});
 });
 

@@ -578,6 +578,17 @@ class Integrations < Sinatra::Base
         end
     end
 
+    teams_get_by_id = lambda do
+        protected!
+        org = Organization.new
+        if org.member? params["id"], @session_hash["id"]
+            team = org.get_team params["id"]
+            return team.to_json
+        else
+            redirect to("/unauthorized")
+        end
+    end
+
     teams_post = lambda do
         protected!
         status 400
@@ -1173,9 +1184,9 @@ class Integrations < Sinatra::Base
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:id] #id = token
+            if fields[:token]
                 account = Account.new
-                team = account.join_team fields[:id]
+                team = account.join_team fields[:token]
                 if team
                     status 201
                     response = team
@@ -1189,26 +1200,38 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    team_invites_post = lambda do
+    user_teams_get = lambda do
+        protected!
+        team = Organization.new
+        puts params.inspect
+        if team.member? params["team_id"], @session_hash["id"]
+            members = team.get_users params
+            return members.to_json
+        else
+            redirect to("/unauthorized")
+        end
+    end
+
+    user_teams_post = lambda do
         protected!
         status 400
         response = {} 
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:id] && fields[:email]
+            if fields[:team_id] && fields[:user_email]
                 team = Organization.new
-                if team.member? fields[:id], @session_hash["id"]
+                if team.member? fields[:team_id], @session_hash["id"]
                     account = Account.new
 
-                    query = {:email => fields[:email]}
+                    query = {:email => fields[:user_email]}
                     user = account.get query
 
                     if !user
-                        user = account.create fields[:email], nil, request.ip
+                        user = account.create fields[:user_email], nil, request.ip
                     end
 
-                    invitation = team.invite_member fields[:id], @session_hash["id"], user[:id], user[:email]
+                    invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email]
 
                     if invitation
                         status 201
@@ -1315,9 +1338,12 @@ class Integrations < Sinatra::Base
 
     post "/teams", &teams_post
     get "/teams", &teams_get
-
-    post "/team-invites", &team_invites_post
+    get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
+
+    post "/user-teams", &user_teams_post
+    get "/user-teams", allows: [:team_id], needs: [:team_id], &user_teams_get
+
     #TODO post "/invites/accounts"
 
     get '/unauthorized' do

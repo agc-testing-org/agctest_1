@@ -2,15 +2,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 col-xs-12">
-            {{#unless model.invitation.registered}}
-                {{user-reset invitation=model.invitation token=model.token}}
-            {{else}}
-                {{#if session.isAuthenticated}}
-                    {{user-invite invitation=model.invitation}}  
-                {{else}}
-                    {{user-login invitation=model.invitation}} 
-                {{/if}}
-            {{/unless}}
+            {{user-reset invitation=model.invitation token=model.token}}
         </div>
     </div>
 </div>

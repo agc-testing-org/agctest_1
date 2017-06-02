@@ -1,7 +1,7 @@
 import Ember from 'ember';
-import UnAuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-route-mixin';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
-export default Ember.Route.extend({
+export default Ember.Route.extend(AuthenticatedRouteMixin,{
     activate () {
         Ember.$('body').addClass('body-dark');
     },                                       
@@ -11,12 +11,12 @@ export default Ember.Route.extend({
     },    
     actions: {
         error(error, transition) {
-            console.log(error);
-            if (error && error.errors && error.errors[0].status === '404') {
+            console.log(error);     
+            if (error && error.errors && error.errors[0].status === '404') { 
                 this.transitionTo('home');
-            }
-        }
-    },
+            }                                   
+        }           
+    }, 
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
@@ -26,9 +26,10 @@ export default Ember.Route.extend({
             }),
         });
     },
-    afterModel(model,transition) {
-        if(model.invitation.registered){
-            this.transitionTo('registered-invitation',model.token);
-        }
+    beforeModel(transition) {
+        this._super(transition);
+        let loginController = this.controllerFor('login');
+        loginController.set('previousTransition', transition);
     }
+
 });

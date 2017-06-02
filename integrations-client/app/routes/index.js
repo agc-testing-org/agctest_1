@@ -9,10 +9,15 @@ export default Ember.Route.extend(UnAuthenticatedRouteMixin,{
         Ember.$('body').removeClass('body-dark');
         Ember.$('#register-modal').modal('hide');
     },    
-    store: Ember.inject.service(),
+    /*
+    store: Ember.inject.service(),    
     model: function(params) {
         return Ember.RSVP.hash({
 
         });
+    },
+    */
+    afterModel() {
+        this.transitionTo('register');
     }
 });
