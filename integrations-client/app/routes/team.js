@@ -8,6 +8,10 @@ export default Ember.Route.extend({
             if (error && error.errors && error.errors[0].status === '404') {
      //           this.transitionTo('home');
             }
+        },
+        refresh(){
+            console.log("refreshing router");
+            this.refresh();
         }
     },
     store: Ember.inject.service(),

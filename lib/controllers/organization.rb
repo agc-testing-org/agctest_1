@@ -24,7 +24,7 @@ class Organization
     def get_users params
         begin
             users = []
-            UserTeam.where(params).each do |user|
+            UserTeam.where(params).order(:id => :desc).each do |user|
                 row = user.as_json
                 row["user_first_name"] = user.user.first_name
                 row["user_last_name"] = user.user.last_name

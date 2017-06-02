@@ -673,6 +673,9 @@ button{
 .main{
     margin:0px;
 }
+.main.center{
+    margin:0 auto 0;
+}
 .main .slide{ /* need alternative for mobile */
     position:fixed;
     left:0px;
@@ -791,20 +794,12 @@ button{
     font-weight: 500;
     font-size: 40px;
 }
-
-.main .list-group-item{
-    margin-bottom:4px;
-}
-.main .list-group{
-    border: 3px solid #ededed;
-    border-bottom: 1px solid #ededed;
-    background-color: #ededed;
-}
-
 .main .list-group-item{
     color: #4C4C4C;
     background-color:#fff;
     border: 1px solid #ededed;
+}
+.main .list-group-item-action{
     margin-bottom:3px;
 }
 .main .list-group-item.active{

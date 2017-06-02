@@ -5,13 +5,16 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     actions: {
         invite(teamId){
+            var _this = this;
             var email = this.get('email');
             if(email && email.length > 4){
                 var project = this.get('store').createRecord('user-team', {
                     team_id: teamId,
                     user_email: email
                 });
-                project.save();
+                project.save().then(function(){
+                    _this.sendAction("refresh");
+                });
             }
         }
     }

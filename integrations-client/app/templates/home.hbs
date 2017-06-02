@@ -11,11 +11,10 @@
         </div>
         {{/each}}
         Teams
-        {{create-team}}
+
         {{#each model.teams as |team|}}
         <div>
         {{#link-to "team" team.id}}{{team.name}}{{/link-to}}
-        {{create-team-invite team=team}} 
         </div>
         {{/each}}
         
