@@ -88,7 +88,6 @@ class Integrations < Sinatra::Base
                 @session_hash = JSON.parse(session_hash)
                 if @session_hash
                     @key = @session_hash["key"]
-                    puts "::unlocking token"
                     @jwt_hash = account.validate_token @session, @key
                     if @jwt_hash
                         return true
@@ -172,12 +171,12 @@ class Integrations < Sinatra::Base
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:name].length > 1 && fields[:name].length < 30
+            if fields[:first_name].length > 1 && fields[:first_name].length < 30
                 account = Account.new
                 if (account.valid_email fields[:email]) 
-                    user = account.create fields[:email], fields[:name], request.ip
-                    if user # send welcome email with token
-                        account.create_email fields[:email], fields[:name], user.token #TODO - change email now that confirmation is set at invite accept
+                    user = account.create fields[:email], fields[:first_name], fields[:last_name], request.ip
+                    if user && user.id # send welcome email with token
+                        account.create_email fields[:email], fields[:first_name], user.token #TODO - change email now that confirmation is set at invite accept
                         if fields[:roles].length < 10 #accept roles from people that sign up without an invite
                             fields[:roles].each do |r|
                                 account.update_role user.id, r[:id], r[:active]
@@ -230,7 +229,7 @@ class Integrations < Sinatra::Base
                             ip: request.ip,
                             jwt: jwt
                         }
-                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -268,7 +267,7 @@ class Integrations < Sinatra::Base
                     ip: request.ip, 
                     jwt: jwt                        
                 }  
-                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :name => user[:name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                     response[:success] = true
                     response[:w7_token] = jwt
                     status 200
@@ -346,7 +345,7 @@ class Integrations < Sinatra::Base
                 update_fields = {
                     github_username: username 
                 }  
-                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
+                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
                     status 200
                     return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else
@@ -376,7 +375,7 @@ class Integrations < Sinatra::Base
     account_get = lambda do
         protected!
         status 200
-        return {:id => @session_hash["id"], :name => @session_hash["name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
+        return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
     account_roles_get = lambda do
@@ -1229,7 +1228,7 @@ class Integrations < Sinatra::Base
                     user = account.get query
 
                     if !user
-                        user = account.create fields[:user_email], nil, request.ip
+                        user = account.create fields[:user_email], nil, nil, request.ip
                     end
 
                     invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email]

@@ -21,7 +21,7 @@ adam_confirmed_b_team:
   sender: adam_confirmed
   user: adam_confirmed
   team: bteam
-  accepted: true
+  accepted: false
   token: "ABCDE"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

@@ -149,14 +149,21 @@ class Account
         end
     end
 
-    def create email, name, ip
+    def lowercase str
+        if str
+            return str.downcase
+
+        else
+            return str
+        end
+    end
+
+    def create email, first_name, last_name, ip
         begin
-            if name
-                name = name.downcase
-            end
             user = User.create({
                 email: email.downcase,
-                first_name: name,
+                first_name: (lowercase first_name),
+                last_name: (lowercase last_name),
                 token: SecureRandom.hex(32),
                 ip: ip
             })
@@ -233,13 +240,21 @@ class Account
         user = User.find_by(email: email)
         if user 
             user[:token] = SecureRandom.hex
-            mail user.email, "Wired7 Password Reset", "#{user.name.capitalize},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{user.name.capitalize},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+            
+            name = user.first_name
+            if name 
+                name = name.capitalize
+            else
+                name = "Hi"
+            end
+            
+            mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
             return user.save
         else
             return false
         end
     end
-    
+
     def get_reset_token token
         begin
             token = token.split("-")
