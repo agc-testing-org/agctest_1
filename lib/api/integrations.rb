@@ -1177,7 +1177,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    account_teams_post = lambda do
+    user_teams_patch = lambda do
         protected!
         status 400
         response = {}
@@ -1185,6 +1185,7 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             if fields[:token]
+                #TODO - this should check to make sure user_id matches the invite user_id
                 account = Account.new
                 team = account.join_team fields[:token]
                 if team
@@ -1194,7 +1195,7 @@ class Integrations < Sinatra::Base
                     response[:error] = "This invite is invalid or has expired"
                 end
             else
-                response[:error] = "Team not specified"
+                response[:error] = "Missing token"
             end
         end
         return response.to_json
@@ -1203,7 +1204,7 @@ class Integrations < Sinatra::Base
     user_teams_get = lambda do
         protected!
         team = Organization.new
-        puts params.inspect
+   
         if team.member? params["team_id"], @session_hash["id"]
             members = team.get_users params
             return members.to_json
@@ -1293,8 +1294,6 @@ class Integrations < Sinatra::Base
     patch "/account/connections/read", &user_connections_patch_read
     patch "/account/connections/confirmed", &user_connections_patch_confirmed
 
-    post "/account/teams", &account_teams_post
-
     get "/account/:user_id/roles", &account_roles_get
     get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
     patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
@@ -1341,10 +1340,11 @@ class Integrations < Sinatra::Base
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
 
+    post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
     get "/user-teams", allows: [:team_id], needs: [:team_id], &user_teams_get
 
-    #TODO post "/invites/accounts"
+    #TODO post "/invites/accounts" # for "normal" / seat users
 
     get '/unauthorized' do
         status 401

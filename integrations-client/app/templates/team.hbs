@@ -1,17 +1,17 @@
-<div class="container main center">
-    <div class="row">
-        <div class="col-md-8 col-sm-12 offset-md-2">
-            <h1 class="text-uppercase text-center">{{model.team.name}}</h1>
+<div class="container-fluid pl-0 pr-0">
+    <main class="col-sm-12 col-md-12 offset-sm-0 pl-0 pr-0">
+        <div class="row main">
+
+            <div class="col-md-6 col-sm-12 offset-md-0 slide full hidden-sm-down">
+                {{team-overview team=model.team user_teams=model.user_teams}}
+            </div>
+            <div class="col-md-6 col-sm-12 offset-md-0 slide full hidden-md-up">
+                {{team-overview team=model.team user_teams=model.user_teams}} 
+            </div>
+
+            <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{team-content user_teams=model.user_teams team=model.team refresh="refresh"}}</div>
+            <div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{team-content user_teams=model.user_teams team=model.team refresh="refresh"}}</div>
+
         </div>
-    </div>
-    <div class="row">
-        <div class="col-md-8 col-sm-12 offset-md-2">
-            {{user-team-invite team=model.team refresh="refresh"}}            
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-8 col-sm-12 offset-md-2">
-            {{user-team-list user_teams=model.user_teams}}
-        </div>
-    </div>
+    </main>
 </div>

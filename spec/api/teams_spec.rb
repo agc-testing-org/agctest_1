@@ -71,4 +71,47 @@ describe "/teams" do
             end
         end
     end
+    
+    describe "GET /" do
+        context "teams" do
+            fixtures :teams, :user_teams
+            before(:each) do
+                get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user}")
+                @teams = JSON.parse(last_response.body)
+            end
+            it_behaves_like "teams"
+        end
+        context "no teams" do
+            before(:each) do
+                get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @teams = JSON.parse(last_response.body)
+            end
+            it "should return empty" do
+                expect(@teams).to be_empty
+            end
+        end
+    end
+    
+    describe "GET /" do
+        fixtures :teams
+        before(:each) do
+             @team = teams(:ateam).id
+        end
+        context "member" do
+            fixtures :user_teams
+            before(:each) do
+                get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} and teams.id = #{@team}")
+                @teams = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "teams"
+        end
+        context "not member" do
+            before(:each) do
+                get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end 
+            it_behaves_like "unauthorized"
+        end
+    end
 end

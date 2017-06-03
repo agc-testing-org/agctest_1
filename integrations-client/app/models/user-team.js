@@ -3,6 +3,7 @@ import DS from 'ember-data';
 const { attr, Model } = DS;
 
 export default DS.Model.extend({
+    accepted: attr('boolean'),
     team_id: attr('number'),
     sender_id: attr('number'),
     sender_first_name: attr('string'),

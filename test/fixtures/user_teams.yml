@@ -16,3 +16,12 @@ adam_invited:
   token: "123"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+
+adam_confirmed_b_team:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: bteam
+  accepted: true
+  token: "ABCDE"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

@@ -321,7 +321,9 @@ class Account
             })
             if invite
                 invite.update_attributes!({accepted: true, token: nil})
-                return invite.as_json
+                invitation = invite.as_json
+                invitation.delete("token")
+                return invitation
             else
                 return nil
             end

@@ -31,7 +31,6 @@ class Organization
                 row["sender_first_name"] = user.sender.first_name
                 row["sender_last_name"] = user.sender.last_name
                 row.delete("token")
-                row.delete("token")
                 users[users.length] = row
             end
             return users
