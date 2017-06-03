@@ -1,22 +1,21 @@
 require 'spec_helper'
 require 'api_helper'
 
-describe "/user-teams" do
+describe "/team-invites" do
 
     fixtures :users
     before(:all) do
         @CREATE_TOKENS=true
     end
 
-
     describe "GET /?token=" do
-        fixtures :users, :teams, :user_teams
+        fixtures :teams, :user_teams
         before(:each) do
             @invite = user_teams(:adam_invited)
         end
         context "valid token" do
             before(:each) do
-                get "/user-teams?token=#{@invite.token}"
+                get "/team-invites?token=#{@invite.token}"
                 @res = JSON.parse(last_response.body)
             end
             it "should return invite id" do
@@ -30,6 +29,15 @@ describe "/user-teams" do
             end
             it "should return sender name" do
                 expect(@res["sender"]).to eq @invite.sender.first_name
+            end
+        end
+        context "invalid token" do
+            before(:each) do
+                get "/team-invites?token=YYEEA"
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return empty" do
+                expect(@res).to be_empty
             end
         end
     end
