@@ -109,7 +109,6 @@ class Integrations < Sinatra::Base
     def github_authorization
         if @session_hash["github"]
             account = Account.new
-            puts "::unlocking github token"
             return account.unlock_github_token @session, retrieve_github_token 
         end 
     end
