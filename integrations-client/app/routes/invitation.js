@@ -27,7 +27,7 @@ export default Ember.Route.extend({
         });
     },
     afterModel(model,transition) {
-        if(model.invitation.registered){
+        if(model.invitation.get("registered")){
             this.transitionTo('registered-invitation',model.token);
         }
     }
