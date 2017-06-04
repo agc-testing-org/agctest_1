@@ -1,0 +1,20 @@
+
+        {{#if connections}}
+        <div class="full">
+            <h3>Contacts</h3>
+            {{#each connections as |connection|}}
+                {{connection.first_name}}<br>
+                E:{{connection.email}}
+            {{/each}}
+        </div>
+        {{else}}
+        <div class="vertical-align-hold">
+            <div class="vertical-align-cell">
+                <div class="overview">
+                    <div class="text-center">
+                        <h3>No contacts</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}

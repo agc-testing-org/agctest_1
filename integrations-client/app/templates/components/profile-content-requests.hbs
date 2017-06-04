@@ -1,0 +1,26 @@
+        {{#if requests}}
+        <div class="full">
+        <h3>Contact requests</h3>
+        {{#each requests as |request|}}
+        {{#if (eq request.read "0")}}
+        {{connection-read id=request.id}}
+        <div class="main list-group-item active">
+            <p>{{request.user_name}} is interested in contacting you. Would you like to share your contact information?
+            </p>
+        </div>
+        {{else}}
+        {{connection-confirm id=request.id confirmed=request.confirmed user_name=request.user_name}}
+        {{/if}}
+        {{/each}}
+        </div>
+        {{else}}
+        <div class="vertical-align-hold">
+            <div class="vertical-align-cell">
+                <div class="overview">
+                    <div class="text-center">
+                        <h3>No contact requests</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}

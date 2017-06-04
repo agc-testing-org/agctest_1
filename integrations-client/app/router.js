@@ -28,7 +28,12 @@ Router.map(function() {
         });
     });
     this.route('team', {path: '/team/:id'});
-    this.route('profile',{ path: '/:username'});
+    this.route('profile',{ path: '/:username'}); // public profile
+    this.route('me', function() { // private profile (logged in)
+        this.route('notifications');
+        this.route('connections');
+        this.route('requests');
+    });
     this.route('notifications');
     this.route('connections');
     this.route('requests');

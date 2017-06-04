@@ -84,6 +84,7 @@ Shell 2 (project root)
     bundle install
     export RACK_ENV=development
     source ~/.bashrc
+    whenever --update-crontab #probably don't need this every time, but will help if it changes
     bundle exec rake db:migrate
     passenger start --ssl --ssl-certificate localhost.crt --ssl-certificate-key localhost.key --port 3001 --ssl-port 3000 
 
