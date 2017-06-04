@@ -705,6 +705,7 @@ button{
     padding-top:10px;
     padding-bottom:2px;
     color: #ccc;
+    z-index:1;
 }
 .main .about{
     padding:5px;
