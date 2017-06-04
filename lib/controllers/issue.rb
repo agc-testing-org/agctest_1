@@ -533,6 +533,16 @@ class Issue
         end
     end
 
+    def user_connections_get_by_id contact_id, id
+        begin
+            ss = UserConnection.find_or_initialize_by(:id => id, :contact_id => contact_id)
+            return {:id => ss.id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def get_user_info user_id
         begin      
             return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email").as_json
@@ -545,6 +555,16 @@ class Issue
     def get_user_notifications user_id
         begin      
             return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id").order('created_at DESC').as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_notifications_by_id user_id, id
+        begin      
+            ss = UserNotification.find_or_initialize_by(:user_id => user_id, :id => id)
+            return {:id => ss.id}
         rescue => e
             puts e
             return nil
