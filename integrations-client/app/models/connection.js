@@ -3,6 +3,6 @@ import DS from 'ember-data';
 const { attr, Model } = DS;
 
 export default DS.Model.extend({
-	name: DS.attr('string'),
+	first_name: DS.attr('string'),
 	email: DS.attr('string')
 });

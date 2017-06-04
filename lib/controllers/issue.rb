@@ -385,12 +385,12 @@ class Issue
                 project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
                 state = State.where("id = ?", x.state_id).select("name").as_json
                 sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
-                user = User.where("id = ?", x.user_id).select("name").as_json
+                user = User.where("id = ?", x.user_id).select("first_name").as_json
                 state_name = state[0]["name"]
                 project_org = project[0]["org"]
                 project_name = project[0]["name"]
                 sprint_title = sprint[0]["title"]
-                user_name = user[0]["name"]
+                user_name = user[0]["first_name"]
 
                 if x.comment_id != nil
                     notification = Notification.create({
@@ -487,8 +487,8 @@ class Issue
 
     def create_connection_request user_id, contact_id
         begin
-            user = User.where("id = ?", user_id).select("name").as_json
-            user_name = user[0]["name"]            
+            user = User.where("id = ?", user_id).select("first_name").as_json
+            user_name = user[0]["first_name"]            
             connection_request = UserConnection.create({
                 user_id: user_id,
                 user_name: user_name,
@@ -504,8 +504,7 @@ class Issue
 
     def get_user_connections query
         begin      
-            return UserConnection.where(query).as_json
-           
+            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed").as_json
         rescue => e
             puts e
             return nil
@@ -536,7 +535,7 @@ class Issue
 
     def get_user_info user_id
         begin      
-            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.name, users.email").as_json
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email").as_json
         rescue => e
             puts e
             return nil
