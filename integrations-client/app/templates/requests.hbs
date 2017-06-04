@@ -1,0 +1,66 @@
+<div class="container-fluid pl-0 pr-0">
+    <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
+        <ul class="nav nav-pills flex-column timeline">
+            <div class="menu">
+                <li>{{#link-to "notifications" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-envelope"></i>Notifications
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "connections" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-users"></i>Contacts
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "requests" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user-plus"></i>Contact requests
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "home2" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user"></i>Profile
+                    {{/link-to}}
+                </li>
+            </div>
+        </ul>
+    </nav>
+</div>
+<div class="row main">
+    <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">
+    </div>
+    <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">
+        {{#if model.requests}}
+        <br>
+        <h5>Contact requests</h5>
+        <br>
+        {{#each model.requests as |request|}}
+        {{#if (eq request.read "0")}}
+        {{connection-read id=request.id}}
+        <div class="main list-group-item active">
+            <p>{{request.user_name}} is interested in contacting you. Would you like to share your contact information?
+            </p>
+        </div>
+        {{else}}
+        {{connection-confirm id=request.id confirmed=request.confirmed user_name=request.user_name}}
+        {{/if}}
+        {{/each}}
+        {{else}}
+        <div class="vertical-align-hold">
+            <div class="vertical-align-cell">
+                <div class="overview">
+                    <div class="text-center">
+                        <h3>There is no contact requests yet</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</div>

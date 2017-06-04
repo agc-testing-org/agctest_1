@@ -3,4 +3,5 @@ user_2_connection_1:
   contact: masha_get_connection_request
   read: true
   confirmed: 2
+  user_name: 'masha'
 

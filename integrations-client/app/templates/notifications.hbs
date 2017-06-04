@@ -1,0 +1,80 @@
+<div class="container-fluid pl-0 pr-0">
+    <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
+        <ul class="nav nav-pills flex-column timeline">
+            <div class="menu">
+                <li>{{#link-to "notifications" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-envelope"></i>Notifications
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "connections" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-users"></i>Contacts
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "requests" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user-plus"></i>Contact requests
+                    {{/link-to}}
+                </li>
+                <hr>
+                <li>
+                    {{#link-to "home2" tagName='li' href=false class="cursor-pointer nav-item text-center
+                    text-capitalize" }}
+                    <i class="fa fa-fw fa-user"></i>Profile
+                    {{/link-to}}
+                </li>
+            </div>
+        </ul>
+    </nav>
+</div>
+<div class="row main">
+    <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">
+    </div>
+    <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">
+        {{#if model.notifications}}
+        <br>
+        <h5>Notifications</h5>
+        <br>
+        {{#each model.notifications as |notification|}}
+        {{#if (eq notification.read "0")}}
+        {{notification-read id=notification.id}}
+        <div class="list-group active">
+            <h3 class="title text-capitalize">
+                {{notification.project_org}}/{{notification.project_name}}
+            </h3>
+            Sprint {{notification.sprint_id}} ({{notification.sprint_name}}) {{notification.body}}<br>
+            <div class="date text-muted">{{moment-from-now notification.created_at}}</div></
+        </div>
+        <hr>
+        {{else}}
+        <div>
+            <h3 class="title text-capitalize">
+                {{notification.project_org}}/{{notification.project_name}}
+            </h3>
+            Sprint {{notification.sprint_id}} (<a
+                href="/develop/{{notification.project_org}}/{{notification.project_id}}/sprint/{{notification.sprint_id}}/state/{{notification.sprint_state_id}}"
+                id="ember817" class="ember-view">{{notification.sprint_name}}</a> ){{notification.body}}
+            <br>
+            <div class="date text-muted">{{moment-from-now notification.created_at}}</div>
+            <hr>
+        </div>
+        {{/if}}
+        {{/each}}
+        {{else}}
+        <div class="vertical-align-hold">
+            <div class="vertical-align-cell">
+                <div class="overview">
+                    <div class="text-center">
+                        <h3>There is no notifications yet</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</div>

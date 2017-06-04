@@ -1127,6 +1127,26 @@ class Integrations < Sinatra::Base
         end
     end
 
+     user_connections_get_by_id = lambda do
+        protected!
+        status 401
+        if @session_hash["id"]
+            status 400
+            begin
+                if params[:id]
+                    issue = Issue.new
+                    response = (issue.user_connections_get_by_id @session_hash["id"], params[:id])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
+
     user_connections_patch_read = lambda do
         protected!
         status 401
@@ -1273,6 +1293,58 @@ class Integrations < Sinatra::Base
         end
     end
 
+  get_user_notifications = lambda do
+    user_id = (default_to_signed params[:user_id])
+    if user_id
+      issue = Issue.new
+      user_notification = issue.get_user_notifications user_id
+      return user_notification.to_json
+    end
+  end
+
+  get_user_notifications_by_id = lambda do
+    protected!
+    status 401
+    if @session_hash["id"]
+      status 400
+      begin
+        if params[:id]
+          issue = Issue.new
+          response = (issue.get_user_notifications_by_id @session_hash["id"], params[:id])
+          if response
+            status 201
+          end
+        end
+      rescue => e
+        puts e
+      end
+    end
+    return response.to_json
+  end
+
+  user_notifications_read = lambda do
+    protected!
+    status 401
+    response = {}
+    if @session_hash["id"]
+      status 400
+      begin
+        request.body.rewind
+        fields = JSON.parse(request.body.read, :symbolize_names => true)
+        if params[:id] && fields[:read]
+          issue = Issue.new
+          response = (issue.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+          if response
+            status 201
+          end
+        end
+      rescue => e
+        puts e
+      end
+    end
+    return response.to_json
+  end
+
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
@@ -1287,10 +1359,15 @@ class Integrations < Sinatra::Base
     patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
 
     post "/account/connections", &connections_request_post
-    get "/account/connections", &connections_get
-    get "/account/connections/confirmed", &get_user_info
-    patch "/account/connections/read", &user_connections_patch_read
-    patch "/account/connections/confirmed", &user_connections_patch_confirmed
+    get "/account/connections/requests", &connections_get
+    get "/account/confirmed/connections", &get_user_info
+    patch "/account/connections/read/requests/:id", &user_connections_patch_read
+    patch "/account/connections/confirme/requests/:id", &user_connections_patch_confirmed
+    get "/account/connections/read/requests/:id", &user_connections_get_by_id
+    get "/account/connections/confirme/requests/:id", &user_connections_get_by_id
+    get "/account/notifications", &get_user_notifications
+    patch "/account/read/notifications/:id", &user_notifications_read 
+    get "/account/read/notifications/:id", &get_user_notifications_by_id
 
     get "/account/:user_id/roles", &account_roles_get
     get "/account/:user_id/roles/:role_id", &account_roles_get_by_role

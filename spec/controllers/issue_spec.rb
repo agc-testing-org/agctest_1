@@ -96,6 +96,9 @@ describe ".Issue" do
             it "should include confirmed" do
                 expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
             end
+            it "should include user_name" do
+                expect(@res["user_name"]).to eq(users(:masha_post_connection_request).name)
+            end
         end
     end 
 
@@ -121,8 +124,8 @@ describe ".Issue" do
         context "connection_request_read" do
             fixtures :user_connections
             before(:each) do
-                contact_id = (users(:adam_confirmed).id)
-                user_id = (users(:adam).id)
+                contact_id = (users(:masha_get_connection_request).id)
+                user_id = (users(:masha_post_connection_request).id)
                 @read = false
                 @res = (@issue.update_user_connections_read contact_id, user_id, @read)
             end
@@ -137,8 +140,8 @@ describe ".Issue" do
         context "connection_request_confirmed" do
             fixtures :user_connections
             before(:each) do
-                contact_id = (users(:adam_confirmed).id)
-                user_id = (users(:adam).id)
+                contact_id = (users(:masha_get_connection_request).id)
+                user_id = (users(:masha_post_connection_request).id)
                 @confirmed = 3
                 @res = (@issue.update_user_connections_confirmed contact_id, user_id, @confirmed)
             end
@@ -172,7 +175,9 @@ describe ".Issue" do
         end
     end 
 
-    context "#create_entry_in_notifications_table" do
+
+=begin
+    context "#create_entry_in_notifications_table", :focus => true do
         fixtures :sprint_timelines
         context "create_entry" do
             before(:each) do
@@ -324,4 +329,5 @@ describe ".Issue" do
             end
         end
     end 
+=end
 end

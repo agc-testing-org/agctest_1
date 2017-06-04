@@ -1,3 +1,5 @@
+export default Router;
+
 import Ember from 'ember';
 import config from './config/environment';
 
@@ -27,6 +29,10 @@ Router.map(function() {
     });
     this.route('team', {path: '/team/:id'});
     this.route('profile',{ path: '/:username'});
+    this.route('notifications');
+    this.route('connections');
+    this.route('requests');
+    this.route('home2');
 });
 
 export default Router;

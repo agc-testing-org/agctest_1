@@ -372,44 +372,71 @@ class Issue
         end
     end
 
-        def recently_changed_sprint?
+    def recently_changed_sprint?
         begin
-            if defined?Notification.last.sprint_timeline_id
+            if defined? Notification.last.sprint_timeline_id
                 id = Notification.last.sprint_timeline_id
-            else 
+            else
                 id = 0
             end
+
             response = SprintTimeline.where("id > ?", id)
             response.each do |x|
+                project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
+                state = State.where("id = ?", x.state_id).select("name").as_json
+                sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
+                user = User.where("id = ?", x.user_id).select("first_name").as_json
+                state_name = state[0]["name"]
+                project_org = project[0]["org"]
+                project_name = project[0]["name"]
+                sprint_title = sprint[0]["title"]
+                user_name = user[0]["first_name"]
+
                 if x.comment_id != nil
                     notification = Notification.create({
                         sprint_id: x.sprint_id,
-                        sprint_state_id: x.state_id,
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
                         subject: 'Sprint commented',
-                        body: 'Sprint commented'
+                        body: 'Sprint commented by'+' '+user_name,
+                        created_at: x.created_at,
+                        project_org: project_org,
+                        project_name: project_name,
+                        project_id: x.project_id,
+                        sprint_name: sprint_title,
+                        sprint_state_id: x.sprint_state_id
                         })
                 elsif x.vote_id != nil
                     notification = Notification.create({
                         sprint_id: x.sprint_id,
-                        sprint_state_id: x.state_id,
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
                         subject: 'Sprint voted',
-                        body: 'Sprint voted'
+                        body: 'Sprint voted by'+' '+user_name,
+                        created_at: x.created_at,
+                        project_org: project_org,
+                        project_name: project_name,
+                        project_id: x.project_id,
+                        sprint_name: sprint_title,
+                        sprint_state_id: x.sprint_state_id
                         })
-                else x.vote_id == nil and x.comment_id == nil
+                else
+                    x.vote_id == nil and x.comment_id == nil
                     notification = Notification.create({
                         sprint_id: x.sprint_id,
-                        sprint_state_id: x.state_id,
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
                         subject: 'Sprint state changed',
-                        body: 'Sprint state changed'
+                        body: 'state changed to'+' '+state_name,
+                        created_at: x.created_at,
+                        project_org: project_org,
+                        project_name: project_name,
+                        project_id: x.project_id,
+                        sprint_name: sprint_title,
+                        sprint_state_id: x.sprint_state_id
                         })
                 end
             end
@@ -417,8 +444,8 @@ class Issue
         rescue => e
             puts e
             return nil
+            end
         end
-    end
 
     def create_user_notification
         begin
@@ -447,11 +474,25 @@ class Issue
         end
     end
 
+    def read_user_notifications user_id, id, read
+        begin
+            ss = UserNotification.find_or_initialize_by(:user_id => user_id, :id => id)
+            ss.update_attributes!(:read => read)
+            return {:id => ss.id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def create_connection_request user_id, contact_id
         begin
+            user = User.where("id = ?", user_id).select("first_name").as_json
+            user_name = user[0]["first_name"]            
             connection_request = UserConnection.create({
                 user_id: user_id,
-                contact_id: contact_id,
+                user_name: user_name,
+                contact_id: contact_id
             })
 
             return connection_request.as_json
@@ -463,8 +504,7 @@ class Issue
 
     def get_user_connections query
         begin      
-            return UserConnection.where(query).as_json
-           
+            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed").as_json
         rescue => e
             puts e
             return nil
@@ -475,7 +515,7 @@ class Issue
         begin
             ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
             ss.update_attributes!(:read => read)
-            return {:id => ss.contact_id, :user_id => ss.user_id, :read => ss.read}
+            return {:id => ss.id, :read => ss.read}
         rescue => e
             puts e
             return nil
@@ -486,7 +526,17 @@ class Issue
         begin
             ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
             ss.update_attributes!(:confirmed => confirmed)
-            return {:id => ss.contact_id, :user_id => ss.user_id, :confirmed => ss.confirmed}
+            return {:id => ss.id, :confirmed => ss.confirmed}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def user_connections_get_by_id contact_id, id
+        begin
+            ss = UserConnection.find_or_initialize_by(:id => id, :contact_id => contact_id)
+            return {:id => ss.id}
         rescue => e
             puts e
             return nil
@@ -495,7 +545,26 @@ class Issue
 
     def get_user_info user_id
         begin      
-            return User.joins("inner join user_connections ON user_connections.contact_id=users.id AND user_connections.confirmed=2").where("user_connections.user_id" => user_id).select("users.first_name, users.email").as_json
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_notifications user_id
+        begin      
+            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id").order('created_at DESC').as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_notifications_by_id user_id, id
+        begin      
+            ss = UserNotification.find_or_initialize_by(:user_id => user_id, :id => id)
+            return {:id => ss.id}
         rescue => e
             puts e
             return nil
