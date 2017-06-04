@@ -270,10 +270,10 @@ describe ".Account" do
             fixtures :users
             before(:each) do
                 ip = "192.168.1.1"
-                @res = @account.create users(:adam).email, users(:adam).name, ip 
+                @res = @account.create users(:adam).email, users(:adam).first_name, users(:adam).last_name, ip 
             end
-            it "should return nil" do
-                expect(@res).to eq(nil)
+            it "should return nil id" do
+                expect(@res["id"]).to be nil 
             end
             it "should not create a new record in the users table" do
                 expect(@mysql_client.query("select * from users where email = '#{users(:adam).email}'").count).to eq(1)
@@ -282,9 +282,10 @@ describe ".Account" do
         context "email does not exist" do
             before(:each) do
                 @email = "Adam0@wired7.com"
-                @name = "ADAM"
+                @first_name = "ADAM"
+                @last_name = "COCKELL"
                 @ip = "192.168.1.1"
-                @res = @account.create @email, @name, @ip
+                @res = @account.create @email, @first_name, @last_name, @ip
                 @mysql = @mysql_client.query("select * from users").first
             end
             it "should return user object" do
@@ -294,8 +295,11 @@ describe ".Account" do
                 it "should include downcased email" do
                     expect(@mysql["email"]).to eq(@email.downcase)
                 end
-                it "should include downcased name" do
-                    expect(@mysql["name"]).to eq(@name.downcase)
+                it "should include downcased first name" do
+                    expect(@mysql["first_name"]).to eq(@first_name.downcase)
+                end
+                it "should include downcased last name" do
+                    expect(@mysql["last_name"]).to eq(@last_name.downcase)
                 end
                 it "should include admin = 0" do
                     expect(@mysql["admin"]).to eq(0)
@@ -342,7 +346,8 @@ describe ".Account" do
         context "account exists" do
             fixtures :users
             before(:each) do
-                @res = @account.get users(:adam).id
+                params = {:id => users(:adam).id}
+                @res = @account.get params
             end
             context "object" do
                 it "should include email" do
@@ -358,7 +363,8 @@ describe ".Account" do
         end
         context "account does not exist" do
             before(:each) do
-                @res = @account.get 2
+                params = {:id => 2}
+                @res = @account.get params
             end
             it "should return nil" do
                 expect(@res).to be nil
@@ -484,21 +490,17 @@ describe ".Account" do
         end
     end
 
-    context "#validate_reset_token" do
-        before(:each) do
-            @ip = '192.168.1.1'
-        end
+    context "#get_reset_token" do
         context "when an account exists" do
             fixtures :users
             before(:each) do
                 @email = users(:adam).email
                 @email_hash = Digest::MD5.hexdigest(@email)
                 @query = "select * from users where id = #{users(:adam).id}"
-                @password = "12345678"
             end
             context "token generated 24 hours +" do
                 before(:each) do
-                    @res = @account.validate_reset_token "#{@email_hash}-#{users(:adam).token}", @password, @ip
+                    @res = @account.get_reset_token "#{@email_hash}-#{users(:adam).token}"
                 end
                 it "should return nil" do
                     expect(@res).to be nil 
@@ -513,46 +515,67 @@ describe ".Account" do
             context "token generated within 24 hours" do
                 before(:each) do
                     @account.request_token @email
-                    @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
+                    @res = @account.get_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}"
                 end
                 it "should return user object" do
                     expect(@res[:id]).to eq(@mysql_client.query(@query).first["id"])
                 end
-                it "should save the new password" do
-                    expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
-                end
-                it "should make the token nil" do
-                    expect(@mysql_client.query(@query).first["token"]).to be nil
-                end
-                it "should update confirmed to true" do
-                    expect(@mysql_client.query(@query).first["confirmed"]).to eq(1)
-                end
-                it "should save the user's ip address" do
-                    expect(@mysql_client.query(@query).first["ip"]).to eq(@ip)
-                end
-            end
-            context "protected account" do
-                before(:each) do
-                    query = "update users SET `protected` = 1 where id = #{users(:adam).id}"
-                    @mysql_client.query(query)
-                    @account.request_token @email
-                    @res = @account.validate_reset_token "#{@email_hash}-#{@mysql_client.query(@query).first["token"]}", @password, @ip
-                end
-                it "should set protected to false" do
-                    expect(@mysql_client.query(@query).first["protected"]).to eq(0)
-                end
+
             end
         end
         context "when an account does not exist" do
             before(:each) do
                 @password = "12345678"
-                @res = @account.validate_reset_token "1234567865432-12121212", @password, @ip
+                @res = @account.get_reset_token "1234567865432-12121212"
             end
             it "should return false" do
                 expect(@res).to be nil 
             end
         end
     end
+
+    context "#confirm_user", :focus => true do 
+        fixtures :users
+        before(:each) do
+            @ip = '192.168.1.1'
+            @password = "1235678"
+            @email = users(:adam).email
+            @email_hash = Digest::MD5.hexdigest(@email)
+            @account.request_token @email
+            @query = "select * from users where id = #{users(:adam).id}"
+            @token = @mysql_client.query(@query).first["token"]
+        end
+        context "with user object" do
+            before(:each) do
+                res = @account.get_reset_token "#{@email_hash}-#{@token}"
+                @res = @account.confirm_user res, @password, @ip
+            end
+
+            it "should save the new password" do 
+                expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
+            end                                             
+            it "should make the token nil" do
+                expect(@mysql_client.query(@query).first["token"]).to be nil
+            end                                                             
+            it "should update confirmed to true" do 
+                expect(@mysql_client.query(@query).first["confirmed"]).to eq(1)
+            end                                                                             
+            it "should save the user's ip address" do               
+                expect(@mysql_client.query(@query).first["ip"]).to eq(@ip)                  
+            end                                                                                             
+        end
+        context "protected account" do
+            before(:each) do
+                query = "update users SET `protected` = 1 where id = #{@token}"
+                res = @account.get_reset_token "#{@email_hash}-#{users(:adam).token}"
+                @res = @account.confirm_user res, @password, @ip
+            end
+            it "should set protected to false" do
+                expect(@mysql_client.query(@query).first["protected"]).to eq(0)
+            end
+        end
+    end
+
     context "#get_roles" do
         fixtures :roles
         it "should return all roles" do

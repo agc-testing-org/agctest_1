@@ -7,11 +7,12 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
         //        this.store.adapterFor('sprint').set('namespace', 'projects/' + 1 );
         //        console.log(this.get('session-account'));
-
+      
         return Ember.RSVP.hash({
             states: this.store.findAll('state'),
             projects: this.store.findAll('project'),
             repositories: this.store.findAll('repository'),
+            teams: this.store.findAll('team'),
             comments: this.store.queryRecord('aggregate-comment', {
              
             }),

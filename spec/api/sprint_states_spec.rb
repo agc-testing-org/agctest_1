@@ -102,6 +102,9 @@ describe "/sprints-states" do
             it "should return current master branch sha" do
                 expect(@sprint_state_results.first["sha"]).to eq(sprint_states(:sprint_1_state_1).sha)
             end
+            it "should save sprint_state_id in sprint_timelines" do
+                expect(@mysql_client.query("select * from sprint_timelines").first["sprint_state_id"]).to eq(@sprint_states[0]["sprint_state_id"])
+            end
             it_behaves_like "sprint_states"
         end
         context "unauthorized" do
@@ -126,7 +129,7 @@ describe "/sprints-states" do
                     it_behaves_like "sprint_states"
                 end
             end
-            context "with contributors (owned) and comments", :focus => true do
+            context "with contributors (owned) and comments" do
                 fixtures :contributors, :comments
                 before(:each) do
                     sprint_state_id = sprint_states(:sprint_1_state_1).id

@@ -264,10 +264,14 @@ button{
 .vertical-align-hold{
     display: table;
     position: absolute;
-    left:0px;
-    top:40px;
+    left:0px; 
+    top:0px;
     height: 100%;
     width: 100%;    
+}
+.hidden-md-up .vertical-align-hold{
+    position: relative;
+    overflow: visible;
 }
 .vertical-align-cell{
     display: table-cell;
@@ -673,6 +677,9 @@ button{
 .main{
     margin:0px;
 }
+.main.center{
+    margin:0 auto 0;
+}
 .main .slide{ /* need alternative for mobile */
     position:fixed;
     left:0px;
@@ -684,16 +691,21 @@ button{
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
     background-color: #ededed;
 }
+.main .slide.full{
+    margin-left:0px;
+}
 .main .slide.hidden-md-up{
     position:relative;
     margin-left:0px;
 }
 .main .footprint{
+    position:absolute;
     padding:5px;
     font-weight:300;
     padding-top:10px;
     padding-bottom:2px;
     color: #ccc;
+    z-index:1;
 }
 .main .about{
     padding:5px;
@@ -723,6 +735,7 @@ button{
 }
 .main .overview{
     padding:20px;
+    padding-top:50px;
 }
 .main .hidden-md-up .overview{
     margin-top:20px;
@@ -791,20 +804,16 @@ button{
     font-weight: 500;
     font-size: 40px;
 }
-
-.main .list-group-item{
-    margin-bottom:4px;
-}
-.main .list-group{
-    border: 3px solid #ededed;
-    border-bottom: 1px solid #ededed;
-    background-color: #ededed;
-}
-
 .main .list-group-item{
     color: #4C4C4C;
     background-color:#fff;
     border: 1px solid #ededed;
+}
+.main .list-group-item .stack{
+    position:relative;
+    width:100%;
+}
+.main .list-group-item-action{
     margin-bottom:3px;
 }
 .main .list-group-item.active{

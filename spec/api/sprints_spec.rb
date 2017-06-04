@@ -135,6 +135,9 @@ describe "/sprints" do
                 it "should include idea state_id" do
                     expect(@timeline["state_id"]).to eq(states(:idea).id)
                 end
+                it "should include sprint_state_id" do
+                    expect(@timeline["sprint_state_id"]).to eq(1)
+                end
             end
         end
     end
@@ -143,7 +146,7 @@ describe "/sprints" do
         fixtures :sprints, :sprint_states
         context "valid params" do
             context "filter by" do
-                context "project_id", :focus => true do
+                context "project_id" do
                     before(:each) do
                         project_id = projects(:demo).id
                         get "/sprints?project_id=#{project_id}"

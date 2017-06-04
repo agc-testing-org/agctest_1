@@ -495,7 +495,7 @@ class Issue
 
     def get_user_info user_id
         begin      
-            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("users.name, users.email").as_json
+            return User.joins("inner join user_connections ON user_connections.contact_id=users.id AND user_connections.confirmed=2").where("user_connections.user_id" => user_id).select("users.first_name, users.email").as_json
         rescue => e
             puts e
             return nil

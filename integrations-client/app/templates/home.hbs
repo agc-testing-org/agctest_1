@@ -10,6 +10,14 @@
         {{#link-to "develop.project" project.org project.id}}{{project.org}}/{{project.id}}-{{project.name}}{{/link-to}}
         </div>
         {{/each}}
+        Teams
+
+        {{#each model.teams as |team|}}
+        <div>
+        {{#link-to "team" team.id}}{{team.name}}{{/link-to}}
+        </div>
+        {{/each}}
+        
 
     </div>
     <div class="container flow profile">

@@ -21,7 +21,8 @@ export default Base.extend({
                 data: JSON.stringify({
                     email: options.email,
                     token: options.token,
-                    password: options.password
+                    password: options.password,
+                    invitation: options.fromInvitation
                 }),
                 contentType: 'application/json;charset=utf-8',
                 dataType: 'json'

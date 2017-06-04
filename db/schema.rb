@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170516000000) do
+ActiveRecord::Schema.define(version: 20170531022856) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -163,6 +163,13 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.boolean "contributors", default: false, null: false
   end
 
+  create_table "teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.string "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
     t.integer "contact_id", null: false
@@ -231,9 +238,23 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.index ["user_id"], name: "index_user_skillsets_on_user_id"
   end
 
+  create_table "user_teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id"
+    t.integer "sender_id", null: false
+    t.string "user_email"
+    t.integer "team_id", null: false
+    t.boolean "accepted", default: false
+    t.string "token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sender_id"], name: "fk_rails_58c1498938"
+    t.index ["team_id"], name: "fk_rails_64c25f3fe6"
+    t.index ["user_id"], name: "index_user_team_on_user"
+  end
+
   create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "email", null: false
-    t.string "name", null: false
+    t.string "first_name"
     t.boolean "admin", default: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -245,6 +266,7 @@ ActiveRecord::Schema.define(version: 20170516000000) do
     t.boolean "confirmed", default: false
     t.string "token"
     t.string "github_username"
+    t.string "last_name"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -289,6 +311,9 @@ ActiveRecord::Schema.define(version: 20170516000000) do
   add_foreign_key "user_roles", "users"
   add_foreign_key "user_skillsets", "skillsets"
   add_foreign_key "user_skillsets", "users"
+  add_foreign_key "user_teams", "teams"
+  add_foreign_key "user_teams", "users"
+  add_foreign_key "user_teams", "users", column: "sender_id"
   add_foreign_key "votes", "contributors"
   add_foreign_key "votes", "sprint_states"
   add_foreign_key "votes", "users"

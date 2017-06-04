@@ -12,7 +12,7 @@ export default Component.extend({
         this.$('#register-modal').modal('show');
     },
     actions: {
-        login(withRedirect) {
+        login() {
             var email = this.get("email");
             var password = this.get("password");
             var _this = this;
@@ -23,9 +23,7 @@ export default Component.extend({
                         console.log(reason);
                         this.set('errorMessage', JSON.parse(reason).message);
                     }).then(function(){
-                        if(withRedirect){
-                            _this.get('routes').redirect("home");
-                        }
+
                     });
                 }
             }

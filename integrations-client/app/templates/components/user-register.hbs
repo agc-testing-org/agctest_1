@@ -2,16 +2,16 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content rounded">
             <div class="modal-header">
-                <div class="title">Register</div>
+                <div class="title">Register for Early Access</div>
             </div>
             <div class="modal-header subtitle">
-                <div class="text-muted">Create a new Wired7 account</div>
+                <div class="text-muted">Wired7 is gradually onboarding users through invitations.  Register and we will invite you as soon as possible.</div>
             </div>
             <div class="modal-body">
                 <form class="register-form text-left" {{action 'register' on="submit"}}>
 
                     {{#if registered}}
-                    <h3 class="text-left text-teal">We've sent a confirmation email to {{email}}.  Please verify your email address to continue.</h3>
+                    <h3 class="text-left text-teal">Thanks for signing up.  We will send you an invite as soon as we can!</h3>
                     {{else}}
 
                     <div class="form-group">
@@ -39,7 +39,7 @@
                     {{/if}}
                 </form>
             </div>
-            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "index" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
         </div>
     </div>
 </div>
