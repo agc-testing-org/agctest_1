@@ -44,8 +44,8 @@ export default Component.extend({
                         method: "POST",
                         url: "/register",
                         data: JSON.stringify({
-                            firstName: firstName,
-                            lastName: lastName,
+                            first_name: firstName,
+                            last_name: lastName,
                             email: email,
                             roles: role_array
                         })
