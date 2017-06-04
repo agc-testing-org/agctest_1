@@ -715,7 +715,7 @@ class Integrations < Sinatra::Base
 
                     sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
 
-                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id}
+                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state[:id]} 
                     if sprint_state && (issue.log_event log_params) 
                         status 201
                         response = sprint_state
@@ -814,7 +814,7 @@ class Integrations < Sinatra::Base
 
                         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
                         if sprint_state
-                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :project_id => project["id"]}
+                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :project_id => project["id"], :contributor_id => params[:id] }
                             if sprint_state && (issue.log_event log_params)
                                 status 201
                                 response = winner 
