@@ -735,6 +735,7 @@ button{
 }
 .main .overview{
     padding:20px;
+    padding-top:50px;
 }
 .main .hidden-md-up .overview{
     margin-top:20px;
