@@ -1,4 +1,4 @@
-class AddProject < ActiveRecord::Migration
+class AddProject < ActiveRecord::Migration[4.2]
     def change
         add_column :notifications, :project_org, :string, :null => false
         add_column :notifications, :created_at, :datetime, :null => false
