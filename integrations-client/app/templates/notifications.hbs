@@ -43,22 +43,21 @@
         {{#each model.notifications as |notification|}}
         {{#if (eq notification.read "0")}}
         {{notification-read id=notification.id}}
-        <div class="main list-group-item active">
+        <div class="list-group active">
             <h3 class="title text-capitalize">
                 {{notification.project_org}}/{{notification.project_name}}
             </h3>
-            <p>Sprint {{notification.sprint_id}} ({{notification.sprint_name}}) {{notification.body}}
-            <br>
-            <div class="date text-muted">{{moment-from-now notification.created_at}}</div>
-            </p>
+            Sprint {{notification.sprint_id}} ({{notification.sprint_name}}) {{notification.body}}<br>
+            <div class="date text-muted">{{moment-from-now notification.created_at}}</div></
         </div>
+        <hr>
         {{else}}
         <div>
             <h3 class="title text-capitalize">
                 {{notification.project_org}}/{{notification.project_name}}
             </h3>
             Sprint {{notification.sprint_id}} (<a
-                href="/develop/{{notification.project_org}}/{{notification.project_id}}/sprint/{{notification.sprint_id}}"
+                href="/develop/{{notification.project_org}}/{{notification.project_id}}/sprint/{{notification.sprint_id}}/state/{{notification.sprint_state_id}}"
                 id="ember817" class="ember-view">{{notification.sprint_name}}</a> ){{notification.body}}
             <br>
             <div class="date text-muted">{{moment-from-now notification.created_at}}</div>

@@ -395,7 +395,6 @@ class Issue
                 if x.comment_id != nil
                     notification = Notification.create({
                         sprint_id: x.sprint_id,
-                        sprint_state_id: x.state_id,
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
@@ -405,12 +404,12 @@ class Issue
                         project_org: project_org,
                         project_name: project_name,
                         project_id: x.project_id,
-                        sprint_name: sprint_title
+                        sprint_name: sprint_title,
+                        sprint_state_id: x.sprint_state_id
                         })
                 elsif x.vote_id != nil
                     notification = Notification.create({
                         sprint_id: x.sprint_id,
-                        sprint_state_id: x.state_id,
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
@@ -420,13 +419,13 @@ class Issue
                         project_org: project_org,
                         project_name: project_name,
                         project_id: x.project_id,
-                        sprint_name: sprint_title
+                        sprint_name: sprint_title,
+                        sprint_state_id: x.sprint_state_id
                         })
                 else
                     x.vote_id == nil and x.comment_id == nil
                     notification = Notification.create({
                         sprint_id: x.sprint_id,
-                        sprint_state_id: x.state_id,
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
@@ -436,7 +435,8 @@ class Issue
                         project_org: project_org,
                         project_name: project_name,
                         project_id: x.project_id,
-                        sprint_name: sprint_title
+                        sprint_name: sprint_title,
+                        sprint_state_id: x.sprint_state_id
                         })
                 end
             end
@@ -545,7 +545,7 @@ class Issue
 
     def get_user_notifications user_id
         begin      
-            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read").as_json
+            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id").order('created_at DESC').as_json
         rescue => e
             puts e
             return nil
