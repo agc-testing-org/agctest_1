@@ -13,7 +13,9 @@ export default Component.extend({
     },
     init(){
         this._super(...arguments);
-        this.set("fromInvitation",this.get("invitation").id);
+        if(this.get("invitation")){
+            this.set("fromInvitation",this.get("invitation").id);
+        }
     },
     actions: {
         reset() {
