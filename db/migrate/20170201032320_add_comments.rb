@@ -1,4 +1,4 @@
-class AddComments < ActiveRecord::Migration
+class AddComments < ActiveRecord::Migration[4.2]
     def change
         create_table "comments", force: :cascade do |t|
             t.integer  "user_id",       limit: 4,                null: false

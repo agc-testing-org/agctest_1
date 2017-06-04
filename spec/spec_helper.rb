@@ -1,6 +1,6 @@
 require 'sinatra'
 require 'sinatra/activerecord'
-require 'watir-webdriver'
+require 'watir'
 require 'rack/test'
 require 'database_cleaner'
 require 'rails/all'

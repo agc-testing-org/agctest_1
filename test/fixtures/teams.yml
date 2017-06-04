@@ -1,0 +1,11 @@
+ateam:
+  user: adam_confirmed
+  name: "ATEAM"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+bteam:
+  user: adam_confirmed
+  name: "BTEAM"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

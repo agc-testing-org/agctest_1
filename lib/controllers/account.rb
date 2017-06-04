@@ -1,4 +1,5 @@
 class Account
+
     def initialize
 
     end
@@ -148,19 +149,25 @@ class Account
         end
     end
 
-    def create email, name, ip
+    def lowercase str
+        if str
+            return str.downcase
+
+        else
+            return str
+        end
+    end
+
+    def create email, first_name, last_name, ip
         begin
             user = User.create({
                 email: email.downcase,
-                name: name.downcase,
+                first_name: (lowercase first_name),
+                last_name: (lowercase last_name),
                 token: SecureRandom.hex(32),
                 ip: ip
             })
-            if user.id
-                return user
-            else
-                return nil
-            end
+            return user
         rescue => e
             puts e
             return nil
@@ -175,7 +182,7 @@ class Account
         end
     end
 
-    def safe_string string, length
+    def safe_string string, length #TODO - make sure we use this EVERYWHERE we accept input
         if string =~ /^[a-zA-Z0-9\-]{#{length},}$/
             return true
         else
@@ -183,9 +190,9 @@ class Account
         end
     end
 
-    def get id
+    def get params
         begin
-            user = User.find_by(id: id)
+            user = User.find_by(params)
             if user
                 return user
             else
@@ -233,17 +240,33 @@ class Account
         user = User.find_by(email: email)
         if user 
             user[:token] = SecureRandom.hex
-            mail user.email, "Wired7 Password Reset", "#{user.name.capitalize},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{user.name.capitalize},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+            
+            name = user.first_name
+            if name 
+                name = name.capitalize
+            else
+                name = "Hi"
+            end
+            
+            mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
             return user.save
         else
             return false
         end
     end
 
-    def validate_reset_token token, password, ip
-        token = token.split("-")
-        user = User.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token[1]).take
-        if user && (Digest::MD5.hexdigest(user[:email]) == token[0])
+    def get_reset_token token
+        begin
+            token = token.split("-")
+            return User.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token[1]).take
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def confirm_user user, password, ip
+        if user
             user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
             user[:protected] = false
@@ -279,7 +302,7 @@ class Account
 
     def update_role user_id, role_id, active
         begin
-            return role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
+            return UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
         rescue => e
             puts e
             return nil 
@@ -289,6 +312,36 @@ class Account
     def get_account_roles user_id, query
         begin            
             return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_teams user_id
+        begin 
+            return Team.joins(:user_teams).where({
+                "user_teams.user_id" => user_id
+            })
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def join_team token
+        begin
+            invite = UserTeam.find_by({
+                token: token 
+            })
+            if invite
+                invite.update_attributes!({accepted: true, token: nil})
+                invitation = invite.as_json
+                invitation.delete("token")
+                return invitation
+            else
+                return nil
+            end
         rescue => e
             puts e
             return nil

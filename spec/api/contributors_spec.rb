@@ -10,7 +10,7 @@ describe "/contributors" do
     end 
 
     describe "POST /:id/comments" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
@@ -22,6 +22,7 @@ describe "/contributors" do
                 post "/contributors/#{@contributor_id}/comments", {:text => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
                 @mysql = @mysql_client.query("select * from comments").first
+                @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
             end
             it "should return comment id" do
                 expect(@res["id"]).to eq(1)
@@ -32,6 +33,17 @@ describe "/contributors" do
                 end
                 it "should save contributor_id" do
                     expect(@mysql["contributor_id"]).to eq(@contributor_id)
+                end
+            end
+            context "sprint_timelines" do
+                it "should record sprint state id" do
+                    expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
+                end
+                it "should record comment id" do
+                    expect(@sprint_timeline["comment_id"]).to eq(@res["id"])
+                end
+                it "should record contributor id" do
+                    expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
                 end
             end
         end
@@ -45,7 +57,7 @@ describe "/contributors" do
     end
 
     describe "POST /:id/votes" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
@@ -53,6 +65,7 @@ describe "/contributors" do
             post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from votes").first
+            @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
         end
         it "should return vote id" do
             expect(@res["id"]).to eq(1)
@@ -67,6 +80,17 @@ describe "/contributors" do
             it "should save sprint_state_id" do
                 expect(@mysql["sprint_state_id"]).to eq(@sprint_state_id)
             end
+        end
+        context "sprint_timelines" do
+            it "should record sprint state id" do
+                expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
+            end
+            it "should record comment id" do
+                expect(@sprint_timeline["vote_id"]).to eq(@res["id"])
+            end 
+            it "should record contributor id" do
+                expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
+            end 
         end
         context "duplicate vote" do
             before(:each) do
@@ -125,6 +149,7 @@ describe "/contributors" do
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from sprint_states").first
             @timeline = @mysql_client.query("select * from sprint_timelines").first
+            @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
         end
         context "admin" do
             it "should return sprint_state id" do
@@ -141,9 +166,12 @@ describe "/contributors" do
                     expect(@mysql["pull_request"]).to eq(@pull_id)
                 end
             end
-            context "sprint_timeline" do
-                it "should save sprint_state_id" do
-                    expect(@timeline["sprint_state_id"]).to eq(@sprint_state_id)
+            context "sprint_timelines" do
+                it "should record sprint state id" do
+                    expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
+                end
+                it "should record contributor id" do
+                    expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
                 end
             end
         end

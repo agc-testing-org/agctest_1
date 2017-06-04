@@ -24,7 +24,8 @@ export default Component.extend({
         register() {
             var _this = this;
             var email = this.get("email");
-            var name = this.get("name");
+            var firstName = this.get("firstName");
+            var lastName = this.get("lastName");
 
             var role_ids = this.get('roles').getEach('id');
             var role_actives = this.get('roles').getEach('active');
@@ -38,12 +39,13 @@ export default Component.extend({
             }
 
             if(email && email.length > 4){
-                if(name && name.length > 1){
+                if(firstName && firstName.length > 1){
                     Ember.$.ajax({                    
                         method: "POST",
                         url: "/register",
                         data: JSON.stringify({
-                            name: name,
+                            first_name: firstName,
+                            last_name: lastName,
                             email: email,
                             roles: role_array
                         })

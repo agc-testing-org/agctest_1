@@ -40,7 +40,7 @@ describe ".Issue" do
             end
         end
     end
-    context "#get_skillsets", :focus => true do
+    context "#get_skillsets" do
         fixtures :skillsets
         context "skillsets" do
             before(:each) do
@@ -75,7 +75,7 @@ describe ".Issue" do
         end 
     end 
 
-    context "#get_user_connections", :focus => true do
+    context "#get_user_connections" do
         fixtures :users
         context "connections" do
             fixtures :user_connections
@@ -111,7 +111,7 @@ describe ".Issue" do
                 @res = (@issue.get_user_info user_id).first
             end
             it "should include user_id" do
-                expect(@res["name"]).to eq(users(:masha_get_connection_request).name)
+                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
             end
             it "should include contact_id" do
                 expect(@res["email"]).to eq(users(:masha_get_connection_request).email)
@@ -119,7 +119,7 @@ describe ".Issue" do
         end
     end 
 
-    context "#patch_user_connections_read", :focus => true do
+    context "#patch_user_connections_read" do
         fixtures :users
         context "connection_request_read" do
             fixtures :user_connections
@@ -135,7 +135,7 @@ describe ".Issue" do
         end
     end 
 
-    context "#patch_user_connections_confirmed", :focus => true do
+    context "#patch_user_connections_confirmed" do
         fixtures :users
         context "connection_request_confirmed" do
             fixtures :user_connections
@@ -151,7 +151,7 @@ describe ".Issue" do
         end
     end 
 
-    context "#post_user_connections_request", :focus => true do
+    context "#post_user_connections_request" do
         fixtures :users
         context "connection_request_confirmed" do
             fixtures :user_connections
@@ -174,6 +174,7 @@ describe ".Issue" do
             end
         end
     end 
+
 
 =begin
     context "#create_entry_in_notifications_table", :focus => true do
@@ -264,7 +265,7 @@ describe ".Issue" do
         end
     end 
 
-    context "#create_entry_in_user_notifications_table", :focus => true do
+    context "#create_entry_in_user_notifications_table" do
         fixtures :notifications, :users, :sprint_skillsets, :user_skillsets, :user_roles, :user_contributors
         context "create_entry" do
             before(:each) do

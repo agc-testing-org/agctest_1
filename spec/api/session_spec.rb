@@ -19,8 +19,11 @@ describe "API" do
         it "should save user admin status in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["admin"]).to eq(!@mysql_client.query(@query).first["admin"].zero?)
         end
-        it "should save user name in redis" do
-            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["name"]).to eq(@mysql_client.query(@query).first["name"])
+        it "should save user first name in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["first_name"]).to eq(@mysql_client.query(@query).first["first_name"])
+        end
+        it "should save user last name in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["last_name"]).to eq(@mysql_client.query(@query).first["last_name"])
         end
         it "should save github_username in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["github_username"]).to eq(@mysql_client.query(@query).first["github_username"])
@@ -63,8 +66,11 @@ describe "API" do
                 it "should save email" do
                     expect(@users["email"]).to eq(@email)
                 end
-                it "should save name" do
-                    expect(@users["name"]).to eq(@name)
+                it "should save first name" do
+                    expect(@users["first_name"]).to eq(@first_name)
+                end
+                it "should save last name" do
+                    expect(@users["last_name"]).to eq(@last_name)
                 end
                 it "should save ip" do
                     expect(@users["ip"]).to eq(@ip)
@@ -73,10 +79,11 @@ describe "API" do
         end
         context "new user" do
             before(:each) do
-                @name = "adam"
+                @first_name = "adam"
+                @last_name = "cockell"
                 @ip = "127.0.0.1"
                 @email = "adam+01@wired7.com"
-                post "/register", {:name => @name, :email=> @email, :roles => @roles}.to_json
+                post "/register", {:first_name => @first_name, :last_name => @last_name, :email=> @email, :roles => @roles}.to_json
                 @users = @mysql_client.query("select * from users where email = '#{@email}'").first
                 @user_roles = @mysql_client.query("select * from user_roles")
             end
@@ -93,9 +100,9 @@ describe "API" do
         context "existing user" do
             fixtures :users
             before(:each) do
-                @name = users(:adam).name
+                @first_name = users(:adam).first_name
                 @email = users(:adam).email
-                post "/register", {:name => @name, :email=> @email, :roles => @roles}.to_json
+                post "/register", {:first_name => @first_name, :email=> @email, :roles => @roles}.to_json
                 @users = @mysql_client.query("select * from users where email = '#{@email}'").first
             end
             it_behaves_like "register" # don't want to let user know account exists, unless owner -- send email
@@ -184,7 +191,7 @@ describe "API" do
                 expect(@res.keys).to include("github_username")
             end
             it "should include user name" do
-                expect(@res["name"]).to eq(users(:adam_confirmed).name)
+                expect(@res["first_name"]).to eq(users(:adam_confirmed).first_name)
             end
             it "should not return key" do
                 expect(@res["key"]).to be nil
@@ -245,21 +252,48 @@ describe "API" do
                     expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
                 end
             end
-        end
-        context "with invalid password" do
-            before(:each) do
-                @token = users(:adam).token
-                @query = "select * from users where id = #{users(:adam).id}"
-                @email_hash = Digest::MD5.hexdigest(users(:adam).email)
-                @password = 123
-                post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json
-                @res = JSON.parse(last_response.body)
+            context "invitation" do
+                fixtures :teams, :user_teams
+                context "valid token" do
+                    before(:each) do
+                        @token = user_teams(:adam_confirmed_b_team).token
+                        post "/reset", { :password => @password, :token => @token, :invitation => true }.to_json
+                        @res = JSON.parse(last_response.body)
+                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                        @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
+                    end
+                    it_behaves_like "session_response"
+                    it_behaves_like "new_session"
+                    it "should set accepted = true" do
+                        expect(@user_teams_result.first["accepted"]).to be 1
+                    end
+                end
+                context "expired token" do
+                    before(:each) do
+                        post "/reset", { :password => @password, :token => "ZRY", :invitation => true }.to_json
+                        @res = JSON.parse(last_response.body)
+                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                    end
+                    it "should return success = false" do
+                         expect(@res["success"]).to eq(false)
+                    end
+                end
             end
-            it "should return success = false" do
-                expect(@res["success"]).to eq(false)
-            end
-            it "should not save password" do
-                expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
+            context "with invalid password" do
+                before(:each) do
+                    @token = users(:adam).token
+                    @query = "select * from users where id = #{users(:adam).id}"
+                    @email_hash = Digest::MD5.hexdigest(users(:adam).email)
+                    @password = 123
+                    post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json
+                    @res = JSON.parse(last_response.body)
+                end
+                it "should return success = false" do
+                    expect(@res["success"]).to eq(false)
+                end
+                it "should not save password" do
+                    expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
+                end
             end
         end
     end
@@ -303,7 +337,7 @@ describe "API" do
         end
     end
 
-    describe "POST /session/linkedin", :focus => true do
+    describe "POST /session/linkedin" do
         fixtures :users
         before(:each) do
             @password = "adam12345"

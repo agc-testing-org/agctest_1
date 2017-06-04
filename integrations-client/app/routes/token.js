@@ -10,6 +10,8 @@ export default Ember.Route.extend(UnAuthenticatedRouteMixin,{
         Ember.$('#register-modal').modal('hide');
     },
     model: function(params) {
-        return params.id;
+        return Ember.RSVP.hash({
+            token: params.id
+        });
     },
 });
