@@ -28,16 +28,14 @@ Router.map(function() {
         });
     });
     this.route('team', {path: '/team/:id'});
-    this.route('profile',{ path: '/:username'}); // public profile
+    this.route('profile',{ path: '/:id'}, function(){ // public profile
+        this.route('requests');
+    });
     this.route('me', function() { // private profile (logged in)
         this.route('notifications');
         this.route('connections');
         this.route('requests');
     });
-    this.route('notifications');
-    this.route('connections');
-    this.route('requests');
-    this.route('home2');
 });
 
 export default Router;

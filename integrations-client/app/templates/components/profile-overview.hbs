@@ -2,9 +2,11 @@
     <div class="vertical-align-cell">
         <div class="overview text-center">
             <h1 class="name text-capitalize">{{sessionAccount.account.first_name}}</h1>
-            <div class="description">{{sprint.description}}</div>
-            <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
+            <div class="about text-capitalize">Joined {{sessionAccount.account.created_at}}</div>
+            {{#if me}}
             {{profile-overview-skillsets skillsets=skillsets class="skillsets"}}
+            {{/if}}
+            {{profile-overview-skillset-stats skillsets=skillsets class="skillsets"}}
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
                     {{sprint-state-overview-score total=5000 title="Example Stat A"}}
