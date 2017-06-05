@@ -1,29 +1,12 @@
 {{#if (eq confirmed "1")}}
-<div>
     {{user_name}} is interested in contacting you. Would you like to share your contact information?
-    <br>
-    <span {{action "confirmeUserConnectionRequests" id 2}} class="badge badge-info rounded
-    cursor-pointer">Confirme</span>
-    <span {{action "confirmeUserConnectionRequests" id 3}} class="badge badge-warning rounded
-    cursor-pointer">Reject</span>
-    <hr>
-</div>
+    <span {{action "confirmeUserConnectionRequests" request_id 2}} class="badge badge-info rounded cursor-pointer">Confirm</span>
+    <span {{action "confirmeUserConnectionRequests" request_id 3}} class="badge badge-warning rounded cursor-pointer">Reject</span>
 {{else if (eq confirmed "2")}}
-<div>
-    Your contact information shared to {{user_name}}
-    <br>
-    <span {{action "confirmeUserConnectionRequests" id 3}} class="badge badge-warning rounded
-    cursor-pointer">Reject</span>
-    <hr>
-</div>
-
+    Your contact information shared with {{user_name}}
+    <span {{action "confirmeUserConnectionRequests" request_id 3}} class="badge badge-warning rounded cursor-pointer">Reject</span>
 {{else if (eq confirmed "3")}}
-<div>
-    Your contact information not shared to {{user_name}}
-    <br>
-    <span {{action "confirmeUserConnectionRequests" id 2}} class="badge badge-info rounded
-    cursor-pointer">Confirme</span>
-    <hr>
-</div>
+    Your contact information not shared with {{user_name}}
+    <span {{action "confirmeUserConnectionRequests" request_id 2}} class="badge badge-info rounded cursor-pointer">Confirme</span>
 {{/if}}
 

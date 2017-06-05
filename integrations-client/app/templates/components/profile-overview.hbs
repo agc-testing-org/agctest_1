@@ -1,0 +1,24 @@
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview text-center">
+            <h1 class="name text-capitalize">{{sessionAccount.account.first_name}}</h1>
+            <div class="about text-capitalize">Joined {{sessionAccount.account.created_at}}</div>
+            {{#if me}}
+            {{profile-overview-skillsets skillsets=skillsets class="skillsets"}}
+            {{/if}}
+            {{profile-overview-skillset-stats skillsets=skillsets class="skillsets"}}
+            <div class="row">
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=5000 title="Example Stat A"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=110 title="Example Stat B"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=300 title="Example Stat C"}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170531022856) do
+ActiveRecord::Schema.define(version: 20170605030718) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -70,6 +70,11 @@ ActiveRecord::Schema.define(version: 20170531022856) do
     t.integer "user_id"
     t.integer "sprint_timeline_id", null: false
     t.integer "sprint_id", null: false
+    t.string "project_org", null: false
+    t.datetime "created_at", null: false
+    t.string "sprint_name", null: false
+    t.string "project_name", null: false
+    t.integer "project_id", null: false
     t.index ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true
   end
 
@@ -175,6 +180,9 @@ ActiveRecord::Schema.define(version: 20170531022856) do
     t.integer "contact_id", null: false
     t.integer "confirmed", default: 1
     t.boolean "read", default: false
+    t.string "user_name", null: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"
     t.index ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true
     t.index ["user_id"], name: "index_user_connections_on_user_id"
@@ -190,6 +198,8 @@ ActiveRecord::Schema.define(version: 20170531022856) do
     t.integer "user_id", null: false
     t.integer "notifications_id", null: false
     t.boolean "read", default: false
+    t.datetime "created_at"
+    t.datetime "updated_at"
     t.index ["notifications_id"], name: "index_user_notifications_on_notifications_id"
     t.index ["user_id", "notifications_id"], name: "index_notification_id_and_user_id_on_user_notification", unique: true
     t.index ["user_id"], name: "index_user_notifications_on_user_id"

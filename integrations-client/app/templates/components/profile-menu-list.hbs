@@ -1,0 +1,43 @@
+<ul class="nav nav-pills flex-column timeline">
+
+    <div class="menu">
+        {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <i class="fa fa-fw fa-user"></i>My Profile
+        {{/link-to}}
+    </div>
+
+    {{#if me}}
+
+        {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-envelope"></i>
+            </div>
+            Notifications
+        {{/link-to}}
+
+        {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-users"></i>
+            </div>
+            Contacts
+        {{/link-to}}
+
+        {{#link-to "me.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-user-plus"></i>
+            </div>
+            Contact Requests
+        {{/link-to}}
+    
+    {{else}}
+        {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-user-plus"></i>
+            </div>
+            Request Contact
+        {{/link-to}}
+        
+    {{/if}}
+
+    {{user-logout}}
+</ul>
