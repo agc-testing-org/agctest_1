@@ -34,6 +34,10 @@
     export INTEGRATIONS_HMAC=""
     export INTEGRATIONS_EMAIL_ADDRESS=""
     export INTEGRATIONS_EMAIL_PASSWORD=""
+    export INTEGRATIONS_SIDEKIQ_HOST=true
+    export INTEGRATIONS_SIDEKIQ_USERNAME="adam"
+    export INTEGRATIONS_SIDEKIQ_PASSWORD="123456"
+
     if [ "$RACK_ENV" == "test" ]; then
         export INTEGRATIONS_GITHUB_URL="test"
         export INTEGRATIONS_REDIS_DB=2
@@ -87,6 +91,14 @@ Shell 2 (project root)
     whenever --update-crontab #probably don't need this every time, but will help if it changes
     bundle exec rake db:migrate
     passenger start --ssl --ssl-certificate localhost.crt --ssl-certificate-key localhost.key --port 3001 --ssl-port 3000 
+
+Shell 3 (project root)
+
+    rvm use ruby-2.4.0
+    bundle install
+    export RACK_ENV=development
+    source ~/.bashrc
+    RACK_ENV=$development bundle exec sidekiq -e $RACK_ENV -c 10 -r ./lib/api/integrations.rb 
 
 Shell 3
 

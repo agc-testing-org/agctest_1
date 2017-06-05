@@ -3,8 +3,13 @@
         <div class="full">
             <h3>Contacts</h3>
             {{#each connections as |connection|}}
-                {{connection.first_name}}<br>
-                E:{{connection.email}}
+                <div class="sprint">
+                    <div class="title text-capitalize">{{connection.first_name}} {{connection.last_name}}</div>
+                    <div class="description">
+                        <span class="text-muted">E</span> {{connection.email}}
+                    </div>
+                    <div class="date text-muted">{{moment-from-now connection.updated_at}}</div>
+                </div>
             {{/each}}
         </div>
         {{else}}

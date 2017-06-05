@@ -6,5 +6,8 @@ export default Ember.Route.extend({
         return Ember.RSVP.hash({
             notifications: this.store.findAll('notification')
         });
+    },
+    afterModel(){
+        this.store.adapterFor('notification').set('namespace', '');
     }
 });

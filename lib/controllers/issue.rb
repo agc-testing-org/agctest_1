@@ -398,8 +398,8 @@ class Issue
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
-                        subject: 'Sprint commented',
-                        body: 'Sprint commented by'+' '+user_name,
+                        subject: 'New Comment',
+                        body: user_name+' commented',
                         created_at: x.created_at,
                         project_org: project_org,
                         project_name: project_name,
@@ -413,8 +413,8 @@ class Issue
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
-                        subject: 'Sprint voted',
-                        body: 'Sprint voted by'+' '+user_name,
+                        subject: 'New Vote',
+                        body: user_name+' voted on',
                         created_at: x.created_at,
                         project_org: project_org,
                         project_name: project_name,
@@ -429,8 +429,8 @@ class Issue
                         user_id: x.user_id,
                         sprint_timeline_id: x.id,
                         contributor_id: x.contributor_id,
-                        subject: 'Sprint state changed',
-                        body: 'state changed to'+' '+state_name,
+                        subject: 'Sprint State Change',
+                        body: state_name+' created',
                         created_at: x.created_at,
                         project_org: project_org,
                         project_name: project_name,
@@ -545,7 +545,7 @@ class Issue
 
     def get_user_info user_id
         begin      
-            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email").as_json
+            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email, user_connections.created_at, user_connections.updated_at").as_json
         rescue => e
             puts e
             return nil

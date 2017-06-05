@@ -36,6 +36,9 @@ body {
     -moz-border-radius: 500px !important;
     border-radius: 500px !important;
 }
+.shadow{
+    box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
 h1{
     font-size:42px;
     line-height:48px;
@@ -765,6 +768,10 @@ button{
 }
 .main .still .sprint{
     margin-bottom:20px;
+    padding:10px;
+}
+.main .still .sprint.read-false{
+    background-color: #fff;
 }
 .main .still .sprint .title{
 

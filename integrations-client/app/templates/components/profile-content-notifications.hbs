@@ -1,39 +1,29 @@
-        {{#if notifications}}
-        <div class="full">
+{{#if notifications}}
+    <div class="full">
         <h3>Notifications</h3>
 
         {{#each notifications as |notification|}}
-        {{#if (eq notification.read "0")}}
-        {{notification-read id=notification.id}}
-        <div class="list-group active">
-            <h3 class="title text-capitalize">
-                {{notification.project_org}}/{{notification.project_name}}
-            </h3>
-            Sprint {{notification.sprint_id}} ({{notification.sprint_name}}) {{notification.body}}<br>
-            <div class="date text-muted">{{moment-from-now notification.created_at}}</div></
-        </div>
-        {{else}}
-        <div>
-            <h3 class="title text-capitalize">
-                {{notification.project_org}}/{{notification.project_name}}
-            </h3>
-            Sprint {{notification.sprint_id}} (<a href="/develop/{{notification.project_org}}/{{notification.project_id}}/sprint/{{notification.sprint_id}}/state/{{notification.sprint_state_id}}" id="ember817" class="ember-view">{{notification.sprint_name}}</a> ){{notification.body}}
-            <br>
-            <div class="date text-muted">{{moment-from-now notification.created_at}}</div>
-            <hr>
-        </div>
-        {{/if}}
-        {{/each}}
-        </div>
-
-        {{else}}
-        <div class="vertical-align-hold">
-            <div class="vertical-align-cell">
-                <div class="overview">
-                    <div class="text-center">
-                        <h3>No notifications</h3>
-                    </div>
+            <div class="sprint read-{{notification.read}} rounded">
+                {{#if (eq notification.read false)}}
+                    {{notification-read notification_id=notification.id}}
+                {{/if}}
+                <div class="title">{{#link-to "develop.project.sprint.state" notification.project_org notification.project_id notification.sprint_id notification.sprint_state_id}}{{notification.sprint_name}}{{/link-to}} (<span class="text-uppercase">{{notification.project_org}}/{{notification.project_name}}</span>)</div>
+                <div class="description">
+                    {{notification.body}}
+                </div>
+                <div class="date text-muted">{{moment-from-now notification.created_at}}</div>
+            </div>
+        
+        {{/each}}    
+    </div>
+{{else}}
+    <div class="vertical-align-hold">
+        <div class="vertical-align-cell">
+            <div class="overview">
+                <div class="text-center">
+                    <h3>No notifications</h3>
                 </div>
             </div>
         </div>
-        {{/if}}
+    </div>
+{{/if}}
