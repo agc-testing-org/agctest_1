@@ -3,10 +3,10 @@
     <span {{action "confirmeUserConnectionRequests" request_id 2}} class="badge badge-info rounded cursor-pointer">Confirm</span>
     <span {{action "confirmeUserConnectionRequests" request_id 3}} class="badge badge-warning rounded cursor-pointer">Reject</span>
 {{else if (eq confirmed "2")}}
-    Your contact information shared to {{user_name}}
+    Your contact information shared with {{user_name}}
     <span {{action "confirmeUserConnectionRequests" request_id 3}} class="badge badge-warning rounded cursor-pointer">Reject</span>
 {{else if (eq confirmed "3")}}
-    Your contact information not shared to {{user_name}}
+    Your contact information not shared with {{user_name}}
     <span {{action "confirmeUserConnectionRequests" request_id 2}} class="badge badge-info rounded cursor-pointer">Confirme</span>
 {{/if}}
 

@@ -3,9 +3,16 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
+    sessionAccount: Ember.inject.service('session-account'),
     model: function(params) { 
+       
+        var teams = this.store.findAll('team');
+
+        this.store.adapterFor('skillset').set('namespace', 'account/'+this.get("sessionAccount.account").id); 
+
         return Ember.RSVP.hash({
-            teams: this.store.findAll('team')
+            skillsets: this.store.findAll('skillset'),
+            teams: teams
         });
     }
 });
