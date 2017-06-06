@@ -326,6 +326,7 @@ button{
 }
 .register-form input{
     background-color: #3a3a3a;
+    color: orange !important;
 }
 .register-form button{
     width:100%; 
@@ -355,7 +356,7 @@ button{
     margin-top:10px; 
     color: #fff;
 }
-.register-form .form-control{
+.register-form .form-control,.register-form .form-control[disabled]{
     background-color: #3a3a3a;
 }
 

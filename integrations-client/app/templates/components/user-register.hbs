@@ -2,10 +2,25 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content rounded">
             <div class="modal-header">
-                <div class="title">Register for Early Access</div>
+                <div class="title">
+                {{#if invitation}}
+                    You've been invited!
+                {{else}}
+                    Register for Early Access 
+                {{/if}}
+                </div>
             </div>
             <div class="modal-header subtitle">
-                <div class="text-muted">Wired7 is gradually onboarding users through invitations.  Register and we will invite you as soon as possible.</div>
+                <div class="text-muted">
+                
+                Wired7 is gradually onboarding users through invitations.  
+                
+                {{#if invitation}}
+                    <span class="text-capitalize">{{invitation.sender}}</span> ({{invitation.sender_email}}) would like for you to join the <span class="text-capitalize">{{invitation.name}}</span> team.
+                {{else}}
+                    Register and we will invite you as soon as possible.
+                {{/if}}
+                </div>
             </div>
             <div class="modal-body">
                 <form class="register-form text-left" {{action 'register' on="submit"}}>
@@ -14,15 +29,31 @@
                     <h3 class="text-left text-teal">Thanks for signing up.  We will send you an invite as soon as we can!</h3>
                     {{else}}
 
+                    {{#if errorMessage}}<div class="alert alert-warning rounded">{{errorMessage}}</div>{{/if}}
+
                     <div class="form-group">
                         <label>First Name</label>
                         {{input value=firstName placeholder="" class="form-control input-lg rounded"}}
                     </div>
 
+                    {{#unless invitation}}
                     <div class="form-group">
                         <label>Email</label>
-                        {{input value=email type="email" placeholder="" class="form-control input-lg rounded"}}
+                        {{#if invitation}}
+                            {{input value=email type="email" placeholder="" class="form-control input-lg rounded" value=invitation.email disabled=true}}
+                        {{else}}
+                            {{input value=email type="email" placeholder="" class="form-control input-lg rounded"}}
+                        {{/if}}
                     </div>
+                    {{/unless}}
+
+                    {{#if invitation}}
+                    <div class="form-group">
+                        <label>Password</label>
+                        {{input type="password" value=password placeholder="Password" class="form-control input-lg rounded"}}
+                        {{input type="password" value=passwordb placeholder="Confirm Password" class="form-control input-lg rounded"}}
+                    </div>
+                    {{/if}}
 
                     <div class="form-group">
                         <label>Group</label>
@@ -32,14 +63,24 @@
                             {{/each}}
                         </div>
                     </div>
-
-                    <button {{action "register"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Register</button>
-                    <h4 class="tos text-center">By registering you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
+                    
+                    {{#if invitation}}
+                        <button {{action "accept" token}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Accept</button>
+                    {{else}}
+                        <button {{action "register"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Register</button>
+                    {{/if}}
+                    <h4 class="tos text-center">
+                        By {{#if invitation}}accepting{{else}}registering{{/if}} you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}
+                    </h4>
 
                     {{/if}}
                 </form>
             </div>
-            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+            {{#if invitation}}
+                <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer"><a>Want us to send another email?</a></div>
+            {{else}}
+                <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+            {{/if}}
         </div>
     </div>
 </div>

@@ -265,8 +265,9 @@ class Account
         end
     end
 
-    def confirm_user user, password, ip
+    def confirm_user user, password, first_name, ip
         if user
+            user[:first_name] = first_name
             user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
             user[:protected] = false
@@ -329,11 +330,25 @@ class Account
         end
     end
 
+    def refresh_team_invite token
+        begin
+            invite = UserTeam.find_by(:token => token)
+            if invite
+                invite.token = SecureRandom.hex(32)
+                invite.save
+                mail invite.user_email, "Invitation to Wired7", "Hey there,<br><br>We recently received a request for a new Wired7 invitation.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join Wired7</a><br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "Hey there,\n\nWe recently received a request for a new Wired7 invitation.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+            end
+            return true
+        rescue => e
+            puts e
+            return nil 
+        end
+
+    end
+
     def join_team token
         begin
-            invite = UserTeam.find_by({
-                token: token 
-            })
+            invite = UserTeam.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token).take
             if invite
                 invite.update_attributes!({accepted: true, token: nil})
                 invitation = invite.as_json

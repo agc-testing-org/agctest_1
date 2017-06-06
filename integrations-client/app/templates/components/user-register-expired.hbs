@@ -1,0 +1,23 @@
+<div class="modal" id="register-modal" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content rounded">
+            <div class="modal-header">
+                <div class="title">
+                    There's an issue with your invitation!
+                </div>
+            </div>
+            <div class="modal-header subtitle">
+                <div class="text-muted">
+                
+                Wired7 is gradually onboarding users through invitations.
+                
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning rounded">{{message}}</div>
+            </div>
+
+            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer"><a {{action "resend" token}}>Want us to send another email?</a></div>
+        </div>
+    </div>
+</div>
