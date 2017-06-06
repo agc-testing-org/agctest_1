@@ -1,8 +1,8 @@
 require_relative './lib/api/integrations.rb'
 require 'sidekiq/web'
 
-map '/sidekiq' do
-    if ENV['INTEGRATIONS_SIDEKIQ_HOST']
+if ENV['INTEGRATIONS_SIDEKIQ_HOST']
+    map '/sidekiq' do
         use Rack::Auth::Basic, "Protected Area" do |username, password|
             Rack::Utils.secure_compare(::Digest::SHA256.hexdigest(username), ::Digest::SHA256.hexdigest(ENV["INTEGRATIONS_SIDEKIQ_USERNAME"])) &
                 Rack::Utils.secure_compare(::Digest::SHA256.hexdigest(password), ::Digest::SHA256.hexdigest(ENV["INTEGRATIONS_SIDEKIQ_PASSWORD"]))
