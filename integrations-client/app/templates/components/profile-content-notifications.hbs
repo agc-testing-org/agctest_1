@@ -8,6 +8,9 @@
                     {{notification-read notification_id=notification.id}}
                 {{/if}}
                 <div class="title">{{#link-to "develop.project.sprint.state" notification.project_org notification.project_id notification.sprint_id notification.sprint_state_id}}{{notification.sprint_name}}{{/link-to}} (<span class="text-uppercase">{{notification.project_org}}/{{notification.project_name}}</span>)</div>
+                 <div class="subject">
+                    {{notification.subject}}
+                </div>
                 <div class="description">
                     {{notification.body}}
                 </div>

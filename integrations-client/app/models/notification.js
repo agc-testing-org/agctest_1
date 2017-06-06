@@ -11,6 +11,7 @@ export default DS.Model.extend({
     project_id: attr('number'),
     created_at: attr('date'),
     read: attr('boolean'),
-    sprint_state_id: attr('number')
+    sprint_state_id: attr('number'),
+    subject: attr('string')
 });
 

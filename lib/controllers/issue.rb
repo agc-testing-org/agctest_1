@@ -511,22 +511,11 @@ class Issue
         end
     end
 
-    def update_user_connections_read contact_id, user_id, read
+    def update_user_connections contact_id, user_id, read, confirmed
         begin
             ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
-            ss.update_attributes!(:read => read)
-            return {:id => ss.id, :read => ss.read}
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def update_user_connections_confirmed contact_id, user_id, confirmed
-        begin
-            ss = UserConnection.find_or_initialize_by(:user_id => user_id, :contact_id => contact_id)
-            ss.update_attributes!(:confirmed => confirmed)
-            return {:id => ss.id, :confirmed => ss.confirmed}
+            ss.update_attributes!(:read => read, :confirmed => confirmed)
+            return {:id => ss.id, :read => ss.read, :confirmed => ss.confirmed}
         rescue => e
             puts e
             return nil
@@ -554,7 +543,7 @@ class Issue
 
     def get_user_notifications user_id
         begin      
-            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id").order('created_at DESC').as_json
+            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id, notifications.subject").order('created_at DESC').as_json
         rescue => e
             puts e
             return nil
