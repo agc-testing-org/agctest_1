@@ -5,7 +5,6 @@ const { inject: { service }, Component } = Ember;
 export default Component.extend({
     session: service('session'),
     path: "/reset",
-    fromInvitation: null, 
     errorMessage: null,
     didRender() {
         this._super(...arguments);
@@ -13,9 +12,6 @@ export default Component.extend({
     },
     init(){
         this._super(...arguments);
-        if(this.get("invitation")){
-            this.set("fromInvitation",this.get("invitation").id);
-        }
     },
     actions: {
         reset() {
@@ -23,7 +19,7 @@ export default Component.extend({
             var passwordb = this.get("passwordb");
             if(password && (password.length > 7)){
                 if(password === passwordb){
-                    var credentials = this.getProperties('token', 'password', 'path', 'fromInvitation');
+                    var credentials = this.getProperties('token', 'password', 'path');
                     this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
                         console.log(reason);
                         this.set('errorMessage', JSON.parse(reason).message);

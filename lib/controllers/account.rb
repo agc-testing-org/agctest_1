@@ -228,9 +228,9 @@ class Account
         end
     end
 
-    def create_email email, name, token 
+    def create_email user 
         begin
-            mail email, "Welcome to Wired7 #{name.capitalize}", "#{name.capitalize},<br><br>Thanks for joining us!<br><br>To continue using the service please confirm your email by opening the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Confirm My Email</a>.<br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 Team", "#{name.capitalize},\n\nThanks for joining us!\n\n  To continue using the service please confirm your email by opening the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 Team"
+            mail user.email, "Wired7 Registration", "#{user.first_name.capitalize},<br><br>Thanks for signing up!  We are gradually onboarding users through invitations and will invite you as soon as possible.<br><br><br>- The Wired7 ATeam", "#{user.first_name.capitalize},\n\nThanks for signing up!  We are gradually onboarding users through invitations and will invite you as soon as possible.\n\n\n- The Wired7 ATeam"
         rescue => e
             puts e
         end

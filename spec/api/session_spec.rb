@@ -200,6 +200,64 @@ describe "API" do
 
     end
 
+    context "POST /accept" do
+        fixtures :users, :teams, :user_teams
+        before(:each) do
+            @first_name = "Adam"
+            @password = 'pass1221ef31'
+        end 
+        context "valid token" do
+            before(:each) do
+                @token = user_teams(:adam_confirmed_b_team).token
+                post "/accept", { :password => @password, :firstName => @first_name, :token => @token }.to_json
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
+            end 
+            it_behaves_like "session_response"
+            it_behaves_like "new_session"
+            it "should set accepted = true" do
+                expect(@user_teams_result.first["accepted"]).to be 1
+            end
+        end
+        context "expired token" do
+            before(:each) do
+                post "/accept", { :password => @password, :firstName => @first_name, :token => user_teams(:adam_invited_expired).token }.to_json
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it "should return success = false" do
+                expect(@res["success"]).to eq(false)
+            end
+        end
+    end
+
+    context "POST /resend" do
+        fixtures :users, :teams, :user_teams
+        context "valid token" do
+            before(:each) do
+                @token = user_teams(:adam_invited_expired).token
+                post "/resend", { :token => @token }.to_json
+                @res = JSON.parse(last_response.body)
+                @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_invited_expired).team_id}")
+            end
+            it "should update token" do
+                expect(@user_teams_result.first["token"]).to_not eq @token
+            end
+            it "should return success = true" do
+                expect(@res["success"]).to eq(true)
+            end
+        end
+        context "invalid token" do
+            before(:each) do
+                post "/resend", { :token => "YYYZ" }.to_json
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return success = true" do
+                expect(@res["success"]).to eq(true)
+            end
+        end
+    end
 
     context "POST /reset" do
         fixtures :users
@@ -250,33 +308,6 @@ describe "API" do
                 end
                 it "should not save password" do
                     expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
-                end
-            end
-            context "invitation" do
-                fixtures :teams, :user_teams
-                context "valid token" do
-                    before(:each) do
-                        @token = user_teams(:adam_confirmed_b_team).token
-                        post "/reset", { :password => @password, :token => @token, :invitation => true }.to_json
-                        @res = JSON.parse(last_response.body)
-                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
-                        @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
-                    end
-                    it_behaves_like "session_response"
-                    it_behaves_like "new_session"
-                    it "should set accepted = true" do
-                        expect(@user_teams_result.first["accepted"]).to be 1
-                    end
-                end
-                context "expired token" do
-                    before(:each) do
-                        post "/reset", { :password => @password, :token => "ZRY", :invitation => true }.to_json
-                        @res = JSON.parse(last_response.body)
-                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
-                    end
-                    it "should return success = false" do
-                         expect(@res["success"]).to eq(false)
-                    end
                 end
             end
             context "with invalid password" do

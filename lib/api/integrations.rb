@@ -194,15 +194,13 @@ class Integrations < Sinatra::Base
                 account = Account.new
                 if (account.valid_email fields[:email]) 
                     user = account.create fields[:email], fields[:first_name], fields[:last_name], request.ip
-                    if user && user.id # send welcome email with token
-                        account.create_email fields[:email], fields[:first_name], user.token #TODO - change email now that confirmation is set at invite accept
+                    if user && user.id # send welcome email 
+                        account.create_email user
                         if fields[:roles].length < 10 #accept roles from people that sign up without an invite
                             fields[:roles].each do |r|
                                 account.update_role user.id, r[:id], r[:active]
                             end
                         end
-                    else # user forgot OR unauthorized claim, so send reset password email
-                        account.request_token fields[:email]
                     end
                     response[:success] = true
                     status 201
@@ -279,7 +277,7 @@ class Integrations < Sinatra::Base
                     user = account.get_reset_token fields[:token]
 
                     if user
-                        account.confirm_user user, fields[:password], request.ip
+                        account.confirm_user user, fields[:password], user.first_name, request.ip
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, nil 
                         update_fields = {

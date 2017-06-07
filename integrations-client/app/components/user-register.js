@@ -30,7 +30,7 @@ export default Component.extend({
             if(firstName && firstName.length > 1){
                 if(password && (password.length > 7)){
                     if(password === passwordb){
-                        var credentials = this.getProperties('token', 'password', 'path', 'fromInvitation','firstName');
+                        var credentials = this.getProperties('token', 'password', 'path','firstName');
                         this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
                             console.log(reason);
                             this.set('errorMessage', JSON.parse(reason).message);
