@@ -15,8 +15,9 @@ Router.map(function() {
     this.route('register');
     this.route('login'); 
     this.route('token',{ path: '/token/:id' });
-    this.route('invitation', {path: '/invitation/:id'});
-    this.route('registered-invitation', {path: '/registered-invitation/:id'});
+    this.route('invitation', {path: '/invitation/:id'}, function(){
+        this.route('resend');
+    });
     this.route('forgot');
     this.route('develop', {path: '/develop'}, function() {
         this.route('index', {path: '/'});
@@ -35,6 +36,7 @@ Router.map(function() {
         this.route('notifications');
         this.route('connections');
         this.route('requests');
+        this.route('invitation', {path: '/invitation/:id'});
     });
 });
 

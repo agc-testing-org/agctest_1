@@ -5,12 +5,13 @@ const { inject: { service }, Component } = Ember;
 export default Component.extend({
     session: service('session'),
     message:"This invite is invalid or has expired",
+    showResend: true,
+    init(){
+        this._super(...arguments);
+    },
     didRender() {
         this._super(...arguments);
         this.$('#register-modal').modal('show');
-    },
-    init(){
-        this._super(...arguments);
     },
     actions: {
         resend(token) {
@@ -24,7 +25,8 @@ export default Component.extend({
             }).then(function(response) {
                 var res = JSON.parse(response);
                 if(res["success"] === true){
-                    _this.set('message', "A new invite will be sent to the email address associated with the invite");
+                    _this.set("message", "A new invitation will be sent to the associated email address");
+                    _this.set("showResend", false);
                 }
             }, function(xhr, status, error) {
                 var response = xhr.responseText;

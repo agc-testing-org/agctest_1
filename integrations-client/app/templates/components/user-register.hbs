@@ -1,10 +1,10 @@
-<div class="modal" id="register-modal" data-backdrop="static">
+<div class="modal show" id="register-modal" data-backdrop="static" data-show="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content rounded">
             <div class="modal-header">
                 <div class="title">
                 {{#if invitation}}
-                    You've been invited!
+                    You've been invited to <span class="text-capitalize">{{invitation.name}}</span>!
                 {{else}}
                     Register for Early Access 
                 {{/if}}
@@ -16,7 +16,7 @@
                 Wired7 is gradually onboarding users through invitations.  
                 
                 {{#if invitation}}
-                    <span class="text-capitalize">{{invitation.sender}}</span> ({{invitation.sender_email}}) would like for you to join the <span class="text-capitalize">{{invitation.name}}</span> team.
+                    <span class="text-capitalize">{{invitation.sender_first_name}}</span> ({{invitation.sender_email}}) would like for you to join the <span class="text-capitalize">{{invitation.name}}</span> team.
                 {{else}}
                     Register and we will invite you as soon as possible.
                 {{/if}}
@@ -77,9 +77,9 @@
                 </form>
             </div>
             {{#if invitation}}
-                <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer"><a>Want us to send another email?</a></div>
+                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "invitation.resend" class="text-muted"}}Want us to send another email{{/link-to}}</div>
             {{else}}
-                <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
             {{/if}}
         </div>
     </div>

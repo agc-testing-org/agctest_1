@@ -330,15 +330,18 @@ class Account
         end
     end
 
+    def mail_invite invite
+        mail invite.user_email, "Wired7 Invitation to #{invite.team.name.capitalize} from #{invite.sender.first_name.capitalize}", "Great news,<br><br>#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name.capitalize} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name.capitalize}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name.capitalize} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+    end
+
     def refresh_team_invite token
         begin
             invite = UserTeam.find_by(:token => token)
             if invite
                 invite.token = SecureRandom.hex(32)
                 invite.save
-                mail invite.user_email, "Invitation to Wired7", "Hey there,<br><br>We recently received a request for a new Wired7 invitation.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join Wired7</a><br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "Hey there,\n\nWe recently received a request for a new Wired7 invitation.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
             end
-            return true
+            return invite
         rescue => e
             puts e
             return nil 
@@ -346,10 +349,18 @@ class Account
 
     end
 
-    def join_team token
+    def check_user actual_user_id, record_user_id
+        if actual_user_id != nil
+            return actual_user_id == record_user_id
+        else
+            return true
+        end
+    end
+
+    def join_team token, user_id
         begin
             invite = UserTeam.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token).take
-            if invite
+            if invite && (check_user user_id, invite.user_id)
                 invite.update_attributes!({accepted: true, token: nil})
                 invitation = invite.as_json
                 invitation.delete("token")

@@ -2,11 +2,7 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 col-xs-12">
-            {{#if model.invitation.sender_email}}
-                {{user-register invitation=model.invitation token=model.token roles=model.roles}}
-            {{else}}
-                {{user-register-expired token=model.token}}
-            {{/if}}
+            {{outlet}}
         </div>
     </div>
 </div>

@@ -171,12 +171,12 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             account = Account.new
-            if account.refresh_team_invite fields[:token] # return success even if token not found
-                response[:success] = true
-                status 201
-            else
-                response[:message] = "An error has occurred"
+            invite = account.refresh_team_invite fields[:token]
+            if invite
+                account.mail_invite invite
             end
+            response[:success] = true # always return success
+            status 201
         rescue => e
             puts e
             response[:message] = "Invalid request"
@@ -229,7 +229,7 @@ class Integrations < Sinatra::Base
             if fields[:token] && fields[:password]
                 password_length = fields[:password].to_s.length
                 if password_length > 7 && password_length < 31
-                    team = account.join_team fields[:token]
+                    team = account.join_team fields[:token], nil
                     if team
                         user_params = {:id => team["user_id"]}
                         user = account.get user_params
@@ -275,16 +275,8 @@ class Integrations < Sinatra::Base
             if fields[:token] && fields[:password]
                 password_length = fields[:password].to_s.length
                 if password_length > 7 && password_length < 31
-                    user = nil                    
-                    if fields[:invitation]
-                        team = account.join_team fields[:token]
-                        if team
-                            user_params = {:id => team["user_id"]}
-                            user = account.get user_params
-                        end
-                    else
-                        user = account.get_reset_token fields[:token]
-                    end
+
+                    user = account.get_reset_token fields[:token]
 
                     if user
                         account.confirm_user user, fields[:password], request.ip
@@ -1269,9 +1261,8 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             if fields[:token]
-                #TODO - this should check to make sure user_id matches the invite user_id
                 account = Account.new
-                team = account.join_team fields[:token]
+                team = account.join_team fields[:token], @session_hash["id"]
                 if team
                     status 201
                     response = team
@@ -1316,10 +1307,13 @@ class Integrations < Sinatra::Base
                         user = account.create fields[:user_email], nil, nil, request.ip
                     end
 
-                    invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email]
+                    invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email] 
 
                     if invitation
                         status 201
+                        account.mail_invite invitation
+                        invitation = invitation.as_json
+                        invitation.delete("token") #don't return token
                         response = invitation
                     else
                         response[:error] = "An error has occurred"

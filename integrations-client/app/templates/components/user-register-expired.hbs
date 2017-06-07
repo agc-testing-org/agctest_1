@@ -15,9 +15,16 @@
             </div>
             <div class="modal-body">
                 <div class="alert alert-warning rounded">{{message}}</div>
+
+                {{#if showResend}}
+                    <form class="register-form">
+                        <button {{action "resend" token}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Resend</button>
+                    </form>
+                {{/if}}
+
             </div>
 
-            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer"><a {{action "resend" token}}>Want us to send another email?</a></div>
+            <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "register" class="text-muted"}}Cancel{{/link-to}}</div>
         </div>
     </div>
 </div>
