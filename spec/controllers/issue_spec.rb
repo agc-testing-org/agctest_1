@@ -97,7 +97,7 @@ describe ".Issue" do
                 expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
             end
             it "should include user_name" do
-                expect(@res["user_name"]).to eq(users(:masha_post_connection_request).name)
+                expect(@res["user_name"]).to eq(users(:masha_post_connection_request).first_name)
             end
         end
     end 

@@ -539,6 +539,7 @@ describe ".Account" do
         before(:each) do
             @ip = '192.168.1.1'
             @password = "1235678"
+            @first = "ADAM1"
             @email = users(:adam).email
             @email_hash = Digest::MD5.hexdigest(@email)
             @account.request_token @email
@@ -548,7 +549,7 @@ describe ".Account" do
         context "with user object" do
             before(:each) do
                 res = @account.get_reset_token "#{@email_hash}-#{@token}"
-                @res = @account.confirm_user res, @password, @ip
+                @res = @account.confirm_user res, @password, @first, @ip
             end
 
             it "should save the new password" do 
@@ -568,7 +569,7 @@ describe ".Account" do
             before(:each) do
                 query = "update users SET `protected` = 1 where id = #{@token}"
                 res = @account.get_reset_token "#{@email_hash}-#{users(:adam).token}"
-                @res = @account.confirm_user res, @password, @ip
+                @res = @account.confirm_user res, @password, @first, @ip
             end
             it "should set protected to false" do
                 expect(@mysql_client.query(@query).first["protected"]).to eq(0)
