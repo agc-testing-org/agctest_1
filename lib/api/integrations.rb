@@ -1102,8 +1102,8 @@ class Integrations < Sinatra::Base
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
 
                 if fields[:contact_id]
-                    issue = Issue.new
-                    connection_request = issue.create_connection_request @session_hash["id"], fields[:contact_id]
+                    account = Account.new
+                    connection_request = account.create_connection_request @session_hash["id"], fields[:contact_id]
 
                     if connection_request
                         status 201
@@ -1120,9 +1120,9 @@ class Integrations < Sinatra::Base
     connections_get = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            issue = Issue.new
+            account = Account.new
             query = {"user_connections.contact_id" => user_id}
-            connections = issue.get_user_connections query
+            connections = account.get_user_connections query
             return connections.to_json
         end
     end
@@ -1134,8 +1134,8 @@ class Integrations < Sinatra::Base
             status 400
             begin
                 if params[:id]
-                    issue = Issue.new
-                    response = (issue.user_connections_get_by_id @session_hash["id"], params[:id])
+                    account = Account.new
+                    response = (account.user_connections_get_by_id @session_hash["id"], params[:id])
                     if response
                         status 201
                     end
@@ -1157,8 +1157,8 @@ class Integrations < Sinatra::Base
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:user_id] && fields[:read] && fields[:confirmed]
-                    issue = Issue.new
-                    response = (issue.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
+                    account = Account.new
+                    response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
                     if response
                         status 201
                     end
@@ -1262,8 +1262,8 @@ class Integrations < Sinatra::Base
     get_user_info = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            issue = Issue.new
-            user_info = issue.get_user_info user_id
+            account = Account.new
+            user_info = account.get_user_info user_id
             return user_info.to_json
         end
     end
@@ -1271,8 +1271,8 @@ class Integrations < Sinatra::Base
   get_user_notifications = lambda do
     user_id = (default_to_signed params[:user_id])
     if user_id
-      issue = Issue.new
-      user_notification = issue.get_user_notifications user_id
+      account = Account.new
+      user_notification = account.get_user_notifications user_id
       return user_notification.to_json
     end
   end
@@ -1284,8 +1284,8 @@ class Integrations < Sinatra::Base
       status 400
       begin
         if params[:id]
-          issue = Issue.new
-          response = (issue.get_user_notifications_by_id @session_hash["id"], params[:id])
+          account = Account.new
+          response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
           if response
             status 201
           end
@@ -1307,8 +1307,8 @@ class Integrations < Sinatra::Base
         request.body.rewind
         fields = JSON.parse(request.body.read, :symbolize_names => true)
         if params[:id] && fields[:read]
-          issue = Issue.new
-          response = (issue.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+          account = Account.new
+          response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
           if response
             status 201
           end
