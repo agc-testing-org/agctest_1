@@ -188,7 +188,7 @@ describe "/projects" do
     end
 
     describe "POST /:id/contributors" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
             Octokit::Client.any_instance.stub(:create_repository) { {} }
@@ -210,7 +210,9 @@ describe "/projects" do
                 @project = projects(:demo).id
                 post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
+                puts @res.inspect
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+                puts @sql.inspect
             end
             context "contributor" do
                 it "should include repo name" do

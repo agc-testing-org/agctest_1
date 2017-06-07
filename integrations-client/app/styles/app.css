@@ -326,7 +326,7 @@ button{
 }
 .register-form input{
     background-color: #3a3a3a;
-    color: orange !important;
+    color: #fff !important;
 }
 .register-form button{
     width:100%; 
