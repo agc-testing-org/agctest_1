@@ -393,52 +393,30 @@ class Issue
                 user_name = user[0]["first_name"]
 
                 if x.comment_id != nil
-                    notification = Notification.create({
-                        sprint_id: x.sprint_id,
-                        user_id: x.user_id,
-                        sprint_timeline_id: x.id,
-                        contributor_id: x.contributor_id,
-                        subject: 'New Comment',
-                        body: user_name+' commented',
-                        created_at: x.created_at,
-                        project_org: project_org,
-                        project_name: project_name,
-                        project_id: x.project_id,
-                        sprint_name: sprint_title,
-                        sprint_state_id: x.sprint_state_id
-                        })
+                    subject = 'New Comment'
+                    body = user_name+' commented'
                 elsif x.vote_id != nil
-                    notification = Notification.create({
-                        sprint_id: x.sprint_id,
-                        user_id: x.user_id,
-                        sprint_timeline_id: x.id,
-                        contributor_id: x.contributor_id,
-                        subject: 'New Vote',
-                        body: user_name+' voted on',
-                        created_at: x.created_at,
-                        project_org: project_org,
-                        project_name: project_name,
-                        project_id: x.project_id,
-                        sprint_name: sprint_title,
-                        sprint_state_id: x.sprint_state_id
-                        })
+                    subject = 'New Vote'
+                    body = user_name+' voted on'
                 else
-                    x.vote_id == nil and x.comment_id == nil
-                    notification = Notification.create({
-                        sprint_id: x.sprint_id,
-                        user_id: x.user_id,
-                        sprint_timeline_id: x.id,
-                        contributor_id: x.contributor_id,
-                        subject: 'Sprint State Change',
-                        body: state_name+' created',
-                        created_at: x.created_at,
-                        project_org: project_org,
-                        project_name: project_name,
-                        project_id: x.project_id,
-                        sprint_name: sprint_title,
-                        sprint_state_id: x.sprint_state_id
-                        })
+                    subject = 'Sprint State Change'
+                    body = state_name+' created'
                 end
+
+                notification = Notification.create({
+                    sprint_id: x.sprint_id,
+                    user_id: x.user_id,
+                    sprint_timeline_id: x.id,
+                    contributor_id: x.contributor_id,
+                    subject: subject,
+                    body: body,
+                    created_at: x.created_at,
+                    project_org: project_org,
+                    project_name: project_name,
+                    project_id: x.project_id,
+                    sprint_name: sprint_title,
+                    sprint_state_id: x.sprint_state_id
+                })
             end
             return response
         rescue => e
