@@ -8,9 +8,10 @@
             {{/if}}
             <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
             {{#if me}}
-            {{profile-overview-skillsets skillsets=skillsets class="skillsets"}}
+                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
+                {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
             {{/if}}
-            {{profile-overview-skillset-stats skillsets=skillsets class="skillsets"}}
+            {{profile-overview-skillsets-roles-stats skillsets=skillsets roles=roles class="skillsets"}}
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
                     {{sprint-state-overview-score total=5000 title="Example Stat A"}}

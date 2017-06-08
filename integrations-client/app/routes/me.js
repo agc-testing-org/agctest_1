@@ -12,11 +12,13 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
         this.store.adapterFor('skillset').set('namespace', 'users/me');
         var skillsets = this.store.findAll('skillset'); 
+        var roles = this.store.findAll('role');
         this.store.adapterFor('skillset').set('namespace', ''); 
 
         return Ember.RSVP.hash({
             teams: this.store.findAll('team'),
             skillsets: skillsets,
+            roles: roles,
             user: user
         });
     }
