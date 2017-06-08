@@ -22,7 +22,15 @@
             <div class="modal-body">
                 <form {{action 'reset' on="submit"}} class="register-form">
                     <div class="text-center">
-                        {{#if errorMessage}}<div class="alert alert-warning">{{errorMessage}}</div>{{/if}}
+                        {{#if errorMessage}}<div class="alert alert-warning rounded text-center">{{errorMessage}}</div>{{/if}}
+
+                        {{#if invitation}}
+                        <div class="form-group text-left">
+                            <label>Email</label>
+                            {{input disabled=true value=email type="email" value=invitation.email class="form-control input-lg rounded"}}
+                        </div>
+                        {{/if}}
+
                         {{input type="password" value=password placeholder="Password" class="form-control input-lg rounded"}}
                         {{input type="password" value=passwordb placeholder="Confirm Password" class="form-control input-lg rounded"}}
 

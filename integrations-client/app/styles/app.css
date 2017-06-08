@@ -326,6 +326,7 @@ button{
 }
 .register-form input{
     background-color: #3a3a3a;
+    color: #fff !important;
 }
 .register-form button{
     width:100%; 
@@ -333,6 +334,9 @@ button{
     background-color: orange;
     border: 0px;
     font-size:20px;
+}
+.register-form .btn-outline-secondary{
+    color: #fff !important;
 }
 .register-form .btn-group label{
     margin-bottom: 10px;
@@ -355,7 +359,7 @@ button{
     margin-top:10px; 
     color: #fff;
 }
-.register-form .form-control{
+.register-form .form-control,.register-form .form-control[disabled]{
     background-color: #3a3a3a;
 }
 
@@ -487,7 +491,7 @@ button{
     padding: 20px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #333;
+    background-color: #4C4C4C;
     padding-left: 0px;
     padding-right: 0px;
     padding-top: 0px;
@@ -514,7 +518,7 @@ button{
     color: #28B6C3;
     margin:0px;
     padding:10px;
-    background-color: #4C4C4C;
+    background-color: #333;
     border-bottom: 0px solid #333;
     color: #cfcfcf;
     width:100%;
@@ -529,7 +533,7 @@ button{
     padding-bottom:0px;
 }
 .sidebar .nav .menu li.active{
-    background-color: #333;
+    background-color: #4c4c4c;
     color: #cfcfcf;
 }
 .sidebar .nav .menu li, .sidebar.hidden-md-up .nav .menu li{
@@ -539,7 +543,7 @@ button{
     border-bottom: 0px;
     color: #cfcfcf;     
     width:100%;
-    background-color: #333;
+    background-color: #4c4c4c;
     display:block;              
     position:relative;              
 } 

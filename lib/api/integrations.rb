@@ -164,6 +164,26 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    resend_invitation_post = lambda do
+        status 400
+        response = {:success => false}
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            account = Account.new
+            invite = account.refresh_team_invite fields[:token]
+            if invite
+                account.mail_invite invite
+            end
+            response[:success] = true # always return success
+            status 201
+        rescue => e
+            puts e
+            response[:message] = "Invalid request"
+        end
+        return response.to_json
+    end
+
     register_post = lambda do
         status 400
         response = {:success => false}
@@ -174,15 +194,13 @@ class Integrations < Sinatra::Base
                 account = Account.new
                 if (account.valid_email fields[:email]) 
                     user = account.create fields[:email], fields[:first_name], fields[:last_name], request.ip
-                    if user && user.id # send welcome email with token
-                        account.create_email fields[:email], fields[:first_name], user.token #TODO - change email now that confirmation is set at invite accept
+                    if user && user.id 
+                        account.create_email user 
                         if fields[:roles].length < 10 #accept roles from people that sign up without an invite
                             fields[:roles].each do |r|
                                 account.update_role user.id, r[:id], r[:active]
                             end
                         end
-                    else # user forgot OR unauthorized claim, so send reset password email
-                        account.request_token fields[:email]
                     end
                     response[:success] = true
                     status 201
@@ -199,6 +217,52 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
+    accept_post = lambda do
+        status 400
+        response = { :success => false }
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            account = Account.new
+            if fields[:token] && fields[:password]
+                password_length = fields[:password].to_s.length
+                if password_length > 7 && password_length < 31
+                    team = account.join_team fields[:token], nil
+                    if team
+                        user_params = {:id => team["user_id"]}
+                        user = account.get user_params
+                        if user
+                            account.confirm_user user, fields[:password], fields[:firstName], request.ip
+                            user_secret = SecureRandom.hex(32) #session secret, not password
+                            jwt = account.create_token user[:id], user_secret, fields[:firstName]
+                            update_fields = {
+                                ip: request.ip,
+                                jwt: jwt
+                            }
+                            if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                                response[:success] = true
+                                response[:w7_token] = jwt
+                                status 201
+                            end
+                        else
+                            response[:message] = "An error has occurred"
+                        end
+                    else
+                        response[:message] = "This token is invalid or has expired"
+                    end
+                else
+                    response[:message] = "Your password must be 8-30 characters in length"
+                end
+            else
+                response[:message] = "This request is not valid"
+            end
+        rescue => e
+            puts e
+            response[:message] = "This request is not valid"
+        end
+        return response.to_json
+    end
+
     reset_post = lambda do
         status 400
         response = { :success => false }
@@ -209,21 +273,13 @@ class Integrations < Sinatra::Base
             if fields[:token] && fields[:password]
                 password_length = fields[:password].to_s.length
                 if password_length > 7 && password_length < 31
-                    user = nil                    
-                    if fields[:invitation]
-                        team = account.join_team fields[:token]
-                        if team
-                            user_params = {:id => team["user_id"]}
-                            user = account.get user_params
-                        end
-                    else
-                        user = account.get_reset_token fields[:token]
-                    end
+
+                    user = account.get_reset_token fields[:token]
 
                     if user
-                        account.confirm_user user, fields[:password], request.ip
+                        account.confirm_user user, fields[:password], user.first_name, request.ip
                         user_secret = SecureRandom.hex(32) #session secret, not password
-                        jwt = account.create_token user[:id], user_secret, fields[:name]
+                        jwt = account.create_token user[:id], user_secret, nil 
                         update_fields = {
                             ip: request.ip,
                             jwt: jwt
@@ -273,7 +329,7 @@ class Integrations < Sinatra::Base
                 end
             else
                 response[:message] = "Email or password incorrect."
-                status 200
+                status 401
             end
         rescue => e
             puts e
@@ -371,24 +427,46 @@ class Integrations < Sinatra::Base
         end
     end
 
-    account_get = lambda do
+    session_get = lambda do
         protected!
         status 200
         return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
-    account_roles_get = lambda do
+    users_get_by_id = lambda do
+        status 404
+        account = Account.new
+        user = account.get_users params
+        if user[0]
+            status 200
+            return user[0].to_json
+        else
+            return {}.to_json
+        end
+    end
+
+    users_get_by_me = lambda do
+        protected!
+        redirect to("/users/#{@session_hash["id"]}")
+    end
+
+    users_roles_get = lambda do
         account = Account.new
         return (account.get_account_roles params[:user_id], {}).to_json
     end
 
-    account_roles_get_by_role = lambda do
+    users_roles_get_by_me = lambda do
+        protected!
+        redirect to("/users/#{@session_hash["id"]}/roles")
+    end
+
+    users_roles_get_by_role = lambda do
         account = Account.new
         query = {:id => params[:role_id]}
         return (account.get_account_roles params[:user_id], query).to_json
     end
 
-    account_roles_patch_by_id = lambda do
+    users_roles_patch_by_id = lambda do
         protected!
         status 401
         response = {}
@@ -462,18 +540,23 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    user_skillsets_get = lambda do
+    users_skillsets_get = lambda do
         issue = Issue.new
         return (issue.get_user_skillsets params[:user_id], {}).to_json
     end
 
-    user_skillsets_get_by_skillset = lambda do
+    users_skillsets_get_by_me = lambda do
+        protected!
+        redirect to("/users/#{@session_hash["id"]}/skillsets")
+    end
+
+    users_skillsets_get_by_skillset = lambda do
         issue = Issue.new
         query = {:id => params[:skillset_id]}
         return (issue.get_user_skillsets params[:user_id], query)[0].to_json
     end
 
-    user_skillsets_patch = lambda do
+    users_skillsets_patch = lambda do
         protected!
         status 401
         response = {}
@@ -1127,7 +1210,7 @@ class Integrations < Sinatra::Base
         end
     end
 
-     user_connections_get_by_id = lambda do
+    user_connections_get_by_id = lambda do
         protected!
         status 401
         if @session_hash["id"]
@@ -1203,9 +1286,8 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             if fields[:token]
-                #TODO - this should check to make sure user_id matches the invite user_id
                 account = Account.new
-                team = account.join_team fields[:token]
+                team = account.join_team fields[:token], @session_hash["id"]
                 if team
                     status 201
                     response = team
@@ -1222,7 +1304,7 @@ class Integrations < Sinatra::Base
     user_teams_get = lambda do
         protected!
         team = Organization.new
-   
+
         if team.member? params["team_id"], @session_hash["id"]
             members = team.get_users params
             return members.to_json
@@ -1250,10 +1332,13 @@ class Integrations < Sinatra::Base
                         user = account.create fields[:user_email], nil, nil, request.ip
                     end
 
-                    invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email]
+                    invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email] 
 
                     if invitation
                         status 201
+                        account.mail_invite invitation
+                        invitation = invitation.as_json
+                        invitation.delete("token") #don't return token
                         response = invitation
                     else
                         response[:error] = "An error has occurred"
@@ -1267,20 +1352,19 @@ class Integrations < Sinatra::Base
     end
 
     team_invites_get = lambda do
-        status 404
+        status 200
         team = Organization.new
         invite = team.get_member_invite params[:token]
         if invite
-            status 200
             return {
                 id: invite.id,
                 name: invite.team.name,
-                email: invite.user_email,
-                sender: invite.sender.first_name,
+                sender_email: invite.sender.email,
+                sender_first_name: invite.sender.first_name,
                 registered: invite.user.confirmed
             }.to_json
         else
-            return {}.to_json
+            return {:id => params[:token]}.to_json
         end
     end
 
@@ -1293,70 +1377,82 @@ class Integrations < Sinatra::Base
         end
     end
 
-  get_user_notifications = lambda do
-    user_id = (default_to_signed params[:user_id])
-    if user_id
-      issue = Issue.new
-      user_notification = issue.get_user_notifications user_id
-      return user_notification.to_json
-    end
-  end
-
-  get_user_notifications_by_id = lambda do
-    protected!
-    status 401
-    if @session_hash["id"]
-      status 400
-      begin
-        if params[:id]
-          issue = Issue.new
-          response = (issue.get_user_notifications_by_id @session_hash["id"], params[:id])
-          if response
-            status 201
-          end
+    get_user_notifications = lambda do
+        user_id = (default_to_signed params[:user_id])
+        if user_id
+            issue = Issue.new
+            user_notification = issue.get_user_notifications user_id
+            return user_notification.to_json
         end
-      rescue => e
-        puts e
-      end
     end
-    return response.to_json
-  end
 
-  user_notifications_read = lambda do
-    protected!
-    status 401
-    response = {}
-    if @session_hash["id"]
-      status 400
-      begin
-        request.body.rewind
-        fields = JSON.parse(request.body.read, :symbolize_names => true)
-        if params[:id] && fields[:read]
-          issue = Issue.new
-          response = (issue.read_user_notifications @session_hash["id"], params[:id], fields[:read])
-          if response
-            status 201
-          end
+    get_user_notifications_by_id = lambda do
+        protected!
+        status 401
+        if @session_hash["id"]
+            status 400
+            begin
+                if params[:id]
+                    issue = Issue.new
+                    response = (issue.get_user_notifications_by_id @session_hash["id"], params[:id])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
         end
-      rescue => e
-        puts e
-      end
+        return response.to_json
     end
-    return response.to_json
-  end
+
+    user_notifications_read = lambda do
+        protected!
+        status 401
+        response = {}
+        if @session_hash["id"]
+            status 400
+            begin
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if params[:id] && fields[:read]
+                    issue = Issue.new
+                    response = (issue.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+                    if response
+                        status 201
+                    end
+                end
+            rescue => e
+                puts e
+            end
+        end
+        return response.to_json
+    end
 
     #API
     post "/register", &register_post
     post "/forgot", &forgot_post
+    post "/resend", &resend_invitation_post
     post "/reset", &reset_post
+    post "/accept", &accept_post
     post "/login", &login_post
     post "/session/github", &session_provider_github_post
     post "/session/linkedin", &session_provider_linkedin_post
     delete "/session", &session_delete
-    get "/account", &account_get
-    get "/account/:user_id/skillsets", &user_skillsets_get
-    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
-    patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
+    get "/session", &session_get
+
+    get "/users/me", &users_get_by_me #must precede :id request
+    get "/users/:id", allows: [:id], &users_get_by_id
+
+    get "/users/me/skillsets", &users_skillsets_get_by_me # must precede :user_id request
+    get "/users/:user_id/skillsets", &users_skillsets_get
+    get "/users/:user_id/skillsets/:skillset_id", &users_skillsets_get_by_skillset
+    patch "/users/:user_id/skillsets/:skillset_id", &users_skillsets_patch 
+
+    get "/users/me/roles", &users_roles_get_by_me # must precede :user_id request
+    get "/users/:user_id/roles", &users_roles_get
+    get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
+    patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
 
     post "/account/connections", &connections_request_post
     get "/account/connections/requests", &connections_get
@@ -1368,10 +1464,6 @@ class Integrations < Sinatra::Base
     get "/account/notifications", &get_user_notifications
     patch "/account/read/notifications/:id", &user_notifications_read 
     get "/account/read/notifications/:id", &get_user_notifications_by_id
-
-    get "/account/:user_id/roles", &account_roles_get
-    get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
-    patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get

@@ -64,9 +64,7 @@ class Organization
 
     def invite_member team_id, sender_id, user_id, user_email
         begin
-            invitation = UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32)}).as_json
-            invitation.delete("token") #don't return token
-            return invitation
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32)})
         rescue => e
             puts e
             return nil

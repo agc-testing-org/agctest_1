@@ -3,28 +3,19 @@
         <div class="modal-content rounded">
             <div class="modal-header">
                 <div class="title">
-
-                    {{#if invitation}}
-                        Sign in to Accept an Invitation
-                    {{else}}
-                        Sign In
-                    {{/if}}
-
+                    Sign In
                 </div>
             </div>
             <div class="modal-header subtitle">
                 <div class="text-muted">
-
-                    {{#if invitation}}
-                        {{invitation.sender}} would like for you to join the {{invitation.name}} team
-                    {{else}}
-                        Sign in to your Wired7 Account
-                    {{/if}}
+                    Sign in to your Wired7 Account
                 </div>
             </div>
             <div class="modal-body">
                 
                 <form class="register-form" {{action 'login' on="submit"}}>
+
+                    {{#if errorMessage}}<div class="alert alert-warning text-center rounded">{{errorMessage}}</div>{{/if}}
 
                     {{input type="email" value=email placeholder="Email" class="form-control rounded"}}
                     {{input type="password" value=password placeholder="Password" class="form-control rounded"}}

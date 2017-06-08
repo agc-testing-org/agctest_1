@@ -6,14 +6,18 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     sessionAccount: Ember.inject.service('session-account'),
 
     model: function(params) { 
-       
-        var teams = this.store.findAll('team');
-        
-        this.store.adapterFor('skillset').set('namespace', 'account/'+this.get("sessionAccount.account").id); 
+
+        this.store.adapterFor('me').set('namespace', 'users');
+        var user = this.store.queryRecord('me',{});
+
+        this.store.adapterFor('skillset').set('namespace', 'users/me');
+        var skillsets = this.store.findAll('skillset'); 
+        this.store.adapterFor('skillset').set('namespace', ''); 
 
         return Ember.RSVP.hash({
-            skillsets: this.store.findAll('skillset'),
-            teams: teams
+            teams: this.store.findAll('team'),
+            skillsets: skillsets,
+            user: user
         });
     }
 });

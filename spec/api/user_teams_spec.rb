@@ -76,7 +76,7 @@ describe "/user-teams" do
         end
     end
 
-    describe "PATCH /" do
+    describe "POST /" do
         fixtures :teams, :user_teams
         context "valid token" do
             before(:each) do
@@ -93,9 +93,23 @@ describe "/user-teams" do
             end
         end
         context "invalid token" do
-            it "should return error message" do
-                post "/user-teams/token", { :token => "999"  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            after(:each) do 
                 expect(JSON.parse(last_response.body)["error"]).to eq("This invite is invalid or has expired")
+            end
+            context "expired" do
+                it "should return error message" do
+                    post "/user-teams/token", { :token => user_teams(:adam_invited_expired).token  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+            end
+            context "bogus" do
+                it "should return error message" do
+                    post "/user-teams/token", { :token => "999"  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+            end
+            context "another user's" do
+                it "should return error message" do
+                    post "/user-teams/token", { :token => user_teams(:adam_protected).token }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
             end
         end
     end

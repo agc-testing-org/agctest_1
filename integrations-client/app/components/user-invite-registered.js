@@ -14,13 +14,15 @@ export default Component.extend({
         accept(inviteId) {
             var _this = this;
             var store = this.get('store');
-            
-            store.adapterFor('team').set('namespace', 'user-teams' );
-            store.createRecord('token', {
+
+            store.adapterFor('token').set('namespace', 'user-teams' );
+            var token = store.createRecord('token', {
                 token: inviteId 
-            }).save().then(function(payload) {
-                store.adapterFor('team').set('namespace', '' );
-                _this.get("routes").redirectWithId("team",payload.id);
+            }).save();
+            
+            token.then(function(payload) {
+                store.adapterFor('token').set('namespace', '');
+                _this.get("routes").redirectWithId("team",payload.get("team_id"));
             });
         },
     }

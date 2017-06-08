@@ -6,7 +6,9 @@ export default Component.extend({
     session: service('session'),
     store: Ember.inject.service(),
     routes: Ember.inject.service('route-injection'),
-    registered: false,
+    registereid: false,
+    path: "/accept",
+    errorMessage: null,
     didRender() { 
         this._super(...arguments);
         this.$('#register-modal').modal('show');
@@ -20,6 +22,31 @@ export default Component.extend({
                 obj.set("active",true); 
             }
             console.log(obj.get("name")+ " set to "+obj.get("active"));
+        },
+        accept(){
+            var password = this.get("password");
+            var passwordb = this.get("passwordb");
+            var firstName = this.get("firstName");
+            if(firstName && firstName.length > 1){
+                if(password && (password.length > 7)){
+                    if(password === passwordb){
+                        var credentials = this.getProperties('token', 'password', 'path','firstName');
+                        this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
+                            console.log(reason);
+                            this.set('errorMessage', JSON.parse(reason).message);
+                        });
+                    }
+                    else {
+                        this.set('errorMessage', "Passwords do not match");
+                    }
+                }
+                else {
+                    this.set('errorMessage', "Password must be 8-30 characters");
+                }
+            }
+            else {
+                this.set('errorMessage', "Please enter a first name with more than one character (only letters, numbers, dashes).");
+            }
         },
         register() {
             var _this = this;
@@ -65,7 +92,13 @@ export default Component.extend({
                         });
                     });
                 }
+                else {                                           
+                    this.set('errorMessage', "Please enter a first name with more than one character (only letters, numbers, dashes).");                  
+                } 
             }
+            else {                    
+                this.set('errorMessage', "Please enter a valid email address.");
+            } 
         },
     }
 });

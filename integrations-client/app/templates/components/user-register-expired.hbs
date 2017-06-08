@@ -1,0 +1,29 @@
+<div class="modal" id="register-modal" data-backdrop="static">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content rounded">
+            <div class="modal-header">
+                <div class="title">
+                    There's an issue with your invitation!
+                </div>
+            </div>
+            <div class="modal-header subtitle">
+                <div class="text-muted">
+                
+                    This invitation appears to be invalid or expired.  If you received an email invitation from us use the button below and we'll send you a new one.
+                
+                </div>
+            </div>
+            <div class="modal-body">
+
+                {{#if showResend}}
+                    <form class="register-form">
+                        <button {{action "resend" token}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Resend</button>
+                    </form>
+                {{/if}}
+
+            </div>
+
+            <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "register" class="text-muted"}}Cancel{{/link-to}}</div>
+        </div>
+    </div>
+</div>

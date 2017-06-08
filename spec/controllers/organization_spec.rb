@@ -21,7 +21,7 @@ describe ".Organization" do
         end
         context "has not accepted" do
             before(:each) do
-                @user_id = user_teams(:adam_invited).id
+                @user_id = user_teams(:adam_invited_expired).id
                 @res = @team.member? @team_id, @user_id
             end 
             it "should return false" do
