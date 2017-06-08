@@ -206,7 +206,7 @@ class Account
 
     def get_users params # can be used if we add search functionality later
         begin
-            return User.where(params).select(:created_at).as_json
+            return User.where(params).select(:id, :created_at).as_json
         rescue => e
             puts e
             return nil

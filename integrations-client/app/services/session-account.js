@@ -16,8 +16,8 @@ export default Ember.Service.extend({
 
                 console.log("AUTHENTICATED");
                 var store = _this.get('store');
-                store.adapterFor('account').set('namespace', ''); 
-                return store.queryRecord('account',{ reload: shouldReload }).then((account) => {
+                store.adapterFor('session').set('namespace', ''); 
+                return store.queryRecord('session',{ reload: shouldReload }).then((account) => {
                     this.set('account',account);
 
                     /*
