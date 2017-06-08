@@ -463,7 +463,7 @@ class Integrations < Sinatra::Base
     users_roles_get_by_role = lambda do
         account = Account.new
         query = {:id => params[:role_id]}
-        return (account.get_account_roles params[:user_id], query).to_json
+        return (account.get_account_roles params[:user_id], query)[0].to_json
     end
 
     users_roles_patch_by_id = lambda do

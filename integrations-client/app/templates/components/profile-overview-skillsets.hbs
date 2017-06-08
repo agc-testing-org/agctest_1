@@ -1,7 +1,0 @@
-{{#each skillsets as |skillset|}}
-    {{#if skillset.active}}
-        <span {{action "updateSkillset" skillset.id false}} class="badge badge-default rounded selected cursor-pointer">{{skillset.name}}</span>
-    {{else}}
-        <span {{action "updateSkillset" skillset.id true}} class="badge badge-default rounded unselected cursor-pointer">{{skillset.name}}</span>
-    {{/if}}
-{{/each}}

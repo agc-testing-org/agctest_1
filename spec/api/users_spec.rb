@@ -266,7 +266,7 @@ describe "/users" do
             fixtures :user_roles
             before(:each) do
                 get "/users/#{@user_id}/roles/#{@role_id}", {}, {} 
-                @res = [JSON.parse(last_response.body)][0][0]
+                @res = JSON.parse(last_response.body)
             end
             it_behaves_like "user_role"
         end

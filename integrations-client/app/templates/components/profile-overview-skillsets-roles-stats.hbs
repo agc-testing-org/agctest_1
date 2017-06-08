@@ -1,0 +1,11 @@
+{{#each roles as |role|}}
+    {{#if role.active}}
+        <span {{action "filter" role.id}} class="badge badge-default rounded selected cursor-pointer">{{role.name}}</span>
+    {{/if}}
+{{/each}}
+
+{{#each skillsets as |skillset|}}
+    {{#if skillset.active}}
+        <span {{action "filter" skillset.id}} class="badge badge-default rounded selected cursor-pointer">{{skillset.name}}</span>
+    {{/if}}
+{{/each}}
