@@ -2,9 +2,11 @@ import Ember from 'ember';
 
 export default Ember.Route.extend({
     model: function () {
-        this.store.adapterFor('connection').set('namespace', 'account');
+    	this.store.adapterFor('connection').set('namespace', 'account');
+    	var connections = this.store.findAll('connection');
+        this.store.adapterFor('connection').set('namespace', '');
         return Ember.RSVP.hash({
-            connections: this.store.findAll('connection')
-        })
+            connections: connections
+        });
     }
 });

@@ -3,11 +3,13 @@ import Ember from 'ember';
 export default Ember.Route.extend({
     model: function () {
         this.store.adapterFor('notification').set('namespace', 'account');
-        return Ember.RSVP.hash({
-            notifications: this.store.findAll('notification')
-        });
-    },
-    afterModel(){
+        var notifications = this.store.findAll('notification');
         this.store.adapterFor('notification').set('namespace', '');
+
+        return Ember.RSVP.hash({
+            notifications: notifications
+        });
     }
 });
+
+
