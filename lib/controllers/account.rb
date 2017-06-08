@@ -204,6 +204,15 @@ class Account
         end
     end
 
+    def get_users params # can be used if we add search functionality later
+        begin
+            return User.where(params).select(:created_at).as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def update id, fields
         begin
             user = User.find_by(id: id)
@@ -240,14 +249,14 @@ class Account
         user = User.find_by(email: email)
         if user 
             user[:token] = SecureRandom.hex
-            
+
             name = user.first_name
             if name 
                 name = name.capitalize
             else
                 name = "Hi"
             end
-            
+
             mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
             return user.save
         else

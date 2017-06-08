@@ -166,7 +166,7 @@ describe "API" do
         end
     end
 
-    context "GET /account" do
+    context "GET /session" do
         fixtures :users
         context "signed in" do
             before(:each) do
@@ -175,7 +175,7 @@ describe "API" do
                 post "/login", { :password => @password, :email => @email }.to_json
                 res = JSON.parse(last_response.body)
                 w7_token = res["w7_token"]
-                get "/account",{},{"HTTP_AUTHORIZATION" => "Bearer #{w7_token}"}
+                get "/session",{},{"HTTP_AUTHORIZATION" => "Bearer #{w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should include user id" do

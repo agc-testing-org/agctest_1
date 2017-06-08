@@ -427,24 +427,46 @@ class Integrations < Sinatra::Base
         end
     end
 
-    account_get = lambda do
+    session_get = lambda do
         protected!
         status 200
         return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
-    account_roles_get = lambda do
+    users_get_by_id = lambda do
+        status 404
+        account = Account.new
+        user = account.get_users params
+        if user[0]
+            status 200
+            return user[0].to_json
+        else
+            return {}.to_json
+        end
+    end
+
+    users_get_by_me = lambda do
+        protected!
+        redirect to("/users/#{@session_hash["id"]}")
+    end
+
+    users_roles_get = lambda do
         account = Account.new
         return (account.get_account_roles params[:user_id], {}).to_json
     end
 
-    account_roles_get_by_role = lambda do
+    users_roles_get_by_me = lambda do
+        protected!
+        redirect to("/users/#{@session_hash["id"]}/roles")
+    end
+
+    users_roles_get_by_role = lambda do
         account = Account.new
         query = {:id => params[:role_id]}
         return (account.get_account_roles params[:user_id], query).to_json
     end
 
-    account_roles_patch_by_id = lambda do
+    users_roles_patch_by_id = lambda do
         protected!
         status 401
         response = {}
@@ -518,18 +540,23 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    user_skillsets_get = lambda do
+    users_skillsets_get = lambda do
         issue = Issue.new
         return (issue.get_user_skillsets params[:user_id], {}).to_json
     end
 
-    user_skillsets_get_by_skillset = lambda do
+    users_skillsets_get_by_me = lambda do
+        protected!
+        redirect to("/users/#{@session_hash["id"]}/skillsets")
+    end
+
+    users_skillsets_get_by_skillset = lambda do
         issue = Issue.new
         query = {:id => params[:skillset_id]}
         return (issue.get_user_skillsets params[:user_id], query)[0].to_json
     end
 
-    user_skillsets_patch = lambda do
+    users_skillsets_patch = lambda do
         protected!
         status 401
         response = {}
@@ -1412,10 +1439,20 @@ class Integrations < Sinatra::Base
     post "/session/github", &session_provider_github_post
     post "/session/linkedin", &session_provider_linkedin_post
     delete "/session", &session_delete
-    get "/account", &account_get
-    get "/account/:user_id/skillsets", &user_skillsets_get
-    get "/account/:user_id/skillsets/:skillset_id", &user_skillsets_get_by_skillset
-    patch "/account/:user_id/skillsets/:skillset_id", &user_skillsets_patch 
+    get "/session", &session_get
+
+    get "/users/me", &users_get_by_me #must precede :id request
+    get "/users/:id", allows: [:id], &users_get_by_id
+
+    get "/users/me/skillsets", &users_skillsets_get_by_me # must precede :user_id request
+    get "/users/:user_id/skillsets", &users_skillsets_get
+    get "/users/:user_id/skillsets/:skillset_id", &users_skillsets_get_by_skillset
+    patch "/users/:user_id/skillsets/:skillset_id", &users_skillsets_patch 
+
+    get "/users/me/roles", &users_roles_get_by_me # must precede :user_id request
+    get "/users/:user_id/roles", &users_roles_get
+    get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
+    patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
 
     post "/account/connections", &connections_request_post
     get "/account/connections/requests", &connections_get
@@ -1427,10 +1464,6 @@ class Integrations < Sinatra::Base
     get "/account/notifications", &get_user_notifications
     patch "/account/read/notifications/:id", &user_notifications_read 
     get "/account/read/notifications/:id", &get_user_notifications_by_id
-
-    get "/account/:user_id/roles", &account_roles_get
-    get "/account/:user_id/roles/:role_id", &account_roles_get_by_role
-    patch "/account/:user_id/roles/:role_id", &account_roles_patch_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get

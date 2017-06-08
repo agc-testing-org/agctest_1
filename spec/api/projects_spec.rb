@@ -191,7 +191,7 @@ describe "/projects" do
         fixtures :projects, :sprints, :sprint_states
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
-            Octokit::Client.any_instance.stub(:create_repository) { {} }
+            Octokit::Client.any_instance.stub(:create_repository) { %x( mkdir "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; cd "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; git init --bare)}
 
             body = {
                 :name=>"1",
@@ -210,9 +210,7 @@ describe "/projects" do
                 @project = projects(:demo).id
                 post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
-                puts @res.inspect
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
-                puts @sql.inspect
             end
             context "contributor" do
                 it "should include repo name" do
@@ -230,7 +228,7 @@ describe "/projects" do
             end
             context "repo" do
                 before(:each) do
-                    @git = %x(cd #{@uri}; git branch)
+                    @git = %x(cd "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; git branch)
                 end
                 it "should create master branch" do
                     expect(@git).to include("master")
@@ -277,7 +275,7 @@ describe "/projects" do
         context "valid contributor" do
             before(:each) do
                 get "/projects/#{@project}/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
                 @res = JSON.parse(last_response.body)
             end
             it "should return contributor id" do
@@ -311,7 +309,7 @@ describe "/projects" do
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
                 patch "/projects/#{@project}/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
-                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
             end
             context "contributor" do
                 it "should include commit" do
