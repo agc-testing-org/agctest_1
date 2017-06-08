@@ -26,10 +26,10 @@
                 <form class="register-form text-left" {{action 'register' on="submit"}}>
 
                     {{#if registered}}
-                    <h3 class="text-left text-teal">Thanks for signing up.  We will send you an invite as soon as we can!</h3>
+                        <div class="alert alert-info rounded text-center">We will email you an invite as soon as we can!</div>
                     {{else}}
 
-                    {{#if errorMessage}}<div class="alert alert-warning rounded">{{errorMessage}}</div>{{/if}}
+                    {{#if errorMessage}}<div class="alert alert-warning rounded text-center">{{errorMessage}}</div>{{/if}}
 
                     <div class="form-group">
                         <label>First Name</label>

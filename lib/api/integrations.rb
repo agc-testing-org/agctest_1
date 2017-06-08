@@ -194,8 +194,8 @@ class Integrations < Sinatra::Base
                 account = Account.new
                 if (account.valid_email fields[:email]) 
                     user = account.create fields[:email], fields[:first_name], fields[:last_name], request.ip
-                    if user && user.id # send welcome email 
-                        account.create_email user
+                    if user && user.id 
+                        account.create_email user 
                         if fields[:roles].length < 10 #accept roles from people that sign up without an invite
                             fields[:roles].each do |r|
                                 account.update_role user.id, r[:id], r[:active]
@@ -329,7 +329,7 @@ class Integrations < Sinatra::Base
                 end
             else
                 response[:message] = "Email or password incorrect."
-                status 200
+                status 401
             end
         rescue => e
             puts e

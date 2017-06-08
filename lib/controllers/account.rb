@@ -239,7 +239,7 @@ class Account
 
     def create_email user 
         begin
-            mail user.email, "Wired7 Registration", "#{user.first_name.capitalize},<br><br>Thanks for signing up!  We are gradually onboarding users through invitations and will invite you as soon as possible.<br><br><br>- The Wired7 ATeam", "#{user.first_name.capitalize},\n\nThanks for signing up!  We are gradually onboarding users through invitations and will invite you as soon as possible.\n\n\n- The Wired7 ATeam"
+            mail user.email, "Wired7 Registration", "Hi #{user.first_name.capitalize},<br><br>Thanks for signing up!  We are gradually onboarding users to the service and will email you an invitation as soon as possible.<br><br><br>- Adam Cockell<br>Founder of Wired7", "Hi #{user.first_name.capitalize},\n\nThanks for signing up!  We are gradually onboarding users to the service and will email you an invitation as soon as possible.\n\n\n- Adam Cockell\nFounder of Wired7"
         rescue => e
             puts e
         end

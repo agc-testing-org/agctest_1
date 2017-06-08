@@ -150,7 +150,7 @@ describe "API" do
             after(:each) do
                 res = JSON.parse(last_response.body)
                 expect(res["success"]).to be false
-                expect(last_response.status).to eq 200
+                expect(last_response.status).to eq 401
             end
             context "email" do
                 before(:each) do

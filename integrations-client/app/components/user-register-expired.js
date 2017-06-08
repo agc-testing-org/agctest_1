@@ -4,7 +4,7 @@ const { inject: { service }, Component } = Ember;
 
 export default Component.extend({
     session: service('session'),
-    message:"This invite is invalid or has expired",
+    message:null,
     showResend: true,
     init(){
         this._super(...arguments);

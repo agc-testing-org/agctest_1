@@ -2,7 +2,7 @@
 
     <div class="menu">
         {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <i class="fa fa-fw fa-user"></i>My Profile
+            <i class="fa fa-fw fa-user"></i>{{sessionAccount.account.first_name}}
         {{/link-to}}
     </div>
 
@@ -28,7 +28,16 @@
             </div>
             Contact Requests
         {{/link-to}}
-    
+
+        {{#each teams as |team|}}
+        {{#link-to "team" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-users"></i>
+            </div>
+            Team {{team.name}}
+        {{/link-to}}
+        {{/each}}
+
     {{else}}
         {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
