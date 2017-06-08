@@ -46,7 +46,6 @@ require_relative '../models/user_profile.rb'
 require_relative '../models/user_position.rb'
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
-require_relative '../models/user_contributor.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/connection_state.rb'
  
@@ -1319,9 +1318,8 @@ class Integrations < Sinatra::Base
     end
     return response.to_json
   end
-
-    #API
-    
+  
+    #API 
     post "/register", &register_post
     post "/forgot", &forgot_post
     post "/reset", &reset_post

@@ -51,11 +51,6 @@ class Issue
                 text: text
             })
 
-            user_contributor = UserContributor.create({
-                user_id: user_id,
-                contributors_id: contributor_id
-            })
-
             return comment
         rescue => e
             puts e
@@ -81,11 +76,6 @@ class Issue
             record = vote.as_json
             record[:previous] = previous_record
             record[:created] = new_record #created = false would mean no change to the frontend
-
-            user_contributor = UserContributor.create({
-                user_id: user_id,
-                contributors_id: contributor_id
-            })
 
             return record
         rescue => e
@@ -383,21 +373,28 @@ class Issue
             response = SprintTimeline.where("id > ?", id)
             response.each do |x|
                 project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
-                state = State.where("id = ?", x.state_id).select("name").as_json
                 sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
                 user = User.where("id = ?", x.user_id).select("first_name").as_json
-                state_name = state[0]["name"]
+                if x.state_id != nil
+                    state = State.where("id = ?", x.state_id).select("name").as_json
+                    state_name = state[0]["name"]
+                else
+                    state_name = 'The state has not changed'
+                end
                 project_org = project[0]["org"]
                 project_name = project[0]["name"]
                 sprint_title = sprint[0]["title"]
                 user_name = user[0]["first_name"]
 
-                if x.comment_id != nil
+                if x.comment_id != nil && x.contributor_id != nil
                     subject = 'New Comment'
                     body = user_name+' commented'
-                elsif x.vote_id != nil
+                elsif x.vote_id != nil && x.contributor_id != nil
                     subject = 'New Vote'
                     body = user_name+' voted on'
+                elsif x.contributor_id != nil
+                    subject = 'Sprint State Complete'
+                    body = 'Best Contribution Selected'
                 else
                     subject = 'Sprint State Change'
                     body = state_name+' created'
@@ -432,11 +429,14 @@ class Issue
             else 
                 id = 0
             end
+            
             skillset_user_notification = SprintSkillset.joins("INNER JOIN notifications ON sprint_skillsets.sprint_id=notifications.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1 and notifications.contributor_id is NULL").select("user_skillsets.user_id","notifications.id")
             roles_user_notification = UserRole.joins("CROSS JOIN notifications").where("((user_roles.active=1 and user_roles.role_id=1 and notifications.sprint_state_id=2) or (user_roles.active=1 and user_roles.role_id=4 and notifications.sprint_state_id=4) or (user_roles.active=1 and user_roles.role_id=3 and notifications.sprint_state_id=6) or (user_roles.active != 'NULL' and notifications.sprint_state_id NOT IN (2,4,6))) and notifications.contributor_id is NULL").select("user_roles.user_id","notifications.id")
-            comments_and_votes_user_notifications = UserContributor.joins("Join notifications").where("user_contributors.contributors_id = notifications.contributor_id and user_contributors.user_id != notifications.user_id").select("user_contributors.user_id", "notifications.id")
+            votes_user_notifications = Notification.joins("join votes").where("votes.contributor_id = notifications.contributor_id and votes.user_id != notifications.user_id").select("votes.user_id", "notifications.id")
+            comments_user_notifications = Notification.joins("join comments").where("comments.contributor_id = notifications.contributor_id and comments.user_id != notifications.user_id").select("comments.user_id", "notifications.id")
+            sprint_owner_notification = Notification.joins("join sprints ON notifications.sprint_id=sprints.id").where("notifications.user_id != sprints.user_id and notifications.subject IN ('New Comment','New Vote')").select("sprints.user_id", "notifications.id")
 
-            response = skillset_user_notification + roles_user_notification + comments_and_votes_user_notifications
+            response = skillset_user_notification + roles_user_notification + votes_user_notifications + comments_user_notifications + sprint_owner_notification
             response.each do |x|
                 if x[:id] > id
                     user_notifications = UserNotification.create({

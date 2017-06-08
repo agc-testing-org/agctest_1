@@ -41,16 +41,6 @@ class Repo
                 repo: repo
             })
 
-            contributor_subscribe = UserContributor.create({
-                user_id: user_id,
-                contributors_id: repo.id
-            })
-            sprint_owner = Sprint.find_by(query)
-            sprint_owner_subscribe = UserContributor.create({
-                user_id: sprint_owner.user_id,
-                contributors_id: repo.id
-            })
-
             return repo.id
         rescue => e
             puts e
