@@ -394,16 +394,38 @@ class Account
         end
     end
 
+    def is_owner? user_id
+        begin 
+            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id).count > 0)
+        rescue => e
+            puts e
+            return false
+        end
+    end
+
     def sign_in email, password, ip
-        user = User.find_by(email: email.downcase)
-        if user && user.password
-            if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
-                return user
+        begin
+            user = User.find_by(email: email.downcase)
+            if user && user.password
+                if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
+                    return user
+                else
+                    return nil
+                end
             else
-                return nil
+                return nil 
             end
-        else
-            return nil 
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_seat user_id, team_id
+        begin
+            return UserTeam.find_by(:user_id => user_id, :team_id => team_id ).seat_id
+        rescue => e
+            return nil
         end
     end
 end

@@ -3,10 +3,10 @@
         <div class="overview text-center">
             <h1 class="name text-capitalize">{{team.name}}</h1>
             <div class="description text-capitalize">created {{moment-from-now team.created_at}}</div>
-            <div class="about">teams allow organizations to share seats and contacts</div>
+            <div class="about">share access to talent with teams</div>
             <div class="row">
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
-                    {{sprint-state-overview-score total=user_teams.length title="Members"}}
+                    {{sprint-state-overview-score total=user_teams.length title="Invitations"}}
                 </div>
             </div>
         </div>

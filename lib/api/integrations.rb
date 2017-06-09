@@ -42,6 +42,8 @@ require_relative '../models/comment.rb'
 require_relative '../models/vote.rb'
 require_relative '../models/team.rb'
 require_relative '../models/user_team.rb'
+require_relative '../models/seat.rb'
+require_relative '../models/plan.rb'
 require_relative '../models/user_profile.rb'
 require_relative '../models/user_position.rb'
 require_relative '../models/notification.rb'
@@ -233,13 +235,16 @@ class Integrations < Sinatra::Base
                         user = account.get user_params
                         if user
                             account.confirm_user user, fields[:password], fields[:firstName], request.ip
+                            
+                            owner = account.is_owner? user[:id]
+
                             user_secret = SecureRandom.hex(32) #session secret, not password
                             jwt = account.create_token user[:id], user_secret, fields[:firstName]
                             update_fields = {
                                 ip: request.ip,
                                 jwt: jwt
                             }
-                            if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                            if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                                 response[:success] = true
                                 response[:w7_token] = jwt
                                 status 201
@@ -278,13 +283,16 @@ class Integrations < Sinatra::Base
 
                     if user
                         account.confirm_user user, fields[:password], user.first_name, request.ip
+
+                        owner = account.is_owner? user[:id]
+
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, nil 
                         update_fields = {
                             ip: request.ip,
                             jwt: jwt
                         }
-                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                             response[:success] = true
                             response[:w7_token] = jwt 
                             status 201
@@ -316,13 +324,16 @@ class Integrations < Sinatra::Base
             user = account.sign_in fields[:email], fields[:password], request.ip
 
             if user
+
+                owner = account.is_owner? user[:id]
+
                 user_secret = SecureRandom.hex(32) #session secret, not password
                 jwt = account.create_token user[:id], user_secret, user[:name]
                 update_fields = {
                     ip: request.ip, 
                     jwt: jwt                        
-                }  
-                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+                }
+                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
                     response[:success] = true
                     response[:w7_token] = jwt
                     status 200
@@ -400,7 +411,7 @@ class Integrations < Sinatra::Base
                 update_fields = {
                     github_username: username 
                 }  
-                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
+                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
                     status 200
                     return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
                 else
@@ -430,7 +441,7 @@ class Integrations < Sinatra::Base
     session_get = lambda do
         protected!
         status 200
-        return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
+        return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
     end
 
     users_get_by_id = lambda do
@@ -664,7 +675,13 @@ class Integrations < Sinatra::Base
         org = Organization.new
         if org.member? params["id"], @session_hash["id"]
             team = org.get_team params["id"]
-            return team.to_json
+            allowed_seats = org.allowed_seat_types team, @session_hash["admin"]
+            team_response = team.as_json
+            team_response["seats"] = allowed_seats
+            if team.plan
+                team_response["default_seat_id"] = team.plan.seat.id
+            end
+            return team_response.to_json
         else
             redirect to("/unauthorized")
         end
@@ -675,20 +692,27 @@ class Integrations < Sinatra::Base
         status 400
         response = {}
         begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:name] && fields[:name].length > 2
-                org = Organization.new
-                team = org.create_team fields[:name], @session_hash["id"]
+            account = Account.new
+            if ((account.get_seat @session_hash["id"], Team.find_by(:name => "wired7").id) == "owner")
+                request.body.rewind
+                fields = JSON.parse(request.body.read, :symbolize_names => true)
+                if fields[:name] && fields[:name].length > 2
 
-                if team && (org.add_owner @session_hash["id"], team["id"])
-                    response = team
-                    status 201
+                    org = Organization.new
+                    team = org.create_team fields[:name], @session_hash["id"]
+
+                    if team && (org.add_owner @session_hash["id"], team["id"])
+                        response = team
+                        status 201
+                    else
+                        response[:error] = "An error has occurred"
+                    end
+
                 else
-                    response[:error] = "An error has occurred"
+                    response[:error] = "Please enter a more descriptive team name"
                 end
             else
-                response[:error] = "Please enter a more descriptive team name"
+                redirect to("/unauthorized")
             end
         end
         return response.to_json
@@ -1328,20 +1352,29 @@ class Integrations < Sinatra::Base
                     query = {:email => fields[:user_email]}
                     user = account.get query
 
-                    if !user
-                        user = account.create fields[:user_email], nil, nil, request.ip
-                    end
+                    team_info = team.get_team fields[:team_id]
 
-                    invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email] 
+                    allowed_seats = team.allowed_seat_types team_info, @session_hash["admin"]
 
-                    if invitation
-                        status 201
-                        account.mail_invite invitation
-                        invitation = invitation.as_json
-                        invitation.delete("token") #don't return token
-                        response = invitation
+                    if allowed_seats.include? fields[:seat_id]
+
+                        if !user
+                            user = account.create fields[:user_email], nil, nil, request.ip
+                        end
+
+                        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
+
+                        if invitation
+                            status 201
+                            account.mail_invite invitation
+                            invitation = invitation.as_json
+                            invitation.delete("token") #don't return token
+                            response = invitation
+                        else
+                            response[:error] = "An error has occurred"
+                        end
                     else
-                        response[:error] = "An error has occurred"
+                        response[:error] = "Seat type not permitted"
                     end
                 else
                     redirect to("/unauthorized")
@@ -1509,9 +1542,8 @@ class Integrations < Sinatra::Base
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
-    get "/user-teams", allows: [:team_id], needs: [:team_id], &user_teams_get
+    get "/user-teams", allows: [:team_id,:seat_id,:accepted], needs: [:team_id], &user_teams_get
 
-    #TODO post "/invites/accounts" # for "normal" / seat users
 
     get '/unauthorized' do
         status 401

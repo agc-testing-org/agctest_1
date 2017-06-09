@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import UnAuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-route-mixin';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
 export default Ember.Route.extend({
     actions: {
@@ -17,7 +17,7 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
-
+            team: this.store.find('team',params.id)
         });
     },
 });

@@ -18,6 +18,6 @@ export default Ember.Route.extend(UnAuthenticatedRouteMixin,{
     },
     */
     afterModel() {
-        this.transitionTo('register');
+//        this.transitionTo('register');
     }
 });

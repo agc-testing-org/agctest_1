@@ -13,6 +13,8 @@ class Organization
         end
     end
 
+
+
     def get_team id
         begin
             return Team.find_by(:id => id)
@@ -41,7 +43,7 @@ class Organization
 
     def create_team name, user_id
         begin
-            return Team.create({ name: name, user_id: user_id }).as_json
+            return Team.create({ name: name.downcase, user_id: user_id }).as_json
         rescue => e
             puts e
             return nil
@@ -62,7 +64,7 @@ class Organization
         end
     end
 
-    def invite_member team_id, sender_id, user_id, user_email
+    def invite_member team_id, sender_id, user_id, user_email, seat_id
         begin
             return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32)})
         rescue => e
@@ -76,6 +78,18 @@ class Organization
             return UserTeam.find_by(:token => token)
         rescue => e
             return nil
+        end
+    end
+
+    def allowed_seat_types team, is_admin
+
+        if is_admin
+            return Seat.all.select(:id, :name, :created_at)
+        else
+            return [
+                team.plan.seat_id,
+                Seat.find_by(:name => "member").id,
+            ]
         end
     end
 end
