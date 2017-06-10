@@ -8,11 +8,11 @@ export default Ember.Component.extend({
             var _this = this;
             var email = this.get('email');
             if(email && email.length > 4){
-                var project = this.get('store').createRecord('user-team', {
+                var invitation = this.get('store').createRecord('user-team', {
                     team_id: teamId,
                     user_email: email
                 });
-                project.save().then(function(){
+                invitation.save().then(function(){
                     _this.sendAction("refresh");
                 });
             }

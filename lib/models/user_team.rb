@@ -5,6 +5,6 @@ class UserTeam < ActiveRecord::Base
     belongs_to :team
     belongs_to :sender, :class_name => "User"
     belongs_to :user
-    has_one :seat
+    belongs_to :seat
 end
 

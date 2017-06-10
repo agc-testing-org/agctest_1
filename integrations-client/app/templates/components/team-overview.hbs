@@ -1,8 +1,9 @@
+<div class="footprint hidden-sm-down"></div>
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview text-center">
             <h1 class="name text-capitalize">{{team.name}}</h1>
-            <div class="description text-capitalize">created {{moment-from-now team.created_at}}</div>
+            <div class="description">created {{moment-from-now team.created_at}} by <span class="text-capitalize">{{team.user.first_name}}</span> ({{team.user.email}})</div>
             <div class="about">share access to talent with teams</div>
             <div class="row">
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">

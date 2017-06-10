@@ -78,7 +78,7 @@ ActiveRecord::Schema.define(version: 20170608155002) do
     t.index ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true
   end
 
-  create_table "plans", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "plans", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.string "title", null: false
     t.string "description", null: false
@@ -99,7 +99,7 @@ ActiveRecord::Schema.define(version: 20170608155002) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "seats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+  create_table "seats", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
   end
@@ -187,6 +187,7 @@ ActiveRecord::Schema.define(version: 20170608155002) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "plan_id"
+    t.index ["plan_id"], name: "fk_rails_fe85bf605a"
   end
 
   create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -329,6 +330,7 @@ ActiveRecord::Schema.define(version: 20170608155002) do
   add_foreign_key "sprint_timelines", "votes"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
+  add_foreign_key "teams", "plans"
   add_foreign_key "user_notifications", "notifications", column: "notifications_id"
   add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"

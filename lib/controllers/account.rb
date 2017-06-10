@@ -423,7 +423,7 @@ class Account
 
     def get_seat user_id, team_id
         begin
-            return UserTeam.find_by(:user_id => user_id, :team_id => team_id ).seat_id
+            return UserTeam.find_by(:user_id => user_id, :team_id => team_id ).seat.name
         rescue => e
             return nil
         end

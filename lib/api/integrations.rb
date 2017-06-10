@@ -517,6 +517,10 @@ class Integrations < Sinatra::Base
         return (issue.get_skillsets).to_json
     end
 
+    plans_get = lambda do
+        return (Plan.all.as_json).to_json
+    end
+
     sprint_skillsets_get = lambda do
         issue = Issue.new
         return (issue.get_sprint_skillsets params[:sprint_id], {}).to_json
@@ -677,8 +681,14 @@ class Integrations < Sinatra::Base
             team = org.get_team params["id"]
             allowed_seats = org.allowed_seat_types team, @session_hash["admin"]
             team_response = team.as_json
+            team_response["user"] = {
+                :first_name => team.user.first_name,
+                :last_name => team.user.last_name,
+                :email => team.user.email
+            }
             team_response["seats"] = allowed_seats
             if team.plan
+                team_response["plan"] = team.plan
                 team_response["default_seat_id"] = team.plan.seat.id
             end
             return team_response.to_json
@@ -691,25 +701,31 @@ class Integrations < Sinatra::Base
         protected!
         status 400
         response = {}
+        response[:errors] = []
         begin
             account = Account.new
-            if ((account.get_seat @session_hash["id"], Team.find_by(:name => "wired7").id) == "owner")
+            if ((account.get_seat @session_hash["id"], Team.find_by(:name => "wired7").id) == "owner") #owners added to the Wired7 team can create their own teams
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:name] && fields[:name].length > 2
-
-                    org = Organization.new
-                    team = org.create_team fields[:name], @session_hash["id"]
-
-                    if team && (org.add_owner @session_hash["id"], team["id"])
-                        response = team
-                        status 201
+                    if fields[:plan_id]
+                        org = Organization.new
+                        team = org.create_team fields[:name], @session_hash["id"], fields[:plan_id]
+                        if team && team["id"]
+                            if (org.add_owner @session_hash["id"], team["id"])
+                                response = team
+                                status 201
+                            else
+                                response[:errors][0] = {:detail => "An error has occurred"}
+                            end
+                        else
+                            response[:errors][0] = {:detail => "This name is not available"}
+                        end
                     else
-                        response[:error] = "An error has occurred"
+                        response[:errors][0] = {:detail => "Please select a team type"}
                     end
-
                 else
-                    response[:error] = "Please enter a more descriptive team name"
+                    response[:errors][0] = {:detail => "Please enter a more descriptive team name"}
                 end
             else
                 redirect to("/unauthorized")
@@ -1501,6 +1517,7 @@ class Integrations < Sinatra::Base
     get "/roles", &roles_get
     get "/states", &states_get
     get "/skillsets", &skillsets_get
+    get "/plans", &plans_get
 
     get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
     get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset
@@ -1542,7 +1559,7 @@ class Integrations < Sinatra::Base
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
-    get "/user-teams", allows: [:team_id,:seat_id,:accepted], needs: [:team_id], &user_teams_get
+    get "/user-teams", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get
 
 
     get '/unauthorized' do

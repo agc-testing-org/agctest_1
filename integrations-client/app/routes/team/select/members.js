@@ -14,9 +14,9 @@ export default Ember.Route.extend({
         var memberSeatId = this.store.peekAll("seat").findBy("name","member").get("id");
 
         return Ember.RSVP.hash({
-            team: this.modelFor("team").team,
+            team: this.modelFor("team.select").team,
             user_teams: this.store.query('user-team', {
-                team_id: this.paramsFor("team").id,
+                team_id: this.paramsFor("team.select").id,
                 seat_id: memberSeatId
             }),
         });

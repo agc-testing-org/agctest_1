@@ -41,9 +41,9 @@ class Organization
         end
     end
 
-    def create_team name, user_id
+    def create_team name, user_id, plan_id
         begin
-            return Team.create({ name: name.downcase, user_id: user_id }).as_json
+            return Team.create({ name: name.downcase, user_id: user_id, plan_id: plan_id }).as_json
         rescue => e
             puts e
             return nil
