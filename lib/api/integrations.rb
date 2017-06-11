@@ -236,7 +236,7 @@ class Integrations < Sinatra::Base
                         if user
                             account.confirm_user user, fields[:password], fields[:firstName], request.ip
                             
-                            owner = account.is_owner? user[:id]
+                            owner = ((account.is_owner? user[:id]) || user[:admin])
 
                             user_secret = SecureRandom.hex(32) #session secret, not password
                             jwt = account.create_token user[:id], user_secret, fields[:firstName]
@@ -284,7 +284,7 @@ class Integrations < Sinatra::Base
                     if user
                         account.confirm_user user, fields[:password], user.first_name, request.ip
 
-                        owner = account.is_owner? user[:id]
+                        owner = ((account.is_owner? user[:id]) || user[:admin])
 
                         user_secret = SecureRandom.hex(32) #session secret, not password
                         jwt = account.create_token user[:id], user_secret, nil 
@@ -325,7 +325,7 @@ class Integrations < Sinatra::Base
 
             if user
 
-                owner = account.is_owner? user[:id]
+                owner = ((account.is_owner? user[:id]) || user[:admin]) 
 
                 user_secret = SecureRandom.hex(32) #session secret, not password
                 jwt = account.create_token user[:id], user_secret, user[:name]
@@ -519,6 +519,10 @@ class Integrations < Sinatra::Base
 
     plans_get = lambda do
         return (Plan.all.as_json).to_json
+    end
+
+    seats_get = lambda do
+        return (Seat.all.as_json).to_json
     end
 
     sprint_skillsets_get = lambda do
@@ -1360,9 +1364,9 @@ class Integrations < Sinatra::Base
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:team_id] && fields[:user_email]
+            if fields[:team_id] && fields[:user_email] && fields[:seat_id]
                 team = Organization.new
-                if team.member? fields[:team_id], @session_hash["id"]
+                if (team.member? fields[:team_id], @session_hash["id"]) || @session_hash["admin"]
                     account = Account.new
 
                     query = {:email => fields[:user_email]}
@@ -1372,7 +1376,7 @@ class Integrations < Sinatra::Base
 
                     allowed_seats = team.allowed_seat_types team_info, @session_hash["admin"]
 
-                    if allowed_seats.include? fields[:seat_id]
+                    if team.check_allowed_seats allowed_seats, fields[:seat_id]
 
                         if !user
                             user = account.create fields[:user_email], nil, nil, request.ip
@@ -1518,6 +1522,7 @@ class Integrations < Sinatra::Base
     get "/states", &states_get
     get "/skillsets", &skillsets_get
     get "/plans", &plans_get
+    get "/seats", &seats_get
 
     get "/sprints/:sprint_id/skillsets", &sprint_skillsets_get
     get "/sprints/:sprint_id/skillsets/:skillset_id", &sprint_skillsets_get_by_skillset

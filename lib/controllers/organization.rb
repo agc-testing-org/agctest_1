@@ -66,7 +66,7 @@ class Organization
 
     def invite_member team_id, sender_id, user_id, user_email, seat_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32)})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32), seat_id: seat_id})
         rescue => e
             puts e
             return nil
@@ -84,12 +84,21 @@ class Organization
     def allowed_seat_types team, is_admin
 
         if is_admin
-            return Seat.all.select(:id, :name, :created_at)
+            return Seat.all.select(:id)
         else
             return [
                 team.plan.seat_id,
                 Seat.find_by(:name => "member").id,
             ]
+        end
+    end
+
+    def check_allowed_seats allowed, selected
+        begin
+            return allowed.find_by(:id => selected)
+        rescue => e
+            puts e
+            return nil
         end
     end
 end

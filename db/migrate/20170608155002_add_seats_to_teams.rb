@@ -26,16 +26,12 @@ class AddSeatsToTeams < ActiveRecord::Migration[4.2]
         add_column :user_teams, :seat_id, :integer, :null => true
         add_column :user_teams, :period, :integer, :null => true
 
-        add_column :teams, :plan_id, :integer, :null => true
+        add_column :teams, :plan_id, :integer, :null => false, :default => Plan.find_by(:name => "manager").id
 
         if ENV['INTEGRATIONS_INITIAL_USER_EMAIL']
 
             User.create(:email => ENV['INTEGRATIONS_INITIAL_USER_EMAIL'], :admin => true, :confirmed => true)
             initial_user_id = User.find_by(:email => ENV['INTEGRATIONS_INITIAL_USER_EMAIL'] ).id
-
-            Team.create(:name => "wired7", :user_id => initial_user_id )
-
-            UserTeam.create(:user_id => initial_user_id, :user_email => ENV['INTEGRATIONS_INITIAL_USER_EMAIL'], :sender_id => initial_user_id, :team_id => Team.find_by(:name => "wired7").id, :accepted => true, :seat_id => Seat.find_by(:name => "owner").id )
 
         end 
 

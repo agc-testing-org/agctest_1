@@ -21,7 +21,8 @@ export default Ember.Route.extend({
             user_teams: this.store.query('user-team', {
                 team_id: this.paramsFor("team.select").id,
                 seat_id: defaultSeat
-            }),                                             
+            }),
+            default_seat_id: defaultSeat
         });
     },
 });

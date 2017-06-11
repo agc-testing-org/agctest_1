@@ -17,7 +17,8 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
-            team: this.store.find('team',params.id)
+            team: this.store.find('team',params.id),
+            seats: this.store.findAll('seat')
         });
     },
 });

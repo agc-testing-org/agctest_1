@@ -186,7 +186,7 @@ ActiveRecord::Schema.define(version: 20170608155002) do
     t.string "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "plan_id"
+    t.integer "plan_id", default: 2, null: false
     t.index ["plan_id"], name: "fk_rails_fe85bf605a"
   end
 
