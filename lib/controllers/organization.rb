@@ -4,17 +4,6 @@ class Organization
 
     end
 
-    def member? team_id, user_id
-        begin
-            return !UserTeam.find_by({team_id: team_id, user_id: user_id, accepted: true}).nil?
-        rescue => e
-            puts e
-            return false
-        end
-    end
-
-
-
     def get_team id
         begin
             return Team.find_by(:id => id)
@@ -43,7 +32,7 @@ class Organization
 
     def create_team name, user_id, plan_id
         begin
-            return Team.create({ name: name.downcase, user_id: user_id, plan_id: plan_id }).as_json
+            return Team.create({ name: name, user_id: user_id, plan_id: plan_id }).as_json
         rescue => e
             puts e
             return nil
@@ -86,10 +75,7 @@ class Organization
         if is_admin
             return Seat.all.select(:id)
         else
-            return [
-                team.plan.seat_id,
-                Seat.find_by(:name => "member").id,
-            ]
+            return Seat.where(:name => "member").or(Seat.where(:id => team.plan.seat.id)).select(:id)
         end
     end
 

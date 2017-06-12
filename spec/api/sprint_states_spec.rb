@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/sprints-states" do
 
-    fixtures :users, :projects, :sprints, :states
+    fixtures :users, :projects, :sprints, :states, :seats
     
     before(:all) do
         @CREATE_TOKENS=true

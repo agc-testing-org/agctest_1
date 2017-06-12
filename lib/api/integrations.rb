@@ -680,15 +680,18 @@ class Integrations < Sinatra::Base
 
     teams_get_by_id = lambda do
         protected!
-        org = Organization.new
-        if org.member? params["id"], @session_hash["id"]
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["id"]
+        if (seat && (seat == "member" || seat == "owner" ))|| @session_hash["admin"]
+            org = Organization.new
             team = org.get_team params["id"]
             allowed_seats = org.allowed_seat_types team, @session_hash["admin"]
             team_response = team.as_json
             team_response["user"] = {
                 :first_name => team.user.first_name,
                 :last_name => team.user.last_name,
-                :email => team.user.email
+                :email => team.user.email,
+                :id => team.user.id
             }
             team_response["seats"] = allowed_seats
             if team.plan
@@ -708,7 +711,7 @@ class Integrations < Sinatra::Base
         response[:errors] = []
         begin
             account = Account.new
-            if ((account.get_seat @session_hash["id"], Team.find_by(:name => "wired7").id) == "owner") #owners added to the Wired7 team can create their own teams
+            if (@session_hash["owner"] || @session_hash["admin"])
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:name] && fields[:name].length > 2
@@ -1347,9 +1350,10 @@ class Integrations < Sinatra::Base
 
     user_teams_get = lambda do
         protected!
-        team = Organization.new
-
-        if team.member? params["team_id"], @session_hash["id"]
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        if (seat && (seat == "member" || seat == "owner" ))|| @session_hash["admin"]
+            team = Organization.new
             members = team.get_users params
             return members.to_json
         else
@@ -1361,13 +1365,15 @@ class Integrations < Sinatra::Base
         protected!
         status 400
         response = {} 
+        response[:errors] = []
         begin
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
             if fields[:team_id] && fields[:user_email] && fields[:seat_id]
-                team = Organization.new
-                if (team.member? fields[:team_id], @session_hash["id"]) || @session_hash["admin"]
-                    account = Account.new
+                account = Account.new
+                seat = account.get_seat @session_hash["id"], fields[:team_id]
+                if (seat && (seat == "member" || seat == "owner" ))|| @session_hash["admin"]
+                    team = Organization.new
 
                     query = {:email => fields[:user_email]}
                     user = account.get query
@@ -1391,10 +1397,10 @@ class Integrations < Sinatra::Base
                             invitation.delete("token") #don't return token
                             response = invitation
                         else
-                            response[:error] = "An error has occurred"
+                            response[:errors][0] = {:detail => "an error has occurred"}
                         end
                     else
-                        response[:error] = "Seat type not permitted"
+                        response[:errors][0] = {:detail => "seat type not permitted"}
                     end
                 else
                     redirect to("/unauthorized")

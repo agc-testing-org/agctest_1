@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/users" do
 
-    fixtures :users
+    fixtures :users, :seats
     before(:all) do
         @CREATE_TOKENS=true
     end
@@ -68,7 +68,7 @@ describe "/users" do
     end
 
     describe "GET /:user_id/skillsets" do
-        fixtures :skillsets, :users
+        fixtures :skillsets
         before(:each) do
             @user_id = users(:adam).id
         end
@@ -90,7 +90,7 @@ describe "/users" do
     end
 
     describe "GET /me/skillsets" do
-        fixtures :skillsets, :users
+        fixtures :skillsets
         before(:each) do
             @user_id = users(:adam).id
         end
@@ -106,7 +106,7 @@ describe "/users" do
     end
 
     describe "GET /:user_id/skillsets/:skillset_id" do
-        fixtures :skillsets, :users
+        fixtures :skillsets
         before(:each) do
             @user_id = users(:adam).id
             @skillset_id = skillsets(:skillset_1).id
@@ -142,7 +142,7 @@ describe "/users" do
     end
 
     describe "PATCH /:user_id/skillsets" do
-        fixtures :skillsets, :users
+        fixtures :skillsets
         before(:each) do
             @user_id = users(:adam_confirmed).id
             @skillset_id = skillsets(:skillset_1).id 
@@ -210,7 +210,7 @@ describe "/users" do
     end
 
     describe "GET /:user_id/roles" do
-        fixtures :roles, :users
+        fixtures :roles
         before(:each) do
             @user_id = users(:adam).id
         end
@@ -225,7 +225,7 @@ describe "/users" do
     end
 
     describe "GET /me/roles" do
-        fixtures :roles, :users
+        fixtures :roles
         before(:each) do
             @user_id = users(:adam).id
         end
@@ -257,7 +257,7 @@ describe "/users" do
     end
 
     describe "GET /:user_id/roles/:role_id" do
-        fixtures :roles, :users
+        fixtures :roles
         before(:each) do
             @user_id = users(:adam).id
             @role_id = roles(:product).id
@@ -286,7 +286,7 @@ describe "/users" do
     end
 
     describe "PATCH /:user_id/roles" do
-        fixtures :roles, :users
+        fixtures :roles
         before(:each) do
             @user_id = users(:adam_confirmed).id
             @role_id = roles(:product).id 

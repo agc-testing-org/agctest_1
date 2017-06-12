@@ -396,7 +396,7 @@ class Account
 
     def is_owner? user_id
         begin 
-            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id).count > 0)
+            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id, :accepted => true).count > 0)
         rescue => e
             puts e
             return false
@@ -423,7 +423,7 @@ class Account
 
     def get_seat user_id, team_id
         begin
-            return UserTeam.find_by(:user_id => user_id, :team_id => team_id ).seat.name
+            return UserTeam.find_by(:user_id => user_id, :team_id => team_id, :accepted => true).seat.name
         rescue => e
             return nil
         end

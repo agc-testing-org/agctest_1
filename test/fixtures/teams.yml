@@ -3,9 +3,11 @@ ateam:
   name: "ATEAM"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+  plan: manager
 
 bteam:
   user: adam_confirmed
   name: "BTEAM"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+  plan: manager

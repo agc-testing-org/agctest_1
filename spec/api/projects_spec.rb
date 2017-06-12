@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/projects" do
 
-    fixtures :users
+    fixtures :users, :seats
 
     before(:all) do
         @CREATE_TOKENS=true
@@ -109,7 +109,7 @@ describe "/projects" do
     end 
 
     describe "GET /:id" do
-        fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
+        fixtures :sprints, :labels, :states, :projects, :sprint_timelines
         before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
@@ -165,7 +165,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid project" do
-            fixtures :users, :sprint_states, :states, :projects
+            fixtures :sprint_states, :states, :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
@@ -204,7 +204,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid sprint_state_id" do
-            fixtures :users, :sprint_states, :states, :projects
+            fixtures :sprint_states, :states, :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
@@ -239,7 +239,7 @@ describe "/projects" do
             end
         end
         context "invalid sprint_state_id" do
-            fixtures :users, :projects
+            fixtures :projects
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99
@@ -251,7 +251,7 @@ describe "/projects" do
             end
         end
         context "sprint_state_id with contributor = false" do
-            fixtures :users, :sprint_states, :states,  :projects
+            fixtures :sprint_states, :states,  :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_no_contributors).id
                 @project = projects(:demo).id
@@ -301,7 +301,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid contributor" do
-            fixtures :users, :sprint_states, :projects, :contributors
+            fixtures :sprint_states, :projects, :contributors
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
@@ -324,7 +324,7 @@ describe "/projects" do
             end
         end
         context "invalid contributor" do
-            fixtures :users, :projects
+            fixtures :projects
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99

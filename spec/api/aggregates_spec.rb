@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/aggregate-*" do
 
-    fixtures :users
+    fixtures :users, :seats
     before(:all) do
         @CREATE_TOKENS=true
     end 
@@ -22,7 +22,7 @@ describe "/aggregate-*" do
     end
 
     describe "GET /aggregate-comments" do
-        fixtures :users, :projects, :sprints, :sprint_states, :contributors, :comments
+        fixtures :projects, :sprints, :sprint_states, :contributors, :comments
         context "user_id parameter" do
             before(:each) do
                 get "/aggregate-comments?user_id=#{users(:adam_confirmed).id}",{}, {}
@@ -63,7 +63,7 @@ describe "/aggregate-*" do
     end
 
     describe "GET /aggregate-votes" do
-        fixtures :users, :projects, :sprints, :sprint_states, :contributors, :votes
+        fixtures :projects, :sprints, :sprint_states, :contributors, :votes
         context "user_id parameter" do
             before(:each) do
                 get "/aggregate-votes?user_id=#{users(:adam_confirmed).id}",{}, {}
@@ -104,7 +104,7 @@ describe "/aggregate-*" do
     end
 
     describe "GET /aggregate-contributors" do
-        fixtures :users, :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors
         context "user_id parameter" do
             before(:each) do
                 @mysql_client.query("update sprint_states set contributor_id = #{contributors(:adam_confirmed_1).id}")
