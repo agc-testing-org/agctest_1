@@ -682,7 +682,7 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         seat = account.get_seat @session_hash["id"], params["id"]
-        if (seat && (seat == "member" || seat == "owner" ))|| @session_hash["admin"]
+        if seat || @session_hash["admin"]
             org = Organization.new
             team = org.get_team params["id"]
             allowed_seats = org.allowed_seat_types team, @session_hash["admin"]
@@ -693,6 +693,7 @@ class Integrations < Sinatra::Base
                 :email => team.user.email,
                 :id => team.user.id
             }
+            team_response["show"] = ((seat && (seat == "member")) || @session_hash["admin"])
             team_response["seats"] = allowed_seats
             if team.plan
                 team_response["plan"] = team.plan
@@ -1352,10 +1353,10 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         seat = account.get_seat @session_hash["id"], params["team_id"]
-        if (seat && (seat == "member" || seat == "owner" ))|| @session_hash["admin"]
+        if (seat && (seat == "member"))|| @session_hash["admin"]
             team = Organization.new
             members = team.get_users params
-            return members.to_json
+            return members.to_json 
         else
             redirect to("/unauthorized")
         end
@@ -1372,7 +1373,7 @@ class Integrations < Sinatra::Base
             if fields[:team_id] && fields[:user_email] && fields[:seat_id]
                 account = Account.new
                 seat = account.get_seat @session_hash["id"], fields[:team_id]
-                if (seat && (seat == "member" || seat == "owner" ))|| @session_hash["admin"]
+                if (seat && (seat == "member"))|| @session_hash["admin"]
                     team = Organization.new
 
                     query = {:email => fields[:user_email]}

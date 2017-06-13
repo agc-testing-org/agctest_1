@@ -19,6 +19,11 @@ describe "/user-teams" do
                 expect(@res[i]["sender_id"]).to eq(r["sender_id"])
             end
         end
+        it "should return seat_id" do
+            @team_invite_result.each_with_index do |r,i|
+                expect(@res[i]["seat_id"]).to eq(r["seat_id"])
+            end
+        end
         it "should not return token" do
             @team_invite_result.each_with_index do |r,i|
                 expect(@res[i].keys).to_not include "token"
@@ -43,7 +48,7 @@ describe "/user-teams" do
             end
             context "member" do
                 fixtures :user_teams
-                context "with email" do
+                context "valid" do
                     before(:each) do
                         post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                         @res = [JSON.parse(last_response.body)]
@@ -85,6 +90,14 @@ describe "/user-teams" do
                     @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}'")
                 end 
                 it_behaves_like "invites_teams"
+            end
+            context "talent not member" do
+                fixtures :user_teams
+                before(:each) do
+                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                    post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+                it_behaves_like "unauthorized"
             end
         end
         context "invalid team_id" do
@@ -153,6 +166,14 @@ describe "/user-teams" do
                     @team_invite_result = @mysql_client.query("select * from user_teams where team_id = #{@team} ORDER BY ID DESC")
                 end 
                 it_behaves_like "invites_teams"
+            end
+            context "talent not member" do
+                fixtures :user_teams
+                before(:each) do
+                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                    get "/user-teams?team_id=#{@team}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+                it_behaves_like "unauthorized"
             end
         end
         context "invalid team_id" do

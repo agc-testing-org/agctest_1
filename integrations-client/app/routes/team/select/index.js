@@ -3,6 +3,8 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 export default Ember.Route.extend({
     afterModel(model,transition) {
-        this.transitionTo('team.select.members');
+        if(model.team.show){
+            this.transitionTo('team.select.members');
+        }
     }                           
 });

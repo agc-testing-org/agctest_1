@@ -45,7 +45,8 @@ class Organization
                 accepted: true,
                 team_id: team_id, 
                 user_id: user_id, 
-                sender_id: user_id
+                sender_id: user_id,
+                seat_id: Seat.find_by(:name => "member").id
             }).as_json
         rescue => e
             puts e

@@ -50,7 +50,7 @@ describe "/teams" do
 
                     context "user_teams" do
                         before(:each) do
-                            @user_team_result = @mysql_client.query("select * from user_teams").first
+                            @user_team_result = @mysql_client.query("select * from user_teams ORDER BY id DESC").first
                         end
                         it "saves owner as sender_id" do
                             expect(@user_team_result["sender_id"]).to eq(@user)
@@ -60,6 +60,9 @@ describe "/teams" do
                         end 
                         it "saves accepted as true" do
                             expect(@user_team_result["accepted"]).to eq 1 
+                        end
+                        it "saves owner as member" do
+                            expect(@user_team_result["seat_id"]).to eq(seats(:member).id)
                         end
                     end
                 end
@@ -121,7 +124,7 @@ describe "/teams" do
             fixtures :teams, :user_teams
             before(:each) do
                 get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user}")
+                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} AND user_teams.accepted = true")
                 @teams = JSON.parse(last_response.body)
             end
             it_behaves_like "teams"
@@ -159,6 +162,9 @@ describe "/teams" do
             it "should return a list of permitted seats (to invite others)" do
                 expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:priority).id},{:id => seats(:member).id}].to_json)
             end
+            it "should return show true" do
+                expect(@teams[0]["show"]).to be true
+            end
         end
         context "admin" do
             fixtures :user_teams
@@ -170,7 +176,23 @@ describe "/teams" do
             it_behaves_like "teams"
             it "should return a list of all seats" do
                 expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:owner).id},{:id => seats(:sponsored).id},{:id => seats(:priority).id},{:id => seats(:member).id},{:id => seats(:free_agent).id}].to_json)
+            end
+            it "should return show true" do
+                expect(@teams[0]["show"]).to be true
             end 
+        end
+        context "non-member seat" do
+            fixtures :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} and teams.id = #{@team}")
+                @teams = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "teams"
+            it "should return show false" do
+                expect(@teams[0]["show"]).to be false
+            end
         end
         context "not member" do
             before(:each) do

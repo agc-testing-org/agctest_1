@@ -7,6 +7,7 @@
     </div>
 
     {{#if team}}
+    {{#if team.show}}
         {{#link-to "team.select.members" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-envelope"></i>
@@ -20,7 +21,7 @@
             </div>
             Talent
         {{/link-to}}
-        
+    {{/if}}
     {{/if}}
 
     {{user-logout}}

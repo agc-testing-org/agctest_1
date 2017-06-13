@@ -331,7 +331,8 @@ class Account
     def get_teams user_id
         begin 
             return Team.joins(:user_teams).where({
-                "user_teams.user_id" => user_id
+                "user_teams.user_id" => user_id,
+                "user_teams.accepted" => true
             })
         rescue => e
             puts e

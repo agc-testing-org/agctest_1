@@ -11,3 +11,10 @@ bteam:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   plan: manager
+
+wired7_team:
+  user: adam_confirmed
+  name: "Wired7"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  plan: manager
