@@ -6,6 +6,7 @@ export default DS.Model.extend({
     first_name: attr('string'),
     last_name: attr('string'),
     admin: attr('boolean'),
+    owner: attr('boolean'),
     github: attr('boolean'),
     github_username: attr('string')
 });

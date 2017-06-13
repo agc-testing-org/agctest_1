@@ -1,3 +1,13 @@
+adam_original_invite:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: "Wired7"
+  accepted: true
+  token: "ABC00"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: owner
+
 adam_confirmed:
   sender: adam_confirmed
   user: adam_confirmed
@@ -6,6 +16,7 @@ adam_confirmed:
   token: "ABC"
   updated_at: <%= 1.hour.ago.to_s(:db) %>
   created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: member
 
 adam_invited_expired:
   sender: adam_confirmed
@@ -16,6 +27,7 @@ adam_invited_expired:
   token: "123"
   updated_at: <%= 25.hours.ago.to_s(:db) %>
   created_at: <%= 25.hours.ago.to_s(:db) %>
+  seat: member
 
 adam_confirmed_b_team:
   sender: adam_confirmed

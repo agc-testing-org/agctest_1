@@ -534,7 +534,7 @@ describe ".Account" do
         end
     end
 
-    context "#confirm_user", :focus => true do 
+    context "#confirm_user" do 
         fixtures :users
         before(:each) do
             @ip = '192.168.1.1'
@@ -663,5 +663,54 @@ describe ".Account" do
                 expect(@account.sign_in "adamm@wired7.com", @password, @ip).to be nil 
             end
         end 
+    end
+
+    context "#get_seat" do
+        fixtures :users, :teams, :user_teams, :seats
+        before(:each) do
+            @team_id = user_teams(:adam_confirmed).team.id
+        end
+        context "is a member" do
+            before(:each) do
+                @user_id = user_teams(:adam_confirmed).user_id
+                @res = @account.get_seat @user_id, @team_id
+            end
+            it "should return owner" do
+                expect(@res).to eq(user_teams(:adam_confirmed).seat.name)
+            end
+        end
+        context "has not accepted" do
+            before(:each) do
+                @user_id = user_teams(:adam_invited_expired).user_id
+                @res = @account.get_seat @user_id, @team_id
+            end
+            it "should return false" do
+                expect(@res).to be nil
+            end
+        end
+    end
+    
+    context "#is_owner" do
+        fixtures :users, :teams, :user_teams, :seats
+        context "is owner on any team" do
+            before(:each) do
+                @user_id = user_teams(:adam_confirmed).user_id
+                @res = @account.is_owner? @user_id
+            end
+            it "should return true" do
+                expect(@res).to eq(true)
+            end
+        end
+        context "not an owner" do
+            before(:each) do
+                @user_id = user_teams(:adam_invited_expired).user_id
+                @mysql_client.query("update user_teams set accepted = true where id = #{user_teams(:adam_invited_expired).id}")
+                @res = @account.is_owner? @user_id
+            end
+            it "should return false" do
+                expect(@res).to be false 
+            end
+        end
+
     end
 end

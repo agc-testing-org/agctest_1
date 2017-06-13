@@ -7,16 +7,22 @@ export default Ember.Component.extend({
         invite(teamId){
             var _this = this;
             var email = this.get('email');
+            var default_seat_id = this.get('default_seat_id');
             if(email && email.length > 4){
-                var project = this.get('store').createRecord('user-team', {
+                var invitation = this.get('store').createRecord('user-team', {
                     team_id: teamId,
-                    user_email: email
+                    user_email: email,
+                    seat_id: default_seat_id
                 });
-                project.save().then(function(){
+                invitation.save().then(function(){
                     _this.sendAction("refresh");
                 });
             }
+        },
+        selectSeat(seatId){
+            this.set("default_seat_id",seatId);
         }
+
     }
 
 });

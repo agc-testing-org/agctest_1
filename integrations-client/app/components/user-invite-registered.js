@@ -22,7 +22,7 @@ export default Component.extend({
             
             token.then(function(payload) {
                 store.adapterFor('token').set('namespace', '');
-                _this.get("routes").redirectWithId("team",payload.get("team_id"));
+                _this.get("routes").redirectWithId("team.select",payload.get("team_id"));
             });
         },
     }

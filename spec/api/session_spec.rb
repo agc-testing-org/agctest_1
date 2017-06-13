@@ -134,7 +134,7 @@ describe "API" do
     end
 
     context "POST /login" do
-        fixtures :users 
+        fixtures :users, :seats
         context "with valid password" do
             before(:each) do
                 @password = "adam12345"
@@ -167,7 +167,7 @@ describe "API" do
     end
 
     context "GET /session" do
-        fixtures :users
+        fixtures :users, :seats
         context "signed in" do
             before(:each) do
                 @password = "adam12345"
@@ -201,7 +201,7 @@ describe "API" do
     end
 
     context "POST /accept" do
-        fixtures :users, :teams, :user_teams
+        fixtures :users, :teams, :user_teams, :seats
         before(:each) do
             @first_name = "Adam"
             @password = 'pass1221ef31'
@@ -260,7 +260,7 @@ describe "API" do
     end
 
     context "POST /reset" do
-        fixtures :users
+        fixtures :users, :seats
         context "with valid password" do
             before(:each) do
                 @password = 'pass1221ef31'
@@ -330,7 +330,7 @@ describe "API" do
     end
 
     describe "POST /session/github" do
-        fixtures :users
+        fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
             @email = users(:adam_confirmed).email
@@ -369,7 +369,7 @@ describe "API" do
     end
 
     describe "POST /session/linkedin" do
-        fixtures :users
+        fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
             @email = users(:adam_confirmed).email
@@ -448,7 +448,7 @@ describe "API" do
     end
 
     describe "DELETE /session" do
-        fixtures :users
+        fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
             @email = users(:adam_confirmed).email

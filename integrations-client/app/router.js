@@ -9,7 +9,6 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-    this.route('index', {path: '/'});
     this.route('home');
     this.route('forgot');
     this.route('register');
@@ -28,7 +27,13 @@ Router.map(function() {
             }); 
         });
     });
-    this.route('team', {path: '/team/:id'});
+    this.route('team', function(){
+        this.route('new');
+        this.route('select', {path: '/:id'}, function(){
+            this.route('members');
+            this.route('talent');
+        });
+    });
     this.route('profile',{ path: '/:id'}, function(){ // public profile
         this.route('requests');
     });

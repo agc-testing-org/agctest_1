@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170605030718) do
+ActiveRecord::Schema.define(version: 20170608155002) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -78,6 +78,14 @@ ActiveRecord::Schema.define(version: 20170605030718) do
     t.index ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true
   end
 
+  create_table "plans", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.string "title", null: false
+    t.string "description", null: false
+    t.string "seat_id", null: false
+    t.datetime "created_at", null: false
+  end
+
   create_table "projects", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "org", null: false
     t.string "name", null: false
@@ -89,6 +97,11 @@ ActiveRecord::Schema.define(version: 20170605030718) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "seats", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.datetime "created_at", null: false
   end
 
   create_table "skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -173,6 +186,8 @@ ActiveRecord::Schema.define(version: 20170605030718) do
     t.string "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "plan_id", default: 2, null: false
+    t.index ["plan_id"], name: "fk_rails_fe85bf605a"
   end
 
   create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -257,6 +272,8 @@ ActiveRecord::Schema.define(version: 20170605030718) do
     t.string "token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "seat_id"
+    t.integer "period"
     t.index ["sender_id"], name: "fk_rails_58c1498938"
     t.index ["team_id"], name: "fk_rails_64c25f3fe6"
     t.index ["user_id"], name: "index_user_team_on_user"
@@ -313,6 +330,7 @@ ActiveRecord::Schema.define(version: 20170605030718) do
   add_foreign_key "sprint_timelines", "votes"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
+  add_foreign_key "teams", "plans"
   add_foreign_key "user_notifications", "notifications", column: "notifications_id"
   add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"

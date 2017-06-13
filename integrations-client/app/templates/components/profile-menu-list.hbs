@@ -30,13 +30,22 @@
         {{/link-to}}
 
         {{#each teams as |team|}}
-        {{#link-to "team" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+        {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-users"></i>
             </div>
             Team {{team.name}}
         {{/link-to}}
         {{/each}}
+
+        {{#if sessionAccount.account.owner}}
+            {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-user-plus"></i>
+                </div>
+                Create Team
+            {{/link-to}}
+        {{/if}}
 
     {{else}}
         {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}

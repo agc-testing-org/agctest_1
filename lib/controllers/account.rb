@@ -331,7 +331,8 @@ class Account
     def get_teams user_id
         begin 
             return Team.joins(:user_teams).where({
-                "user_teams.user_id" => user_id
+                "user_teams.user_id" => user_id,
+                #"user_teams.accepted" => true #allow team to show for registered invites...
             })
         rescue => e
             puts e
@@ -340,7 +341,7 @@ class Account
     end
 
     def mail_invite invite
-        mail invite.user_email, "Wired7 Invitation to #{invite.team.name.capitalize} from #{invite.sender.first_name.capitalize}", "Great news,<br><br>#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name.capitalize} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name.capitalize}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name.capitalize} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+        mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name.capitalize}", "Great news,<br><br>#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
     end
 
     def refresh_team_invite token
@@ -394,16 +395,38 @@ class Account
         end
     end
 
+    def is_owner? user_id
+        begin 
+            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id, :accepted => true).count > 0)
+        rescue => e
+            puts e
+            return false
+        end
+    end
+
     def sign_in email, password, ip
-        user = User.find_by(email: email.downcase)
-        if user && user.password
-            if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
-                return user
+        begin
+            user = User.find_by(email: email.downcase)
+            if user && user.password
+                if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
+                    return user
+                else
+                    return nil
+                end
             else
-                return nil
+                return nil 
             end
-        else
-            return nil 
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_seat user_id, team_id
+        begin
+            return UserTeam.find_by(:user_id => user_id, :team_id => team_id, :accepted => true).seat.name
+        rescue => e
+            return nil
         end
     end
 end

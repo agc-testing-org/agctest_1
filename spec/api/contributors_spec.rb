@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/contributors" do
 
-    fixtures :users
+    fixtures :users, :seats
 
     before(:all) do
         @CREATE_TOKENS=true
@@ -128,7 +128,7 @@ describe "/contributors" do
     end
 
     describe "POST /:id/winner" do
-        fixtures :users, :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
@@ -178,7 +178,7 @@ describe "/contributors" do
     end
 
     describe "POST /:id/merge" do
-        fixtures :users, :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id

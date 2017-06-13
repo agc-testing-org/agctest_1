@@ -97,7 +97,7 @@ class Issue
     def last_event sprint_id
         begin
             events = SprintTimeline.where(sprint_id: sprint_id)
-            if events
+            if events && events.last
                 return events.last.id
             else
                 return nil

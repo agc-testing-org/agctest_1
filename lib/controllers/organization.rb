@@ -4,15 +4,6 @@ class Organization
 
     end
 
-    def member? team_id, user_id
-        begin
-            return !UserTeam.find_by({team_id: team_id, user_id: user_id, accepted: true}).nil?
-        rescue => e
-            puts e
-            return false
-        end
-    end
-
     def get_team id
         begin
             return Team.find_by(:id => id)
@@ -39,9 +30,9 @@ class Organization
         end
     end
 
-    def create_team name, user_id
+    def create_team name, user_id, plan_id
         begin
-            return Team.create({ name: name, user_id: user_id }).as_json
+            return Team.create({ name: name, user_id: user_id, plan_id: plan_id }).as_json
         rescue => e
             puts e
             return nil
@@ -54,7 +45,8 @@ class Organization
                 accepted: true,
                 team_id: team_id, 
                 user_id: user_id, 
-                sender_id: user_id
+                sender_id: user_id,
+                seat_id: Seat.find_by(:name => "member").id
             }).as_json
         rescue => e
             puts e
@@ -62,9 +54,9 @@ class Organization
         end
     end
 
-    def invite_member team_id, sender_id, user_id, user_email
+    def invite_member team_id, sender_id, user_id, user_email, seat_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32)})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32), seat_id: seat_id})
         rescue => e
             puts e
             return nil
@@ -75,6 +67,24 @@ class Organization
         begin
             return UserTeam.find_by(:token => token)
         rescue => e
+            return nil
+        end
+    end
+
+    def allowed_seat_types team, is_admin
+
+        if is_admin
+            return Seat.all.select(:id)
+        else
+            return Seat.where(:name => "member").or(Seat.where(:id => team.plan.seat.id)).select(:id)
+        end
+    end
+
+    def check_allowed_seats allowed, selected
+        begin
+            return allowed.find_by(:id => selected)
+        rescue => e
+            puts e
             return nil
         end
     end
