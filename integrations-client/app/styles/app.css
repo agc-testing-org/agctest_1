@@ -78,34 +78,57 @@ label{
     margin-bottom:2px;
     font-weight:400;
 }
-.btn-outline-secondary{
-    border: 2px solid #28B6C3;
-    font-size: 14px;
+.btn{
     font-weight: 400;
-    color: #fff;
     text-transform: capitalize;
+    padding:10px;
+    color: #fff;
+    border:0px;
+    background-color:#4c4c4c;
 }
-.btn-outline-secondary:hover{
-    color:#fff !important;
-    background-color: #28B6C3 !important;
+.btn:hover{
+    border:0px;
 }
-.main .btn-outline-secondary{
-    color: #28B6C3 !important;   
+.btn-secondary{  
+
 }
-.main .btn-outline-secondary:hover{
-    border: 2px solid #28B6C3;
-    color: #fff !important;
+.btn-secondary:hover{
+
+
 }
 
-.develop .btn-outline-secondary{
-    border: 2px solid #28B6C3;
-    color: #28B6C3;
+.btn-group label{
+    margin-left: 4px !important;
+    -webkit-border-radius: 4px !important;
+    -moz-border-radius: 4px !important;
+    border-radius: 4px !important; 
+    border:none;
 }
-.develop .btn-outline-secondary.active{
-    background-color:#fff;
+.btn-group label:hover{
+    background-color: #444;
 }
-.btn-outline-secondary:hover{
-    color:#fff;
+.btn-group label.active{
+    background-color: #444;
+    color:#292b2c;
+}
+
+
+.main .btn-secondary{
+
+}
+.main .btn-secondary:hover{
+
+}
+
+.develop .btn-secondary{
+
+
+}
+.develop .btn-secondary.active{
+
+}
+.btn-secondary:hover{
+
 }
 .bg-inverse {
     background-color: transparent !important;
@@ -204,6 +227,38 @@ button{
     border: none;   
 }    
 
+.list-group-item{
+    color: #4C4C4C;
+    background-color:#fff;
+    border: 1px solid #ededed;
+}
+.list-group-item .stack{
+    position:relative;
+    width:100%;
+}
+.list-group-item-action{
+    margin-bottom:3px;
+}
+.list-group-item.active{
+    border:0px;
+    color:#fff;
+    background-color:#4c4c4c;
+}
+.list-group-item h4{
+    font-weight:600;
+}
+.list-group-item.active h4{
+    line-height:36px;
+    font-weight:500;
+}
+.list-group-item small button{
+    background-color:#fff;
+    color: #4C4C4C;
+}
+.list-group-item small button:hover{
+    color: orange;
+    background-color:#fff;
+}
 
 .input-group-addon{
     background-color:#fff;
@@ -329,32 +384,14 @@ button{
     color: #fff !important;
 }
 .register-form button{
-    width:100%; 
     margin-top:10px;
     background-color: orange;
-    border: 0px;
     font-size:20px;
-}
-.register-form .btn-outline-secondary{
-    color: #fff !important;
 }
 .register-form .btn-group label{
     margin-bottom: 10px;
     margin-top:6px;
-    margin-left: 4px !important;
-    -webkit-border-radius: 4px !important;
-    -moz-border-radius: 4px !important;
-    border-radius: 4px !important; 
-    background-color: #3a3a3a;
-    border:none;
 }
-.register-form .btn-group label:hover{
-    color: #28B6C3;
-}
-.register-form .btn-group label.active{
-    color: #28B6C3;
-}
-
 .register-form .tos{
     margin-top:10px; 
     color: #fff;
@@ -814,39 +851,6 @@ button{
 .main .overview .score .total {
     font-weight: 500;
     font-size: 40px;
-}
-.main .list-group-item{
-    color: #4C4C4C;
-    background-color:#fff;
-    border: 1px solid #ededed;
-}
-.main .list-group-item .stack{
-    position:relative;
-    width:100%;
-}
-.main .list-group-item-action{
-    margin-bottom:3px;
-}
-.main .list-group-item.active{
-    background-color:#ededed;
-}
-.main .list-group-item h4{
-    font-weight:600;
-}
-.main .list-group-item.active h4{
-    line-height:29px;
-    font-weight:500;
-}
-.main .list-group-item small button{
-    border: 2px solid orange;
-    padding: 4px;
-    background-color: orange;
-    color: white !important;
-}
-.main .list-group-item small button:hover{
-    background-color: #fff !important;
-    color: orange !important;
-    border: 2px solid orange;
 }
 .main a{
     font-weight:600;
