@@ -23,7 +23,7 @@ export default Ember.Route.extend({
     afterModel(model,transition) {
         if(model.invitation.get("sender_email")){ // more than token returned?
             if(model.invitation.get("registered")){
-                this.transitionTo('registered-invitation',model.token);
+                this.transitionTo('me.invitation',model.token);
             }
         }
         else{

@@ -4,7 +4,7 @@
             <div class="modal-header">
                 <div class="title">
                 {{#if invitation}}
-                    You've been invited to <span class="text-capitalize">{{invitation.name}}</span>!
+                    You've been invited to {{invitation.name}}!
                 {{else}}
                     Register for Early Access 
                 {{/if}}
@@ -16,7 +16,7 @@
                 Wired7 is gradually onboarding users through invitations.  
                 
                 {{#if invitation}}
-                    <span class="text-capitalize">{{invitation.sender_first_name}}</span> ({{invitation.sender_email}}) would like for you to join the <span class="text-capitalize">{{invitation.name}}</span> team.
+                    <span class="text-capitalize">{{invitation.sender_first_name}}</span> ({{invitation.sender_email}}) would like for you to join the {{invitation.name}} team.
                 {{else}}
                     Register and we will invite you as soon as possible.
                 {{/if}}
