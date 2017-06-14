@@ -31,11 +31,6 @@ body {
     -moz-border-radius: 0px 0px 3px 3px !important;
     border-radius: 0px 0px 3px 3px !important;
 }
-.circular{
-    -webkit-border-radius: 500px !important;
-    -moz-border-radius: 500px !important;
-    border-radius: 500px !important;
-}
 .shadow{
     box-shadow: 0 2px 3px rgba(0,0,0,.1);
 }
@@ -66,10 +61,10 @@ button,a{
     cursor:pointer;
 }
 a {
-    color: orange;
+    color: #28B6C3;
 }
 a:hover {
-    color: orange;
+    color: #20919c;
 }
 .cursor-pointer{
     cursor:pointer;
@@ -78,23 +73,30 @@ label{
     margin-bottom:2px;
     font-weight:400;
 }
-.btn{
+.btn, a{
     font-weight: 400;
     text-transform: capitalize;
+}
+.btn{
     padding:10px;
-    color: #fff;
+    color: #fff !important;
     border:0px;
-    background-color:#4c4c4c;
+}
+.btn-sm{
+    padding: 6px;
 }
 .btn:hover{
     border:0px;
 }
 .btn-secondary{  
-
+    background-color:#28B6C3;
 }
 .btn-secondary:hover{
-
-
+    background-color:#20919c;
+}
+.btn-outline-secondary{
+    background-color: #999;
+    color:#fff;
 }
 
 .btn-group label{
@@ -112,23 +114,24 @@ label{
     color:#292b2c;
 }
 
-
-.main .btn-secondary{
-
-}
-.main .btn-secondary:hover{
-
+.badge{
+    font-weight: 300;
+    font-size: 12px;
 }
 
-.develop .btn-secondary{
-
-
+.badge.selected{
+    background-color: #28B6C3;
 }
-.develop .btn-secondary.active{
-
+.badge.unselected{
+    background-color: #fff;
+    color: #28B6C3;
 }
-.btn-secondary:hover{
 
+.dropdown-menu{
+    width:100%;
+}
+.text-muted{
+    color: #a5a5a5;
 }
 .bg-inverse {
     background-color: transparent !important;
@@ -217,7 +220,6 @@ label{
 input, textarea{
     border:none !important;
     background-color: #f9f9f9;
-    color:#28B6C3 !important;
 }
 input{
     margin-bottom:10px;
@@ -231,33 +233,30 @@ button{
     color: #4C4C4C;
     background-color:#fff;
     border: 1px solid #ededed;
-}
-.list-group-item .stack{
-    position:relative;
-    width:100%;
-}
-.list-group-item-action{
-    margin-bottom:3px;
+    margin-bottom:5px;
 }
 .list-group-item.active{
     border:0px;
     color:#fff;
     background-color:#4c4c4c;
+    margin-bottom:5px;
 }
 .list-group-item h4{
     font-weight:600;
 }
 .list-group-item.active h4{
-    line-height:36px;
-    font-weight:500;
+    padding-top:4px;
 }
-.list-group-item small button{
-    background-color:#fff;
-    color: #4C4C4C;
+.list-group-item.active a{
+    color: #fff;
 }
-.list-group-item small button:hover{
-    color: orange;
-    background-color:#fff;
+.list-group-item p{
+    font-weight:300;
+}
+.list-group-item .line{
+    position:relative;
+    width:100%;
+    margin-bottom:5px;
 }
 
 .input-group-addon{
@@ -327,6 +326,9 @@ button{
     height: 100%;
     width: 100%;    
 }
+
+
+
 .hidden-md-up .vertical-align-hold{
     position: relative;
     overflow: visible;
@@ -628,9 +630,7 @@ button{
     position:relative;
 
 }
-.flow .stage .grid .box .comments a{
-    font-weight:600;
-}
+
 .flow .stage .grid textarea{
     border: 1px solid #ededed !important;
 }
@@ -651,9 +651,7 @@ button{
 .flow .timeline .stage .grid .box .point{
     top: 6px;
 }
-.flow .stage .grid .box .comment{
-    font-weight:300;
-}
+
 .flow .stage .grid .box.box-nested .point{
     left: -18px;
     width: 10px;
@@ -756,23 +754,10 @@ button{
     padding-top:0px;
     font-weight:300;
     margin-bottom:10px;
-    color: #28B6C3;
+    color: #a5a5a5;
 }
 .main .slide .skillsets{
     margin-bottom:20px;
-}
-
-.main .slide .skillsets .badge{
-    font-weight: 300;
-    font-size: 12px;
-}
-
-.main .slide .skillsets .badge.selected{
-    background-color: #28B6C3;
-}
-.main .slide .skillsets .badge.unselected{
-    background-color: #fff;
-    color: #28B6C3;
 }
 .main .slide.hidden-md-up .about{
     margin-bottom:10px;
@@ -796,6 +781,7 @@ button{
     min-height: 100%;
     position: fixed;
     height: 100%;
+    left:100px;
     overflow: scroll;
 }
 .main .still .header{
@@ -824,20 +810,6 @@ button{
     margin-bottom:10px;
     font-size:10px;
 }
-.main .still .contribution .comment{
-    font-weight:300;
-}
-.main .still .contribution .comment .text-muted{
-    color: #ccc !important;
-    font-size:12px;
-}
-.main .still .contribution .comments .action{
-    color: #28B6C3;
-}
-.main .still .contribution .more{
-    color: #ccc;
-    font-weight: 400;
-}
 .main .overview .description{
     font-weight:300;
     margin-bottom:10px;
@@ -852,62 +824,32 @@ button{
     font-weight: 500;
     font-size: 40px;
 }
-.main a{
-    font-weight:600;
-}
+
 .main textarea, .main input{
     border: 1px solid #ededed !important;
-}
-.main .requirements{
-    margin-top:50px;
-    background-color: #f9f9f9;
-    padding:20px;
-}
-.main .transition{
-    text-align:center;
-    cursor:pointer;
-}
-.main .transition .dropdown-menu{
-    width:100%;
-}
-.main .hidden-md-up .requirements{
-    margin-bottom:10px;
-}
-
-.main .create{
-    background-color: #f9f9f9;
-    padding: 20px;
-    margin-top: 16px;
-    box-shadow: 0 2px 3px rgba(0,0,0,.1);
-}
-
-.main .create .label{
-
-}
-.main .create button{
-    width:100%;
-}
-.main .create a, .main a.requirements{
-    display:block;
+    background-color: #ededed !important;
 }
 
 /* profile */
-.flow.profile .badge{
-    background-color: #28B6C3;
-}
 .flow.profile .stat{
     font-size:18px; 
     margin-top:6px;
     font-weight:300;
 }
-.flow.profile .stat .badge{
-    height: 30px;
-    width: 30px;
-    line-height: 18px;
-    font-size: 20px;
-}
+
 
 /* Placeholders */
+::-webkit-input-placeholder {
+    color: #a5a5a5 !important;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+    color: #a5a5a5 !important;
+}
+::-moz-placeholder {  /* Firefox 19+ */
+    color: #a5a5a5 !important;
+}
+
 .placeholders {
     padding-bottom: 3rem;
 }
@@ -927,7 +869,7 @@ button{
 }
 
 .form-control{
-    color: #fff;
+    color: #4C4C4C !important;
     font-weight:300;
     font-size: 14px;
 }

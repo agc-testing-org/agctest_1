@@ -1,39 +1,29 @@
-<div class="list-group mt-2 rounded text-left">
-    <div class="list-group-item list-group-item-action flex-column align-items-start active rounded">
-        <div class="d-flex w-100 justify-content-between">
-            <h4 class="mb-0">How to Contribute</h4>
-            <small><button class="btn btn-secondary btn-sm rounded" {{action "submit" project.id contributor.id }}>Synchronize</button></small>
-        </div>
+<div class="list-group rounded text-left">
+    <div class="list-group-item active rounded justify-content-between">
+        <h4>How to Contribute</h4>
+        <button class="btn btn-secondary btn-sm rounded" {{action "submit" project.id contributor.id }}>Synchronize</button>
     </div>
-    <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between">
-            <h4 class="mb-1"><span class="badge badge-default rounded">Option 1</span> Command Line Access</h4>
-        </div>
-        <p class="mb-0 mt-1 text-background p-2 rounded">git clone -b {{sprint_state.id}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>  
+    <div class="list-group-item rounded">
+        <h4 class="line"><span class="badge badge-default rounded mr-1">Option 1</span> Command Line Access</h4>
+        <p class="line">git clone -b {{sprint_state.id}} https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>  
     </div>
-    <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between">
-            <h4 class="mb-1"><span class="badge badge-default rounded">Option 2</span> Github User Interface Access</h4>
-        </div>
-        <p class="mb-0 mt-1"><a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{sprint_state.id}}</a></p>
-        <small>Use this option if you're less familiar with git and the command line</small>
+    <div class="list-group-item rounded">
+        <h4 class="line"><span class="badge badge-default rounded mr-1">Option 2</span> Github User Interface Access</h4>
+        <p class="line"><a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{sprint_state.id}}</a></p>
+        <small class="line text-muted">Use this option if you're less familiar with git and the command line</small>
     </div>
     {{#if (eq sprint_state.state.name "requirements design")}}
-    <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between">
-            <h4 class="mb-1">Requirements Document Placeholder</h4>
-        </div>                              
-        <p class="mb-0 mt-1">We've created a file for your changes: <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md</a></p>
-    </div>                                                                          
+        <div class="list-group-item rounded">
+            <h4 class="line">Requirements Document Placeholder</h4>
+            <p class="line">We've created a file for your changes: <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md</a></p>
+        </div>                                                                          
     {{/if}}
-    <div class="list-group-item rounded list-group-item-action flex-column align-items-start">
-        <div class="d-flex w-100 justify-content-between">                                    
-            <h4 class="mb-1">Synchronize (let us know when you're done)</h4>
-        </div>                                                                                                
-        <p class="mb-0">Last Commit: {{moment-from-now contributor.updated_at}} {{#if contributor.commit}}({{contributor.commit}}){{/if}}</p>
+    <div class="list-group-item rounded">
+        <h4 class="line">Synchronize (let us know when you're done)</h4>
+        <p class="line">Last Commit: {{moment-from-now contributor.updated_at}} {{#if contributor.commit}}({{contributor.commit}}){{/if}}</p>
         {{#if sprint_state.pull_request}}
         {{#unless sprint_state.merged}}
-        <small>Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></small>
+            <small class="line text-muted">Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></small>
         {{/unless}}
         {{/if}}
     </div>
