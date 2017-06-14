@@ -381,6 +381,15 @@ class Account
         end
     end
 
+    def get_exist_requests query
+        begin      
+            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def user_connections_get_by_id contact_id, id
         begin
             ss = UserConnection.find_or_initialize_by(:id => id, :contact_id => contact_id)

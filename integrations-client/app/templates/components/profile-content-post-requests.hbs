@@ -2,7 +2,15 @@
     <div class="vertical-align-cell">
         <div class="overview">
             <div class="text-center">
-                <h3>You've successfully requested a contact information!</h3>
+                {{#each requests as |request|}}
+                {{#if (eq request.confirmed "1")}}
+                <h3>You've successfully requested a contact information! Your request is under review.</h3>
+                {{else if (eq request.confirmed "3")}}
+                <h3>You've already requested a contact information. User is not ready to share contact information.</h3>
+                {{else if (eq request.confirmed "2")}}
+                <h3>User has confirmed your request. Please, see your contacts.</h3>
+                {{/if}}
+                {{/each}}
             </div>
         </div>
     </div>

@@ -1100,13 +1100,17 @@ class Integrations < Sinatra::Base
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-                if fields[:contact_id]
+                if params[:id]
                     account = Account.new
-                    connection_request = account.create_connection_request @session_hash["id"], fields[:contact_id]
+                    connection_request = account.create_connection_request @session_hash["id"], params[:id]
 
                     if connection_request
                         status 201
                         response = connection_request
+                    else
+                        status 202
+                        response[:id] = 0
+                        response[:message] = "You've already requested a contact information."
                     end
                 else
                     status 400
@@ -1123,6 +1127,16 @@ class Integrations < Sinatra::Base
             query = {"user_connections.contact_id" => user_id}
             connections = account.get_user_connections query
             return connections.to_json
+        end
+    end
+
+    get_exist_requests = lambda do
+        user_id = (default_to_signed params[:user_id])
+        if user_id && params[:id]
+            account = Account.new
+            query = {"user_connections.contact_id" =>  params[:id], "user_connections.user_id" => user_id}
+            requests = account.get_exist_requests query
+            return requests.to_json
         end
     end
 
@@ -1334,9 +1348,10 @@ class Integrations < Sinatra::Base
 
     get "/account/connections", &get_user_info
     get "/account/requests", &connections_get
-    post "/account/requests", &connections_request_post
+    post "/account/:id/requests", &connections_request_post
     patch "/account/requests/:id", &user_connections_patch
     get "/account/requests/:id", &user_connections_get_by_id
+    get "/account/:id/requests", &get_exist_requests
     get "/account/notifications", &get_user_notifications
     patch "/account/notifications/:id", &user_notifications_read 
     get "/account/notifications/:id", &get_user_notifications_by_id
