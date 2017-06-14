@@ -59,15 +59,15 @@
                         <label>Group</label>
                         <div class="btn-group" data-toggle="buttons">
                             {{#each roles as |role|}}
-                            <label class="btn btn-primary btn-sm cursor-pointer" {{action "role" role}} >{{role.name}}</label>
+                            <label class="btn btn-secondary btn-sm cursor-pointer" {{action "role" role}} >{{role.name}}</label>
                             {{/each}}
                         </div>
                     </div>
                     
                     {{#if invitation}}
-                        <button {{action "accept" token}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Accept</button>
+                        <button {{action "accept" token}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Accept</button>
                     {{else}}
-                        <button {{action "register"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Register</button>
+                        <button {{action "register"}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Register</button>
                     {{/if}}
                     <h4 class="tos text-center">
                         By {{#if invitation}}accepting{{else}}registering{{/if}} you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}

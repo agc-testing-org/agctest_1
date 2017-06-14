@@ -1,20 +1,22 @@
 {{#if notifications}}
     <div class="full">
-        <h3>Notifications</h3>
-
-        {{#each notifications as |notification|}}
-            <div class="sprint read-{{notification.read}} rounded">
-                {{#if (eq notification.read false)}}
-                    {{notification-read notification_id=notification.id}}
-                {{/if}}
-                <div class="title">{{#link-to "develop.project.sprint.state" notification.project_org notification.project_id notification.sprint_id notification.sprint_state_id}}{{notification.sprint_name}}{{/link-to}} (<span class="text-uppercase">{{notification.project_org}}/{{notification.project_name}}</span>)</div>
-                <div class="description">
-                    {{notification.body}}
-                </div>
-                <div class="date text-muted">{{moment-from-now notification.created_at}}</div>
+        <div class="list-group rounded text-left">
+            <div class="list-group-item active rounded">
+                <h4>My Notifications</h4>
             </div>
-        
-        {{/each}}    
+
+            {{#each notifications as |notification|}}
+                <div class="list-group-item rounded highlight-{{notification.read}}">
+                    <h4 class="line">                
+                        {{#if (eq notification.read false)}}
+                            {{notification-read notification_id=notification.id class="d-inline"}}
+                        {{/if}}
+                        {{#link-to "develop.project.sprint.state" notification.project_org notification.project_id notification.sprint_id notification.sprint_state_id}}{{notification.sprint_name}}{{/link-to}} (<span class="text-uppercase">{{notification.project_org}}/{{notification.project_name}}</span>)</h4>
+                    <p class="line">{{notification.body}}</p>
+                    <small class="line text-muted">{{moment-from-now notification.created_at}}</small>
+                </div>
+            {{/each}}
+        </div>
     </div>
 {{else}}
     <div class="vertical-align-hold">

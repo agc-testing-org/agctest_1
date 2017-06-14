@@ -1,16 +1,24 @@
 {{#if requests}}
     <div class="full">
-        <h3>Contact Requests</h3>
-        {{#each requests as |request|}}
-            <div class="sprint read-{{request.read}} rounded"> 
-            {{#if (eq request.read false)}}
-                {{connection-read request_id=request.id}}            
-                <div class="description">{{request.user_name}} is interested in contacting you. Would you like to share your contact information?</div>
-            {{else}}
-                {{connection-confirm request_id=request.id confirmed=request.confirmed user_name=request.user_name}}
-            {{/if}}
+        <div class="list-group rounded text-left">
+            <div class="list-group-item active rounded">
+                <h4>My Contact Requests</h4>
             </div>
-        {{/each}}
+        
+            {{#each requests as |request|}}
+                <div class="list-group-item rounded">
+                    <p class="line">    
+                        {{#if (eq request.read false)}}
+                            {{connection-read request_id=request.id class="d-inline"}}            
+                            {{request.user_name}} is interested in contacting you. Would you like to share your contact information?
+                        {{else}}
+                            {{connection-confirm request_id=request.id confirmed=request.confirmed user_name=request.user_name class="d-inline"}}
+                        {{/if}}
+                    </p>
+                </div>
+            {{/each}}
+
+        </div>
     </div>
 {{else}}
     <div class="vertical-align-hold">
