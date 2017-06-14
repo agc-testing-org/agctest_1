@@ -1,0 +1,13 @@
+<div class="container-fluid pl-0 pr-0">
+    <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
+        {{team-menu-list team=model.team}}
+    </nav>
+    <nav class="col-md-1 bg-faded sidebar hidden-md-up">
+        {{team-menu-list team=model.team}}
+    </nav>
+    <main class="col-sm-12 col-md-12 offset-sm-0 pl-0 pr-0">
+        <div class="row main">
+            {{outlet}}
+        </div>
+    </main>
+</div>

@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/projects" do
 
-    fixtures :users
+    fixtures :users, :seats
 
     before(:all) do
         @CREATE_TOKENS=true
@@ -109,7 +109,7 @@ describe "/projects" do
     end 
 
     describe "GET /:id" do
-        fixtures :users, :sprints, :labels, :states, :projects, :sprint_timelines
+        fixtures :sprints, :labels, :states, :projects, :sprint_timelines
         before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
@@ -165,7 +165,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid project" do
-            fixtures :users, :sprint_states, :states, :projects
+            fixtures :sprint_states, :states, :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
@@ -188,10 +188,10 @@ describe "/projects" do
     end
 
     describe "POST /:id/contributors" do
-        fixtures :projects, :sprints, :sprint_states, :contributors
+        fixtures :projects, :sprints, :sprint_states
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
-            Octokit::Client.any_instance.stub(:create_repository) { {} }
+            Octokit::Client.any_instance.stub(:create_repository) { %x( mkdir "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; cd "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; git init --bare)}
 
             body = {
                 :name=>"1",
@@ -204,7 +204,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid sprint_state_id" do
-            fixtures :users, :sprint_states, :states, :projects
+            fixtures :sprint_states, :states, :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
@@ -228,7 +228,7 @@ describe "/projects" do
             end
             context "repo" do
                 before(:each) do
-                    @git = %x(cd #{@uri}; git branch)
+                    @git = %x(cd "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; git branch)
                 end
                 it "should create master branch" do
                     expect(@git).to include("master")
@@ -239,7 +239,7 @@ describe "/projects" do
             end
         end
         context "invalid sprint_state_id" do
-            fixtures :users, :projects
+            fixtures :projects
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99
@@ -251,7 +251,7 @@ describe "/projects" do
             end
         end
         context "sprint_state_id with contributor = false" do
-            fixtures :users, :sprint_states, :states,  :projects
+            fixtures :sprint_states, :states,  :projects
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_no_contributors).id
                 @project = projects(:demo).id
@@ -275,7 +275,7 @@ describe "/projects" do
         context "valid contributor" do
             before(:each) do
                 get "/projects/#{@project}/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
                 @res = JSON.parse(last_response.body)
             end
             it "should return contributor id" do
@@ -301,7 +301,7 @@ describe "/projects" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid contributor" do
-            fixtures :users, :sprint_states, :projects, :contributors
+            fixtures :sprint_states, :projects, :contributors
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
@@ -309,7 +309,7 @@ describe "/projects" do
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
                 patch "/projects/#{@project}/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
-                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
             end
             context "contributor" do
                 it "should include commit" do
@@ -324,7 +324,7 @@ describe "/projects" do
             end
         end
         context "invalid contributor" do
-            fixtures :users, :projects
+            fixtures :projects
             before(:each) do
                 @project = projects(:demo).id
                 @sprint_state_id = 99

@@ -1,14 +1,20 @@
 {{#if model.sprints}}
 <div class="full">
-    {{#each model.sprints as |sprint|}}
-    <div class="sprint">
-        <h3 class="title text-capitalize">
-            {{#link-to "develop.project.sprint" sprint.id}}{{sprint.title}}{{/link-to}}
-        </h3>
-        <div class="description">{{sprint.description}}</div>
-        <div class="date text-muted">{{moment-from-now sprint.created_at}}</div>
+
+    <div class="list-group rounded text-left">
+        <div class="list-group-item active rounded">
+            <h4>Sprints</h4>
+        </div>
+
+        {{#each model.sprints as |sprint|}}
+            <div class="list-group-item rounded">
+                <h3 class="line">{{#link-to "develop.project.sprint" sprint.id}}{{sprint.title}}{{/link-to}}</h3>
+                <div class="line">{{sprint.description}}</div>
+                <small class="line text-muted">created {{moment-from-now sprint.created_at}}</small>
+            </div>
+        {{/each}}
+
     </div>
-    {{/each}}
 </div>
 {{else}}
 <div class="vertical-align-hold">

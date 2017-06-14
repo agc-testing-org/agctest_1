@@ -27,10 +27,10 @@
                 {{/unless}}
 
                 {{#if (greater-than sprint.sprint_states.length 2) }}
-                <a class="requirements col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2 rounded" target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements Document</a>
+                <a class="btn btn-secondary rounded mt-5 col-sm-12 col-md-8 offset-md-2" target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
                 {{/if}}
 
-                {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="create transition col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2"}}
+                {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="mt-2 col-sm-12 col-md-8 offset-md-2 pl-0 pr-0"}}
             </div>
         </div>
     </div>

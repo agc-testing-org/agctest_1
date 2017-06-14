@@ -1,21 +1,33 @@
+adam_original_invite:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: "Wired7"
+  accepted: true
+  token: "ABC00"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: owner
+
 adam_confirmed:
   sender: adam_confirmed
   user: adam_confirmed
   team: ateam
   accepted: true
   token: "ABC"
-  updated_at: <%= 2.day.ago.to_s(:db) %>
-  created_at: <%= 5.day.ago.to_s(:db) %>
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: member
 
-adam_invited:
+adam_invited_expired:
   sender: adam_confirmed
   user: adam
   team: ateam
   accepted: false
   user_email: "adam+12345@wired7.com"
   token: "123"
-  updated_at: <%= 2.day.ago.to_s(:db) %>
-  created_at: <%= 5.day.ago.to_s(:db) %>
+  updated_at: <%= 25.hours.ago.to_s(:db) %>
+  created_at: <%= 25.hours.ago.to_s(:db) %>
+  seat: member
 
 adam_confirmed_b_team:
   sender: adam_confirmed
@@ -23,5 +35,15 @@ adam_confirmed_b_team:
   team: bteam
   accepted: false
   token: "ABCDE"
-  updated_at: <%= 2.day.ago.to_s(:db) %>
-  created_at: <%= 5.day.ago.to_s(:db) %>
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+
+adam_protected:
+  sender: adam_confirmed
+  user: adam_protected
+  team: ateam
+  accepted: false
+  token: "ABCDEF"
+  updated_at: <%= 2.hour.ago.to_s(:db) %>
+  created_at: <%= 5.hour.ago.to_s(:db) %>
+

@@ -134,7 +134,7 @@ describe "API" do
     end
 
     context "POST /login" do
-        fixtures :users 
+        fixtures :users, :seats
         context "with valid password" do
             before(:each) do
                 @password = "adam12345"
@@ -150,7 +150,7 @@ describe "API" do
             after(:each) do
                 res = JSON.parse(last_response.body)
                 expect(res["success"]).to be false
-                expect(last_response.status).to eq 200
+                expect(last_response.status).to eq 401
             end
             context "email" do
                 before(:each) do
@@ -166,8 +166,8 @@ describe "API" do
         end
     end
 
-    context "GET /account" do
-        fixtures :users
+    context "GET /session" do
+        fixtures :users, :seats
         context "signed in" do
             before(:each) do
                 @password = "adam12345"
@@ -175,7 +175,7 @@ describe "API" do
                 post "/login", { :password => @password, :email => @email }.to_json
                 res = JSON.parse(last_response.body)
                 w7_token = res["w7_token"]
-                get "/account",{},{"HTTP_AUTHORIZATION" => "Bearer #{w7_token}"}
+                get "/session",{},{"HTTP_AUTHORIZATION" => "Bearer #{w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should include user id" do
@@ -200,9 +200,67 @@ describe "API" do
 
     end
 
+    context "POST /accept" do
+        fixtures :users, :teams, :user_teams, :seats
+        before(:each) do
+            @first_name = "Adam"
+            @password = 'pass1221ef31'
+        end 
+        context "valid token" do
+            before(:each) do
+                @token = user_teams(:adam_confirmed_b_team).token
+                post "/accept", { :password => @password, :firstName => @first_name, :token => @token }.to_json
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
+            end 
+            it_behaves_like "session_response"
+            it_behaves_like "new_session"
+            it "should set accepted = true" do
+                expect(@user_teams_result.first["accepted"]).to be 1
+            end
+        end
+        context "expired token" do
+            before(:each) do
+                post "/accept", { :password => @password, :firstName => @first_name, :token => user_teams(:adam_invited_expired).token }.to_json
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it "should return success = false" do
+                expect(@res["success"]).to eq(false)
+            end
+        end
+    end
+
+    context "POST /resend" do
+        fixtures :users, :teams, :user_teams
+        context "valid token" do
+            before(:each) do
+                @token = user_teams(:adam_invited_expired).token
+                post "/resend", { :token => @token }.to_json
+                @res = JSON.parse(last_response.body)
+                @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_invited_expired).team_id}")
+            end
+            it "should update token" do
+                expect(@user_teams_result.first["token"]).to_not eq @token
+            end
+            it "should return success = true" do
+                expect(@res["success"]).to eq(true)
+            end
+        end
+        context "invalid token" do
+            before(:each) do
+                post "/resend", { :token => "YYYZ" }.to_json
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return success = true" do
+                expect(@res["success"]).to eq(true)
+            end
+        end
+    end
 
     context "POST /reset" do
-        fixtures :users
+        fixtures :users, :seats
         context "with valid password" do
             before(:each) do
                 @password = 'pass1221ef31'
@@ -252,33 +310,6 @@ describe "API" do
                     expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
                 end
             end
-            context "invitation" do
-                fixtures :teams, :user_teams
-                context "valid token" do
-                    before(:each) do
-                        @token = user_teams(:adam_confirmed_b_team).token
-                        post "/reset", { :password => @password, :token => @token, :invitation => true }.to_json
-                        @res = JSON.parse(last_response.body)
-                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
-                        @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
-                    end
-                    it_behaves_like "session_response"
-                    it_behaves_like "new_session"
-                    it "should set accepted = true" do
-                        expect(@user_teams_result.first["accepted"]).to be 1
-                    end
-                end
-                context "expired token" do
-                    before(:each) do
-                        post "/reset", { :password => @password, :token => "ZRY", :invitation => true }.to_json
-                        @res = JSON.parse(last_response.body)
-                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
-                    end
-                    it "should return success = false" do
-                         expect(@res["success"]).to eq(false)
-                    end
-                end
-            end
             context "with invalid password" do
                 before(:each) do
                     @token = users(:adam).token
@@ -299,7 +330,7 @@ describe "API" do
     end
 
     describe "POST /session/github" do
-        fixtures :users
+        fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
             @email = users(:adam_confirmed).email
@@ -338,7 +369,7 @@ describe "API" do
     end
 
     describe "POST /session/linkedin" do
-        fixtures :users
+        fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
             @email = users(:adam_confirmed).email
@@ -417,7 +448,7 @@ describe "API" do
     end
 
     describe "DELETE /session" do
-        fixtures :users
+        fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
             @email = users(:adam_confirmed).email

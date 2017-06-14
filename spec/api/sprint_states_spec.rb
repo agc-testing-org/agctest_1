@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/sprints-states" do
 
-    fixtures :users, :projects, :sprints, :states
+    fixtures :users, :projects, :sprints, :states, :seats
     
     before(:all) do
         @CREATE_TOKENS=true
@@ -136,11 +136,12 @@ describe "/sprints-states" do
                     get "/sprint-states?id_id=#{sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @sprint_state = JSON.parse(last_response.body)[0]
                     @contributors = @sprint_state["contributors"]
-                    @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id}")
+                    @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id} AND contributors.commit IS NOT NULL")
                 end
                 it_behaves_like "contributors"
                 #it_behaves_like "contributor_comments" #TODO
             end
+
         end
     end
 end

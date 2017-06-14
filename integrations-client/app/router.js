@@ -9,14 +9,14 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-    this.route('index', {path: '/'});
     this.route('home');
     this.route('forgot');
     this.route('register');
     this.route('login'); 
     this.route('token',{ path: '/token/:id' });
-    this.route('invitation', {path: '/invitation/:id'});
-    this.route('registered-invitation', {path: '/registered-invitation/:id'});
+    this.route('invitation', {path: '/invitation/:id'}, function(){
+        this.route('resend');
+    });
     this.route('forgot');
     this.route('develop', {path: '/develop'}, function() {
         this.route('index', {path: '/'});
@@ -27,7 +27,13 @@ Router.map(function() {
             }); 
         });
     });
-    this.route('team', {path: '/team/:id'});
+    this.route('team', function(){
+        this.route('new');
+        this.route('select', {path: '/:id'}, function(){
+            this.route('members');
+            this.route('talent');
+        });
+    });
     this.route('profile',{ path: '/:id'}, function(){ // public profile
         this.route('requests');
     });
@@ -35,6 +41,7 @@ Router.map(function() {
         this.route('notifications');
         this.route('connections');
         this.route('requests');
+        this.route('invitation', {path: '/invitation/:id'});
     });
 });
 

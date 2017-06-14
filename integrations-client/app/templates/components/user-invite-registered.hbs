@@ -3,22 +3,22 @@
         <div class="modal-content rounded">
             <div class="modal-header">
                 <div class="title">
-                    Team Invitation
+                    You've been invited to {{invitation.name}}!
                 </div>
             </div>
             <div class="modal-header subtitle">
                 <div class="text-muted">
-                    {{invitation.sender}} would like for you to join the {{invitation.name}} team
+                    <span class="text-capitalize">{{invitation.sender_first_name}}</span> ({{invitation.sender_email}}) would like for you to join the {{invitation.name}} team.
                 </div>
             </div>
             <div class="modal-body">
                 <form class="register-form" {{action 'accept' token on="submit"}}>
 
-                    <button type="submit" class="btn btn-outline-secondary rounded">Accept</button>
+                    <button type="submit" class="btn btn-secondary rounded btn-block">Accept</button>
                     
                 </form>
             </div>
-            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "home" class="text-muted"}}Cancel{{/link-to}}</div>
+            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "me" class="text-muted"}}Cancel{{/link-to}}</div>
         </div>
     </div>
 </div>

@@ -204,6 +204,15 @@ class Account
         end
     end
 
+    def get_users params # can be used if we add search functionality later
+        begin
+            return User.where(params).select(:id, :created_at).as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def update id, fields
         begin
             user = User.find_by(id: id)
@@ -228,9 +237,9 @@ class Account
         end
     end
 
-    def create_email email, name, token 
+    def create_email user 
         begin
-            mail email, "Welcome to Wired7 #{name.capitalize}", "#{name.capitalize},<br><br>Thanks for joining us!<br><br>To continue using the service please confirm your email by opening the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Confirm My Email</a>.<br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 Team", "#{name.capitalize},\n\nThanks for joining us!\n\n  To continue using the service please confirm your email by opening the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 Team"
+            mail user.email, "Wired7 Registration", "Hi #{user.first_name.capitalize},<br><br>Thanks for signing up!  We are gradually onboarding users to the service and will email you an invitation as soon as possible.<br><br><br>- Adam Cockell<br>Founder of Wired7", "Hi #{user.first_name.capitalize},\n\nThanks for signing up!  We are gradually onboarding users to the service and will email you an invitation as soon as possible.\n\n\n- Adam Cockell\nFounder of Wired7"
         rescue => e
             puts e
         end
@@ -240,14 +249,14 @@ class Account
         user = User.find_by(email: email)
         if user 
             user[:token] = SecureRandom.hex
-            
+
             name = user.first_name
             if name 
                 name = name.capitalize
             else
                 name = "Hi"
             end
-            
+
             mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
             return user.save
         else
@@ -265,8 +274,9 @@ class Account
         end
     end
 
-    def confirm_user user, password, ip
+    def confirm_user user, password, first_name, ip
         if user
+            user[:first_name] = first_name
             user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
             user[:protected] = false
@@ -321,7 +331,8 @@ class Account
     def get_teams user_id
         begin 
             return Team.joins(:user_teams).where({
-                "user_teams.user_id" => user_id
+                "user_teams.user_id" => user_id,
+                #"user_teams.accepted" => true #allow team to show for registered invites...
             })
         rescue => e
             puts e
@@ -329,12 +340,37 @@ class Account
         end
     end
 
-    def join_team token
+    def mail_invite invite
+        mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name.capitalize}", "Great news,<br><br>#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name.capitalize} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+    end
+
+    def refresh_team_invite token
         begin
-            invite = UserTeam.find_by({
-                token: token 
-            })
+            invite = UserTeam.find_by(:token => token)
             if invite
+                invite.token = SecureRandom.hex(32)
+                invite.save
+            end
+            return invite
+        rescue => e
+            puts e
+            return nil 
+        end
+
+    end
+
+    def check_user actual_user_id, record_user_id
+        if actual_user_id != nil
+            return actual_user_id == record_user_id
+        else
+            return true
+        end
+    end
+
+    def join_team token, user_id
+        begin
+            invite = UserTeam.where("token = ? and updated_at >= now() - INTERVAL 1 DAY",token).take
+            if invite && (check_user user_id, invite.user_id)
                 invite.update_attributes!({accepted: true, token: nil})
                 invitation = invite.as_json
                 invitation.delete("token")
@@ -359,16 +395,38 @@ class Account
         end
     end
 
+    def is_owner? user_id
+        begin 
+            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id, :accepted => true).count > 0)
+        rescue => e
+            puts e
+            return false
+        end
+    end
+
     def sign_in email, password, ip
-        user = User.find_by(email: email.downcase)
-        if user && user.password
-            if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
-                return user
+        begin
+            user = User.find_by(email: email.downcase)
+            if user && user.password
+                if ((BCrypt::Password.new(user.password) == password) && user.confirmed && !user.protected)
+                    return user
+                else
+                    return nil
+                end
             else
-                return nil
+                return nil 
             end
-        else
-            return nil 
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_seat user_id, team_id
+        begin
+            return UserTeam.find_by(:user_id => user_id, :team_id => team_id, :accepted => true).seat.name
+        rescue => e
+            return nil
         end
     end
 

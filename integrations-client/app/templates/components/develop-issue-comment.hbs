@@ -1,7 +1,7 @@
-{{textarea value=comment class="form-control input-lg rounded mt-2 mb-1" rows="1" placeholder="Your feedback"}}
+{{textarea value=comment class="form-control input-lg rounded mt-2 mb-2" rows="1" placeholder="Your feedback"}}
 
-<a class="d-inline-block pr-2 cursor-pointer action" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment-o" aria-hidden="true"></i> Post Comment</a>
-<a class="d-inline-block cursor-pointer action" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-o-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</a>
+<button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment" aria-hidden="true"></i> Post Comment</button>
+<button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</button>
 
 {{#if sessionAccount.account.admin}}
 
@@ -12,10 +12,10 @@
 {{else}}
 {{#if sprint_state.contributor_id}}
 {{#unless sprint_state.merged}}
-<a class="d-inline-block pl-2 cursor-pointer" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</a>
+<button class="btn btn-outline-secondary btn-sm d-inline-block rounded" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</button>
 {{/unless}}
 {{else}}
-<a class="d-inline-block pl-2 cursor-pointer" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</a>
+<button class="btn btn-outline-secondary btn-sm d-inline-block rounded" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</button>
 {{/if}}
 {{/unless}}
 

@@ -1,0 +1,7 @@
+{{#each items as |item|}}
+    {{#if item.active}}
+        <span {{action "updateItem" type user.id item.id false}} class="badge badge-default rounded selected cursor-pointer">{{item.name}}</span>
+    {{else}}
+        <span {{action "updateItem" type user.id item.id true}} class="badge badge-default rounded unselected cursor-pointer">{{item.name}}</span>
+    {{/if}}
+{{/each}}

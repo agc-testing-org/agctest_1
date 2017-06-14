@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'api_helper'
+#require 'api_helper'
 
 describe "/team-invites" do
 
@@ -11,7 +11,7 @@ describe "/team-invites" do
     describe "GET /?token=" do
         fixtures :teams, :user_teams
         before(:each) do
-            @invite = user_teams(:adam_invited)
+            @invite = user_teams(:adam_invited_expired)
         end
         context "valid token" do
             before(:each) do
@@ -25,19 +25,23 @@ describe "/team-invites" do
                 expect(@res["name"]).to eq @invite.team.name
             end
             it "should return email" do
-                expect(@res["email"]).to eq @invite.user_email
+                expect(@res["sender_email"]).to eq @invite.sender.email
             end
             it "should return sender name" do
-                expect(@res["sender"]).to eq @invite.sender.first_name
+                expect(@res["sender_first_name"]).to eq @invite.sender.first_name
             end
         end
         context "invalid token" do
             before(:each) do
-                get "/team-invites?token=YYEEA"
+                @token = "YYEEA"
+                get "/team-invites?token=#{@token}"
                 @res = JSON.parse(last_response.body)
             end
-            it "should return empty" do
-                expect(@res).to be_empty
+            it "should return id" do
+                expect(@res["id"]).to eq(@token)
+            end
+            it "should return no other keys" do
+                expect(@res.keys).to eq ["id"]
             end
         end
     end

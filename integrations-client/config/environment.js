@@ -43,7 +43,7 @@ module.exports = function(environment) {
       authorizer: 'simple-auth-authorizer:token',
       store: 'session-store:local-storage',
       authenticationRoute: 'login',
-      routeIfAlreadyAuthenticated: 'home',
+      routeIfAlreadyAuthenticated: 'me',
       routeAfterAuthentication: ''
   };
 

@@ -37,6 +37,7 @@
     export INTEGRATIONS_SIDEKIQ_HOST=true
     export INTEGRATIONS_SIDEKIQ_USERNAME="adam"
     export INTEGRATIONS_SIDEKIQ_PASSWORD="123456"
+    export INTEGRATIONS_INITIAL_USER_EMAIL="adamwired7+admin@gmail.com" #this is to allow us to sign in once we first deploy
 
     if [ "$RACK_ENV" == "test" ]; then
         export INTEGRATIONS_GITHUB_URL="test"

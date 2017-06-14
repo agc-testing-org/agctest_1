@@ -1,0 +1,28 @@
+<ul class="nav nav-pills flex-column timeline">
+
+    <div class="menu">
+        {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <i class="fa fa-fw fa-user"></i>My Profile
+        {{/link-to}}
+    </div>
+
+    {{#if team}}
+    {{#if team.show}}
+        {{#link-to "team.select.members" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-envelope"></i>
+            </div>
+            Members
+        {{/link-to}}
+
+        {{#link-to "team.select.talent" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-users"></i>
+            </div>
+            Talent
+        {{/link-to}}
+    {{/if}}
+    {{/if}}
+
+    {{user-logout}}
+</ul>

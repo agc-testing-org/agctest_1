@@ -1,16 +1,15 @@
 {{#if comments}}
+<div class="list-group rounded text-left">
 {{#each (limited sortedComments count) as |comment|}}
-<div>
-    <div class="comment">
-        <i class="fa fa-genderless" aria-hidden="true"></i> {{comment.text}} 
-        {{#if comment.user_profile}}
-        <em class="text-muted">- {{comment.user_profile.title}} in {{comment.user_profile.industry}} ({{comment.user_profile.location}}) {{moment-from-now comment.created_at}}</em>
-        {{else}}
-        <em class="text-muted">- {{moment-from-now comment.created_at}}</em>
-        {{/if}}
+    <div class="list-group-item rounded">
+        <div class="line">{{comment.text}}</div>
+        <small class="text-muted">
+            created {{moment-from-now comment.created_at}}
+            {{#if comment.user_profile}} by a {{comment.user_profile.title}} in {{comment.user_profile.industry}} ({{comment.user_profile.location}}){{/if}}
+        </small>
     </div>
-</div>
 {{/each}}
+</div>
 
 <small class="more">
     {{#if showingAll}}

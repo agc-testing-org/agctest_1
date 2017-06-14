@@ -1,21 +1,34 @@
-<div class="create rounded col-sm-4 offset-sm-4 col-8 offset-2 col-md-8 offset-md-2">
-    <a {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create Sprint{{/if}}</a>
-    <div class="text-left">
+<div class="create rounded">
+    <a class="btn btn-secondary btn-block rounded" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create Sprint Idea{{/if}}</a>
+    <div class="text-left mt-3">
         {{#if displayCreate}}
 
-        {{#if errorMessage}}
-        <div class="alert alert-warning rounded">{{errorMessage}}</div>
-        {{/if}}
-        <div class="form-group">
-            <label>Title</label>
-            {{input value=title placeholder="Briefly describe the request" class="form-control input-lg rounded"}}
-        </div>
+        <div class="card-deck">
+        <div class="card rounded">
+            <div class="card-block">
 
-        <div class="form-group">
-            <label>Description</label>
-            {{textarea rows=5 value=description placeholder="Explain the request in detail" class="form-control input-lg rounded"}}
+                {{#if errorMessage}}
+                    <div class="alert alert-warning rounded text-center">{{errorMessage}}</div>
+                {{/if}}
+                
+                <div class="form-group">
+                    <label>Title</label>
+                    {{input value=title placeholder="title of idea" class="form-control input-lg rounded"}}
+                </div>
+
+                <div class="form-group">
+                    <label>Description</label>
+                    {{textarea rows=5 value=description placeholder="explain the idea in more detail" class="form-control input-lg rounded"}}
+                </div>
+                
+                <button {{action "createSprint" project_id}} type="submit" class="btn btn-secondary btn-sm btn-block rounded">Create Idea</button>
+
+            </div>
+            <div class="card-footer text-center">
+                An idea can be a bug, improvement, task, or feature
+            </div>
         </div>
-        <button {{action "createSprint" project_id}} type="submit" class="btn btn-outline-secondary reversed btn-lg rounded">Save Sprint</button>
+        </div>
 
         {{/if}}
     </div>

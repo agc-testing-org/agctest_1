@@ -17,10 +17,7 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
-            team: this.store.find('team',params.id),
-            user_teams: this.store.query('user-team', {
-                team_id: params.id
-            }),
+
         });
     },
 });

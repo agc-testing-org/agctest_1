@@ -1,45 +1,86 @@
-<div class="modal" id="register-modal" data-backdrop="static">
+<div class="modal show" id="register-modal" data-backdrop="static" data-show="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content rounded">
             <div class="modal-header">
-                <div class="title">Register for Early Access</div>
+                <div class="title">
+                {{#if invitation}}
+                    You've been invited to {{invitation.name}}!
+                {{else}}
+                    Register for Early Access 
+                {{/if}}
+                </div>
             </div>
             <div class="modal-header subtitle">
-                <div class="text-muted">Wired7 is gradually onboarding users through invitations.  Register and we will invite you as soon as possible.</div>
+                <div class="text-muted">
+                
+                Wired7 is gradually onboarding users through invitations.  
+                
+                {{#if invitation}}
+                    <span class="text-capitalize">{{invitation.sender_first_name}}</span> ({{invitation.sender_email}}) would like for you to join the {{invitation.name}} team.
+                {{else}}
+                    Register and we will invite you as soon as possible.
+                {{/if}}
+                </div>
             </div>
             <div class="modal-body">
                 <form class="register-form text-left" {{action 'register' on="submit"}}>
 
                     {{#if registered}}
-                    <h3 class="text-left text-teal">Thanks for signing up.  We will send you an invite as soon as we can!</h3>
+                        <div class="alert alert-info rounded text-center">We will email you an invite as soon as we can!</div>
                     {{else}}
+
+                    {{#if errorMessage}}<div class="alert alert-warning rounded text-center">{{errorMessage}}</div>{{/if}}
 
                     <div class="form-group">
                         <label>First Name</label>
                         {{input value=firstName placeholder="" class="form-control input-lg rounded"}}
                     </div>
 
+                    {{#unless invitation}}
                     <div class="form-group">
                         <label>Email</label>
-                        {{input value=email type="email" placeholder="" class="form-control input-lg rounded"}}
+                        {{#if invitation}}
+                            {{input value=email type="email" placeholder="" class="form-control input-lg rounded" value=invitation.email disabled=true}}
+                        {{else}}
+                            {{input value=email type="email" placeholder="" class="form-control input-lg rounded"}}
+                        {{/if}}
                     </div>
+                    {{/unless}}
+
+                    {{#if invitation}}
+                    <div class="form-group">
+                        <label>Password</label>
+                        {{input type="password" value=password placeholder="Password" class="form-control input-lg rounded"}}
+                        {{input type="password" value=passwordb placeholder="Confirm Password" class="form-control input-lg rounded"}}
+                    </div>
+                    {{/if}}
 
                     <div class="form-group">
                         <label>Group</label>
                         <div class="btn-group" data-toggle="buttons">
                             {{#each roles as |role|}}
-                            <label class="btn btn-primary btn-sm cursor-pointer" {{action "role" role}} >{{role.name}}</label>
+                            <label class="btn btn-secondary btn-sm cursor-pointer" {{action "role" role}} >{{role.name}}</label>
                             {{/each}}
                         </div>
                     </div>
-
-                    <button {{action "register"}} type="submit" class="btn btn-outline-secondary btn-lg rounded">Register</button>
-                    <h4 class="tos text-center">By registering you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}</h4>
+                    
+                    {{#if invitation}}
+                        <button {{action "accept" token}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Accept</button>
+                    {{else}}
+                        <button {{action "register"}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Register</button>
+                    {{/if}}
+                    <h4 class="tos text-center">
+                        By {{#if invitation}}accepting{{else}}registering{{/if}} you agree to our {{link-to 'Terms of Service' 'index'}} and {{link-to 'Privacy Policy' 'index'}}
+                    </h4>
 
                     {{/if}}
                 </form>
             </div>
-            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+            {{#if invitation}}
+                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "invitation.resend" class="text-muted"}}Want us to send another email{{/link-to}}</div>
+            {{else}}
+                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+            {{/if}}
         </div>
     </div>
 </div>
