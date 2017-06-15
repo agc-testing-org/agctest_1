@@ -25,13 +25,6 @@ class CreateNotifications < ActiveRecord::Migration[4.2]
         add_foreign_key "user_notifications", "notifications", column: "notifications_id"
         add_foreign_key "user_notifications", "users", column: "user_id"
 
-        create_table "user_contributors", force: :cascade do |t|
-            t.integer  "user_id",                null: false    
-            t.integer  "contributors_id",       null: false
-        end
-        
-        add_index "user_contributors", ["user_id", "contributors_id"], unique: true, name: 'index_contributors_id_and_user_id_on_user_contributor'
-
         add_column :sprint_timelines, :contributor_id, :integer, :null => true
         add_foreign_key "sprint_timelines", "contributors", column: "contributor_id"
 

@@ -12,6 +12,7 @@
                             {{notification-read notification_id=notification.id class="d-inline"}}
                         {{/if}}
                         {{#link-to "develop.project.sprint.state" notification.project_org notification.project_id notification.sprint_id notification.sprint_state_id}}{{notification.sprint_name}}{{/link-to}} (<span class="text-uppercase">{{notification.project_org}}/{{notification.project_name}}</span>)</h4>
+                    <p class="line">{{notification.subject}}</p>
                     <p class="line">{{notification.body}}</p>
                     <small class="line text-muted">{{moment-from-now notification.created_at}}</small>
                 </div>

@@ -48,7 +48,6 @@ require_relative '../models/user_profile.rb'
 require_relative '../models/user_position.rb'
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
-require_relative '../models/user_contributor.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/connection_state.rb'
  
@@ -1232,13 +1231,17 @@ class Integrations < Sinatra::Base
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-                if fields[:contact_id]
-                    issue = Issue.new
-                    connection_request = issue.create_connection_request @session_hash["id"], fields[:contact_id]
+                if params[:id]
+                    account = Account.new
+                    connection_request = account.create_connection_request @session_hash["id"], params[:id]
 
                     if connection_request
                         status 201
                         response = connection_request
+                    else
+                        status 202
+                        response[:id] = 0
+                        response[:message] = "You've already requested a contact information."
                     end
                 else
                     status 400
@@ -1251,22 +1254,33 @@ class Integrations < Sinatra::Base
     connections_get = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            issue = Issue.new
+            account = Account.new
             query = {"user_connections.contact_id" => user_id}
-            connections = issue.get_user_connections query
+            connections = account.get_user_connections query
             return connections.to_json
         end
     end
 
-    user_connections_get_by_id = lambda do
+
+    get_exist_requests = lambda do
+        user_id = (default_to_signed params[:user_id])
+        if user_id && params[:id]
+            account = Account.new
+            query = {"user_connections.contact_id" =>  params[:id], "user_connections.user_id" => user_id}
+            requests = account.get_exist_requests query
+            return requests.to_json
+        end
+    end
+
+     user_connections_get_by_id = lambda do
         protected!
         status 401
         if @session_hash["id"]
             status 400
             begin
                 if params[:id]
-                    issue = Issue.new
-                    response = (issue.user_connections_get_by_id @session_hash["id"], params[:id])
+                    account = Account.new
+                    response = (account.user_connections_get_by_id @session_hash["id"], params[:id])
                     if response
                         status 201
                     end
@@ -1278,7 +1292,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    user_connections_patch_read = lambda do
+    user_connections_patch = lambda do
         protected!
         status 401
         response = {}
@@ -1287,38 +1301,13 @@ class Integrations < Sinatra::Base
             begin
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:user_id] && fields[:read]
-                    issue = Issue.new
-                    response = (issue.update_user_connections_read @session_hash["id"], fields[:user_id], fields[:read])
-                    puts response
+                if fields[:user_id] && fields[:read] && fields[:confirmed]
+                    account = Account.new
+                    response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
                     if response
                         status 201
                     end
-                end
-            rescue => e
-                puts e
-            end
-        end
-        return response.to_json
-    end
-
-    user_connections_patch_confirmed = lambda do
-        protected!
-        status 401
-        response = {}
-        if @session_hash["id"]
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:user_id] && fields[:confirmed]
-                    issue = Issue.new
-                    response = (issue.update_user_connections_confirmed @session_hash["id"], fields[:user_id], fields[:confirmed])
-                    puts response
-                    if response
-                        status 201
-                    end
-                end
+                end  
             rescue => e
                 puts e
             end
@@ -1431,8 +1420,8 @@ class Integrations < Sinatra::Base
     get_user_info = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            issue = Issue.new
-            user_info = issue.get_user_info user_id
+            account = Account.new
+            user_info = account.get_user_info user_id
             return user_info.to_json
         end
     end
@@ -1440,8 +1429,8 @@ class Integrations < Sinatra::Base
     get_user_notifications = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            issue = Issue.new
-            user_notification = issue.get_user_notifications user_id
+            account = Account.new
+            user_notification = account.get_user_notifications user_id
             return user_notification.to_json
         end
     end
@@ -1453,8 +1442,8 @@ class Integrations < Sinatra::Base
             status 400
             begin
                 if params[:id]
-                    issue = Issue.new
-                    response = (issue.get_user_notifications_by_id @session_hash["id"], params[:id])
+                    account = Account.new
+                    response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
                     if response
                         status 201
                     end
@@ -1476,20 +1465,19 @@ class Integrations < Sinatra::Base
                 request.body.rewind
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if params[:id] && fields[:read]
-                    issue = Issue.new
-                    response = (issue.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+                    account = Account.new
+                    response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
                     if response
                         status 201
                     end
                 end
-            rescue => e
-                puts e
+                return response.to_json
             end
         end
-        return response.to_json
     end
-
+    
     #API
+
     post "/register", &register_post
     post "/forgot", &forgot_post
     post "/resend", &resend_invitation_post
@@ -1514,16 +1502,15 @@ class Integrations < Sinatra::Base
     get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
     patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
 
-    post "/account/connections", &connections_request_post
-    get "/account/connections/requests", &connections_get
-    get "/account/confirmed/connections", &get_user_info
-    patch "/account/connections/read/requests/:id", &user_connections_patch_read
-    patch "/account/connections/confirme/requests/:id", &user_connections_patch_confirmed
-    get "/account/connections/read/requests/:id", &user_connections_get_by_id
-    get "/account/connections/confirme/requests/:id", &user_connections_get_by_id
+    get "/account/connections", &get_user_info
+    get "/account/requests", &connections_get
+    post "/account/:id/requests", &connections_request_post
+    patch "/account/requests/:id", &user_connections_patch
+    get "/account/requests/:id", &user_connections_get_by_id
+    get "/account/:id/requests", &get_exist_requests
     get "/account/notifications", &get_user_notifications
-    patch "/account/read/notifications/:id", &user_notifications_read 
-    get "/account/read/notifications/:id", &get_user_notifications_by_id
+    patch "/account/notifications/:id", &user_notifications_read 
+    get "/account/notifications/:id", &get_user_notifications_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get
