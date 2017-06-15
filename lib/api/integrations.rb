@@ -1094,6 +1094,7 @@ class Integrations < Sinatra::Base
 
                             if sprint_state.state.name == "requirements design"
                                 idea = issue.get_sprint sprint_state.sprint_id 
+                                puts sprint_state.id.to_s
                                 github.create_contents("#{username}/#{name}",
                                                        "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                                            "adding placeholder for requirements",
