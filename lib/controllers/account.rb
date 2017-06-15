@@ -32,7 +32,7 @@ class Account
                 user_profile_id: profile_id,
                 title: profile_position.title,
                 size: profile_position.company["size"], # size symbol retrieves the obj length
-                start_year: profile_position.start_date.year,
+                start_year: (profile_position.start_date.year if profile_position.start_date),
                 end_year: (profile_position.end_date.year if profile_position.end_date),
                 company: profile_position.company.name,
                 industry: profile_position.company.industry
@@ -206,7 +206,7 @@ class Account
 
     def get_users params # can be used if we add search functionality later
         begin
-            return User.where(params).select(:id, :created_at).as_json
+            return User.joins(:user_profile).joins("INNER JOIN user_positions ON user_positions.user_profile_id = user_profiles.id").where(params).select(:id, :created_at, "user_profiles.location_name as location", "user_positions.title", "user_positions.industry", "user_positions.size").as_json
         rescue => e
             puts e
             return nil

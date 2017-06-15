@@ -30,18 +30,37 @@ describe "/users" do
         end
     end
 
+    shared_examples_for "profile" do
+        it "should return created_at" do
+            expect(@res["created_at"]).to_not be nil
+        end
+        it "should return industry" do
+            expect(@res["industry"]).to eq @position.industry
+        end 
+        it "should return location" do
+            expect(@res["location"]).to eq @profile.location_name
+        end                         
+        it "should return size" do
+            expect(@res["size"]).to eq @position.size
+        end                                     
+        it "should return title" do
+            expect(@res["title"]).to eq @position.title
+        end  
+    end
+
     describe "GET /:id" do
+        fixtures :user_profiles, :user_positions
         before(:each) do
-            @user_id = users(:adam).id
+            @user_id = users(:adam_confirmed).id
+            @position = user_positions(:adam_confirmed)
+            @profile = user_profiles(:adam_confirmed)
         end
         context "user exists" do
             before(:each) do
                 get "/users/#{@user_id}", {},  {}
                 @res = JSON.parse(last_response.body)
             end
-            it "should return created_at" do
-                expect(@res.keys).to eq ["id","created_at"]
-            end
+            it_behaves_like "profile"
         end
         context "invalid user" do
             before(:each) do
@@ -55,15 +74,16 @@ describe "/users" do
     end
 
     describe "GET /me" do
-        context "user exists" do
+        fixtures :user_profiles, :user_positions
+        context "signed in" do
             before(:each) do
+                @position = user_positions(:adam_confirmed)
+                @profile = user_profiles(:adam_confirmed)
                 get "/users/me", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"} 
                 follow_redirect!
                 @res = JSON.parse(last_response.body)
-            end
-            it "should return created_at" do
-                expect(@res.keys).to eq ["id","created_at"]
-            end
+            end 
+            it_behaves_like "profile"
         end
     end
 

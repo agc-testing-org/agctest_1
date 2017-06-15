@@ -6,11 +6,20 @@
             {{else}}
             <h1 class="name text-capitalize"><i class="fa fa-fw fa-2x fa-user-secret" aria-hidden="true"></i></h1>
             {{/if}}
+            <h3 class="description">{{#if user.title}}{{user.title}} {{#if user.industry}}in {{user.industry}}{{/if}} (<i class="fa fa-map-marker" aria-hidden="true"></i> {{user.location}}){{/if}}</h3>
             <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
             {{#if me}}
+                <div class="text-left">
+                    {{profile-overview-linkedin complete=user.title}}
+                    {{profile-overview-skillsets-roles-instruction type="skillsets" text="to be notified of relevant events" complete=skillsets}}
+                    {{profile-overview-skillsets-roles-instruction type="roles" text="to be notified of relevant contribution opportunities" complete=roles}}
+                </div>
+                <h4 class="about section text-capitalize">Your Skillsets</h4>
                 {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
+                <div class="about section text-capitalize">Your Roles</div>
                 {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
             {{/if}}
+            <h4 class="about section text-capitalize">Feedback by Skillset and Role</h4>
             {{profile-overview-skillsets-roles-stats skillsets=skillsets roles=roles class="skillsets"}}
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
