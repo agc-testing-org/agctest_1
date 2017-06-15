@@ -75,116 +75,16 @@ describe ".Issue" do
         end 
     end 
 
-    context "#get_user_connections" do
-        fixtures :users
-        context "connections" do
-            fixtures :user_connections
-            before(:each) do
-                user_id = users(:masha_get_connection_request).id
-                query = {"user_connections.contact_id" => user_id}
-                @res = (@issue.get_user_connections query).first
-            end
-            it "should include user_id" do
-                expect(@res["user_id"]).to eq(users(:masha_post_connection_request).id)
-            end
-            it "should include contact_id" do
-                expect(@res["contact_id"]).to eq(users(:masha_get_connection_request).id)
-            end
-            it "should include read" do
-                expect(@res["read"]).to eq(user_connections(:user_2_connection_1).read)
-            end
-            it "should include confirmed" do
-                expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
-            end
-            it "should include user_name" do
-                expect(@res["user_name"]).to eq(users(:masha_post_connection_request).first_name)
-            end
-        end
-    end 
-
-    context "#get_user_info", :focus => true do
-        fixtures :users
-        context "user_info" do
-            fixtures :user_connections
-            before(:each) do
-                user_id = users(:masha_post_connection_request).id
-                @res = (@issue.get_user_info user_id).first
-            end
-            it "should include user_id" do
-                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
-            end
-            it "should include contact_id" do
-                expect(@res["email"]).to eq(users(:masha_get_connection_request).email)
-            end
-        end
-    end 
-
-    context "#patch_user_connections_read" do
-        fixtures :users
-        context "connection_request_read" do
-            fixtures :user_connections
-            before(:each) do
-                contact_id = (users(:masha_get_connection_request).id)
-                user_id = (users(:masha_post_connection_request).id)
-                @read = false
-                @res = (@issue.update_user_connections_read contact_id, user_id, @read)
-            end
-            it "should include read" do
-                expect(@res[:read]).to eq(@read)
-            end
-        end
-    end 
-
-    context "#patch_user_connections_confirmed" do
-        fixtures :users
-        context "connection_request_confirmed" do
-            fixtures :user_connections
-            before(:each) do
-                contact_id = (users(:masha_get_connection_request).id)
-                user_id = (users(:masha_post_connection_request).id)
-                @confirmed = 3
-                @res = (@issue.update_user_connections_confirmed contact_id, user_id, @confirmed)
-            end
-            it "should include read" do
-                expect(@res[:confirmed]).to eq(@confirmed)
-            end
-        end
-    end 
-
-    context "#post_user_connections_request" do
-        fixtures :users
-        context "connection_request_confirmed" do
-            fixtures :user_connections
-            before(:each) do
-                @contact_id = (users(:adam_protected).id)
-                @user_id = (users(:adam).id)
-                @res = (@issue.create_connection_request @user_id, @contact_id)
-            end
-            it "should include user_id" do
-                expect(@res["user_id"]).to eq(@user_id)
-            end
-            it "should include contact_id" do
-                expect(@res["contact_id"]).to eq(@contact_id)
-            end
-            it "should include read" do
-                expect(@res["read"]).to eq(false)
-            end
-            it "should include confirmed" do
-                expect(@res["confirmed"]).to eq(1)
-            end
-        end
-    end 
-
-
 =begin
     context "#create_entry_in_notifications_table", :focus => true do
-        fixtures :sprint_timelines
+        fixtures :sprint_timelines, :notifications
         context "create_entry" do
             before(:each) do
-                @res = (@issue.recently_changed_sprint?)
-                @state_change_notification = @mysql_client.query("select * from notifications where subject='Sprint state changed'").first
-                @comment_notification = @mysql_client.query("select * from notifications where subject='Sprint commented'").first
-                @vote_notification = @mysql_client.query("select * from notifications where subject='Sprint voted'").first
+                @res = @issue.recently_changed_sprint?
+                puts @res
+                @state_change_notification = @mysql_client.query("select * from notifications where subject='Sprint State Change'").first
+                @comment_notification = @mysql_client.query("select * from notifications where subject='New Comment'").first
+                @vote_notification = @mysql_client.query("select * from notifications where subject='New Vote'").first
 
             end
             context "notifications count vs sprint_timelines count" do
@@ -210,7 +110,7 @@ describe ".Issue" do
                     expect(@state_change_notification["contributor_id"]).to eq(sprint_timelines(:demo_1).contributor_id)
                 end
                 it "should include subject" do
-                    expect(@state_change_notification["subject"]).to eq("Sprint state changed")
+                    expect(@state_change_notification["subject"]).to eq("Sprint State Change")
                 end
                 it "should include body" do
                     expect(@state_change_notification["body"]).to eq("Sprint state changed")
@@ -233,7 +133,7 @@ describe ".Issue" do
                     expect(@comment_notification["contributor_id"]).to eq(sprint_timelines(:demo_5).contributor_id)
                 end
                 it "should include subject" do
-                    expect(@comment_notification["subject"]).to eq("Sprint commented")
+                    expect(@comment_notification["subject"]).to eq("New Comment")
                 end
                 it "should include body" do
                     expect(@comment_notification["body"]).to eq("Sprint commented")
@@ -256,7 +156,7 @@ describe ".Issue" do
                     expect(@vote_notification["contributor_id"]).to eq(sprint_timelines(:demo_6).contributor_id)
                 end
                 it "should include subject" do
-                    expect(@vote_notification["subject"]).to eq("Sprint voted")
+                    expect(@vote_notification["subject"]).to eq("New Vote")
                 end
                 it "should include body" do
                     expect(@vote_notification["body"]).to eq("Sprint voted")
@@ -270,12 +170,14 @@ describe ".Issue" do
         context "create_entry" do
             before(:each) do
                 @res = (@issue.create_user_notification)
+                puts @res
                 @skillset_notification =  @mysql_client.query("select * from user_notifications where notifications_id=1").first
                 @roles_notification_product =  @mysql_client.query("select * from user_notifications where notifications_id=2").first
                 @roles_notification_design =  @mysql_client.query("select * from user_notifications where notifications_id=3 ORDER BY ID DESC").first
                 @roles_notification_development =  @mysql_client.query("select * from user_notifications where notifications_id=4 ORDER BY ID DESC").first
                 @comment_notification =  @mysql_client.query("select * from user_notifications where notifications_id=5").first
                 @votes_notification =  @mysql_client.query("select * from user_notifications where notifications_id=6").first
+                puts @skillset_notification
 
 
             end
