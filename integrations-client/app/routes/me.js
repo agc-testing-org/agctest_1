@@ -5,6 +5,12 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
 
+    actions: {
+        refresh(){
+            console.log("refreshing router");
+            this.refresh();
+        }
+    },
     model: function(params) { 
 
         this.store.adapterFor('me').set('namespace', 'users');

@@ -7,7 +7,7 @@
 
 {{#unless sessionAccount.account.github}}
 {{#unless sprint_state.merged}}
-{{user-login-oauth text=" to Merge" provider="github"}}
+{{user-login-oauth text=" to Merge" provider="github" class="d-inline"}}
 {{/unless}}
 {{else}}
 {{#if sprint_state.contributor_id}}

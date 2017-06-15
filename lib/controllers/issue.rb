@@ -155,12 +155,13 @@ class Issue
     def get_sprint_states query, user_id
         begin
             response = Array.new
-            SprintState.joins(:sprint).where(query).each_with_index do |ss,i|
+            sprint_state_results = SprintState.joins(:sprint).where(query)
+            sprint_state_results.each_with_index do |ss,i|
                 response[i] = ss.as_json
                 response[i][:active_contribution_id] = nil
                 response[i][:contributors] = []
                 ss.contributors.each_with_index do |c,k|
-                    if c.commit
+                    if c.commit || ((sprint_state_results.length - 1) == i) # don't show empty results unless this is the current sprint_state
                         comments = c.comments.as_json
                         c.comments.each_with_index do |com,x|
                             if com.user.user_profile
