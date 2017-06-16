@@ -12,6 +12,7 @@ export default DS.Model.extend({
     created_at: attr('date'),
     read: attr('boolean'),
     sprint_state_id: attr('number'),
-    subject: attr('string')
+    subject: attr('string'),
+    comment_body: attr('string')
 });
 

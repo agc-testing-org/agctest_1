@@ -497,7 +497,7 @@ class Account
 
     def get_user_notifications user_id
         begin      
-            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id, notifications.subject").order('created_at DESC').as_json
+            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id, notifications.subject, notifications.comment_body").order('created_at DESC').as_json
         rescue => e
             puts e
             return nil

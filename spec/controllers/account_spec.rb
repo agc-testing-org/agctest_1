@@ -713,4 +713,90 @@ describe ".Account" do
         end
 
     end
+
+    context "#get_user_connections" do
+        fixtures :users
+        context "connections" do
+            fixtures :user_connections
+            before(:each) do
+                user_id = users(:masha_get_connection_request).id
+                query = {"user_connections.contact_id" => user_id}
+                @res = (@account.get_user_connections query).first
+            end
+            it "should include user_id" do
+                expect(@res["user_id"]).to eq(users(:masha_post_connection_request).id)
+            end
+            it "should include contact_id" do
+                expect(@res["contact_id"]).to eq(users(:masha_get_connection_request).id)
+            end
+            it "should include read" do
+                expect(@res["read"]).to eq(user_connections(:user_2_connection_1).read)
+            end
+            it "should include confirmed" do
+                expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
+            end
+            it "should include user_name" do
+                expect(@res["user_name"]).to eq(users(:masha_post_connection_request).first_name)
+            end
+        end
+    end 
+
+    context "#get_user_info", :focus => true do
+        fixtures :users
+        context "user_info" do
+            fixtures :user_connections
+            before(:each) do
+                user_id = users(:masha_post_connection_request).id
+                @res = (@account.get_user_info user_id).first
+            end
+            it "should include user_id" do
+                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
+            end
+            it "should include contact_id" do
+                expect(@res["email"]).to eq(users(:masha_get_connection_request).email)
+            end
+        end
+    end 
+
+    context "#patch_user_connections" do
+        fixtures :users
+        context "connection_request_read" do
+            fixtures :user_connections
+            before(:each) do
+                contact_id = (users(:masha_get_connection_request).id)
+                user_id = (users(:masha_post_connection_request).id)
+                @read = false
+                @confirmed = 3
+                @res = (@account.update_user_connections contact_id, user_id, @read, @confirmed)
+            end
+            it "should include read" do
+                expect(@res[:read]).to eq(@read)
+            end
+        end
+    end 
+
+    context "#post_user_connections_request" do
+        fixtures :users
+        context "connection_request_confirmed" do
+            fixtures :user_connections
+            before(:each) do
+                @contact_id = (users(:adam_protected).id)
+                @user_id = (users(:adam).id)
+                @res = (@account.create_connection_request @user_id, @contact_id)
+            end
+            it "should include user_id" do
+                expect(@res["user_id"]).to eq(@user_id)
+            end
+            it "should include contact_id" do
+                expect(@res["contact_id"]).to eq(@contact_id)
+            end
+            it "should include read" do
+                expect(@res["read"]).to eq(false)
+            end
+            it "should include confirmed" do
+                expect(@res["confirmed"]).to eq(1)
+            end
+        end
+    end 
+
 end
