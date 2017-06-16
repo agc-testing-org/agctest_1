@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170608155002) do
+ActiveRecord::Schema.define(version: 201706161200001) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "user_id", null: false
@@ -75,6 +75,7 @@ ActiveRecord::Schema.define(version: 20170608155002) do
     t.string "sprint_name", null: false
     t.string "project_name", null: false
     t.integer "project_id", null: false
+    t.text "comment_body"
     t.index ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true
   end
 
