@@ -378,12 +378,17 @@ class Issue
                 project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
                 sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
                 user = UserPosition.joins("join user_profiles").where("user_positions.user_profile_id=user_profiles.id and user_profiles.user_id=?", x.user_id).select("user_positions.title", "user_profiles.location_name", "user_positions.industry").as_json
-                
+
                 if x.state_id != nil
                     state = State.where("id = ?", x.state_id).select("name").as_json
                     state_name = state[0]["name"]
                 else
                     state_name = 'The state has not changed'
+                end
+
+                if x.comment_id != nil
+                    comment = Comment.where("id = ?", x.comment_id).select("text").as_json
+                    comment_body = comment[0]["text"]
                 end
 
                 if user.empty?
@@ -436,7 +441,8 @@ class Issue
                     project_name: project_name,
                     project_id: x.project_id,
                     sprint_name: sprint_title,
-                    sprint_state_id: x.sprint_state_id
+                    sprint_state_id: x.sprint_state_id,
+                    comment_body: comment_body
                 })
             end
             return response
