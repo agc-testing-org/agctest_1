@@ -71,11 +71,17 @@
 - Create a test Github account
 - Setup a developer application for this Github account (https://github.com/settings/developers)
 - Set authorization callback to https://localhost:3000/callback/github
-- Save client ID as INTEGRATIONS_GITHUB_CLIENT_ID and client secret as INTEGRATIONS_GITHUB_CLIENT_SECRET in your ~/.bashrc (vars found below)
+- Save client ID as INTEGRATIONS_GITHUB_CLIENT_ID and client secret as INTEGRATIONS_GITHUB_CLIENT_SECRET in your ~/.bashrc
 - Save your username in the ~/.bashrc as INTEGRATIONS_GITHUB_ADMIN_USER
 - Setup a personal token for that user as well (https://github.com/settings/tokens)
 - Save this in the ~/.bashrc as INTEGRATIONS_GITHUB_ADMIN_SECRET
 
+### LinkedIn Setup
+
+- Create a test Linkedin Account
+- Setup a developer application for this Linkedin Account (https://www.linkedin.com/developer/apps)
+- Set authorized redirect URL to https://localhost:3000/callback/linkedin
+- Save client ID as INTEGRATIONS_LINKEDIN_CLIENT_ID and client secret as INTEGRATIONS_LINKEDIN_CLIENT_SECRET in your ~/.bashrc
 
 ### Running
 
@@ -112,3 +118,8 @@ Shell 3
 Browser
     
     Go to https://localhost:3000
+
+Monitoring Background Jobs
+
+    Go to https://localhost:3000/sidekiq
+    Enter the vars you have set for INTEGRATIONS_SIDEKIQ_USERNAME and INTEGRATIONS_SIDEKIQ_PASSWORD
