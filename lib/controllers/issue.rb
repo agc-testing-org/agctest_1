@@ -377,24 +377,45 @@ class Issue
             response.each do |x|
                 project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
                 sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
-                user = User.where("id = ?", x.user_id).select("first_name").as_json
+                user = UserPosition.joins("join user_profiles").where("user_positions.user_profile_id=user_profiles.id and user_profiles.user_id=?", x.user_id).select("user_positions.title", "user_profiles.location_name", "user_positions.industry").as_json
+                
                 if x.state_id != nil
                     state = State.where("id = ?", x.state_id).select("name").as_json
                     state_name = state[0]["name"]
                 else
                     state_name = 'The state has not changed'
                 end
+
+                if user.empty?
+                    user_title = 'Someone'
+                else
+                    user_title = user[0]["title"]
+                    user_location_name = user[0]["location_name"]
+                    user_industry = user[0]["industry"]
+                end
+
                 project_org = project[0]["org"]
                 project_name = project[0]["name"]
                 sprint_title = sprint[0]["title"]
-                user_name = user[0]["first_name"]
-
+                
                 if x.comment_id != nil && x.contributor_id != nil
                     subject = 'New Comment'
-                    body = user_name+' commented'
+                    if user_industry != nil && user_location_name != nil
+                        body = 'A '+user_title+' in '+user_industry+' ('+user_location_name+') commented on'
+                    elsif user_location_name != nil
+                        body = 'A '+user_title+' ('+user_location_name+') commented on'
+                    else
+                        body = 'A '+user_title+' commented on'
+                    end
                 elsif x.vote_id != nil && x.contributor_id != nil
                     subject = 'New Vote'
-                    body = user_name+' voted on'
+                    if user_industry != nil && user_location_name != nil
+                        body = 'A '+user_title+' in '+user_industry+' ('+user_location_name+') voted on'
+                    elsif user_location_name != nil
+                        body = 'A '+user_title+' ('+user_location_name+') voted on'
+                    else
+                        body = 'A '+user_title+' voted on'
+                    end
                 elsif x.contributor_id != nil
                     subject = 'Sprint State Complete'
                     body = 'Best Contribution Selected'
