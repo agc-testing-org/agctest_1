@@ -1,0 +1,24 @@
+<ul class="nav nav-pills flex-column timeline">
+    <div class="menu">
+    {{#if session.isAuthenticated}}
+        {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <i class="fa fa-fw fa-user"></i>Profile
+        {{/link-to}}
+    {{else}}
+        {{#link-to "register" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <i class="fa fa-fw fa-home"></i>Home
+        {{/link-to}}
+    {{/if}}
+
+
+    {{#link-to "terms" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize selectable" }}
+        Terms
+    {{/link-to}}
+
+    {{#link-to "privacy" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize selectable" }}
+        Privacy
+    {{/link-to}}
+
+    </div>
+</ul>
+

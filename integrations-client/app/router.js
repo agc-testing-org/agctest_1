@@ -9,7 +9,8 @@ const Router = Ember.Router.extend({
 });
 
 Router.map(function() {
-    this.route('home');
+    this.route('privacy');
+    this.route('terms');
     this.route('forgot');
     this.route('register');
     this.route('login'); 
@@ -17,7 +18,6 @@ Router.map(function() {
     this.route('invitation', {path: '/invitation/:id'}, function(){
         this.route('resend');
     });
-    this.route('forgot');
     this.route('develop', {path: '/develop'}, function() {
         this.route('index', {path: '/'});
         this.route('project', {path: '/:org/:name'}, function() {
