@@ -1066,22 +1066,24 @@ class Integrations < Sinatra::Base
                         response[:github_signed] = true
 
                         repo = Repo.new
-                        query = {:sprint_state_id => sprint_state.id, :user_id => @session_hash["id"] }
+                        query = {"sprint_states.sprint_id" => sprint_state.sprint_id, :user_id => @session_hash["id"] } #check for sprint, not sprint state
                         contributor = repo.get_contributor query
 
                         if !contributor
                             name = repo.name
                             query = {:id => sprint_state.sprint_id}
-                            created = repo.create @session_hash["id"], project["id"], sprint_state.id, name, query
                         else
                             name = contributor.repo
-                            created = contributor.id
                         end
 
-                        begin
-                            github.create_repository(name)
-                        rescue => e
-                            puts e
+                        created = repo.create @session_hash["id"], project["id"], sprint_state.id, name, query
+
+                        if !contributor
+                            begin
+                                github.create_repository(name)
+                            rescue => e
+                                puts e
+                            end
                         end
 
                         if created
@@ -1092,13 +1094,13 @@ class Integrations < Sinatra::Base
                             repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id, false
                             repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
 
-                            if sprint_state.state.name == "requirements design"
+                            if sprint_state.state.name == "requirements design" && !contributor # only need to create doc if first time contributing
                                 idea = issue.get_sprint sprint_state.sprint_id 
-                                puts sprint_state.id.to_s
+
                                 github.create_contents("#{username}/#{name}",
                                                        "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                                            "adding placeholder for requirements",
-                                                           "##{idea.title}\n\n###Description\n#{idea.description}",
+                                                           "# #{idea.title}\n\n### Description\n#{idea.description}", #space required between markdown header and first letter
                                                            :branch => sprint_state.id.to_s)
                             end
                         else
@@ -1273,7 +1275,7 @@ class Integrations < Sinatra::Base
         end
     end
 
-     user_connections_get_by_id = lambda do
+    user_connections_get_by_id = lambda do
         protected!
         status 401
         if @session_hash["id"]
@@ -1476,7 +1478,7 @@ class Integrations < Sinatra::Base
             end
         end
     end
-    
+
     #API
 
     post "/register", &register_post

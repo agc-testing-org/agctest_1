@@ -25,7 +25,7 @@ class Repo
 
     def get_contributor query
         begin
-            return Contributor.where(query).last
+            return Contributor.joins(:sprint_state).where(query).last
         rescue => e
             puts e
             return nil

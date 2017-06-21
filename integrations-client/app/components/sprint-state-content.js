@@ -21,6 +21,9 @@ export default Component.extend({
                 console.log("refreshing");
                 _this.sendAction("refresh");
             });
+        },
+        refresh(){
+            this.sendAction("refresh");
         }
 
     }

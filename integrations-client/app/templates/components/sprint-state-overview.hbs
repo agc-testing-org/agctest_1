@@ -6,7 +6,7 @@
             <div class="description">{{sprint.description}}</div>
             <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
             {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets"}}
-            <div class="row">
+            <div class="row mb-3">
                 {{#unless (eq showing-state.state_id.name "idea")}}
                 {{#if contributors}}
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
@@ -25,12 +25,15 @@
                 {{/if}}
 
                 {{/unless}}
+            </div>
+            <div class="row">
 
-                {{#if (greater-than sprint.sprint_states.length 2) }}
-                <a class="btn btn-secondary rounded mt-5 col-sm-12 col-md-8 offset-md-2" target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
+                {{#if mergedStates}}
+                    <a class="btn btn-secondary rounded col-sm-12 col-md-8 mt-2 offset-md-2" target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
                 {{/if}}
 
                 {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="mt-2 col-sm-12 col-md-8 offset-md-2 pl-0 pr-0"}}
+
             </div>
         </div>
     </div>

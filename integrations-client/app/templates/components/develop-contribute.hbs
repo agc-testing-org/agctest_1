@@ -12,7 +12,7 @@
         <p class="line"><a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{sprint_state.id}}</a></p>
         <small class="line text-muted">Use this option if you're less familiar with git and the command line</small>
     </div>
-    {{#if (eq sprint_state.state.name "requirements design")}}
+    {{#if (eq sprint_state.state_id.name "requirements design")}}
         <div class="list-group-item rounded">
             <h4 class="line">Requirements Document Placeholder</h4>
             <p class="line">We've created a file for your changes: <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md</a></p>
