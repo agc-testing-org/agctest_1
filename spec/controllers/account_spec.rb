@@ -584,6 +584,7 @@ describe ".Account" do
             expect(roles.length).to be > 0
             roles.each_with_index do |r,i|
                 expect(r["name"]).to eq(roles(r["name"]).name)
+                expect(r["fa_icon"]).to eq(roles(r["name"]).fa_icon)
             end
         end
     end
