@@ -10,7 +10,7 @@
             <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
             {{#if me}}
                 <div class="text-left">
-                    {{profile-overview-linkedin complete=user.title}}
+                    {{profile-overview-linkedin complete=user.title refresh="refresh"}}
                     {{profile-overview-skillsets-roles-instruction type="skillsets" text="to be notified of relevant events" items=skillsets}}
                     {{profile-overview-skillsets-roles-instruction type="roles" text="to be notified of relevant contribution opportunities" items=roles}}
                 </div>

@@ -529,7 +529,7 @@ button{
 }
 .sidebar.hidden-md-up{
     background-color: #333;
-    margin-top: -56px;
+    margin-top: 0px;
     padding:0px;
     position:relative;
     min-width:100%;
@@ -552,6 +552,11 @@ button{
     width:100%;
     display:block;
     position:relative;
+}
+.sidebar.hidden-md-up .nav .legal li{
+    padding-left:10px !important;
+    padding-right:10px !important;
+
 }
 
 .sidebar .nav .menu{ 

@@ -54,29 +54,29 @@ export default Ember.Component.extend({
         judge(contributor_id,sprint_state_id,project_id){
             var store = this.get('store');
             store.adapterFor('winner').set('namespace', 'contributors/' + contributor_id );
-
+            var _this = this;
             var feedback = store.createRecord('winner', {
                 contributor_id: contributor_id,
                 sprint_state_id: sprint_state_id,
                 project_id: project_id
             }).save().then(function(payload) {
                 store.peekRecord('sprint-state',sprint_state_id).set('winner',payload.get("id"));
-                //   console.log("refreshing");                    
-                // _this.sendAction("refresh");                                  
+                console.log("refreshing");                    
+                _this.sendAction("refresh");                                  
             });
         },
         merge(contributor_id,sprint_state_id,project_id){
             var store = this.get('store');
             store.adapterFor('merge').set('namespace', 'contributors/' + contributor_id );
-
+            var _this = this;
             var feedback = store.createRecord('merge', {
                 contributor_id: contributor_id,
                 sprint_state_id: sprint_state_id,
                 project_id: project_id
             }).save().then(function(payload) {
                 store.peekRecord('sprint-state',sprint_state_id).set('merge',payload.get("merged"));
-                //   console.log("refreshing");                    
-                // _this.sendAction("refresh");                                  
+                console.log("refreshing");                    
+                _this.sendAction("refresh");                                  
             });
         }
     }
