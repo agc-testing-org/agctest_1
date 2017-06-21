@@ -97,7 +97,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   create_table "roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "fa_icon", null: false
   end
 
   create_table "seats", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

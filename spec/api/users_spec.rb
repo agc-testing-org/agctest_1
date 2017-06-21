@@ -215,6 +215,7 @@ describe "/users" do
                 expect(@res.length).to eq(Role.count)
                 Role.all.each_with_index do |role,i|
                     expect(@res[i]["name"]).to eq(role.name)
+                    expect(@res[i]["fa_icon"]).to eq(role.fa_icon)
                 end
             end
         end

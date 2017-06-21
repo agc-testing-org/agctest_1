@@ -108,25 +108,30 @@ label{
     background-color: #999;
     color:#fff;
 }
-
+.btn-group{
+    display:inline-block;
+}
 .btn-group label{
-    margin-left: 4px !important;
-    -webkit-border-radius: 4px !important;
-    -moz-border-radius: 4px !important;
-    border-radius: 4px !important; 
-    border:none;
+    margin-left:4px !important;
+    background-color: #3a3a3a;
+    color: #fff !important;
+    font-weight:400 !important;
 }
 .btn-group label:hover{
-    background-color: #444;
+    background-color: #28B6C3;
+    color: #fff !important;
 }
 .btn-group label.active{
-    background-color: #444;
-    color:#292b2c;
+    background-color: #28B6C3;
+    color: #fff !important;
 }
 
-.badge{
+.badge, .btn-group label{
     font-weight: 300;
     font-size: 12px;
+    box-shadow: 0 1px 1px rgba(0,0,0,.1);
+    margin:1px;
+    border:0px;
 }
 
 .badge.selected{
@@ -136,6 +141,12 @@ label{
     background-color: #fff;
     color: #28B6C3;
 }
+.badge.role, .btn-group label{
+    font-size: 14px;
+    padding: 10px;
+    margin: 4px;
+}
+
 
 .dropdown-menu{
     width:100%;
@@ -393,7 +404,7 @@ button{
     font-size:20px;
 }
 .register-form .btn-group label{
-    margin-bottom: 10px;
+    margin-bottom: 0px;
     margin-top:6px;
 }
 .register-form .tos{
@@ -575,9 +586,12 @@ button{
     background-color: #28B6C3;
     color: #fff;
 }
+.legal{
+    font-size:12px;
+    color:#666;
+}
 .menu.legal li{
     padding:3px !important;
-    font-size:12px;
 }
 .menu.legal li.copy{
     color:#999 !important;
