@@ -368,15 +368,6 @@ class Issue
         end
     end
 
-    def recently_changed_sprints
-        begin
-            return SprintTimeline.where(:processed => 0).map(&:id)
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def process_user_notification sprint_timeline_id
         begin
             return SprintTimeline.find_by(:id => sprint_timeline_id).update(:processed => 1) 
