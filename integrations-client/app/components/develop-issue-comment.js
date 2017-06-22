@@ -4,34 +4,41 @@ export default Ember.Component.extend({
     session: Ember.inject.service('session'),
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
+    errorMessage: null,
     actions: {
         comment(contributor_id,sprint_state_id){
             var _this = this;
             var comment = this.get("comment");
-            if(comment.length < 500){
-                var store = this.get('store');
-                store.adapterFor('comment').set('namespace', 'contributors/' + contributor_id );
+            if(comment && (comment.length > 1)){
+                if(comment.length < 5000){
+                    this.set('errorMessage', "");
+                    var store = this.get('store');
+                    store.adapterFor('comment').set('namespace', 'contributors/' + contributor_id );
 
-                var feedback = store.createRecord('comment', {
-                    contributor_id: contributor_id,
-                    sprint_state_id: sprint_state_id,
-                    text: comment
-                }).save().then(function(payload) {
-                    store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
-                    _this.set("comment",null);
-                    //                  console.log(payload);
-                 //   console.log("refreshing");
-                   // _this.sendAction("refresh");
-                 //   store.push({
-                   //       data: {
-                     //       id
-                      //    }
-                   // });
-                });
+                    var feedback = store.createRecord('comment', {
+                        contributor_id: contributor_id,
+                        sprint_state_id: sprint_state_id,
+                        text: comment
+                    }).save().then(function(payload) {
+                        store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
+                        _this.set("comment",null);
+                        //                  console.log(payload);
+                        //   console.log("refreshing");
+                        // _this.sendAction("refresh");
+                        //   store.push({
+                        //       data: {
+                        //       id
+                        //    }
+                        // });
+                    });
 
+                }
+                else{
+                    this.set('errorMessage', "Comments must be less than 5000 characters"); 
+                }
             }
-            else{
-                //comment too long
+            else {
+                this.set('errorMessage', "Please enter a more detailed comment");
             }
         },
         vote(contributor_id,sprint_state_id){

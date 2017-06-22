@@ -1,3 +1,4 @@
+{{#if errorMessage}}<div class="alert alert-warning rounded text-center mt-3">{{errorMessage}}</div>{{/if}}
 {{textarea value=comment class="form-control input-lg rounded mt-2 mb-2" rows="1" placeholder="Your feedback"}}
 
 <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment" aria-hidden="true"></i> Post Comment</button>

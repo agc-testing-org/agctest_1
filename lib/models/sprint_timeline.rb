@@ -7,4 +7,6 @@ class SprintTimeline < ActiveRecord::Base
     belongs_to :state
     belongs_to :label
     belongs_to :sprint_state
+    belongs_to :comment
+    belongs_to :vote
 end

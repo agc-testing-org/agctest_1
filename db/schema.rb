@@ -150,6 +150,8 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.integer "sprint_state_id"
     t.integer "vote_id"
     t.integer "contributor_id"
+    t.string "diff", null: false
+    t.integer "processed", default: 0
     t.index ["comment_id"], name: "fk_rails_1251c5b8fd"
     t.index ["contributor_id"], name: "fk_rails_c3269fa3ec"
     t.index ["label_id"], name: "fk_rails_1b320ef958"
@@ -212,12 +214,10 @@ ActiveRecord::Schema.define(version: 201706161200001) do
 
   create_table "user_notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
-    t.integer "notifications_id", null: false
     t.boolean "read", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.index ["notifications_id"], name: "index_user_notifications_on_notifications_id"
-    t.index ["user_id", "notifications_id"], name: "index_notification_id_and_user_id_on_user_notification", unique: true
+    t.integer "sprint_timeline_id", null: false
     t.index ["user_id"], name: "index_user_notifications_on_user_id"
   end
 
@@ -332,8 +332,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
   add_foreign_key "teams", "plans"
-  add_foreign_key "user_notifications", "notifications", column: "notifications_id"
-  add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"
   add_foreign_key "user_profiles", "users"
   add_foreign_key "user_roles", "roles"

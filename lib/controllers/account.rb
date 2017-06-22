@@ -496,8 +496,27 @@ class Account
     end
 
     def get_user_notifications user_id
-        begin      
-            return Notification.joins("inner join user_notifications").where("notifications.id=user_notifications.notifications_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, notifications.sprint_id, notifications.body, notifications.project_id, notifications.project_org, notifications.project_name, notifications.created_at, notifications.sprint_name, user_notifications.read, notifications.sprint_state_id, notifications.subject, notifications.comment_body").order('created_at DESC').as_json
+        begin     
+            response = []
+            SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, sprint_timelines.sprint_id, sprint_timelines.project_id, sprint_timelines.created_at, user_notifications.read, sprint_timelines.sprint_state_id, sprint_timelines.comment_id, sprint_timelines.vote_id, sprint_timelines.sprint_state_id, sprint_timelines.contributor_id, sprint_timelines.user_id, sprint_timelines.diff").order('created_at DESC').each_with_index do |notification,i|
+                params = {:id => notification.user_id}
+                user = get_users params
+                if user
+                    user = user[0]
+                end
+                
+                response[i] = notification.as_json
+                response[i][:user_profile] = user
+                response[i][:sprint] = notification.sprint
+                response[i][:project] = notification.project
+                response[i][:sprint_state] = notification.sprint_state
+                response[i][:comment] = notification.comment
+                response[i][:vote] = notification.vote
+
+            end
+
+            return response
+
         rescue => e
             puts e
             return nil

@@ -281,6 +281,10 @@ button{
     width:100%;
     margin-bottom:5px;
 }
+.list-group-item .line.quotation{
+    color: #999;
+    padding:10px;
+}
 
 .input-group-addon{
     background-color:#fff;
