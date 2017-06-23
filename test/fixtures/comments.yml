@@ -13,3 +13,5 @@ adam_admin_1:
   created_at: <%= 5.hours.ago.to_s(:db) %>
   contributor: adam_confirmed_1
   text: "this is cool"
+
+

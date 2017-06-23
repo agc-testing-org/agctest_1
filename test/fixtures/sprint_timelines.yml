@@ -1,11 +1,11 @@
-demo_sprint_1_transition:
-  user: adam_confirmed
+sprint_1_transition:
+  user: adam_admin
   project: demo 
   sprint: sprint_1
   sprint_state: sprint_1_state_2
-  state_id: 1
+  state: requirements_design
   diff: "transition"
-  created_at: <%= 5.day.ago.to_s(:db) %>
+  created_at: <%= 3.day.ago.to_s(:db) %>
 
 sprint_1_state_1_comment:
   user: adam_admin
@@ -13,8 +13,20 @@ sprint_1_state_1_comment:
   sprint: sprint_1
   comment: adam_admin_1
   sprint_state: sprint_1_state_1
+  contributor: adam_confirmed_1
   state_id: 1
   diff: "comment" 
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1_state_1_vote:
+  user: adam_admin
+  project: demo
+  sprint: sprint_1
+  vote: adam_admin_1
+  sprint_state: sprint_1_state_1
+  contributor: adam_confirmed_1
+  state_id: 1 
+  diff: "vote"
   created_at: <%= 5.day.ago.to_s(:db) %>
 
 sprint_1_state_1_winner:

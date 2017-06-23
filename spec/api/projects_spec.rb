@@ -52,16 +52,6 @@ describe "/projects" do
                 expect(@timeline[i]["state_id"]).to eq(t["state_id"])
             end
         end
-        it "should return the label_id" do
-            @timeline_result.each_with_index do |t,i|
-                expect(@timeline[i]["label"]["id"]).to eq(t["label_id"])
-            end
-        end
-        it "should return the after id" do
-            @timeline_result.each_with_index do |t,i|
-                expect(@timeline[i]["after"]).to eq(t["after"])
-            end
-        end
     end
 
     describe "POST /" do

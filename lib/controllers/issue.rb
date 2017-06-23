@@ -84,24 +84,8 @@ class Issue
         end
     end
 
-    def last_event sprint_id
-        begin
-            events = SprintTimeline.where(sprint_id: sprint_id)
-            if events && events.last
-                return events.last.id
-            else
-                return nil
-            end
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def log_event params 
-        after = (last_event params[:sprint_id])
         begin
-            params[:after] = after
             sprint_event = SprintTimeline.create(params)
             if ENV['RACK_ENV'] != "test"
                 UserNotificationWorker.perform_async sprint_event.id
@@ -387,7 +371,7 @@ class Issue
 
     #TODO - who should get the new diff type?
 
-    def user_notifications_by_skillsets sprint_timeline_id
+    def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
             users = SprintTimeline.where(:id => sprint_timeline_id).joins("INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id=sprint_timelines.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1").select("user_skillsets.user_id","sprint_timelines.id")
@@ -410,9 +394,9 @@ class Issue
     end 
 
     def user_notifications_for_contributor sprint_timeline_id
-        # votes or comments for user that owns contribution
+        # vote or comment for user that owns contribution
         begin
-            users = SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON sprint_timelines.contributor_id = contributors.id join users on users.id = contributors.user_id AND diff IN('vote','comment')").where("contributors.user_id != sprint_timelines.user_id").select("users.id as user_id", "sprint_timelines.id")
+            users = SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON sprint_timelines.contributor_id = contributors.id AND sprint_timelines.diff IN('vote','comment')").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id as user_id", "sprint_timelines.id")
             return nil_for_empty users
         rescue => e
             puts e

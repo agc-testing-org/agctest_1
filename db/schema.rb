@@ -153,7 +153,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.datetime "created_at", null: false
     t.integer "project_id", null: false
     t.integer "user_id", null: false
-    t.integer "after"
     t.integer "comment_id"
     t.integer "sprint_state_id"
     t.integer "vote_id"
