@@ -94,6 +94,14 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "role_id", null: false
+    t.integer "state_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["role_id"], name: "fk_rails_e2904e4c1a"
+    t.index ["state_id"], name: "fk_rails_04a4d5a98d"
+  end
+
   create_table "roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -316,6 +324,8 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   add_foreign_key "contributors", "sprint_states"
   add_foreign_key "contributors", "users"
   add_foreign_key "logins", "users"
+  add_foreign_key "role_states", "roles"
+  add_foreign_key "role_states", "states"
   add_foreign_key "sprint_skillsets", "skillsets"
   add_foreign_key "sprint_skillsets", "sprints"
   add_foreign_key "sprint_states", "contributors"

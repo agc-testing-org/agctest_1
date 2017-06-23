@@ -5,45 +5,38 @@ idea:
   instruction: "hello"
   contributors: true
 
-backlog:
-  name: "backlog"
-  fa_icon: "fa fa-cool"
-  description: "this is"
-  instruction: "hello"
-  contributors: true
-
-in-requirements-design:
-  name: "in-requirements-design"
+requirements_design:
+  name: "requirements design"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
 
-in-requirements-review:
-  name: "in-requirements-review"
+requirements_review:
+  name: "requirements review"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
 
-in-visual-design:
-  name: "in-visual-design"
+visual_design:
+  name: "visual design"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
 
-in-visual-review:
-  name: "in-visual-review"
+design_review:
+  name: "design review"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
 
-in-development:
-  name: "in-development"
+development:
+  name: "development"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
 
-in-development-review:
-  name: "in-development-review"
+development-review:
+  name: "development review"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"

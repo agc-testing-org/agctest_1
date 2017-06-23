@@ -1,60 +1,27 @@
-demo_1:
-  id: 1
+demo_sprint_1_transition:
   user: adam_confirmed
   project: demo 
   sprint: sprint_1
+  sprint_state: sprint_1_state_2
   state_id: 1
-  label: needs-design
+  diff: "transition"
   created_at: <%= 5.day.ago.to_s(:db) %>
 
-demo_1b:
-  id: 4
-  user: adam_confirmed
+sprint_1_state_1_comment:
+  user: adam_admin
   project: demo
-  sprint: sprint_1b
+  sprint: sprint_1
+  comment: adam_admin_1
+  sprint_state: sprint_1_state_1
   state_id: 1
-  label: needs-design
+  diff: "comment" 
   created_at: <%= 5.day.ago.to_s(:db) %>
 
-demo_2:
-  id: 2
+sprint_1_state_1_winner:
   user: adam_confirmed
   project: demo
   sprint: sprint_1
-  state_id: 1
-  label: needs-design
+  contributor: adam_confirmed_1
+  sprint_state: sprint_1_state_1
+  diff: "winner"
   created_at: <%= 5.day.ago.to_s(:db) %>
-  after: 1
-
-demob_1:
-  id: 3
-  user: adam_confirmed
-  project: demob
-  sprint: sprint_2
-  state_id: 1
-  label: needs-design
-  created_at: <%= 5.day.ago.to_s(:db) %>
-
-demo_5:
-  id: 5
-  user: adam_confirmed
-  project: demo
-  sprint: sprint_1
-  state_id: 1
-  label: needs-design
-  created_at: <%= 5.day.ago.to_s(:db) %>
-  after: 1
-  comment_id: 1
-  contributor_id: 1
-
-demo_6:
-  id: 6
-  user: adam_confirmed
-  project: demo
-  sprint: sprint_1
-  state_id: 1
-  label: needs-design
-  created_at: <%= 5.day.ago.to_s(:db) %>
-  after: 1
-  vote_id: 1
-  contributor_id: 1

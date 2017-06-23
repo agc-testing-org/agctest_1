@@ -20,3 +20,9 @@ sprint_1_no_contributors:
   created_at: <%= 5.day.ago.to_s(:db) %>
   deadline: <%= 5.day.ago.to_s(:db) %>
 
+sprint_1b_idea:
+  sprint: sprint_1b
+  state: idea
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  deadline: <%= 5.day.ago.to_s(:db) %>

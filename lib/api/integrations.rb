@@ -50,7 +50,7 @@ require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/connection_state.rb'
- 
+require_relative '../models/role_state.rb' 
 
 # Workers
 require_relative '../workers/user_notification_worker.rb'
@@ -807,7 +807,7 @@ class Integrations < Sinatra::Base
                     if sprint
                         state = State.find_by(:name => "idea").id
                         sprint_state = issue.create_sprint_state sprint.id, state, nil
-                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state["id"], :diff => "new"}
+                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :diff => "new"}
                         if sprint_state && (issue.log_event log_params) 
                             status 201
                             response = sprint                            
@@ -845,10 +845,10 @@ class Integrations < Sinatra::Base
 
                     sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
 
-                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state[:id], :diff => "transition"} 
+                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :diff => "transition"} 
                     if sprint_state && (issue.log_event log_params) 
                         status 201
-                        response = sprint_state
+                        response = sprint_state.as_json
                     end
                 end
             end
