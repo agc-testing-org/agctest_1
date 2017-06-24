@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'mysql2'
 require 'sinatra/activerecord'
+require 'activerecord-import'
 require 'sinatra/strong-params'
 require 'json'
 require 'sinatra/base'
@@ -22,6 +23,7 @@ require_relative '../controllers/account.rb'
 require_relative '../controllers/issue.rb'
 require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
+require_relative '../controllers/activity.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -1261,7 +1263,8 @@ class Integrations < Sinatra::Base
     connections_get = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            account = Account.new
+            account = Account.new #TODO - pass in signed in user_id to prevent someone from accessing this information from another account; same for other requests like this
+                                  #let's add API layer tests to check for this type of hack
             query = {"user_connections.contact_id" => user_id}
             connections = account.get_user_connections query
             return connections.to_json

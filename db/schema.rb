@@ -159,6 +159,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.integer "contributor_id"
     t.string "diff", null: false
     t.integer "processed", default: 0
+    t.integer "processing"
     t.index ["comment_id"], name: "fk_rails_1251c5b8fd"
     t.index ["contributor_id"], name: "fk_rails_c3269fa3ec"
     t.index ["label_id"], name: "fk_rails_1b320ef958"

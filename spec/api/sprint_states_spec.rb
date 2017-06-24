@@ -103,7 +103,7 @@ describe "/sprints-states" do
                 expect(@sprint_state_results.first["sha"]).to eq(sprint_states(:sprint_1_state_1).sha)
             end
             it "should save sprint_state_id in sprint_timelines" do
-                expect(@mysql_client.query("select * from sprint_timelines").first["sprint_state_id"]).to eq(@sprint_states[0]["sprint_state_id"])
+                expect(@mysql_client.query("select * from sprint_timelines").first["sprint_state_id"]).to eq(@sprint_states[0]["id"])
             end
             it_behaves_like "sprint_states"
         end

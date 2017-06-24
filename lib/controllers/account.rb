@@ -303,7 +303,7 @@ class Account
 
     def get_roles
         begin 
-            return Role.all.order(:id)
+            return Role.all.order(:name)
         rescue => e
             puts e
             return nil
@@ -321,7 +321,7 @@ class Account
 
     def get_account_roles user_id, query
         begin            
-            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active","roles.fa_icon").as_json
+            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active","roles.fa_icon").order(:name).as_json
         rescue => e
             puts e
             return nil
@@ -432,7 +432,7 @@ class Account
 
     def get_user_connections query
         begin      
-            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed").as_json
+            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed, user_connections.created_at, user_connections.updated_at").as_json
         rescue => e
             puts e
             return nil

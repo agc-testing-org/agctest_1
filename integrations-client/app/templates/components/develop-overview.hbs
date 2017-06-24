@@ -1,4 +1,4 @@
-<div class="footprint hidden-sm-down">Showing Sprints in <span class="text-capitalize">{{model.state.name}} Phase</span></div>
+<div class="footprint hidden-sm-down">Showing Sprints in {{#unless (eq model.state.name "any")}}the{{/unless}} <span class="text-capitalize">{{model.state.name}} Phase</span></div>
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview text-center">

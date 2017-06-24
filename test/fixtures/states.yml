@@ -34,6 +34,7 @@ development:
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
+  contributors: true
 
 development-review:
   name: "development review"
