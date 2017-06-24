@@ -1,6 +1,7 @@
 source 'http://rubygems.org'
 gem 'sinatra', '2.0.0'
 gem 'sinatra-activerecord', '2.0.13'
+gem 'activerecord-import', ">= 0.19.0"
 gem 'sinatra-strong-params'
 gem 'mysql2', '0.4.4'
 gem 'rake'

@@ -5,45 +5,39 @@ idea:
   instruction: "hello"
   contributors: true
 
-backlog:
-  name: "backlog"
+requirements_design:
+  name: "requirements design"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+requirements_review:
+  name: "requirements review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+visual_design:
+  name: "visual design"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+design_review:
+  name: "design review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+development:
+  name: "development"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"
   contributors: true
 
-in-requirements-design:
-  name: "in-requirements-design"
-  fa_icon: "fa fa-cool"
-  description: "this is"
-  instruction: "hello"
-
-in-requirements-review:
-  name: "in-requirements-review"
-  fa_icon: "fa fa-cool"
-  description: "this is"
-  instruction: "hello"
-
-in-visual-design:
-  name: "in-visual-design"
-  fa_icon: "fa fa-cool"
-  description: "this is"
-  instruction: "hello"
-
-in-visual-review:
-  name: "in-visual-review"
-  fa_icon: "fa fa-cool"
-  description: "this is"
-  instruction: "hello"
-
-in-development:
-  name: "in-development"
-  fa_icon: "fa fa-cool"
-  description: "this is"
-  instruction: "hello"
-
-in-development-review:
-  name: "in-development-review"
+development-review:
+  name: "development review"
   fa_icon: "fa fa-cool"
   description: "this is"
   instruction: "hello"

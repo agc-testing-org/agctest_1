@@ -1,3 +1,4 @@
+{{#unless (eq model.state.name "any")}}{{title model.state.name " sprints"}}{{else}}{{title "Sprints"}}{{/unless}}
 <div class="container-fluid pl-0 pr-0">
     <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
         {{state-list states=model.states}}

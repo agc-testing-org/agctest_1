@@ -5,7 +5,7 @@
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
             posted {{moment-from-now comment.created_at}}
-            {{#if comment.user_profile}} by a {{comment.user_profile.title}} {{#if comment.user_profile.industry}}in {{comment.user_profile.industry}}{{/if}} ({{comment.user_profile.location}}){{/if}}
+            {{#if comment.user_profile}} by a {{user-profile-descriptor user_profile=comment.user_profile class="d-inline"}}{{/if}}
         </small>
     </div>
 {{/each}}

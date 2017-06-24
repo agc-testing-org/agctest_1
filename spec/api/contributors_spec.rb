@@ -48,10 +48,19 @@ describe "/contributors" do
             end
         end
         context "invalid comment" do
-            it "should return error message" do
-                post "/contributors/#{@contributor_id}/comments", {:text => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-                res = JSON.parse(last_response.body)
-                expect(res["message"]).to eq("Please enter a more detailed comment")
+            context "< 2 char" do
+                it "should return error message" do
+                    post "/contributors/#{@contributor_id}/comments", {:text => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    res = JSON.parse(last_response.body)
+                    expect(res["message"]).to eq("Please enter a more detailed comment")
+                end
+            end
+            context "greater than 4999 characters" do
+                it "should return error message" do
+                    post "/contributors/#{@contributor_id}/comments", {:text => "A"*5000, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    res = JSON.parse(last_response.body)
+                    expect(res["message"]).to eq("Comments must be less than 5000 characters")
+                end
             end
         end
     end

@@ -4,9 +4,6 @@ require 'spec_helper'
 describe "/team-invites" do
 
     fixtures :users
-    before(:all) do
-        @CREATE_TOKENS=true
-    end
 
     describe "GET /?token=" do
         fixtures :teams, :user_teams

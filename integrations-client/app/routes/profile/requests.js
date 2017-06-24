@@ -9,6 +9,8 @@ export default Ember.Route.extend({
             contact_id: id
         }).save()
         var requests = this.store.findAll('request');
+
+        store.adapterFor('request').set('namespace', '');
         return Ember.RSVP.hash({
             requests: requests
         });

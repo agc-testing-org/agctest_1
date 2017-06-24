@@ -1,5 +1,3 @@
-export default Router;
-
 import Ember from 'ember';
 import config from './config/environment';
 
@@ -43,6 +41,18 @@ Router.map(function() {
         this.route('requests');
         this.route('invitation', {path: '/invitation/:id'});
     });
+});
+
+Router.reopen({
+    sessionAccount: Ember.inject.service('session-account'),
+    notifyGoogleAnalytics: Ember.on('didTransition', function() {
+        if (!ga) { return; }
+        ga('set', 'userId', this.get("sessionAccount.account.id"));
+        return ga('send', 'pageview', {
+            'page': this.get('url'),
+            'title': this.get('url'),
+        });
+    })
 });
 
 export default Router;

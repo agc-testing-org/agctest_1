@@ -95,7 +95,7 @@ describe "/sprints-states" do
         end
         context "admin" do
             before(:each) do
-                post "/sprint-states", {:sprint => sprints(:sprint_1).id, :state => states(:backlog).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                post "/sprint-states", {:sprint => sprints(:sprint_1).id, :state => states(:development).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @sprint_states = [JSON.parse(last_response.body)]
                 @sprint_state_results = @mysql_client.query("select * from sprint_states where sprint_id = #{sprints(:sprint_1).id} AND id = #{@sprint_states[0]["id"]} ORDER BY id DESC")
             end
@@ -103,13 +103,13 @@ describe "/sprints-states" do
                 expect(@sprint_state_results.first["sha"]).to eq(sprint_states(:sprint_1_state_1).sha)
             end
             it "should save sprint_state_id in sprint_timelines" do
-                expect(@mysql_client.query("select * from sprint_timelines").first["sprint_state_id"]).to eq(@sprint_states[0]["sprint_state_id"])
+                expect(@mysql_client.query("select * from sprint_timelines").first["sprint_state_id"]).to eq(@sprint_states[0]["id"])
             end
             it_behaves_like "sprint_states"
         end
         context "unauthorized" do
             before(:each) do
-                post "/sprint-states", {:sprint => sprints(:sprint_1).id, :state => states(:backlog).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                post "/sprint-states", {:sprint => sprints(:sprint_1).id, :state => states(:development).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
             it_behaves_like "unauthorized"
         end

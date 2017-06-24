@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'mysql2'
 require 'sinatra/activerecord'
+require 'activerecord-import'
 require 'sinatra/strong-params'
 require 'json'
 require 'sinatra/base'
@@ -22,6 +23,7 @@ require_relative '../controllers/account.rb'
 require_relative '../controllers/issue.rb'
 require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
+require_relative '../controllers/activity.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -50,10 +52,10 @@ require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/connection_state.rb'
- 
+require_relative '../models/role_state.rb' 
 
 # Workers
-require_relative '../workers/notification_worker.rb'
+require_relative '../workers/user_notification_worker.rb'
 
 set :database, {
     adapter: "mysql2",  
@@ -807,7 +809,7 @@ class Integrations < Sinatra::Base
                     if sprint
                         state = State.find_by(:name => "idea").id
                         sprint_state = issue.create_sprint_state sprint.id, state, nil
-                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state["id"]}
+                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :diff => "new"}
                         if sprint_state && (issue.log_event log_params) 
                             status 201
                             response = sprint                            
@@ -845,10 +847,10 @@ class Integrations < Sinatra::Base
 
                     sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
 
-                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state[:id]} 
+                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :diff => "transition"} 
                     if sprint_state && (issue.log_event log_params) 
                         status 201
-                        response = sprint_state
+                        response = sprint_state.as_json
                     end
                 end
             end
@@ -867,19 +869,23 @@ class Integrations < Sinatra::Base
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
             if fields[:text] && fields[:text].length > 1
-                issue = Issue.new
-                comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
+                if fields[:text].length < 5000
+                    issue = Issue.new
+                    comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
 
-                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-                query = { :id => sprint_state.sprint_id }
-                sprint = issue.get_sprints query
-                project_id = sprint[0]["project_id"]
+                    sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+                    query = { :id => sprint_state.sprint_id }
+                    sprint = issue.get_sprints query
+                    project_id = sprint[0]["project_id"]
 
-                log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id]}
+                    log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "comment"}
 
-                if comment && (issue.log_event log_params)
-                    status 201
-                    response = comment
+                    if comment && (issue.log_event log_params)
+                        status 201
+                        response = comment
+                    end
+                else
+                    response[:message] = "Comments must be less than 5000 characters"
                 end
             else
                 response[:message] = "Please enter a more detailed comment"
@@ -905,7 +911,7 @@ class Integrations < Sinatra::Base
             sprint = issue.get_sprints query 
             project_id = sprint[0]["project_id"]
 
-            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id]}
+            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "vote"}
 
             if vote 
                 if vote[:created]
@@ -944,7 +950,7 @@ class Integrations < Sinatra::Base
 
                         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
                         if sprint_state
-                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :project_id => project["id"], :contributor_id => params[:id] }
+                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :project_id => project["id"], :contributor_id => params[:id], :diff => "winner" }
                             if sprint_state && (issue.log_event log_params)
                                 status 201
                                 response = winner 
@@ -1257,7 +1263,8 @@ class Integrations < Sinatra::Base
     connections_get = lambda do
         user_id = (default_to_signed params[:user_id])
         if user_id
-            account = Account.new
+            account = Account.new #TODO - pass in signed in user_id to prevent someone from accessing this information from another account; same for other requests like this
+                                  #let's add API layer tests to check for this type of hack
             query = {"user_connections.contact_id" => user_id}
             connections = account.get_user_connections query
             return connections.to_json

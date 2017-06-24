@@ -13,6 +13,8 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     },
     model: function(params) { 
 
+        var states = this.store.findAll('state');
+
         this.store.adapterFor('me').set('namespace', 'users');
         var user = this.store.queryRecord('me',{});
 
@@ -25,7 +27,8 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             teams: this.store.findAll('team'),
             skillsets: skillsets,
             roles: roles,
-            user: user
+            user: user,
+            states: states
         });
     }
 });

@@ -1,7 +1,7 @@
-#user_1_role_1:
-  #role: product 
-  #user_id: 1
-  #active: 1
+adam_confirmed_product:
+  user: adam_confirmed
+  role: product
+  active: 1
 
 notification_role_product:
   user: masha_post_connection_request

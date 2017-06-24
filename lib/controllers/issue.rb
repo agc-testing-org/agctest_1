@@ -35,7 +35,7 @@ class Issue
                 state_id: state_id,
                 sha: sha
             })
-            return sprint_state.as_json 
+            return sprint_state 
         rescue => e
             puts e
             return nil
@@ -84,25 +84,12 @@ class Issue
         end
     end
 
-    def last_event sprint_id
-        begin
-            events = SprintTimeline.where(sprint_id: sprint_id)
-            if events && events.last
-                return events.last.id
-            else
-                return nil
-            end
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def log_event params 
-        after = (last_event params[:sprint_id])
         begin
-            params[:after] = after
             sprint_event = SprintTimeline.create(params)
+            if ENV['RACK_ENV'] != "test"
+                UserNotificationWorker.perform_async sprint_event.id
+            end
             return sprint_event.id
         rescue => e
             puts e
@@ -357,123 +344,6 @@ class Issue
                 response[contributor.sprint_state.state_id][index][:sprint_state][:state] = contributor.sprint_state.state.as_json
                 response[contributor.sprint_state.state_id][index][:sprint_state][:sprint] = contributor.sprint_state.sprint.as_json
                 response[contributor.sprint_state.state_id][index][:sprint_state][:sprint][:project] = contributor.sprint_state.sprint.project.as_json
-            end
-            return response
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def recently_changed_sprint?
-        begin
-            if defined? Notification.last.sprint_timeline_id
-                id = Notification.last.sprint_timeline_id
-            else
-                id = 0
-            end
-
-            response = SprintTimeline.where("id > ?", id)
-            response.each do |x|
-                project = Project.where("id = ?", x.project_id).select("org", "name", "id").as_json
-                sprint = Sprint.where("id = ?", x.sprint_id).select("title").as_json
-                user = UserPosition.joins("join user_profiles").where("user_positions.user_profile_id=user_profiles.id and user_profiles.user_id=?", x.user_id).select("user_positions.title", "user_profiles.location_name", "user_positions.industry").as_json
-
-                if x.state_id != nil
-                    state = State.where("id = ?", x.state_id).select("name").as_json
-                    state_name = state[0]["name"]
-                else
-                    state_name = 'The state has not changed'
-                end
-
-                if x.comment_id != nil
-                    comment = Comment.where("id = ?", x.comment_id).select("text").as_json
-                    comment_body = comment[0]["text"]
-                end
-
-                if user.empty?
-                    user_title = 'Someone'
-                else
-                    user_title = user[0]["title"]
-                    user_location_name = user[0]["location_name"]
-                    user_industry = user[0]["industry"]
-                end
-
-                project_org = project[0]["org"]
-                project_name = project[0]["name"]
-                sprint_title = sprint[0]["title"]
-                
-                if x.comment_id != nil && x.contributor_id != nil
-                    subject = 'New Comment'
-                    if user_industry != nil && user_location_name != nil
-                        body = 'A '+user_title+' in '+user_industry+' ('+user_location_name+') commented on'
-                    elsif user_location_name != nil
-                        body = 'A '+user_title+' ('+user_location_name+') commented on'
-                    else
-                        body = 'A '+user_title+' commented on'
-                    end
-                elsif x.vote_id != nil && x.contributor_id != nil
-                    subject = 'New Vote'
-                    if user_industry != nil && user_location_name != nil
-                        body = 'A '+user_title+' in '+user_industry+' ('+user_location_name+') voted on'
-                    elsif user_location_name != nil
-                        body = 'A '+user_title+' ('+user_location_name+') voted on'
-                    else
-                        body = 'A '+user_title+' voted on'
-                    end
-                elsif x.contributor_id != nil
-                    subject = 'Sprint State Complete'
-                    body = 'Best Contribution Selected'
-                else
-                    subject = 'Sprint State Change'
-                    body = state_name+' created'
-                end
-
-                notification = Notification.create({
-                    sprint_id: x.sprint_id,
-                    user_id: x.user_id,
-                    sprint_timeline_id: x.id,
-                    contributor_id: x.contributor_id,
-                    subject: subject,
-                    body: body,
-                    created_at: x.created_at,
-                    project_org: project_org,
-                    project_name: project_name,
-                    project_id: x.project_id,
-                    sprint_name: sprint_title,
-                    sprint_state_id: x.sprint_state_id,
-                    comment_body: comment_body
-                })
-            end
-            return response
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def create_user_notification
-        begin
-            if UserNotification.maximum(:notifications_id) != nil
-                id = UserNotification.maximum(:notifications_id)
-            else 
-                id = 0
-            end
-            
-            skillset_user_notification = SprintSkillset.joins("INNER JOIN notifications ON sprint_skillsets.sprint_id=notifications.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1 and notifications.contributor_id is NULL").select("user_skillsets.user_id","notifications.id")
-            roles_user_notification = UserRole.joins("CROSS JOIN notifications").where("((user_roles.active=1 and user_roles.role_id=1 and notifications.sprint_state_id=2) or (user_roles.active=1 and user_roles.role_id=4 and notifications.sprint_state_id=4) or (user_roles.active=1 and user_roles.role_id=3 and notifications.sprint_state_id=6) or (user_roles.active != 'NULL' and notifications.sprint_state_id NOT IN (2,4,6))) and notifications.contributor_id is NULL").select("user_roles.user_id","notifications.id")
-            votes_user_notifications = Notification.joins("join votes").where("votes.contributor_id = notifications.contributor_id and votes.user_id != notifications.user_id").select("votes.user_id", "notifications.id")
-            comments_user_notifications = Notification.joins("join comments").where("comments.contributor_id = notifications.contributor_id and comments.user_id != notifications.user_id").select("comments.user_id", "notifications.id")
-            sprint_owner_notification = Notification.joins("join sprints ON notifications.sprint_id=sprints.id").where("notifications.user_id != sprints.user_id and notifications.subject IN ('New Comment','New Vote')").select("sprints.user_id", "notifications.id")
-
-            response = skillset_user_notification + roles_user_notification + votes_user_notifications + comments_user_notifications + sprint_owner_notification
-            response.each do |x|
-                if x[:id] > id
-                    user_notifications = UserNotification.create({
-                        notifications_id: x[:id],
-                        user_id: x[:user_id]
-                    })
-                end
             end
             return response
         rescue => e

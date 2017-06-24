@@ -94,6 +94,14 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "role_id", null: false
+    t.integer "state_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["role_id"], name: "fk_rails_e2904e4c1a"
+    t.index ["state_id"], name: "fk_rails_04a4d5a98d"
+  end
+
   create_table "roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -145,11 +153,13 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.datetime "created_at", null: false
     t.integer "project_id", null: false
     t.integer "user_id", null: false
-    t.integer "after"
     t.integer "comment_id"
     t.integer "sprint_state_id"
     t.integer "vote_id"
     t.integer "contributor_id"
+    t.string "diff", null: false
+    t.integer "processed", default: 0
+    t.integer "processing"
     t.index ["comment_id"], name: "fk_rails_1251c5b8fd"
     t.index ["contributor_id"], name: "fk_rails_c3269fa3ec"
     t.index ["label_id"], name: "fk_rails_1b320ef958"
@@ -212,12 +222,10 @@ ActiveRecord::Schema.define(version: 201706161200001) do
 
   create_table "user_notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
-    t.integer "notifications_id", null: false
     t.boolean "read", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.index ["notifications_id"], name: "index_user_notifications_on_notifications_id"
-    t.index ["user_id", "notifications_id"], name: "index_notification_id_and_user_id_on_user_notification", unique: true
+    t.integer "sprint_timeline_id", null: false
     t.index ["user_id"], name: "index_user_notifications_on_user_id"
   end
 
@@ -316,6 +324,8 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   add_foreign_key "contributors", "sprint_states"
   add_foreign_key "contributors", "users"
   add_foreign_key "logins", "users"
+  add_foreign_key "role_states", "roles"
+  add_foreign_key "role_states", "states"
   add_foreign_key "sprint_skillsets", "skillsets"
   add_foreign_key "sprint_skillsets", "sprints"
   add_foreign_key "sprint_states", "contributors"
@@ -332,8 +342,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
   add_foreign_key "teams", "plans"
-  add_foreign_key "user_notifications", "notifications", column: "notifications_id"
-  add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"
   add_foreign_key "user_profiles", "users"
   add_foreign_key "user_roles", "roles"

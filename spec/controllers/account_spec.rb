@@ -579,11 +579,19 @@ describe ".Account" do
 
     context "#get_roles" do
         fixtures :roles
-        it "should return all roles" do
-            roles = @account.get_roles
-            expect(roles.length).to be > 0
-            roles.each_with_index do |r,i|
+        before(:each) do
+            @roles = @account.get_roles
+        end
+        it "should return more than one result" do
+            expect(@roles.length).to be > 0
+        end
+        it "should return name" do
+            @roles.each_with_index do |r,i|
                 expect(r["name"]).to eq(roles(r["name"]).name)
+            end
+        end
+        it "should return fa_icon" do
+            @roles.each_with_index do |r,i|
                 expect(r["fa_icon"]).to eq(roles(r["name"]).fa_icon)
             end
         end
@@ -690,7 +698,7 @@ describe ".Account" do
             end
         end
     end
-    
+
     context "#is_owner" do
         fixtures :users, :teams, :user_teams, :seats
         context "is owner on any team" do
@@ -739,10 +747,16 @@ describe ".Account" do
             it "should include user_name" do
                 expect(@res["user_name"]).to eq(users(:masha_post_connection_request).first_name)
             end
+            it "should include created_at" do
+                expect(@res["created_at"]).to_not be nil
+            end
+            it "should include updated_at" do
+                expect(@res["updated_at"]).to_not be nil
+            end
         end
     end 
 
-    context "#get_user_info", :focus => true do
+    context "#get_user_info" do
         fixtures :users
         context "user_info" do
             fixtures :user_connections
