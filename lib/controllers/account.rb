@@ -432,26 +432,7 @@ class Account
 
     def get_user_connections query
         begin      
-            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed, user_connections.created_at, user_connections.updated_at").as_json
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def get_exist_requests query
-        begin      
-            return UserConnection.where(query).select("user_connections.id, user_connections.user_name, user_connections.user_id, user_connections.contact_id, user_connections.read, user_connections.confirmed").as_json
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def user_connections_get_by_id contact_id, id
-        begin
-            ss = UserConnection.find_or_initialize_by(:id => id, :contact_id => contact_id)
-            return {:id => ss.id}
+            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id").where(query).select("user_connections.*","users.first_name").as_json
         rescue => e
             puts e
             return nil
@@ -460,15 +441,10 @@ class Account
 
     def create_connection_request user_id, contact_id
         begin
-            user = User.where("id = ?", user_id).select("first_name").as_json
-            user_name = user[0]["first_name"]            
-            connection_request = UserConnection.create({
+            return UserConnection.find_or_create_by({
                 user_id: user_id,
-                user_name: user_name,
                 contact_id: contact_id
-            })
-
-            return connection_request.as_json
+            }).as_json
         rescue => e
             puts e
             return nil
@@ -486,9 +462,18 @@ class Account
         end
     end
 
-    def get_user_info user_id
+    def get_user_connections_requested user_id # people that request are automatically added as contacts
+        begin
+            return User.joins("inner join user_connections ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.id, users.first_name, users.email, user_connections.created_at, user_connections.updated_at").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_connections_accepted user_id
         begin      
-            return User.joins("inner join user_connections").where("user_connections.user_id = #{user_id} and user_connections.contact_id=users.id and user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email, user_connections.created_at, user_connections.updated_at").as_json
+            return User.joins("inner join user_connections ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.id, users.first_name, users.email, user_connections.created_at, user_connections.updated_at").as_json
         rescue => e
             puts e
             return nil
@@ -504,7 +489,7 @@ class Account
                 if user
                     user = user[0]
                 end
-                
+
                 response[i] = notification.as_json
                 response[i][:user_profile] = user
                 response[i][:sprint] = notification.sprint

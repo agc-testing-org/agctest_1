@@ -48,12 +48,14 @@
         {{/if}}
 
     {{else}}
-        {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-user-plus"></i>
-            </div>
-            Request Contact
-        {{/link-to}}
+        {{#unless (eq user.id sessionAccount.account.id)}}
+            {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-user-plus"></i>
+                </div>
+                Request Contact
+            {{/link-to}}
+        {{/unless}}
         
     {{/if}}
 

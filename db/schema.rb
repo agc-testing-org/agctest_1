@@ -206,7 +206,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.integer "contact_id", null: false
     t.integer "confirmed", default: 1
     t.boolean "read", default: false
-    t.string "user_name", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"
