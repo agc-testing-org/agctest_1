@@ -245,7 +245,7 @@ describe "/users" do
         end
     end
 
-    describe "GET /me/roles", :focus => true do
+    describe "GET /me/roles" do
         fixtures :roles
         before(:each) do
             @user_id = users(:adam).id
@@ -334,5 +334,164 @@ describe "/users" do
             end
         end
     end
-end
+    
+    shared_examples_for "contact_info" do
+        it "should include user_name" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["first_name"]).to eq(r["first_name"])
+            end
+        end
+        it "should include email" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["email"]).to eq(r["email"])
+            end
+        end
+    end
 
+    shared_examples_for "contact" do
+        it "should include user_id" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["user_id"]).to eq(r["user_id"])
+            end
+        end
+        it "should include contact_id" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["contact_id"]).to eq(r["contact_id"])
+            end
+        end
+        it "should include read" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["read"]).to eq(r["read"] == 1)
+            end
+        end
+        it "should include confirmed" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["confirmed"]).to eq(r["confirmed"])
+            end
+        end
+        it "should include created_at" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["created_at"]).to_not be nil
+            end
+        end
+        it "should include updated_at" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["updated_at"]).to_not be nil 
+            end
+        end
+    end
+
+    describe "GET /connections" do
+        fixtures :user_connections
+        context "signed in" do
+            before(:each) do
+                get "/users/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:adam_confirmed_request_adam_accepted).user_id} where user_connections.confirmed=2) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:adam_confirmed_request_adam_accepted).user_id})")
+            end
+            it_behaves_like "contact"
+            it_behaves_like "contact_info"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/connections"
+            end
+            it_behaves_like "unauthorized" 
+        end
+    end
+
+    describe "GET /requests" do
+        fixtures :user_connections
+        context "signed in" do
+            before(:each) do
+                get "/users/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.contact_id=users.id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}")
+            end
+            it_behaves_like "contact"
+            it_behaves_like "contact_info" 
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/requests"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "GET /requests/:id" do
+        fixtures :user_connections
+        context "signed in" do
+            before(:each) do
+                get "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
+            end
+            it_behaves_like "contact"
+            it_behaves_like "contact_info" 
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "PATCH /requests/:id" do
+        fixtures :user_connections
+        context "signed in" do
+            before(:each) do
+                @confirmed = 2
+                patch "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
+            end
+            it_behaves_like "contact" 
+            it "should update confirmed" do
+                expect(@res[0]["confirmed"]).to eq @confirmed
+            end
+        end
+        context "not signed in" do
+            before(:each) do
+                patch "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "POST /:id/requests" do
+        context "signed in" do
+            before(:each) do
+                post "/users/#{users(:adam_admin).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @contact_result = @mysql_client.query("select * from user_connections where user_id = #{users(:adam_admin).id}")
+            end
+            it_behaves_like "contact"
+        end
+        context "not signed in" do
+            before(:each) do
+                post "/users/#{users(:adam_admin).id}/requests"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "GET /:id/requests" do
+        fixtures :user_connections
+        context "signed in" do
+            before(:each) do
+                get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_id = #{@user}")
+            end
+            it_behaves_like "contact"
+        end
+        context "not signed in" do
+            before(:each) do    
+                get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests" 
+            end                                                 
+            it_behaves_like "unauthorized"  
+        end                                         
+    end
+end

@@ -1273,10 +1273,11 @@ class Integrations < Sinatra::Base
 
     connections_requests_get_by_id = lambda do
         protected!
-        status 200
+        status 400 
         response = {}
 
         if params[:id]
+            status 200
             account = Account.new
             query = {:id =>  params[:id], :contact_id => @session_hash["id"]} 
             requests = account.get_user_connections query
@@ -1290,24 +1291,21 @@ class Integrations < Sinatra::Base
 
     user_connections_patch = lambda do
         protected!
-        status 401
+        status 400
         response = {}
-        if @session_hash["id"]
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:user_id] && fields[:read] && fields[:confirmed]
-                    account = Account.new
-                    response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
-                    if response
-                        status 201
-                    end
-                end  
-            rescue => e
-                puts e
-            end
+
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if fields[:user_id] && fields[:read] && fields[:confirmed]
+                status 201
+                account = Account.new
+                response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
+            end  
+        rescue => e
+            puts e
         end
+
         return response.to_json
     end
 
@@ -1484,9 +1482,6 @@ class Integrations < Sinatra::Base
     delete "/session", &session_delete
     get "/session", &session_get
 
-    get "/users/me", &users_get_by_me #must precede :id request
-    get "/users/:id", allows: [:id], &users_get_by_id
-
     get "/users/me/skillsets", &users_skillsets_get_by_me # must precede :user_id request
     get "/users/:user_id/skillsets", &users_skillsets_get
     get "/users/:user_id/skillsets/:skillset_id", &users_skillsets_get_by_skillset
@@ -1497,12 +1492,18 @@ class Integrations < Sinatra::Base
     get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
     patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
 
-    get "/account/connections", &connections_get
-    get "/account/requests", &connections_requests_get
-    post "/account/:id/requests", &connections_request_post
-    patch "/account/requests/:id", &user_connections_patch
-    get "/account/requests/:id", &connections_requests_get_by_id
-    get "/account/:id/requests", &get_exist_request
+    get "/users/connections", &connections_get 
+    get "/users/requests", &connections_requests_get
+    get "/users/requests/:id", &connections_requests_get_by_id
+    patch "/users/requests/:id", &user_connections_patch
+
+    post "/users/:id/requests", &connections_request_post
+    get "/users/:id/requests", &get_exist_request
+
+    # do not add a /users request with a single namespace below this
+    get "/users/me", &users_get_by_me #must precede :id request
+    get "/users/:id", allows: [:id], &users_get_by_id
+
     get "/account/notifications", &get_user_notifications
     patch "/account/notifications/:id", &user_notifications_read 
     get "/account/notifications/:id", &get_user_notifications_by_id
