@@ -100,8 +100,8 @@ describe ".Activity" do
             @res = @activity.record_user_notifications @bulk
             @result = @mysql_client.query("select * from user_notifications")
         end
-        it "should return inserted records" do
-            expect(@res).to eq @bulk.length
+        it "should return true" do
+            expect(@res).to be true
         end
         context "bulk" do
             it "should save all records" do
@@ -139,7 +139,7 @@ describe ".Activity" do
         end
     end
 
-    context "#process_notification", :focus => true do
+    context "#process_notification" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :comments
         before(:each) do #same scenario as #user_notifications_for_owner
             @sprint_timeline_id = sprint_timelines(:sprint_1_state_1_comment).id
@@ -164,6 +164,20 @@ describe ".Activity" do
             end
             it "should return sprint_timeline_id" do
                 expect(@user_notifications_result["sprint_timeline_id"]).to eq @sprint_timeline_id
+            end
+        end
+    end
+
+    context "#user_notifications_distinct", :focus => true do
+        fixtures :users
+        before(:each) do
+            object = User.where(:id => users(:adam_confirmed).id).select("id as user_id")
+            @array = object + object
+            @res = @activity.user_notifications_distinct @array
+        end
+        context "array" do
+            it "should contain a single record" do
+                expect(@res.length).to eq 1
             end
         end
     end

@@ -9,7 +9,7 @@ export default Ember.Component.extend({
 
             var store = this.get('store');
 
-            store.adapterFor('requests').set('namespace', 'account');
+            store.adapterFor('requests').set('namespace', 'users/');
 
             var requestRead = store.findRecord('request', id).then(function (request) {
                 request.set('read', read);

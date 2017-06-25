@@ -10,7 +10,7 @@ export default Ember.Route.extend({
     model: function (params, transition) {
         var id = this.paramsFor('profile').id;
         var store = this.get('store');
-        store.adapterFor('request').set('namespace', 'account/' + id);
+        store.adapterFor('request').set('namespace', 'users/' + id);
         var request = this.store.queryRecord('request',{
 
         });

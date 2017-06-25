@@ -8,7 +8,7 @@ export default Ember.Component.extend({
             var _this = this;
             var store = this.get('store');
             console.log(id);
-            store.adapterFor('request').set('namespace', 'account/' + id);
+            store.adapterFor('request').set('namespace', 'users/' + id);
             var requestPost = store.createRecord('request', {
                 contact_id: id
             }).save().then(function(payload) { 
