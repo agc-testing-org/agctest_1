@@ -48,7 +48,6 @@ require_relative '../models/seat.rb'
 require_relative '../models/plan.rb'
 require_relative '../models/user_profile.rb'
 require_relative '../models/user_position.rb'
-require_relative '../models/notification.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/connection_state.rb'
@@ -1232,96 +1231,80 @@ class Integrations < Sinatra::Base
 
     connections_request_post = lambda do
         protected!
-        status 401
+        status 400
         response = {}
-        if @session_hash["id"]
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-
-                if params[:id]
-                    account = Account.new
-                    connection_request = account.create_connection_request @session_hash["id"], params[:id]
-
-                    if connection_request
-                        status 201
-                        response = connection_request
-                    else
-                        status 202
-                        response[:id] = 0
-                        response[:message] = "You've already requested a contact information."
-                    end
-                else
-                    status 400
-                end
-            end
-            return response.to_json
-        end
-    end
-
-    connections_get = lambda do
-        user_id = (default_to_signed params[:user_id])
-        if user_id
-            account = Account.new #TODO - pass in signed in user_id to prevent someone from accessing this information from another account; same for other requests like this
-                                  #let's add API layer tests to check for this type of hack
-            query = {"user_connections.contact_id" => user_id}
-            connections = account.get_user_connections query
-            return connections.to_json
-        end
-    end
-
-
-    get_exist_requests = lambda do
-        user_id = (default_to_signed params[:user_id])
-        if user_id && params[:id]
+        
+        if params[:id]
             account = Account.new
-            query = {"user_connections.contact_id" =>  params[:id], "user_connections.user_id" => user_id}
-            requests = account.get_exist_requests query
-            return requests.to_json
-        end
-    end
+            connection_request = account.create_connection_request @session_hash["id"], params[:id]
 
-    user_connections_get_by_id = lambda do
-        protected!
-        status 401
-        if @session_hash["id"]
-            status 400
-            begin
-                if params[:id]
-                    account = Account.new
-                    response = (account.user_connections_get_by_id @session_hash["id"], params[:id])
-                    if response
-                        status 201
-                    end
-                end
-            rescue => e
-                puts e
+            if connection_request
+                status 201
+                response = connection_request
             end
         end
         return response.to_json
     end
 
-    user_connections_patch = lambda do
+    connections_requests_get = lambda do
         protected!
-        status 401
+        account = Account.new 
+        query = {"user_connections.contact_id" => @session_hash["id"]}
+        connections = account.get_user_connections query
+        return connections.to_json
+    end
+
+    get_exist_request = lambda do
+        protected!
+        if params[:id]
+            account = Account.new
+            query = {"user_connections.contact_id" =>  params[:id], :user_id => @session_hash["id"]}
+            requests = account.get_user_connections query
+            if requests[0]
+                return requests[0].to_json
+            else
+                return {:id => 0}.to_json
+            end
+        else
+            return {}.to_json
+        end
+    end
+
+    connections_requests_get_by_id = lambda do
+        protected!
+        status 400 
         response = {}
-        if @session_hash["id"]
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:user_id] && fields[:read] && fields[:confirmed]
-                    account = Account.new
-                    response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
-                    if response
-                        status 201
-                    end
-                end  
-            rescue => e
-                puts e
+
+        if params[:id]
+            status 200
+            account = Account.new
+            query = {:id =>  params[:id], :contact_id => @session_hash["id"]} 
+            requests = account.get_user_connections query
+            if requests
+                response = requests[0]
             end
         end
+
+        return response.to_json
+    end
+
+    user_connections_patch = lambda do
+        protected!
+        status 400
+        response = {}
+
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if fields[:user_id] && fields[:read] && fields[:confirmed]
+                status 201
+                account = Account.new
+                response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
+            end  
+        rescue => e
+            puts e
+        end
+
         return response.to_json
     end
 
@@ -1427,13 +1410,12 @@ class Integrations < Sinatra::Base
         end
     end
 
-    get_user_info = lambda do
-        user_id = (default_to_signed params[:user_id])
-        if user_id
-            account = Account.new
-            user_info = account.get_user_info user_id
-            return user_info.to_json
-        end
+    connections_get = lambda do
+        protected!
+        account = Account.new
+        accepted = account.get_user_connections_accepted @session_hash["id"] 
+        requested = account.get_user_connections_requested @session_hash["id"] 
+        return (accepted + requested).to_json
     end
 
     get_user_notifications = lambda do
@@ -1499,9 +1481,6 @@ class Integrations < Sinatra::Base
     delete "/session", &session_delete
     get "/session", &session_get
 
-    get "/users/me", &users_get_by_me #must precede :id request
-    get "/users/:id", allows: [:id], &users_get_by_id
-
     get "/users/me/skillsets", &users_skillsets_get_by_me # must precede :user_id request
     get "/users/:user_id/skillsets", &users_skillsets_get
     get "/users/:user_id/skillsets/:skillset_id", &users_skillsets_get_by_skillset
@@ -1512,12 +1491,18 @@ class Integrations < Sinatra::Base
     get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
     patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
 
-    get "/account/connections", &get_user_info
-    get "/account/requests", &connections_get
-    post "/account/:id/requests", &connections_request_post
-    patch "/account/requests/:id", &user_connections_patch
-    get "/account/requests/:id", &user_connections_get_by_id
-    get "/account/:id/requests", &get_exist_requests
+    get "/users/connections", &connections_get 
+    get "/users/requests", &connections_requests_get
+    get "/users/requests/:id", &connections_requests_get_by_id
+    patch "/users/requests/:id", &user_connections_patch
+
+    post "/users/:id/requests", &connections_request_post
+    get "/users/:id/requests", &get_exist_request
+
+    # do not add a /users request with a single namespace below this
+    get "/users/me", &users_get_by_me #must precede :id request
+    get "/users/:id", allows: [:id], &users_get_by_id
+
     get "/account/notifications", &get_user_notifications
     patch "/account/notifications/:id", &user_notifications_read 
     get "/account/notifications/:id", &get_user_notifications_by_id

@@ -62,23 +62,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.index ["user_id"], name: "index_logins_on_user"
   end
 
-  create_table "notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "subject", null: false
-    t.text "body", limit: 255, null: false
-    t.integer "sprint_state_id"
-    t.integer "contributor_id"
-    t.integer "user_id"
-    t.integer "sprint_timeline_id", null: false
-    t.integer "sprint_id", null: false
-    t.string "project_org", null: false
-    t.datetime "created_at", null: false
-    t.string "sprint_name", null: false
-    t.string "project_name", null: false
-    t.integer "project_id", null: false
-    t.text "comment_body"
-    t.index ["sprint_timeline_id"], name: "index_sprint_timeline_id_on_notification", unique: true
-  end
-
   create_table "plans", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.string "title", null: false
@@ -206,7 +189,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.integer "contact_id", null: false
     t.integer "confirmed", default: 1
     t.boolean "read", default: false
-    t.string "user_name", null: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"

@@ -745,7 +745,7 @@ describe ".Account" do
                 expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
             end
             it "should include user_name" do
-                expect(@res["user_name"]).to eq(users(:masha_post_connection_request).first_name)
+                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
             end
             it "should include created_at" do
                 expect(@res["created_at"]).to_not be nil
@@ -756,13 +756,13 @@ describe ".Account" do
         end
     end 
 
-    context "#get_user_info" do
+    context "#get_user_connections_accepted" do
         fixtures :users
         context "user_info" do
             fixtures :user_connections
             before(:each) do
                 user_id = users(:masha_post_connection_request).id
-                @res = (@account.get_user_info user_id).first
+                @res = (@account.get_user_connections_accepted user_id).first
             end
             it "should include user_id" do
                 expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
@@ -773,7 +773,7 @@ describe ".Account" do
         end
     end 
 
-    context "#patch_user_connections" do
+    context "#update_user_connections" do
         fixtures :users
         context "connection_request_read" do
             fixtures :user_connections
@@ -785,12 +785,12 @@ describe ".Account" do
                 @res = (@account.update_user_connections contact_id, user_id, @read, @confirmed)
             end
             it "should include read" do
-                expect(@res[:read]).to eq(@read)
+                expect(@res["read"]).to eq(@read)
             end
         end
     end 
 
-    context "#post_user_connections_request" do
+    context "#create_connection_request" do
         fixtures :users
         context "connection_request_confirmed" do
             fixtures :user_connections

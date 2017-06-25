@@ -1,20 +1,27 @@
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview">
-        <div class="text-center">
-                {{#each requests as |request|}}
-                {{#if (eq request.confirmed "1")}}
-                <h3>You've requested contact information!</h3>
-                <h3>Your request is under review.</h3>
-                {{else if (eq request.confirmed "3")}}
-                <h3>You've already sent a contact request!</h3>
-                <h3>This user is not ready to share contact information with you.</h3>
-                {{else if (eq request.confirmed "2")}}
-                <h3>This user has confirmed your request!</h3>
-                <h3>View {{#link-to "me.connections"}}my contacts{{/link-to}}.</h3>
+            <div class="text-center">
+                {{#if (eq request.id 0)}}
+                    <h3>Request this user's contact information?</h3>
+                    <h4>Please note that this will automatically share yours</h4>
+
+                    <button class="btn btn-secondary rounded mt-2" {{action "request" user_id}}>Request</button>
+                {{else}}
+
+                    {{#if (eq request.confirmed "1")}}
+                        <h3>You've requested contact information!</h3>
+                        <h3>Your request is under review.</h3>
+                    {{else if (eq request.confirmed "3")}}
+                        <h3>You've already sent a contact request.</h3>
+                        <h3>This user is not ready to share contact information with you.</h3>
+                    {{else if (eq request.confirmed "2")}}
+                        <h3>This user has confirmed your request!</h3>
+                        <h3>View {{#link-to "me.connections"}}my contacts{{/link-to}}.</h3>
+                    {{/if}}
+
                 {{/if}}
-                {{/each}}
-                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -1,7 +1,7 @@
 {{title "Contact Request"}}
 <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">
-    {{profile-content-post-requests requests=model.requests}}
+    {{profile-content-post-requests request=model.request user_id=model.id refresh="refresh"}}
 </div>
 <div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">
-    {{profile-content-post-requests requests=model.requests}} 
+    {{profile-content-post-requests request=model.request user_id=model.id refresh="refresh"}} 
 </div>
