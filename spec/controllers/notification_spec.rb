@@ -87,7 +87,7 @@ describe ".Activity" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
         before(:each) do
             @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
-            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
+            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where (user_roles.user_id != #{sprint_timelines(:sprint_1_transition).user_id}) AND user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
             @res = @activity.user_notifications_by_roles @sprint_timeline_id
         end
         it_behaves_like "user_notifications"
