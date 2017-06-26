@@ -1,7 +1,7 @@
 import Ember from 'ember';
-import UnAuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-route-mixin';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
-export default Ember.Route.extend({
+export default Ember.Route.extend(AuthenticatedRouteMixin,{
     actions: {
         error(error, transition) {
             console.log(error);

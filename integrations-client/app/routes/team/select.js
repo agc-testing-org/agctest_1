@@ -22,7 +22,6 @@ export default Ember.Route.extend({
         });
     },
     afterModel(model,transition) {
-        alert(JSON.stringify(model.team));
         if(model.team.get("show")){
             this.transitionTo('team.select.members');
         }

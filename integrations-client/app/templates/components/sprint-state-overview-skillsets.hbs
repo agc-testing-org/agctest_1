@@ -6,6 +6,8 @@
 <span {{action "updateSkillset" skillset.id sprint_id true}} class="badge badge-default rounded unselected cursor-pointer">{{skillset.name}}</span>
 {{/if}}
 {{else}}
+{{#if skillset.active}}
 <span class="badge badge-default rounded selected">{{skillset.name}}</span>
+{{/if}}
 {{/if}}
 {{/each}}

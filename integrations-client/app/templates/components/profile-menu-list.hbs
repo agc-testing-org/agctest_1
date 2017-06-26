@@ -1,65 +1,74 @@
 <ul class="nav nav-pills flex-column timeline">
-
-    <div class="menu">
-        {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+    
+    {{#unless session.isAuthenticated}}
+        <div class="menu">
+            {{#link-to "login" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <i class="fa fa-fw fa-sign-in"></i>Sign In
+            {{/link-to}}
+        </div>
+    {{else}}
+        <div class="menu">
+            {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <i class="fa fa-fw fa-user"></i>{{sessionAccount.account.first_name}}
-        {{/link-to}}
-    </div>
+            {{/link-to}}
+        </div>
 
-    {{#if me}}
+        {{#if me}}
 
-        {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-envelope"></i>
-            </div>
-            Notifications
-        {{/link-to}}
+            {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-envelope"></i>
+                </div>
+                Notifications
+            {{/link-to}}
 
-        {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-users"></i>
-            </div>
-            Contacts
-        {{/link-to}}
+            {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-users"></i>
+                </div>
+                Contacts
+            {{/link-to}}
 
-        {{#link-to "me.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-user-plus"></i>
-            </div>
-            Contact Requests
-        {{/link-to}}
-
-        {{#each teams as |team|}}
-        {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-users"></i>
-            </div>
-            Team {{team.name}}
-        {{/link-to}}
-        {{/each}}
-
-        {{#if sessionAccount.account.owner}}
-            {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            {{#link-to "me.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-user-plus"></i>
                 </div>
-                Create Team
+                Contact Requests
             {{/link-to}}
+
+            {{#each teams as |team|}}
+            {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-users"></i>
+                </div>
+                Team {{team.name}}
+            {{/link-to}}
+            {{/each}}
+
+            {{#if sessionAccount.account.owner}}
+                {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                    <div class="icon hidden-sm-down">
+                        <i class="fa fa-fw fa-2x fa-user-plus"></i>
+                    </div>
+                    Create Team
+                {{/link-to}}
+            {{/if}}
+
+        {{else}}
+            {{#unless (eq user.id sessionAccount.account.id)}}
+                {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                    <div class="icon hidden-sm-down">
+                        <i class="fa fa-fw fa-2x fa-user-plus"></i>
+                    </div>
+                    Request Contact
+                {{/link-to}}
+            {{/unless}}
+        
         {{/if}}
 
-    {{else}}
-        {{#unless (eq user.id sessionAccount.account.id)}}
-            {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-user-plus"></i>
-                </div>
-                Request Contact
-            {{/link-to}}
-        {{/unless}}
-        
-    {{/if}}
+        {{user-logout}}
 
-    {{user-logout}}
+    {{/unless}}
 
     {{application-foot}}
 </ul>
