@@ -17,11 +17,12 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
-            team: this.store.find('team',params.id),
+            team: this.store.findRecord('team',params.id,{reload: true}),
             seats: this.store.findAll('seat')
         });
     },
     afterModel(model,transition) {
+        alert(JSON.stringify(model.team));
         if(model.team.get("show")){
             this.transitionTo('team.select.members');
         }
