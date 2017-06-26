@@ -65,5 +65,19 @@ describe ".Issue" do
                 expect((@issue.get_sprint_state sprint_states(:sprint_1_state_1).id).state.id).to eq(sprint_states(:sprint_1_state_1).state_id)
             end
         end 
-    end 
+    end
+    context "#get_sprint_state_ids_by_sprint" do
+        fixtures :sprints, :sprint_states
+        it "should return a list of all sprint_state_ids" do
+            expect(@issue.get_sprint_state_ids_by_sprint sprint_states(:sprint_1_state_1).id).to eq(@mysql_client.query("select id from sprint_states where sprint_id = #{sprint_states(:sprint_1_state_1).id}").to_a)
+        end
+    end
+    context "#get_next_sprint_state" do
+        before(:each) do
+            @list = [1,3,9,44]
+        end
+        it "should return the next item in the list" do
+            expect(@issue.get_next_sprint_state @list[1], @list).to eq(@list[2])
+        end
+    end
 end
