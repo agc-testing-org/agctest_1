@@ -27,7 +27,6 @@ class Issue
         end
     end
 
-
     def create_sprint_state sprint_id, state_id, sha
         begin
             sprint_state = SprintState.create({
@@ -64,10 +63,10 @@ class Issue
                 user_id: user_id,
                 sprint_state_id: sprint_state_id
             })
-        
+
             new_record = false
             previous_record = vote.contributor_id
-            
+
             if previous_record != contributor_id.to_i # if vote is new or different (let the frontend know votes will change with new_record)
                 vote.update_attributes!(:contributor_id => contributor_id)
                 new_record = true
@@ -133,6 +132,25 @@ class Issue
     def get_projects query
         begin
             return Project.where(query).as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_next_sprint_state sprint_state_id, sprint_states
+        next_id = 0
+        sprint_states.each_with_index do |s,i|
+            if s == sprint_state_id
+                next_id = sprint_states[i+1]
+            end
+        end
+        return next_id
+    end
+
+    def get_sprint_state_ids_by_sprint sprint_id
+        begin
+            return SprintState.where(:sprint_id => sprint_id).select(:id).map(&:id)
         rescue => e
             puts e
             return nil

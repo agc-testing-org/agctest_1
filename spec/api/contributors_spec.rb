@@ -7,7 +7,19 @@ describe "/contributors" do
 
     before(:all) do
         @CREATE_TOKENS=true
-    end 
+    end
+
+    shared_examples_for "sprint_timelines_for_feedback_actions" do
+        it "should record sprint state id" do
+            expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
+        end
+        it "should record contributor id" do
+            expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
+        end
+        it "should record next_sprint_state_id" do
+            expect(@sprint_timeline["next_sprint_state_id"]).to eq(sprint_states(:sprint_1_state_2).id)
+        end
+    end
 
     describe "POST /:id/comments" do
         fixtures :projects, :sprints, :sprint_states, :contributors, :states
@@ -36,15 +48,13 @@ describe "/contributors" do
                 end
             end
             context "sprint_timelines" do
-                it "should record sprint state id" do
-                    expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
-                end
                 it "should record comment id" do
                     expect(@sprint_timeline["comment_id"]).to eq(@res["id"])
                 end
-                it "should record contributor id" do
-                    expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
+                it "should set diff = comment" do
+                    expect(@sprint_timeline["diff"]).to eq("comment")
                 end
+                it_behaves_like "sprint_timelines_for_feedback_actions"
             end
         end
         context "invalid comment" do
@@ -91,15 +101,13 @@ describe "/contributors" do
             end
         end
         context "sprint_timelines" do
-            it "should record sprint state id" do
-                expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
-            end
-            it "should record comment id" do
+            it "should record vote id" do
                 expect(@sprint_timeline["vote_id"]).to eq(@res["id"])
             end 
-            it "should record contributor id" do
-                expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
-            end 
+            it "should set diff = vote" do
+                expect(@sprint_timeline["diff"]).to eq("vote")
+            end  
+            it_behaves_like "sprint_timelines_for_feedback_actions"
         end
         context "duplicate vote" do
             before(:each) do
@@ -176,12 +184,10 @@ describe "/contributors" do
                 end
             end
             context "sprint_timelines" do
-                it "should record sprint state id" do
-                    expect(@sprint_timeline["sprint_state_id"]).to eq(@sprint_state_id)
-                end
-                it "should record contributor id" do
-                    expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
-                end
+                it "should set diff = winner" do
+                    expect(@sprint_timeline["diff"]).to eq("winner")
+                end  
+                it_behaves_like "sprint_timelines_for_feedback_actions"
             end
         end
     end

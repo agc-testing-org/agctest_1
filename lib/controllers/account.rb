@@ -483,7 +483,7 @@ class Account
     def get_user_notifications user_id
         begin     
             response = []
-            SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("user_notifications.id, sprint_timelines.sprint_id, sprint_timelines.project_id, sprint_timelines.created_at, user_notifications.read, sprint_timelines.sprint_state_id, sprint_timelines.comment_id, sprint_timelines.vote_id, sprint_timelines.sprint_state_id, sprint_timelines.contributor_id, sprint_timelines.user_id, sprint_timelines.diff").order('created_at DESC').each_with_index do |notification,i|
+            SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').each_with_index do |notification,i|
                 params = {:id => notification.user_id}
                 user = get_users params
                 if user
@@ -495,6 +495,7 @@ class Account
                 response[i][:sprint] = notification.sprint
                 response[i][:project] = notification.project
                 response[i][:sprint_state] = notification.sprint_state
+                response[i][:next_sprint_state] = notification.next_sprint_state
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
 

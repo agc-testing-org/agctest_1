@@ -18,7 +18,7 @@ class Activity
     def user_notifications_by_roles sprint_timeline_id
         # all users that subscribe to a role that corresponds to a sprint state/phase change (transition diff)
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :diff => "transition").joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").select("user_roles.user_id","sprint_timelines.id as sprint_timeline_id")
+            return SprintTimeline.where(:id => sprint_timeline_id, :diff => "transition").joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id","sprint_timelines.id as sprint_timeline_id")
         rescue => e
             puts e
             return []

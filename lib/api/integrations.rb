@@ -873,11 +873,11 @@ class Integrations < Sinatra::Base
                     comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
 
                     sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-                    query = { :id => sprint_state.sprint_id }
-                    sprint = issue.get_sprints query
-                    project_id = sprint[0]["project_id"]
 
-                    log_params = {:comment_id => comment.id, :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "comment"}
+                    sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+                    next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+
+                    log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "comment"}
 
                     if comment && (issue.log_event log_params)
                         status 201
@@ -906,11 +906,11 @@ class Integrations < Sinatra::Base
             vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
 
             sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-            query = { :id => sprint_state.sprint_id }
-            sprint = issue.get_sprints query 
-            project_id = sprint[0]["project_id"]
 
-            log_params = {:vote_id => vote["id"], :project_id => project_id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "vote"}
+            sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+            next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+
+            log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "vote"}
 
             if vote 
                 if vote[:created]
@@ -934,22 +934,22 @@ class Integrations < Sinatra::Base
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
 
                 issue = Issue.new
+                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
 
-                query = {:id => fields[:project_id].to_i}
-                project = (issue.get_projects query)[0]
+                if sprint_state
 
-                repo = Repo.new
-                github = (repo.github_client github_authorization)
-                pr = github.create_pull_request("#{project["org"]}/#{project["name"]}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
+                    repo = Repo.new
+                    github = (repo.github_client github_authorization)
+                    pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
 
-                if pr
-                    parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
-                    winner = issue.set_winner fields[:sprint_state_id], parameters
-                    if winner
+                    if pr
+                        parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
+                        winner = issue.set_winner fields[:sprint_state_id], parameters
+                        if winner
+                            sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+                            next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
 
-                        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-                        if sprint_state
-                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id =>  sprint_state.id, :user_id => @session_hash["id"], :project_id => project["id"], :contributor_id => params[:id], :diff => "winner" }
+                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id => sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :project_id => sprint_state.sprint.project.id, :contributor_id => params[:id], :diff => "winner" }
                             if sprint_state && (issue.log_event log_params)
                                 status 201
                                 response = winner 
@@ -959,8 +959,6 @@ class Integrations < Sinatra::Base
                         else
 
                         end
-                    else
-
                     end
                 end
             else
@@ -1233,7 +1231,7 @@ class Integrations < Sinatra::Base
         protected!
         status 400
         response = {}
-        
+
         if params[:id]
             account = Account.new
             connection_request = account.create_connection_request @session_hash["id"], params[:id]
