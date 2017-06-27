@@ -1466,6 +1466,102 @@ class Integrations < Sinatra::Base
         end
     end
 
+    get_user_comments_created_by_skillset = lambda do
+        if params[:user_id] && params[:skillset_id]
+            activity = Activity.new
+            requests = activity.user_comments_created_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_comments_received_by_skillset = lambda do
+        if params[:user_id] && params[:skillset_id]
+            activity = Activity.new
+            requests = activity.user_comments_received_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_votes_cast_by_skillset = lambda do
+        if params[:user_id] && params[:skillset_id]
+            activity = Activity.new
+            requests = activity.user_votes_cast_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_votes_received_by_skillset = lambda do
+        if params[:user_id] && params[:skillset_id]
+            activity = Activity.new
+            requests = activity.user_votes_received_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_contributions_created_by_skillset = lambda do
+        if params[:user_id] && params[:skillset_id]
+            activity = Activity.new
+            requests = activity.user_contributions_created_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_contributions_selected_by_skillset = lambda do
+        if params[:user_id] && params[:skillset_id]
+            activity = Activity.new
+            requests = activity.user_contributions_selected_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_comments_created_by_role = lambda do
+        if params[:user_id] && params[:role_id]
+            activity = Activity.new
+            requests = activity.user_comments_created_by_role params[:user_id], params[:role_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_votes_created_by_role = lambda do
+        if params[:user_id] && params[:role_id]
+            activity = Activity.new
+            requests = activity.user_votes_cast_by_role params[:user_id], params[:role_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_contributors_created_by_role = lambda do
+        if params[:user_id] && params[:role_id]
+            activity = Activity.new
+            requests = activity.user_contributions_created_by_role params[:user_id], params[:role_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_comments_received_by_role = lambda do
+        if params[:user_id] && params[:role_id]
+            activity = Activity.new
+            requests = activity.user_comments_received_by_role params[:user_id], params[:role_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_votes_received_by_role = lambda do
+        if params[:user_id] && params[:role_id]
+            activity = Activity.new
+            requests = activity.user_votes_received_by_role params[:user_id], params[:role_id]
+            return requests.to_json
+        end
+    end
+
+    get_user_contributions_selected_by_role = lambda do
+        if params[:user_id] && params[:role_id]
+            activity = Activity.new
+            requests = activity.user_contributions_selected_by_role params[:user_id], params[:role_id]
+            return requests.to_json
+        end
+    end
+
     #API
 
     post "/register", &register_post
@@ -1500,6 +1596,19 @@ class Integrations < Sinatra::Base
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request
     get "/users/:id", allows: [:id], &users_get_by_id
+
+    get "/users/:user_id/comments/skillset/:skillset_id", &get_user_comments_created_by_skillset
+    get "/users/:user_id/votes/skillset/:skillset_id", &get_user_votes_cast_by_skillset
+    get "/users/:user_id/contributors/skillset/:skillset_id", &get_user_contributions_created_by_skillset
+    get "/users/:user_id/comments/received/skillset/:skillset_id", &get_user_comments_received_by_skillset
+    get "/users/:user_id/votes/received/skillset/:skillset_id", &get_user_votes_received_by_skillset
+    get "/users/:user_id/contributors/received/skillset/:skillset_id", &get_user_contributions_selected_by_skillset
+    get "/users/:user_id/comments/role/:role_id", &get_user_comments_created_by_role
+    get "/users/:user_id/votes/role/:role_id", &get_user_votes_created_by_role
+    get "/users/:user_id/contributors/role/:role_id", &get_user_contributors_created_by_role
+    get "/users/:user_id/comments/received/role/:role_id", &get_user_comments_received_by_role
+    get "/users/:user_id/votes/received/role/:role_id", &get_user_votes_received_by_role
+    get "/users/:user_id/contributors/received/role/:role_id", &get_user_contributions_selected_by_role
 
     get "/account/notifications", &get_user_notifications
     patch "/account/notifications/:id", &user_notifications_read 
