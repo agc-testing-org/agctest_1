@@ -41,6 +41,9 @@ Router.map(function() {
         this.route('requests');
         this.route('invitation', {path: '/invitation/:id'});
     });
+
+    this.route("limit");
+    this.route("fourOhFour", { path: "*path"});
 });
 
 Router.reopen({

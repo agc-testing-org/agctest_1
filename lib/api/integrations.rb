@@ -144,6 +144,30 @@ class Integrations < Sinatra::Base
         end
     end
 
+    def session_tokens user, owner
+        account = Account.new
+        user_secret = SecureRandom.hex(32) #session secret, not password
+        user_refresh = SecureRandom.hex(32)
+        expiration = 60 * 1 # 15 min
+        jwt = account.create_token user[:id], user_secret, user[:name]
+        update_fields = {
+            ip: request.ip,
+            jwt: jwt,
+            refresh: user_refresh
+        }
+        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json, expiration) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+            response = {
+                :success => true,
+                :access_token => jwt,
+                :expires_at => (Time.now + expiration).to_i,
+                :expires_in => expiration,
+                :refresh_token => user_refresh
+            }
+            status 200
+            return response
+        end
+    end
+
     # API
     forgot_post = lambda do
         status 400
@@ -235,20 +259,10 @@ class Integrations < Sinatra::Base
                         user = account.get user_params
                         if user
                             account.confirm_user user, fields[:password], fields[:firstName], request.ip
-                            
+
                             owner = ((account.is_owner? user[:id]) || user[:admin])
 
-                            user_secret = SecureRandom.hex(32) #session secret, not password
-                            jwt = account.create_token user[:id], user_secret, fields[:firstName]
-                            update_fields = {
-                                ip: request.ip,
-                                jwt: jwt
-                            }
-                            if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
-                                response[:success] = true
-                                response[:w7_token] = jwt
-                                status 201
-                            end
+                            response = session_tokens user, owner
                         else
                             response[:message] = "An error has occurred"
                         end
@@ -286,17 +300,7 @@ class Integrations < Sinatra::Base
 
                         owner = ((account.is_owner? user[:id]) || user[:admin])
 
-                        user_secret = SecureRandom.hex(32) #session secret, not password
-                        jwt = account.create_token user[:id], user_secret, nil 
-                        update_fields = {
-                            ip: request.ip,
-                            jwt: jwt
-                        }
-                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
-                            response[:success] = true
-                            response[:w7_token] = jwt 
-                            status 201
-                        end
+                        response = session_tokens user, owner
                     else
                         response[:message] = "This token has expired"
                     end
@@ -327,17 +331,7 @@ class Integrations < Sinatra::Base
 
                 owner = ((account.is_owner? user[:id]) || user[:admin]) 
 
-                user_secret = SecureRandom.hex(32) #session secret, not password
-                jwt = account.create_token user[:id], user_secret, user[:name]
-                update_fields = {
-                    ip: request.ip, 
-                    jwt: jwt                        
-                }
-                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
-                    response[:success] = true
-                    response[:w7_token] = jwt
-                    status 200
-                end
+                response = session_tokens user, owner
             else
                 response[:message] = "Email or password incorrect."
                 status 401
@@ -353,7 +347,7 @@ class Integrations < Sinatra::Base
         protected!
         status 400
 
-        response = {:success => false, :w7_token => @session}.to_json
+        response = {:success => false, :access_token => @session}.to_json
 
         begin 
             request.body.rewind
@@ -374,7 +368,7 @@ class Integrations < Sinatra::Base
 
                 if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
                     status 201 
-                    return {:success => true, :w7_token => @session}.to_json
+                    return {:success => true, :access_token => @session}.to_json
                 else
                     return response.to_json
                 end
@@ -413,7 +407,7 @@ class Integrations < Sinatra::Base
                 }  
                 if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
                     status 200
-                    return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
+                    return {:success => true, :access_token => @session, :github_token => provider_token}.to_json
                 else
                     return response.to_json
                 end
@@ -423,6 +417,25 @@ class Integrations < Sinatra::Base
             end
         rescue => e
             puts e
+        end
+    end
+
+    session_post = lambda do
+        status 401
+        begin
+            if params[:grant_type] && params[:refresh_token] && (params[:grant_type] == "refresh_token")
+                account = Account.new
+                filters = {:refresh => params[:refresh_token]}
+                user = account.get filters
+                owner = ((account.is_owner? user[:id]) || user[:admin])
+                response = session_tokens user, owner
+                return response.to_json
+            else
+                redirect to("/unauthorized")            
+            end
+        rescue => e
+            puts e
+            redirect to("/unauthorized")
         end
     end
 
@@ -1474,6 +1487,7 @@ class Integrations < Sinatra::Base
     post "/reset", &reset_post
     post "/accept", &accept_post
     post "/login", &login_post
+    post "/session", &session_post #refresh_token
     post "/session/github", &session_provider_github_post
     post "/session/linkedin", &session_provider_linkedin_post
     delete "/session", &session_delete

@@ -1,0 +1,15 @@
+<div class="fullscreen four-oh-four">
+    <div class="background"></div>
+    <div class="vertical-align-hold">
+        <div class="vertical-align-cell">
+            <div class="overview text-center">
+                <h1>Looks like we went too far</h1>
+                <h3>{{text}}</h3>
+
+                {{#unless session.isAuthenticated}}
+                    {{#link-to "login" class="btn btn-secondary rounded mt-4"}}<i class="fa fa-fw fa-sign-in"></i>Sign In{{/link-to}}
+                {{/unless}}
+            </div>
+        </div>
+    </div>
+</div>
