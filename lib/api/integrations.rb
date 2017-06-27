@@ -1469,7 +1469,7 @@ class Integrations < Sinatra::Base
     get_user_comments_created_by_skillset = lambda do
         if params[:user_id] && params[:skillset_id]
             activity = Activity.new
-            requests = activity.user_comments_created_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            requests = activity.user_comments_created_by_skillset params[:user_id], params[:skillset_id]
             return requests.to_json
         end
     end
@@ -1477,7 +1477,7 @@ class Integrations < Sinatra::Base
     get_user_comments_received_by_skillset = lambda do
         if params[:user_id] && params[:skillset_id]
             activity = Activity.new
-            requests = activity.user_comments_received_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            requests = activity.user_comments_received_by_skillset params[:user_id], params[:skillset_id]
             return requests.to_json
         end
     end
@@ -1485,7 +1485,7 @@ class Integrations < Sinatra::Base
     get_user_votes_cast_by_skillset = lambda do
         if params[:user_id] && params[:skillset_id]
             activity = Activity.new
-            requests = activity.user_votes_cast_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            requests = activity.user_votes_cast_by_skillset params[:user_id], params[:skillset_id]
             return requests.to_json
         end
     end
@@ -1493,7 +1493,7 @@ class Integrations < Sinatra::Base
     get_user_votes_received_by_skillset = lambda do
         if params[:user_id] && params[:skillset_id]
             activity = Activity.new
-            requests = activity.user_votes_received_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            requests = activity.user_votes_received_by_skillset params[:user_id], params[:skillset_id]
             return requests.to_json
         end
     end
@@ -1501,7 +1501,7 @@ class Integrations < Sinatra::Base
     get_user_contributions_created_by_skillset = lambda do
         if params[:user_id] && params[:skillset_id]
             activity = Activity.new
-            requests = activity.user_contributions_created_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            requests = activity.user_contributions_created_by_skillset params[:user_id], params[:skillset_id]
             return requests.to_json
         end
     end
@@ -1509,7 +1509,7 @@ class Integrations < Sinatra::Base
     get_user_contributions_selected_by_skillset = lambda do
         if params[:user_id] && params[:skillset_id]
             activity = Activity.new
-            requests = activity.user_contributions_selected_by_skillset_and_roles params[:user_id], params[:skillset_id]
+            requests = activity.user_contributions_selected_by_skillset params[:user_id], params[:skillset_id]
             return requests.to_json
         end
     end
