@@ -378,7 +378,7 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
 
 
         if ENV['INTEGRATIONS_INITIAL_USER_EMAIL']
-            User.create(:email => ENV['INTEGRATIONS_INITIAL_USER_EMAIL'], :admin => true, :confirmed => true)
+            User.create(:email => ENV['INTEGRATIONS_INITIAL_USER_EMAIL'], :admin => true, :first_name => "Adam", :confirmed => true)
         end
 
     end

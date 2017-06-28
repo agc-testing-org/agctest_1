@@ -9,9 +9,7 @@ export default Ember.Component.extend({
             var _this = this;
             this.get('session').authenticate('authenticator:torii', provider).then(function(){
                 _this.get('sessionAccount').loadCurrentUser();
-                if(provider === "linkedin"){
-                    _this.sendAction("refresh");
-                }
+                _this.sendAction("refresh");
             }).catch((reason) => {
                 console.log(reason);
             });
