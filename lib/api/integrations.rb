@@ -167,13 +167,9 @@ class Integrations < Sinatra::Base
 
         session_hash = {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => github_username, :github_token => github_token}.to_json
 
-        if user[:jwt] # session refresh does not require Bearer
-            puts "Expiring token -- "
+        if user[:jwt] && (account.get_key "session", user[:jwt]) # session refresh does not require Bearer
             account.save_token "session", user[:jwt], session_hash, 30 #expire old token in 30s 
         end
-
-        puts "======================"
-        puts "saving token #{jwt}"
 
         if (account.save_token "session", jwt, session_hash, expiration) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
             response = {

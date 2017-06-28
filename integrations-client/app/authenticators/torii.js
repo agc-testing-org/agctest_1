@@ -27,9 +27,7 @@ export default ToriiAuthenticator.extend({
                 //      auth.set('access_token',response.w7_token);
                 //    auth.save();
                 //
-                console.log(response);
-                console.log("AUTHENTICATED "+data.provider);
-                _this.get('sessionAccount').loadCurrentUser();
+
                 return {
                     access_token: response.access_token,
                     provider: data.provider

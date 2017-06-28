@@ -29,6 +29,7 @@ export default Ember.Route.extend(ApplicationRouteMixin,{
                 this.transitionTo("/lost");
                 return false;
             }
+
             if(error && error.errors[0].status === "404"){
                 this.transitionTo("/lost");
                 return false;
