@@ -1,12 +1,5 @@
 module Rack
     module Throttle
-
-        class HourlyRegister < Hourly
-             def allowed?(request)
-                return true
-             end
-        end
-
         #        class HourlyPosts < Hourly
         #            def allowed?(request)
         #               return true unless ((request.request_method == "POST") && ((request.path_info.include? "/votes") || (request.path_info.include? "/comments")||(request.path_info.include? "/skillsets")||(request.path_info.include? "/session")))
