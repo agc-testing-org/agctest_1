@@ -443,9 +443,11 @@ class Integrations < Sinatra::Base
                 account = Account.new
                 filters = {:refresh => params[:refresh_token]}
                 user = account.get filters
-                owner = ((account.is_owner? user[:id]) || user[:admin])
-                response = session_tokens user, owner
-                return response.to_json
+                if user
+                    owner = ((account.is_owner? user[:id]) || user[:admin])
+                    response = session_tokens user, owner
+                    return response.to_json
+                end
             else
                 redirect to("/unauthorized")            
             end

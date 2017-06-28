@@ -476,4 +476,22 @@ describe "API" do
             expect(last_response.status).to eq 200
         end
     end
+
+    describe "POST /session" do
+        fixtures :users, :user_teams, :seats
+        before(:each) do
+            @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            @original_jwt = @mysql_client.query(@query).first["jwt"]
+            post "/session?grant_type=refresh_token&refresh_token=#{users(:adam_confirmed).refresh}"
+            @res = JSON.parse(last_response.body)
+            @query = "select * from users where id = #{users(:adam_confirmed).id}"            
+        end
+
+        it_behaves_like "session_response"
+        it_behaves_like "new_session"
+
+        it "should add a TTL to the previous token" do
+            expect(@redis.ttl("session:#{@original_jwt}")).to be < 31
+        end
+    end
 end
