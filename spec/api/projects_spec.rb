@@ -144,6 +144,7 @@ describe "/projects" do
     end
 
     describe "POST /:id/refresh" do
+        skip "I don't think we're using this anymore..."
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }

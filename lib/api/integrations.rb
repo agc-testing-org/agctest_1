@@ -1585,7 +1585,7 @@ class Integrations < Sinatra::Base
     get "/projects", &projects_get
     get "/projects/:id", allows: [:id], &projects_get_by_id
 
-    post "/projects/:project_id/refresh", &refresh_post
+#    post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
     patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
     get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
