@@ -1,5 +1,6 @@
 class InitialDeploy < ActiveRecord::Migration[5.1]
     def change
+
         create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.integer "sprint_state_id", null: false
@@ -10,14 +11,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["contributor_id"], name: "index_comments_on_contributor_id"
             t.index ["sprint_state_id"], name: "index_comments_on_sprint_state_id"
             t.index ["user_id"], name: "index_comments_on_user_id"
-        end
-
-        add_foreign_key "comments", "contributors"
-        add_foreign_key "comments", "sprint_states"
-        add_foreign_key "comments", "users"
-
-        create_table "connection_states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-            t.string "name", null: false
         end
 
         create_table "contributors", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -33,9 +26,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["user_id"], name: "index_contributors_on_user_id"
         end
 
-        add_foreign_key "contributors", "sprint_states"
-        add_foreign_key "contributors", "users"
-
         create_table "logins", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.string "ip", null: false
@@ -44,8 +34,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["ip"], name: "index_logins_on_ip"
             t.index ["user_id"], name: "index_logins_on_user"
         end
-
-        add_foreign_key "logins", "users"
 
         create_table "plans", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.string "name", null: false
@@ -68,9 +56,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.integer "state_id", null: false
             t.datetime "created_at", null: false
         end
-
-        add_foreign_key "role_states", "roles"
-        add_foreign_key "role_states", "states"
 
         create_table "roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.string "name", null: false
@@ -98,9 +83,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["sprint_id"], name: "index_sprint_skillsets_on_sprint_id"
         end
 
-        add_foreign_key "sprint_skillsets", "skillsets"
-        add_foreign_key "sprint_skillsets", "sprints"
-
         create_table "sprint_states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "sprint_id", null: false
             t.integer "state_id", null: false
@@ -116,11 +98,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["sprint_id"], name: "index_sprint_states_on_sprint_id"
             t.index ["state_id"], name: "index_sprint_states_on_state_id"
         end
-
-        add_foreign_key "sprint_states", "contributors"
-        add_foreign_key "sprint_states", "sprints"
-        add_foreign_key "sprint_states", "states"
-        add_foreign_key "sprint_states", "users", column: "arbiter_id"
 
         create_table "sprint_timelines", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "sprint_id", null: false
@@ -145,14 +122,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["project_id"], name: "index_sprint_timelines_on_project_id"
         end
 
-        add_foreign_key "sprint_timelines", "comments"
-        add_foreign_key "sprint_timelines", "contributors"
-        add_foreign_key "sprint_timelines", "sprint_states"
-        add_foreign_key "sprint_timelines", "sprints"
-        add_foreign_key "sprint_timelines", "states"
-        add_foreign_key "sprint_timelines", "votes"
-        add_foreign_key "sprint_timelines", "projects" 
-
         create_table "sprints", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.integer "project_id", null: false
@@ -163,9 +132,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["project_id"], name: "index_sprints_on_project_id"
             t.index ["user_id"], name: "index_sprints_on_user_id"
         end
-
-        add_foreign_key "sprints", "projects"
-        add_foreign_key "sprints", "users"
 
         create_table "states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.string "name", null: false
@@ -178,7 +144,7 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
 
         create_table "teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.string "name", null: false
-            t.string "user_id", null: false
+            t.integer "user_id", null: false
             t.datetime "created_at", null: false
             t.datetime "updated_at", null: false
             t.integer "plan_id", default: 2, null: false
@@ -186,9 +152,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["user_id"], name: "index_teams_on_user_id"
         end
     
-        add_foreign_key "teams", "plans"
-        add_foreign_key "teams", "users"
-
         create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.integer "contact_id", null: false
@@ -223,8 +186,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["user_profile_id"], name: "index_user_positions_on_user_profile_id"
         end
         
-        add_foreign_key "user_positions", "user_profiles"
-
         create_table "user_profiles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.string "headline"
@@ -234,8 +195,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.datetime "updated_at", null: false
             t.index ["user_id"], name: "index_user_profiles_on_user_id"
         end
-
-        add_foreign_key "user_profiles", "users"
 
         create_table "user_roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
@@ -247,9 +206,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["user_id"], name: "index_user_roles_on_user_id"
         end
 
-        add_foreign_key "user_roles", "roles"
-        add_foreign_key "user_roles", "users"
-
         create_table "user_skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.integer "skillset_id", null: false
@@ -259,9 +215,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["skillset_id"], name: "index_user_skillsets_on_skillset_id"
             t.index ["user_id"], name: "index_user_skillsets_on_user_id"
         end
-
-        add_foreign_key "user_skillsets", "skillsets"
-        add_foreign_key "user_skillsets", "users"
 
         create_table "user_teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id"
@@ -279,10 +232,6 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["user_id"], name: "index_user_teams_on_user_id"
             t.index ["token"], name: "index_user_teams_on_token", unique: true
         end
-
-        add_foreign_key "user_teams", "teams"
-        add_foreign_key "user_teams", "users"
-        add_foreign_key "user_teams", "users", column: "sender_id"
 
         create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.string "email", null: false
@@ -316,10 +265,45 @@ class InitialDeploy < ActiveRecord::Migration[5.1]
             t.index ["user_id"], name: "index_votes_on_user_id"
         end
 
+        add_foreign_key "user_teams", "teams"
+        add_foreign_key "user_teams", "users"
+        add_foreign_key "user_teams", "users", column: "sender_id"
+        add_foreign_key "user_skillsets", "skillsets"
+        add_foreign_key "user_skillsets", "users"
+        add_foreign_key "user_profiles", "users"
+        add_foreign_key "user_positions", "user_profiles"
+        add_foreign_key "teams", "plans"
+        add_foreign_key "teams", "users"
+        add_foreign_key "sprints", "projects"
+        add_foreign_key "sprints", "users"
+        add_foreign_key "sprint_timelines", "comments"
+        add_foreign_key "sprint_timelines", "contributors"
+        add_foreign_key "sprint_timelines", "sprint_states"
+        add_foreign_key "sprint_timelines", "sprints"
+        add_foreign_key "sprint_timelines", "states"
+        add_foreign_key "sprint_timelines", "votes"
+        add_foreign_key "sprint_timelines", "projects" 
+        add_foreign_key "user_notifications", "sprint_timelines"
+        add_foreign_key "user_notifications", "users"
+        add_foreign_key "sprint_states", "contributors"
+        add_foreign_key "sprint_states", "sprints"
+        add_foreign_key "sprint_states", "states"
+        add_foreign_key "sprint_states", "users", column: "arbiter_id"
+        add_foreign_key "sprint_skillsets", "skillsets"
+        add_foreign_key "sprint_skillsets", "sprints"
+        add_foreign_key "logins", "users"
+        add_foreign_key "comments", "contributors"
+        add_foreign_key "comments", "sprint_states"
+        add_foreign_key "comments", "users"
+        add_foreign_key "contributors", "sprint_states"
+        add_foreign_key "contributors", "users"   
+        add_foreign_key "role_states", "roles"
+        add_foreign_key "role_states", "states"
+        add_foreign_key "user_roles", "roles"
+        add_foreign_key "user_roles", "users"
         add_foreign_key "votes", "contributors"
         add_foreign_key "votes", "sprint_states"
         add_foreign_key "votes", "users"
-
 
         Role.create(name: "product", :fa_icon => "fa-street-view")
         Role.create(name: "quality", :fa_icon => "fa-signal")
