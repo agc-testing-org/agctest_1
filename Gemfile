@@ -15,6 +15,7 @@ gem 'linkedin-oauth2', '~> 1.0'
 gem 'sidekiq'
 gem 'sidekiq-client-cli'
 gem 'whenever', :require => false
+gem 'improved-rack-throttle'
 
 group :development do
     gem 'passenger', '~> 5.0.30'

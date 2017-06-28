@@ -286,6 +286,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.string "token"
     t.string "github_username"
     t.string "last_name"
+    t.string "refresh"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

@@ -121,7 +121,8 @@ describe ".Account" do
             @type = "auth"
             @token = "1234567890"
             @value = "VALUE"
-            @res = @account.save_token @type, @token, @value
+            @expiration = 10
+            @res = @account.save_token @type, @token, @value, @expiration
         end
         it "should return true" do
             expect(@res).to be true
@@ -133,8 +134,8 @@ describe ".Account" do
             it "should save the value" do
                 expect(@redis.get("#{@type}:#{@token}")).to eq(@value)
             end
-            it "should add a TTL of 3 hours to the token" do
-                expect(@redis.ttl("#{@type}:#{@token}")).to eq(60*60*3)
+            it "should add a TTL of #{@expiration} seconds to the token" do
+                expect(@redis.ttl("#{@type}:#{@token}")).to eq(@expiration)
             end
         end
     end
@@ -230,7 +231,8 @@ describe ".Account" do
             @access_token = "123456"
             @session = "ABC"
             @provider_token = @account.create_token @id, @key, @access_token
-            @account.save_token "session", @session, {:key => @key}.to_json
+            @expiration = 10
+            @account.save_token "session", @session, {:key => @key}.to_json, @expiration
 
         end
         context "valid token" do

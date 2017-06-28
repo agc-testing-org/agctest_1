@@ -17,6 +17,7 @@ require 'git'
 require 'linkedin-oauth2'
 require 'sidekiq'
 require 'whenever'
+require 'rack/throttle'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -56,6 +57,9 @@ require_relative '../models/role_state.rb'
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 
+# Throttling
+require_relative 'rack'
+
 set :database, {
     adapter: "mysql2",  
     username: ENV['INTEGRATIONS_MYSQL_USERNAME'],
@@ -68,6 +72,32 @@ class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
 
+    redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
+    message = "you have hit our rate limit"
+    key_prefix = :t_
+
+    # Session-Related Routes (less liberal)
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 15, :rules => { :method => :post, :url => /register/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /(resend|forgot|reset|accept)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 20, :rules => { :method => :post, :url => /login/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
+
+    # Service-Based Routes
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 300, :rules => { :method => :get, :url => /(users|account)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :patch, :url => /(users|account)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 90, :rules => { :method => :post, :url => /(users|account|contributors)/ }
+
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 300, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams)/ }
+
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 90, :rules => { :method => :post, :url => /(user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 300, :rules => { :method => :get, :url => /(user-teams)/ }
+
+    # Other Routes
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 600, :rules => { :method => :get }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
+
     LinkedIn.configure do |config|
         config.client_id     = ENV["INTEGRATIONS_LINKEDIN_CLIENT_ID"]
         config.client_secret = ENV["INTEGRATIONS_LINKEDIN_CLIENT_SECRET"]
@@ -77,18 +107,18 @@ class Integrations < Sinatra::Base
     register Sinatra::StrongParams
 
     def protected!
+        @session = retrieve_token
         return if authorized?
         redirect to("/unauthorized")
     end
 
     def authorized?
-        @session = retrieve_token
         if @session
             account = Account.new
             begin
                 session_hash = account.get_key "session", @session
                 @session_hash = JSON.parse(session_hash)
-                if @session_hash
+                if @session_hash 
                     @key = @session_hash["key"]
                     @jwt_hash = account.validate_token @session, @key
                     if @jwt_hash
@@ -109,18 +139,10 @@ class Integrations < Sinatra::Base
     end
 
     def github_authorization
-        if @session_hash["github"]
+        if @session_hash["github_token"]
             account = Account.new
-            return account.unlock_github_token @session, retrieve_github_token 
+            return account.unlock_github_token @session, @session_hash["github_token"] 
         end 
-    end
-
-    def retrieve_github_token
-        if request.env["HTTP_AUTHORIZATION_GITHUB"]
-            return request.env["HTTP_AUTHORIZATION_GITHUB"].split("Bearer ")[1]
-        else
-            return nil
-        end
     end
 
     def retrieve_token
@@ -135,12 +157,60 @@ class Integrations < Sinatra::Base
         if field
             return field
         else
+            @session = retrieve_token
             if authorized?
                 return @session_hash["id"]
             else
                 status 404
                 return nil
             end
+        end
+    end
+
+    def session_tokens user, owner 
+
+        account = Account.new
+        user_secret = SecureRandom.hex(32) #session secret, not password
+        user_refresh = SecureRandom.hex(32)
+        expiration = 60 * 15 # 15 min
+        jwt = account.create_token user[:id], user_secret, user[:name]
+
+        github_access_token = nil
+        github_token = nil
+
+        if @session_hash && @session_hash["github_token"]
+            github_access_token = github_authorization
+            github_token = account.create_token user[:id], user_secret, github_access_token
+        end
+
+        update_fields = {
+            ip: request.ip,
+            jwt: jwt,
+            refresh: user_refresh
+        }
+
+        github_username = user[:github_username]
+        if @session_hash && @session_hash["github_username"]
+            github_username = @session_hash["github_username"]
+            update_fields[:github_username] = @session_hash["github_username"]
+        end
+
+        session_hash = {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => github_username, :github_token => github_token}.to_json
+
+        if user[:jwt] && (account.get_key "session", user[:jwt]) # session refresh does not require Bearer
+            account.save_token "session", user[:jwt], session_hash, 30 #expire old token in 30s 
+        end
+
+        if (account.save_token "session", jwt, session_hash, expiration) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+            response = {
+                :success => true,
+                :access_token => jwt,
+                :expires_at => (Time.now + expiration).to_i,
+                :expires_in => expiration,
+                :refresh_token => user_refresh
+            }
+            status 200
+            return response
         end
     end
 
@@ -235,20 +305,10 @@ class Integrations < Sinatra::Base
                         user = account.get user_params
                         if user
                             account.confirm_user user, fields[:password], fields[:firstName], request.ip
-                            
+
                             owner = ((account.is_owner? user[:id]) || user[:admin])
 
-                            user_secret = SecureRandom.hex(32) #session secret, not password
-                            jwt = account.create_token user[:id], user_secret, fields[:firstName]
-                            update_fields = {
-                                ip: request.ip,
-                                jwt: jwt
-                            }
-                            if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
-                                response[:success] = true
-                                response[:w7_token] = jwt
-                                status 201
-                            end
+                            response = session_tokens user, owner
                         else
                             response[:message] = "An error has occurred"
                         end
@@ -286,17 +346,7 @@ class Integrations < Sinatra::Base
 
                         owner = ((account.is_owner? user[:id]) || user[:admin])
 
-                        user_secret = SecureRandom.hex(32) #session secret, not password
-                        jwt = account.create_token user[:id], user_secret, nil 
-                        update_fields = {
-                            ip: request.ip,
-                            jwt: jwt
-                        }
-                        if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
-                            response[:success] = true
-                            response[:w7_token] = jwt 
-                            status 201
-                        end
+                        response = session_tokens user, owner
                     else
                         response[:message] = "This token has expired"
                     end
@@ -327,17 +377,7 @@ class Integrations < Sinatra::Base
 
                 owner = ((account.is_owner? user[:id]) || user[:admin]) 
 
-                user_secret = SecureRandom.hex(32) #session secret, not password
-                jwt = account.create_token user[:id], user_secret, user[:name]
-                update_fields = {
-                    ip: request.ip, 
-                    jwt: jwt                        
-                }
-                if (account.save_token "session", jwt, {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => user[:github_username]}.to_json) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
-                    response[:success] = true
-                    response[:w7_token] = jwt
-                    status 200
-                end
+                response = session_tokens user, owner
             else
                 response[:message] = "Email or password incorrect."
                 status 401
@@ -353,7 +393,7 @@ class Integrations < Sinatra::Base
         protected!
         status 400
 
-        response = {:success => false, :w7_token => @session}.to_json
+        response = {:success => false, :access_token => @session}.to_json
 
         begin 
             request.body.rewind
@@ -374,7 +414,7 @@ class Integrations < Sinatra::Base
 
                 if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
                     status 201 
-                    return {:success => true, :w7_token => @session}.to_json
+                    return {:success => true, :access_token => @session}.to_json
                 else
                     return response.to_json
                 end
@@ -398,38 +438,61 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            account = Account.new
-
             if fields[:grant_type]
-                access_token = account.github_code_for_token(fields[:auth_code])
 
-                repo = Repo.new
-                github = (repo.github_client access_token)
-                username = github.login
+                account = Account.new
+                filters = {:id => @session_hash["id"]}
+                user = account.get filters
 
-                provider_token = account.create_token @session_hash["id"], @key, access_token
-                update_fields = {
-                    github_username: username 
-                }  
-                if (account.save_token "session", @session, {:key => @key, :id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => true, :github_username => username}.to_json) && (account.update @session_hash["id"], update_fields)
-                    status 200
-                    return {:success => true, :w7_token => @session, :github_token => provider_token}.to_json
-                else
-                    return response.to_json
+                if user
+
+                    access_token = account.github_code_for_token(fields[:auth_code])
+
+                    repo = Repo.new
+                    github = (repo.github_client access_token)
+                    @session_hash["github_username"] = github.login
+
+                    provider_token = account.create_token @session_hash["id"], @key, access_token 
+                    @session_hash["github_token"] = provider_token
+
+                    response = (session_tokens user, @session_hash["owner"])
                 end
             else
                 status 500
-                return response.to_json
             end
         rescue => e
             puts e
+        end
+        return response.to_json
+    end
+
+    session_post = lambda do
+        status 401
+        begin
+            if params[:grant_type] && params[:refresh_token] && (params[:grant_type] == "refresh_token")
+                account = Account.new
+                filters = {:refresh => params[:refresh_token]}
+                user = account.get filters
+                if user
+                    owner = ((account.is_owner? user[:id]) || user[:admin])
+                    response = session_tokens user, owner
+                    return response.to_json
+                end
+            else
+                redirect to("/unauthorized")            
+            end
+        rescue => e
+            puts e
+            redirect to("/unauthorized")
         end
     end
 
     session_delete = lambda do
         protected!
         account = Account.new
-        if (account.delete_token "session", @session)
+        filters = {:jwt => @session}
+        user = account.get filters
+        if (account.delete_token "session", @session) && (user.update({:refresh => nil}))
             status 200
             return {:success => true}.to_json
         else
@@ -441,7 +504,7 @@ class Integrations < Sinatra::Base
     session_get = lambda do
         protected!
         status 200
-        return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => @session_hash["github"], :github_username => @session_hash["github_username"]}.to_json
+        return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => !@session_hash["github_token"].nil?, :github_username => @session_hash["github_username"]}.to_json
     end
 
     users_get_by_id = lambda do
@@ -754,6 +817,7 @@ class Integrations < Sinatra::Base
     end
 
     sprint_states_get = lambda do
+        @session = retrieve_token
         authorized?
         issue = Issue.new
         if @session_hash
@@ -1026,7 +1090,7 @@ class Integrations < Sinatra::Base
                     repo = Repo.new
                     query = {:project_id => project["id"], :user_id => @session_hash["id"] }
                     contributor = repo.get_contributor query
-                    repo.refresh @session, retrieve_github_token, contributor.id, contributor.sprint_state_id, project["org"], project["name"], username, contributor.repo, "master", "master", "master", false
+                    repo.refresh @session, @session_hash["github_token"], contributor.id, contributor.sprint_state_id, project["org"], project["name"], username, contributor.repo, "master", "master", "master", false
                     status = 200
                     response = contributor
                 else
@@ -1094,8 +1158,9 @@ class Integrations < Sinatra::Base
                             response[:id] = created
                             issue = Issue.new
                             sha = (issue.get_sprint_state sprint_state.id).sha
-                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id, false
-                            repo.refresh @session, retrieve_github_token, created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
+
+                            repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id, false
+                            repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
 
                             if sprint_state.state.name == "requirements design" && !contributor # only need to create doc if first time contributing
                                 idea = issue.get_sprint sprint_state.sprint_id 
@@ -1474,6 +1539,7 @@ class Integrations < Sinatra::Base
     post "/reset", &reset_post
     post "/accept", &accept_post
     post "/login", &login_post
+    post "/session", &session_post #refresh_token
     post "/session/github", &session_provider_github_post
     post "/session/linkedin", &session_provider_linkedin_post
     delete "/session", &session_delete
@@ -1540,9 +1606,9 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
 
-    get "/aggregate-comments", &comments_get
-    get "/aggregate-votes", &votes_get
-    get "/aggregate-contributors", &contributors_get
+    #    get "/aggregate-comments", &comments_get
+    #    get "/aggregate-votes", &votes_get
+    #    get "/aggregate-contributors", &contributors_get
 
     post "/teams", &teams_post
     get "/teams", &teams_get

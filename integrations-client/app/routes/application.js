@@ -16,6 +16,25 @@ export default Ember.Route.extend(ApplicationRouteMixin,{
 
     _loadCurrentUser() {
         return this.get('sessionAccount').loadCurrentUser();
+    },
+
+    actions: {
+        error(error, transition) {
+            if(error && error.errors[0].status === "403"){
+                this.transitionTo("/limit");
+                return false;
+            }
+            else if(error && error.errors[0].status === "401"){
+                //                            this.get('session').invalidate();
+                this.transitionTo("/login");
+                return false;
+            }
+
+            if(error && error.errors[0].status === "404"){
+                this.transitionTo("/lost");
+                return false;
+            }
+        }
     }
 
 });

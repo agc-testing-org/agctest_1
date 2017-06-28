@@ -73,9 +73,9 @@ class Account
         return Digest::MD5.hexdigest([user_and_client_secret, iat].join(':').to_s)
     end
 
-    def save_token type, token, value #type = auth OR user 
+    def save_token type, token, value, expiration #type = auth OR user 
         redis = redis_connection
-        return (redis.set("#{type}:#{token}", value) == "OK") && redis.expire("#{type}:#{token}", 60*60*3 ) #3 hours
+        return (redis.set("#{type}:#{token}", value) == "OK") && redis.expire("#{type}:#{token}", expiration )
     end
 
     def create_token user_id, user_secret, payload
