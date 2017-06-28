@@ -26,7 +26,7 @@ export default Ember.Route.extend(ApplicationRouteMixin,{
             }
             else if(error && error.errors[0].status === "401"){
                 //                            this.get('session').invalidate();
-                this.transitionTo("/lost");
+                this.transitionTo("/login");
                 return false;
             }
 

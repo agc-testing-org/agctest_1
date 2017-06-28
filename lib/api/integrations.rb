@@ -17,6 +17,7 @@ require 'git'
 require 'linkedin-oauth2'
 require 'sidekiq'
 require 'whenever'
+require 'rack/throttle'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -56,6 +57,9 @@ require_relative '../models/role_state.rb'
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 
+# Throttling
+require_relative 'rack'
+
 set :database, {
     adapter: "mysql2",  
     username: ENV['INTEGRATIONS_MYSQL_USERNAME'],
@@ -67,6 +71,32 @@ set :database, {
 class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
+
+    redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
+    message = "you have hit our rate limit"
+    key_prefix = :t_
+
+    # Session-Related Routes (less liberal)
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 15, :rules => { :method => :post, :url => /register/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /(resend|forgot|reset|accept)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 20, :rules => { :method => :post, :url => /login/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
+
+    # Service-Based Routes
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 300, :rules => { :method => :get, :url => /(users|account)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :patch, :url => /(users|account)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 90, :rules => { :method => :post, :url => /(users|account|contributors)/ }
+
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 300, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams)/ }
+
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 90, :rules => { :method => :post, :url => /(user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 300, :rules => { :method => :get, :url => /(user-teams)/ }
+
+    # Other Routes
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 600, :rules => { :method => :get }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
 
     LinkedIn.configure do |config|
         config.client_id     = ENV["INTEGRATIONS_LINKEDIN_CLIENT_ID"]
@@ -147,7 +177,7 @@ class Integrations < Sinatra::Base
 
         github_access_token = nil
         github_token = nil
- 
+
         if @session_hash && @session_hash["github_token"]
             github_access_token = github_authorization
             github_token = account.create_token user[:id], user_secret, github_access_token
@@ -158,7 +188,7 @@ class Integrations < Sinatra::Base
             jwt: jwt,
             refresh: user_refresh
         }
-        
+
         github_username = user[:github_username]
         if @session_hash && @session_hash["github_username"]
             github_username = @session_hash["github_username"]
@@ -1576,9 +1606,9 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
 
-    get "/aggregate-comments", &comments_get
-    get "/aggregate-votes", &votes_get
-    get "/aggregate-contributors", &contributors_get
+    #    get "/aggregate-comments", &comments_get
+    #    get "/aggregate-votes", &votes_get
+    #    get "/aggregate-contributors", &contributors_get
 
     post "/teams", &teams_post
     get "/teams", &teams_get
