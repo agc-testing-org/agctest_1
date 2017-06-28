@@ -33,7 +33,7 @@ describe "/aggregate-*" do
         context "no user_id" do
             context "signed in" do
                 before(:each) do
-                    get "/aggregate-comments",{}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    get "/aggregate-comments",{}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                 end
                 it_behaves_like "aggregate_comments"
@@ -74,7 +74,7 @@ describe "/aggregate-*" do
         context "no user_id" do
             context "signed in" do
                 before(:each) do
-                    get "/aggregate-votes",{}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    get "/aggregate-votes",{}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                 end
                 it_behaves_like "aggregate_votes"
@@ -117,7 +117,7 @@ describe "/aggregate-*" do
             context "signed in" do
                 before(:each) do
                     @mysql_client.query("update sprint_states set contributor_id = #{contributors(:adam_confirmed_1).id}")
-                    get "/aggregate-contributors",{}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    get "/aggregate-contributors",{}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                 end
                 it_behaves_like "aggregate_contributors"

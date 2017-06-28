@@ -34,7 +34,6 @@ export default Base.extend({
     },
 
     authenticate: function(options) {
-        console.log("AUTHENTICATING WIRED7");
         var _this = this;
         return new Ember.RSVP.Promise((resolve, reject) => {
             Ember.$.ajax({
@@ -50,8 +49,6 @@ export default Base.extend({
                 dataType: 'json'
             }).then(function(response) {
                 Ember.run(function() {
-                    console.log("AUTHENTICATED WIRED7");
-
                     const expiresAt = _this._absolutizeExpirationTime(response['expires_in']);
                     _this._scheduleAccessTokenRefresh(response['expires_in'], expiresAt, response['refresh_token']);
                     if (!isEmpty(expiresAt)) {
@@ -80,10 +77,6 @@ export default Base.extend({
                 expiresAt = new Date(now + expiresIn * 1000).getTime();
             }
             const offset = (Math.floor(Math.random() * 5) + 5) * 1000;
-            console.log("scheduling");
-            console.log(expiresAt);
-            console.log(offset);
-            console.log(now);
             if (!isEmpty(refreshToken) && !isEmpty(expiresAt) && expiresAt > now - offset) {
                 run.cancel(_this._refreshTokenTimeout);
                 delete _this._refreshTokenTimeout;

@@ -79,7 +79,7 @@ describe "/users" do
             before(:each) do
                 @position = user_positions(:adam_confirmed)
                 @profile = user_profiles(:adam_confirmed)
-                get "/users/me", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"} 
+                get "/users/me", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                 follow_redirect!
                 @res = JSON.parse(last_response.body)
             end 
@@ -117,7 +117,7 @@ describe "/users" do
         context "user_skillsets" do
             fixtures :user_skillsets
             before(:each) do
-                get "/users/me/skillsets", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                get "/users/me/skillsets", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 follow_redirect!
                 @res = JSON.parse(last_response.body)
             end
@@ -171,7 +171,7 @@ describe "/users" do
             context "skillset exists" do
                 before(:each) do
                     @active = false
-                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_skillsets").first
                 end
@@ -180,7 +180,7 @@ describe "/users" do
             context "skillset does not exist" do
                 before(:each) do
                     @active = true
-                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_skillsets").first
                 end
@@ -190,7 +190,7 @@ describe "/users" do
         context "non-authorized" do
             before(:each) do
                 @active = false
-                patch "/users/#{users(:adam).id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/users/#{users(:adam).id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 puts @res = JSON.parse(last_response.body)
             end
             it "should return 401" do
@@ -200,7 +200,7 @@ describe "/users" do
         context "lost 'active' key" do
             before(:each) do
                 @active = false
-                patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 puts @res = JSON.parse(last_response.body)
             end
             it "should return 400" do
@@ -253,7 +253,7 @@ describe "/users" do
         context "user_roles" do
             fixtures :user_roles
             before(:each) do
-                get "/users/me/roles", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                get "/users/me/roles", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 follow_redirect!
                 @res = JSON.parse(last_response.body)
             end
@@ -316,7 +316,7 @@ describe "/users" do
             context "role exists" do
                 before(:each) do
                     @active = false
-                    patch "/users/#{@user_id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    patch "/users/#{@user_id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_roles").first
                 end
@@ -326,7 +326,7 @@ describe "/users" do
         context "non-authorized" do
             before(:each) do
                 @active = false
-                patch "/users/#{users(:adam).id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                patch "/users/#{users(:adam).id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should return 401" do
