@@ -460,7 +460,9 @@ class Integrations < Sinatra::Base
     session_delete = lambda do
         protected!
         account = Account.new
-        if (account.delete_token "session", @session)
+        filters = {:jwt => @session}
+        user = account.get filters
+        if (account.delete_token "session", @session) && (user.update({:refresh => nil}))
             status 200
             return {:success => true}.to_json
         else

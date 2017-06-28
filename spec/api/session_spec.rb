@@ -458,7 +458,7 @@ describe "API" do
         end
     end
 
-    describe "DELETE /session" do
+    describe "DELETE /session", :focus => true do
         fixtures :users, :seats
         before(:each) do
             @password = "adam12345"
@@ -474,6 +474,9 @@ describe "API" do
         end
         it "should return 200" do
             expect(last_response.status).to eq 200
+        end
+        it "should delete refresh token" do
+            expect(@mysql_client.query("select * from users where jwt = '#{@access_token}'").first["refresh"]).to be nil
         end
     end
 
