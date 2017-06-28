@@ -233,7 +233,6 @@ class Issue
             SprintTimeline.where(query).each_with_index do |st,i|
                 response[i] = st.as_json
                 response[i][:sprint] = st.sprint.as_json
-                response[i][:label] = st.label.as_json
             end
             return response
         rescue => e

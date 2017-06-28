@@ -11,6 +11,5 @@ class User < ActiveRecord::Base
     has_one :user_profile
     has_many :user_skillsets
     has_many :user_notifications
-    has_many :user_contributors
     has_many :user_connections
 end

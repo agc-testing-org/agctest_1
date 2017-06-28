@@ -118,6 +118,7 @@ Shell 3
 Browser
     
     Go to https://localhost:3000
+    If this is your first deploy use the forgot password option on the application and you will receive an email at INTEGRATIONS_INITIAL_USER_EMAIL 
 
 Monitoring Background Jobs
 
