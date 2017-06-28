@@ -714,7 +714,7 @@ class Integrations < Sinatra::Base
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:org] && fields[:name]
                     issue = Issue.new
-                    project = issue.create_project fields[:org], fields[:name]
+                    project = issue.create_project @session_hash["admin"], fields[:org], fields[:name]
                     if project 
                         response = project 
                         status 201
@@ -1141,7 +1141,7 @@ class Integrations < Sinatra::Base
                             name = contributor.repo
                         end
 
-                        created = repo.create @session_hash["id"], project["id"], sprint_state.id, name, query
+                        created = repo.create @session_hash["id"], sprint_state.id, name, query
 
                         if !contributor
                             begin

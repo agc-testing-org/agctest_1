@@ -96,11 +96,12 @@ class Issue
         end
     end
 
-    def create_project org, name
+    def create_project user_id, org, name
         begin
             project = Project.create({
                 org: org,
-                name: name
+                name: name,
+                user_id: user_id
             })
             return project
         rescue => e

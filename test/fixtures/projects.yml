@@ -3,9 +3,11 @@ demo:
   name: "DEMO"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+  user: adam_confirmed
 
 demob:
   org: "ADAM123"
   name: "DEMOB"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+  user: adam_confirmed
