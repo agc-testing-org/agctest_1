@@ -1468,7 +1468,7 @@ class Integrations < Sinatra::Base
     end
 
     get_user_comments_created_by_skillset_and_roles = lambda do
-        user_id = params['id']
+        user_id = (default_to_signed params[:user_id])
         if user_id
             feedback = Feedback.new
             requests = feedback.user_comments_created_by_skillset_and_roles params
@@ -1477,7 +1477,7 @@ class Integrations < Sinatra::Base
     end
 
     get_user_comments_received_by_skillset_and_roles = lambda do
-        user_id = params['id']
+        user_id = (default_to_signed params[:user_id])
         if user_id
             feedback = Feedback.new
             requests = feedback.user_comments_received_by_skillset_and_roles params
@@ -1486,7 +1486,7 @@ class Integrations < Sinatra::Base
     end
 
     get_user_votes_cast_by_skillset_and_roles = lambda do
-        user_id = params['id']
+        user_id = (default_to_signed params[:user_id])
         if user_id
             feedback = Feedback.new
             requests = feedback.user_votes_cast_by_skillset_and_roles params
@@ -1495,7 +1495,7 @@ class Integrations < Sinatra::Base
     end
 
     get_user_votes_received_by_skillset_and_roles = lambda do
-        user_id = params['id']
+        user_id = (default_to_signed params[:user_id])
         if user_id
             feedback = Feedback.new
             requests = feedback.user_votes_received_by_skillset_and_roles params
@@ -1504,7 +1504,7 @@ class Integrations < Sinatra::Base
     end
 
     get_user_contributions_created_by_skillset_and_roles = lambda do
-        user_id = params['id']
+        user_id = (default_to_signed params[:user_id])
         if user_id
             feedback = Feedback.new
             requests = feedback.user_contributions_created_by_skillset_and_roles params
@@ -1513,7 +1513,7 @@ class Integrations < Sinatra::Base
     end
 
     get_user_contributions_selected_by_skillset_and_roles = lambda do
-        user_id = params['id']
+        user_id = (default_to_signed params[:user_id])
         if user_id
             feedback = Feedback.new
             requests = feedback.user_contributions_selected_by_skillset_and_roles params
@@ -1521,6 +1521,42 @@ class Integrations < Sinatra::Base
         end
     end
 
+    get_user_comments_created_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/comments?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_votes_cast_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/votes?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_contributions_created_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/contributors?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_comments_received_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/comments-received?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_votes_received_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/votes-received?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_contributions_selected_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/contributors-received?#{params.to_param}"
+        redirect to url
+    end
+    
     #API
 
     post "/register", &register_post
@@ -1555,13 +1591,20 @@ class Integrations < Sinatra::Base
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request
     get "/users/:id", allows: [:id], &users_get_by_id
-    
+
+    get "/users/me/comments", allows: [:skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles_by_me
+    get "/users/me/votes", allows: [:skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
+    get "/users/me/contributors", allows: [:skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
+    get "/users/me/comments-received", allows: [:skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
+    get "/users/me/votes-received", allows: [:skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
+    get "/users/me/contributors-received", allows: [:skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
+
     get "/users/:id/comments", allows: [:id, :skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles
     get "/users/:id/votes", allows: [:id, :skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles
     get "/users/:id/contributors", allows: [:id, :skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles
-    get "/users/:id/comments/received", allows: [:id, :skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles
-    get "/users/:id/votes/received", allows: [:id, :skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles
-    get "/users/:id/contributors/received", allows: [:id, :skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles
+    get "/users/:id/comments-received", allows: [:id, :skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles
+    get "/users/:id/votes-received", allows: [:id, :skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles
+    get "/users/:id/contributors-received", allows: [:id, :skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles
 
     get "/account/notifications", &get_user_notifications
     patch "/account/notifications/:id", &user_notifications_read 
