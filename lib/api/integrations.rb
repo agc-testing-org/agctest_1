@@ -66,6 +66,14 @@ set :database, {
     database: "integrations_#{ENV['RACK_ENV']}"
 }  
 
+Sidekiq.configure_server do |config|
+    config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
+end
+
+Sidekiq.configure_client do |config|
+    config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
+end
+
 class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
