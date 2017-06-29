@@ -4,7 +4,7 @@ packages:
     make: []
     git-all: []
     #mysql-devel: []
-    ruby-devel: []
+    #ruby-devel: []
 
 sources:
   /home/ec2-user: http://download.redis.io/releases/redis-3.2.4.tar.gz
