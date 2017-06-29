@@ -29,3 +29,8 @@ integrations-client/npm-debug.log*
 integrations-client/testem.log
 
 *.rdb
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
