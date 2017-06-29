@@ -91,7 +91,7 @@ Shell 1 (if redis server is not running)
 
 Shell 2 (project root)
     
-    rvm use ruby-2.4.0
+    rvm use ruby-2.3.0
     bundle install
     export RACK_ENV=development
     source ~/.bashrc
@@ -101,7 +101,7 @@ Shell 2 (project root)
 
 Shell 3 (project root)
 
-    rvm use ruby-2.4.0
+    rvm use ruby-2.3.0
     bundle install
     export RACK_ENV=development
     source ~/.bashrc

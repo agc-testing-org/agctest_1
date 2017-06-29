@@ -428,7 +428,9 @@ class Integrations < Sinatra::Base
     end
 
     session_provider_github_post = lambda do
+        puts request.env.inspect
         protected!
+        puts @session
         status 400
         response = {:success => false}
 

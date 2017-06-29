@@ -54,6 +54,8 @@ export default Base.extend({
         });
     },
 
+
+
     authenticate: function(options) {
         var _this = this;
         return new Ember.RSVP.Promise((resolve, reject) => {
@@ -64,10 +66,13 @@ export default Base.extend({
                     email: options.email,
                     token: options.token,
                     password: options.password,
-                    firstName: options.firstName
+                    firstName: options.firstName,
+                    auth_code: options.auth_code,
+                    grant_type: options.grant_type
                 }),
                 contentType: 'application/json;charset=utf-8',
-                dataType: 'json'
+                dataType: 'json',
+                headers: options.headers
             }).then(function(response) {
                 Ember.run(function() {
                     const expiresAt = _this._absolutizeExpirationTime(response['expires_in']);
