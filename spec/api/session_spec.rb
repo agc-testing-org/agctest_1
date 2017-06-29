@@ -410,6 +410,7 @@ describe "API" do
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
             it_behaves_like "session_response"
+            it_behaves_like "new_session"
             context "user_profile" do
                 before(:each) do
                     @user_profiles = @mysql_client.query("select * from user_profiles").first
