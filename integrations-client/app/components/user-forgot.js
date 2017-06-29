@@ -12,6 +12,7 @@ export default Component.extend({
     },   
     actions: {
         reset() {
+            var _this = this;
             var email = this.get("email");
             if(email && (email.length > 5)){
                 Ember.$.ajax({
@@ -23,7 +24,7 @@ export default Component.extend({
                 }).then(function(response) {
                     var res = JSON.parse(response);
                     if(res["success"] === true){
-                        this.set('errorMessage', "A reset link will be sent to "+email);
+                        _this.set('errorMessage', "A reset link will be sent to "+email);
                     }
                 }, function(xhr, status, error) {
                     var response = xhr.responseText;

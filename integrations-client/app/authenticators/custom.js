@@ -1,7 +1,21 @@
 import Ember from 'ember';
 import Base from 'ember-simple-auth/authenticators/base';
 
-const { RSVP, isEmpty, run, computed } = Ember;
+const {
+    RSVP,
+    isEmpty,
+    run,
+    computed,
+    makeArray,
+    assign: emberAssign,
+    merge,
+    A,
+    testing,
+    warn,
+    keys: emberKeys
+} = Ember;
+const assign = emberAssign || merge;
+const keys = Object.keys || emberKeys;
 
 export default Base.extend({
 
@@ -10,6 +24,13 @@ export default Base.extend({
     serverTokenRevocationEndpoint: null,
     clientId: null,
     serverTokenEndpoint: "/session",
+
+    tokenRefreshOffset: computed(function() {
+        const min = 5;
+        const max = 10;
+
+        return (Math.floor(Math.random() * (max - min)) + min) * 1000;
+    }).volatile(),
 
     restore(data) {
         var _this = this;
@@ -23,7 +44,7 @@ export default Base.extend({
                     reject();
                 }
             } else {
-                if (isEmpty(data['access_token'])) {
+                if (!_this._validate(data)) {
                     reject();
                 } else {
                     _this._scheduleAccessTokenRefresh(data['expires_in'], data['expires_at'], data['refresh_token']);
@@ -32,6 +53,8 @@ export default Base.extend({
             }
         });
     },
+
+
 
     authenticate: function(options) {
         var _this = this;
@@ -43,21 +66,22 @@ export default Base.extend({
                     email: options.email,
                     token: options.token,
                     password: options.password,
-                    firstName: options.firstName
+                    firstName: options.firstName,
+                    auth_code: options.auth_code,
+                    grant_type: options.grant_type
                 }),
                 contentType: 'application/json;charset=utf-8',
-                dataType: 'json'
+                dataType: 'json',
+                headers: options.headers
             }).then(function(response) {
                 Ember.run(function() {
                     const expiresAt = _this._absolutizeExpirationTime(response['expires_in']);
                     _this._scheduleAccessTokenRefresh(response['expires_in'], expiresAt, response['refresh_token']);
                     if (!isEmpty(expiresAt)) {
-                        response = Ember.merge(response, { 'expires_at': expiresAt });
+                        response = assign(response, { 'expires_at': expiresAt });
                     }
 
-                    resolve({
-                        access_token: response.access_token
-                    });
+                    resolve(response);
                 });
             }, function(xhr, status, error) {
                 var response = xhr.responseText;
@@ -76,8 +100,16 @@ export default Base.extend({
             if (isEmpty(expiresAt) && !isEmpty(expiresIn)) {
                 expiresAt = new Date(now + expiresIn * 1000).getTime();
             }
-            const offset = (Math.floor(Math.random() * 5) + 5) * 1000;
+            else{
+                console.log("expiresAt: " + expiresAt);
+            }
+            const offset = this.get('tokenRefreshOffset'); 
+            console.log(offset);
+            console.log(expiresAt);
+            console.log("checking");
+            console.log(expiresAt+" > "+ (now - offset));
             if (!isEmpty(refreshToken) && !isEmpty(expiresAt) && expiresAt > now - offset) {
+                console.log("scheduling");
                 run.cancel(_this._refreshTokenTimeout);
                 delete _this._refreshTokenTimeout;
                 if (!Ember.testing) {
@@ -91,23 +123,23 @@ export default Base.extend({
         var _this = this;
         const data                = { 'grant_type': 'refresh_token', 'refresh_token': refreshToken };
         const serverTokenEndpoint = this.get('serverTokenEndpoint'); 
-            return new RSVP.Promise((resolve, reject) => {
-                _this.makeRequest(serverTokenEndpoint, data).then((response) => {
-                    run(() => {
-                        expiresIn       = response['expires_in'] || expiresIn;
-                        refreshToken    = response['refresh_token'] || refreshToken;
-                        const expiresAt = _this._absolutizeExpirationTime(expiresIn);
-                        const data      = Ember.merge(response, { 'expires_in': expiresIn, 'expires_at': expiresAt, 'refresh_token': refreshToken });
-                        _this._scheduleAccessTokenRefresh(expiresIn, null, refreshToken);
-                        console.log(data);
-                        _this.trigger('sessionDataUpdated', data);
-                        resolve(data);
-                    });
-                }, (xhr, status, error) => {
-                    Ember.Logger.warn(`Access token could not be refreshed - server responded with ${error}.`);
-                    reject();
+        return new RSVP.Promise((resolve, reject) => {
+            _this.makeRequest(serverTokenEndpoint, data).then((response) => {
+                run(() => {
+                    expiresIn       = response['expires_in'] || expiresIn;
+                    refreshToken    = response['refresh_token'] || refreshToken;
+                    const expiresAt = _this._absolutizeExpirationTime(expiresIn);
+                    const data      = assign(response, { 'expires_in': expiresIn, 'expires_at': expiresAt, 'refresh_token': refreshToken }); 
+                    _this._scheduleAccessTokenRefresh(expiresIn, null, refreshToken);
+                    console.log(data);
+                    _this.trigger('sessionDataUpdated', data);
+                    resolve(data);
                 });
+            }, (xhr, status, error) => {
+                Ember.Logger.warn(`Access token could not be refreshed - server responded with ${error}.`);
+                reject();
             });
+        });
     },
 
     invalidate: function() {
@@ -146,4 +178,13 @@ export default Base.extend({
 
         return Ember.$.ajax(options);
     },
+
+    rejectWithXhr: computed.deprecatingAlias('rejectWithResponse', {
+        id: `ember-simple-auth.authenticator.reject-with-xhr`,
+        until: '2.0.0'
+    }),
+
+    _validate(data) {
+        return !isEmpty(data['access_token']);
+    }
 });

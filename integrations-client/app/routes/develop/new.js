@@ -6,18 +6,19 @@ export default Ember.Route.extend({
         error(error, transition) {
             console.log(error);
             if (error && error.errors && error.errors[0].status === '404') {
-               // this.transitionTo('home');
+                // this.transitionTo('home');
             } else {
                 return true;
             }
+        },
+        refresh(){
+            console.log("refreshing router");
+            this.refresh();
         }
     },
     model: function(params){
-        this.store.adapterFor('event').set('namespace', 'projects/' + params.name.split("-")[0] );
         return Ember.RSVP.hash({
-            states: this.store.findAll('state'),
-            project: this.store.find('project',params.name.split("-")[0]),
-            events: this.store.findAll('event'),
+            repositories: this.store.findAll('repository'),
         });
     }
 });

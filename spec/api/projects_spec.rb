@@ -34,6 +34,11 @@ describe "/projects" do
                 expect(@projects[i]["name"]).to eq(project_result["name"])
             end
         end
+        it "should return user_id" do
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["user_id"]).to eq(project_result["user_id"])
+            end
+        end
     end
 
     shared_examples_for "sprint_timelines" do
@@ -99,7 +104,7 @@ describe "/projects" do
     end 
 
     describe "GET /:id" do
-        fixtures :sprints, :labels, :states, :projects, :sprint_timelines
+        fixtures :sprints, :states, :projects, :sprint_timelines
         before(:each) do
             project_id = projects(:demo).id
             get "/projects/#{project_id}"
@@ -111,7 +116,7 @@ describe "/projects" do
 
 
     describe "GET /:id/events" do
-        fixtures :sprints, :labels, :states, :projects, :sprint_timelines
+        fixtures :sprints, :states, :projects, :sprint_timelines
         context "no filter" do
             before(:each) do
                 project_id = projects(:demo).id
@@ -139,6 +144,7 @@ describe "/projects" do
     end
 
     describe "POST /:id/refresh" do
+        skip "I don't think we're using this anymore..."
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }

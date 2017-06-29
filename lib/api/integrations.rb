@@ -37,7 +37,6 @@ require_relative '../models/sprint_skillset.rb'
 require_relative '../models/user_skillset.rb'
 require_relative '../models/sprint_timeline.rb'
 require_relative '../models/state.rb'
-require_relative '../models/label.rb'
 require_relative '../models/contributor.rb'
 require_relative '../models/project.rb'
 require_relative '../models/sprint_state.rb'
@@ -51,7 +50,6 @@ require_relative '../models/user_profile.rb'
 require_relative '../models/user_position.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
-require_relative '../models/connection_state.rb'
 require_relative '../models/role_state.rb' 
 
 # Workers
@@ -67,6 +65,14 @@ set :database, {
     host: ENV['INTEGRATIONS_MYSQL_HOST'],
     database: "integrations_#{ENV['RACK_ENV']}"
 }  
+
+Sidekiq.configure_server do |config|
+    config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
+end
+
+Sidekiq.configure_client do |config|
+    config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
+end
 
 class Integrations < Sinatra::Base
 
@@ -399,29 +405,38 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            account = Account.new 
-            access_token = account.linkedin_code_for_token(fields[:auth_code])
+            account = Account.new
 
-            #Skip storing linkedin token.. 
-            #for now just pull what we can from the service and drop the token
+            account = Account.new
+            filters = {:id => @session_hash["id"]}
+            user = account.get filters
 
-            linkedin = (account.linkedin_client access_token)
-            pulled = account.pull_linkedin_profile linkedin
+            if user
+                access_token = account.linkedin_code_for_token(fields[:auth_code])
 
-            if pulled
+                #Skip storing linkedin token.. 
+                #for now just pull what we can from the service and drop the token
 
-                profile_id = account.post_linkedin_profile @session_hash["id"], pulled
+                linkedin = (account.linkedin_client access_token)
+                pulled = account.pull_linkedin_profile linkedin
 
-                if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
-                    status 201 
-                    return {:success => true, :access_token => @session}.to_json
+                if pulled
+
+                    profile_id = account.post_linkedin_profile @session_hash["id"], pulled
+
+                    if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
+                        status 201 
+                        response = (session_tokens user, @session_hash["owner"]) 
+                        return response.to_json
+                    else
+                        return response.to_json
+                    end
                 else
                     return response.to_json
                 end
             else
                 return response.to_json
             end
-
         rescue => e
             puts e
             return response.to_json
@@ -431,6 +446,7 @@ class Integrations < Sinatra::Base
 
     session_provider_github_post = lambda do
         protected!
+        puts @session
         status 400
         response = {:success => false}
 
@@ -716,7 +732,7 @@ class Integrations < Sinatra::Base
                 fields = JSON.parse(request.body.read, :symbolize_names => true)
                 if fields[:org] && fields[:name]
                     issue = Issue.new
-                    project = issue.create_project fields[:org], fields[:name]
+                    project = issue.create_project @session_hash["admin"], fields[:org], fields[:name]
                     if project 
                         response = project 
                         status 201
@@ -1143,7 +1159,7 @@ class Integrations < Sinatra::Base
                             name = contributor.repo
                         end
 
-                        created = repo.create @session_hash["id"], project["id"], sprint_state.id, name, query
+                        created = repo.create @session_hash["id"], sprint_state.id, name, query
 
                         if !contributor
                             begin
@@ -1587,7 +1603,7 @@ class Integrations < Sinatra::Base
     get "/projects", &projects_get
     get "/projects/:id", allows: [:id], &projects_get_by_id
 
-    post "/projects/:project_id/refresh", &refresh_post
+    #    post "/projects/:project_id/refresh", &refresh_post
     post "/projects/:project_id/contributors", &contributors_post
     patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
     get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
