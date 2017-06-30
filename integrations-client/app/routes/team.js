@@ -10,7 +10,6 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             }
         },
         refresh(){
-            console.log("refreshing router");
             this.refresh();
         }
     },

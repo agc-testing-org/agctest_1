@@ -12,7 +12,6 @@ export default Ember.Route.extend({
             }
         },
         refresh(){
-            console.log("refreshing router");
             this.refresh();
         }
     },

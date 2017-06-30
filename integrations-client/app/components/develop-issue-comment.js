@@ -22,14 +22,6 @@ export default Ember.Component.extend({
                     }).save().then(function(payload) {
                         store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
                         _this.set("comment",null);
-                        //                  console.log(payload);
-                        //   console.log("refreshing");
-                        // _this.sendAction("refresh");
-                        //   store.push({
-                        //       data: {
-                        //       id
-                        //    }
-                        // });
                     });
 
                 }
@@ -68,7 +60,6 @@ export default Ember.Component.extend({
                 project_id: project_id
             }).save().then(function(payload) {
                 store.peekRecord('sprint-state',sprint_state_id).set('winner',payload.get("id"));
-                console.log("refreshing");                    
                 _this.sendAction("refresh");                                  
             });
         },
@@ -82,7 +73,6 @@ export default Ember.Component.extend({
                 project_id: project_id
             }).save().then(function(payload) {
                 store.peekRecord('sprint-state',sprint_state_id).set('merge',payload.get("merged"));
-                console.log("refreshing");                    
                 _this.sendAction("refresh");                                  
             });
         }

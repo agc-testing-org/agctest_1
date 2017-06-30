@@ -151,6 +151,9 @@ label{
 .dropdown-menu{
     width:100%;
 }
+.orange{
+    color: orange;
+}
 .text-muted{
     color: #a5a5a5;
 }

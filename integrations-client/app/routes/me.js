@@ -7,7 +7,6 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
     actions: {
         refresh(){
-            console.log("refreshing router");
             this.refresh();
         }
     },

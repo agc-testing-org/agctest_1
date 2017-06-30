@@ -18,7 +18,6 @@ export default Component.extend({
             var project = store.createRecord('contributor', {
                 sprint_state_id: sprint_state_id
             }).save().then(function() {
-                console.log("refreshing");
                 _this.sendAction("refresh");
             });
         },
