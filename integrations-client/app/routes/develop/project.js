@@ -13,11 +13,9 @@ export default Ember.Route.extend({
         }
     },
     model: function(params){
-        this.store.adapterFor('event').set('namespace', 'projects/' + params.name.split("-")[0] );
         return Ember.RSVP.hash({
             states: this.store.findAll('state'),
-            project: this.store.find('project',params.name.split("-")[0]),
-            events: this.store.findAll('event'),
+            project: this.store.find('project',params.name.split("-")[0])
         });
     }
 });

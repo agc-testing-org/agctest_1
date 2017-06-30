@@ -124,7 +124,7 @@ describe "/teams" do
             fixtures :teams, :user_teams
             before(:each) do
                 get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user}")
+                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} AND user_teams.accepted = true")
                 @teams = JSON.parse(last_response.body)
             end
             it_behaves_like "teams"

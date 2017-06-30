@@ -332,7 +332,7 @@ class Account
         begin 
             return Team.joins(:user_teams).where({
                 "user_teams.user_id" => user_id,
-                #"user_teams.accepted" => true #allow team to show for registered invites...
+                "user_teams.accepted" => true #don't allow team to show for registered invites...
             })
         rescue => e
             puts e
