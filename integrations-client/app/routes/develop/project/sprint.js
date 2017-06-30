@@ -16,16 +16,17 @@ export default Ember.Route.extend({
         }
     },
     model: function(params){
+
         this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
+        var skillsets = this.store.query('skillset', {});
+        this.store.adapterFor('skillset').set('namespace','');
 
         return Ember.RSVP.hash({
             id: params.id,
             project: this.modelFor("develop.project").project,
             states: this.modelFor("develop.project").states,
             sprint: this.store.findRecord('sprint', params.id),
-            skillsets: this.store.query('skillset', {
-
-            }),
+            skillsets: skillsets, 
             sprint_states: this.store.query('sprint-state', {
                 sprint_id: params.id
             }),
