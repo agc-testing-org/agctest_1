@@ -443,7 +443,7 @@ class Integrations < Sinatra::Base
 
     session_provider_github_post = lambda do
         protected!
-        puts @session
+
         status 400
         response = {:success => false}
 
