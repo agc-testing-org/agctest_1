@@ -100,16 +100,8 @@ export default Base.extend({
             if (isEmpty(expiresAt) && !isEmpty(expiresIn)) {
                 expiresAt = new Date(now + expiresIn * 1000).getTime();
             }
-            else{
-                console.log("expiresAt: " + expiresAt);
-            }
             const offset = this.get('tokenRefreshOffset'); 
-            console.log(offset);
-            console.log(expiresAt);
-            console.log("checking");
-            console.log(expiresAt+" > "+ (now - offset));
             if (!isEmpty(refreshToken) && !isEmpty(expiresAt) && expiresAt > now - offset) {
-                console.log("scheduling");
                 run.cancel(_this._refreshTokenTimeout);
                 delete _this._refreshTokenTimeout;
                 if (!Ember.testing) {
@@ -131,7 +123,6 @@ export default Base.extend({
                     const expiresAt = _this._absolutizeExpirationTime(expiresIn);
                     const data      = assign(response, { 'expires_in': expiresIn, 'expires_at': expiresAt, 'refresh_token': refreshToken }); 
                     _this._scheduleAccessTokenRefresh(expiresIn, null, refreshToken);
-                    console.log(data);
                     _this.trigger('sessionDataUpdated', data);
                     resolve(data);
                 });
@@ -143,7 +134,6 @@ export default Base.extend({
     },
 
     invalidate: function() {
-        console.log("SIGNED OUT");
         return Ember.RSVP.resolve();
     },
 

@@ -21,7 +21,6 @@ export default Component.extend({
             else {
                 obj.set("active",true); 
             }
-            console.log(obj.get("name")+ " set to "+obj.get("active"));
         },
         accept(){
             var password = this.get("password");
@@ -79,7 +78,6 @@ export default Component.extend({
                     }).then(function(response) {                                                                        
                         var res = JSON.parse(response);
                         if(res["success"] === true){
-                            console.log("REGISTERED");
                             _this.set("registered",true);
                         }
                         else {

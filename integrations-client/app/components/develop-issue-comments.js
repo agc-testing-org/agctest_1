@@ -14,7 +14,6 @@ export default Ember.Component.extend({
             if(yesNo){
                 number = this.get("comments").toArray().length;
             }
-            console.log(number);
             this.set("count",number);
             this.set("showingAll",yesNo);
         }

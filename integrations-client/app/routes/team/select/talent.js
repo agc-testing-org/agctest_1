@@ -4,7 +4,6 @@ import UnAuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-
 export default Ember.Route.extend({
     actions: {
         refresh(){
-            console.log("refreshing router");
             this.refresh();
         }
     },
