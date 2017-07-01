@@ -396,7 +396,7 @@ class Integrations < Sinatra::Base
         protected!
         status 400
 
-        response = {:success => false}.to_json
+        response = {:success => false}
 
         begin 
             request.body.rewind
@@ -412,17 +412,17 @@ class Integrations < Sinatra::Base
 
                 #Skip storing linkedin token.. 
                 #for now just pull what we can from the service and drop the token
-
-                linkedin = (account.linkedin_client access_token)
-                pulled = account.pull_linkedin_profile linkedin
-
                 profile_id = nil
-
-                if pulled
-                    profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-
-                    if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
-                        status 201
+                if access_token
+                    linkedin = (account.linkedin_client access_token)
+                    if linkedin
+                        pulled = account.pull_linkedin_profile linkedin
+                        if pulled
+                            profile_id = account.post_linkedin_profile @session_hash["id"], pulled
+                            if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
+                                status 201
+                            end
+                        end
                     end
                 end
                 # always return tokens, unless user doesn't exist in first place
@@ -454,15 +454,18 @@ class Integrations < Sinatra::Base
 
             if user
                 status 200
+                provider_token = nil
                 access_token = account.github_code_for_token(fields[:auth_code])
+                if access_token
+                    repo = Repo.new
+                    github = (repo.github_client access_token)
+                    if github
+                        @session_hash["github_username"] = github.login
 
-                repo = Repo.new
-                github = (repo.github_client access_token)
-                @session_hash["github_username"] = github.login
-
-                provider_token = account.create_token @session_hash["id"], @key, access_token 
-                @session_hash["github_token"] = provider_token
-
+                        provider_token = account.create_token @session_hash["id"], @key, access_token 
+                        @session_hash["github_token"] = provider_token
+                    end
+                end
                 response = (session_tokens user, @session_hash["owner"])
                 response[:success] = !provider_token.nil?
                 return response.to_json
