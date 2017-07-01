@@ -13,8 +13,6 @@ export default Ember.Service.extend({
         return new RSVP.Promise((resolve, reject) => {
             const authenticated = this.get('session.isAuthenticated');
             if (authenticated) {
-
-                console.log("AUTHENTICATED");
                 var store = _this.get('store');
                 store.adapterFor('session').set('namespace', ''); 
                 return store.queryRecord('session',{ reload: shouldReload }).then((account) => {
