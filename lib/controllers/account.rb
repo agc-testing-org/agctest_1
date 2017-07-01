@@ -5,11 +5,21 @@ class Account
     end
 
     def linkedin_client access_token
-        return LinkedIn::API.new(access_token)
+        begin
+            return LinkedIn::API.new(access_token)
+        rescue => e
+            puts e
+            return nil
+        end
     end
 
     def pull_linkedin_profile client
-        return client.profile(fields: ["headline", "location","summary","positions"])
+        begin
+            return client.profile(fields: ["headline", "location","summary","positions"])
+        rescue => e
+            puts e
+            return nil
+        end
     end
 
     def post_linkedin_profile user_id, profile

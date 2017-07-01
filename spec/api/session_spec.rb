@@ -2,19 +2,28 @@ require 'spec_helper'
 
 describe "API" do
     shared_examples_for "session_response" do
-        it "should return success = true" do
-            expect(@res["success"]).to eq(true)
-        end
         it "should return access token" do
             expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["access_token"])
         end
+        if @password
+            it "should save new password" do
+                expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
+            end
+        end
+        it "should return refresh token" do
+            expect(@mysql_client.query(@query).first["refresh"]).to eq @res["refresh_token"]
+        end
+        it "should return expires_in" do
+            expect(@redis.ttl("session:#{@res["access_token"]}")).to eq @res["expires_in"]
+        end
+
     end
     shared_examples_for "new_session" do
         it "should save access token in redis" do 
             expect(@redis.exists("session:#{@res["access_token"]}")).to be true
         end
         it "should save user id in redis" do
-             expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["id"]).to eq(@mysql_client.query(@query).first["id"])
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["id"]).to eq(@mysql_client.query(@query).first["id"])
         end
         it "should save user admin status in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["admin"]).to eq(!@mysql_client.query(@query).first["admin"].zero?)
@@ -28,19 +37,8 @@ describe "API" do
         it "should save github_username in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["github_username"]).to eq(@mysql_client.query(@query).first["github_username"])
         end
-        it "should return owner" do
+        it "should save owner in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["owner"]).to_not be nil
-        end
-        if @password
-            it "should save new password" do
-                expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
-            end
-        end
-        it "should return refresh token" do
-            expect(@mysql_client.query(@query).first["refresh"]).to eq @res["refresh_token"]
-        end
-        it "should return expires_in" do
-            expect(@redis.ttl("session:#{@res["access_token"]}")).to eq @res["expires_in"]
         end
     end
 
@@ -348,7 +346,27 @@ describe "API" do
             @access_token = res["access_token"]
             @username = "adam_on_github"
         end
-        context "github" do
+        context "failure" do
+            before(:each) do
+                @code = "123"
+                @github_access_token = "ACCESS123"
+
+                Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
+                    :access_token => nil 
+                }.to_json, object_class: OpenStruct) }
+                Octokit::Client.any_instance.stub(:login) { @username }
+
+                post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it_behaves_like "session_response" 
+            it_behaves_like "new_session"
+            it "should return success = false" do
+                expect(@res["success"]).to be false 
+            end
+        end
+        context "success" do
             before(:each) do
                 @code = "123"
                 @github_access_token = "ACCESS123"
@@ -364,6 +382,9 @@ describe "API" do
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
+            it "should return success = true" do
+                expect(@res["success"]).to be true
+            end 
             context "redis" do
                 it "should save github token" do
                     account = Account.new
@@ -388,7 +409,24 @@ describe "API" do
             res = JSON.parse(last_response.body)
             @access_token = res["access_token"]
         end
-        context "linkedin" do
+        context "failure" do
+            before(:each) do
+                access_token = "ABC"
+                code = "123"
+                LinkedIn::OAuth2.any_instance.stub(:get_access_token) { JSON.parse({
+                    :token => nil
+                }.to_json, object_class: OpenStruct) }
+                post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it_behaves_like "session_response"
+            it_behaves_like "new_session"
+            it "should return success = false" do
+                expect(@res["success"]).to be false
+            end
+        end
+        context "success" do
             before(:each) do
                 access_token = "ABC"
                 code = "123"
@@ -411,6 +449,9 @@ describe "API" do
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
+            it "should return success = true" do
+                expect(@res["success"]).to be true
+            end
             context "user_profile" do
                 before(:each) do
                     @user_profiles = @mysql_client.query("select * from user_profiles").first
@@ -459,7 +500,7 @@ describe "API" do
         end
     end
 
-    describe "DELETE /session", :focus => true do
+    describe "DELETE /session" do
         fixtures :users, :seats
         before(:each) do
             @password = "adam12345"

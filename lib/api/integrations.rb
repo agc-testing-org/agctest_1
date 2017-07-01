@@ -396,49 +396,46 @@ class Integrations < Sinatra::Base
         protected!
         status 400
 
-        response = {:success => false, :access_token => @session}.to_json
+        response = {:success => false}
 
         begin 
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
             account = Account.new
-
-            account = Account.new
             filters = {:id => @session_hash["id"]}
             user = account.get filters
 
             if user
+                status 200
                 access_token = account.linkedin_code_for_token(fields[:auth_code])
 
                 #Skip storing linkedin token.. 
                 #for now just pull what we can from the service and drop the token
-
-                linkedin = (account.linkedin_client access_token)
-                pulled = account.pull_linkedin_profile linkedin
-
-                if pulled
-
-                    profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-
-                    if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
-                        status 201 
-                        response = (session_tokens user, @session_hash["owner"]) 
-                        return response.to_json
-                    else
-                        return response.to_json
+                profile_id = nil
+                if access_token
+                    linkedin = (account.linkedin_client access_token)
+                    if linkedin
+                        pulled = account.pull_linkedin_profile linkedin
+                        if pulled
+                            profile_id = account.post_linkedin_profile @session_hash["id"], pulled
+                            if profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0]) #only current position available for now
+                                status 201
+                            end
+                        end
                     end
-                else
-                    return response.to_json
                 end
-            else
+                # always return tokens, unless user doesn't exist in first place
+                response = (session_tokens user, @session_hash["owner"]) 
+                response[:success] = !profile_id.nil?
                 return response.to_json
+            else
+                redirect to("/unauthorized")
             end
         rescue => e
             puts e
             return response.to_json
         end
-
     end
 
     session_provider_github_post = lambda do
@@ -451,32 +448,34 @@ class Integrations < Sinatra::Base
             request.body.rewind
             fields = JSON.parse(request.body.read, :symbolize_names => true)
 
-            if fields[:grant_type]
+            account = Account.new
+            filters = {:id => @session_hash["id"]}
+            user = account.get filters
 
-                account = Account.new
-                filters = {:id => @session_hash["id"]}
-                user = account.get filters
-
-                if user
-
-                    access_token = account.github_code_for_token(fields[:auth_code])
-
+            if user
+                status 200
+                provider_token = nil
+                access_token = account.github_code_for_token(fields[:auth_code])
+                if access_token
                     repo = Repo.new
                     github = (repo.github_client access_token)
-                    @session_hash["github_username"] = github.login
+                    if github
+                        @session_hash["github_username"] = github.login
 
-                    provider_token = account.create_token @session_hash["id"], @key, access_token 
-                    @session_hash["github_token"] = provider_token
-
-                    response = (session_tokens user, @session_hash["owner"])
+                        provider_token = account.create_token @session_hash["id"], @key, access_token 
+                        @session_hash["github_token"] = provider_token
+                    end
                 end
+                response = (session_tokens user, @session_hash["owner"])
+                response[:success] = !provider_token.nil?
+                return response.to_json
             else
-                status 500
+                redirect to("/unauthorized")
             end
         rescue => e
             puts e
+            return response.to_json
         end
-        return response.to_json
     end
 
     session_post = lambda do
