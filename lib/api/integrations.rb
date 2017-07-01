@@ -217,26 +217,39 @@ class Integrations < Sinatra::Base
         end
     end
 
-    # API
-    forgot_post = lambda do
-        status 400
-        response = {:success => false}
+    def check_required_field field, message
+        if field
+            return true
+        else
+            return_error message
+        end
+    end
+
+    def return_error message
+        response = {:errors => [{
+            :detail => message        
+        }]}
+        halt 400, response.to_json
+    end
+
+    def get_json
         begin
             request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-            account = Account.new
-            if account.valid_email fields[:email]
-                account.request_token fields[:email]
-                response[:success] = true
-                status 201
-            else
-                response[:message] = "Please enter a valid email address"
-            end
+            return JSON.parse(request.body.read, :symbolize_names => true)
         rescue => e
             puts e
-            response[:message] = "Invalid request"
+            return_error "invalid request"
         end
-        return response.to_json
+    end
+
+    # API
+    forgot_post = lambda do
+        fields = get_json
+        account = Account.new
+        (account.valid_email fields[:email]) || (return_error "Please enter a valid email address")
+        (account.request_token fields[:email]) || (return_error "We couldn't find this email address")
+        status 201
+        return {:success => true}.to_json
     end
 
     resend_invitation_post = lambda do
@@ -479,13 +492,13 @@ class Integrations < Sinatra::Base
     end
 
     session_post = lambda do
-        status 401
         begin
             if params[:grant_type] && params[:refresh_token] && (params[:grant_type] == "refresh_token")
                 account = Account.new
                 filters = {:refresh => params[:refresh_token]}
                 user = account.get filters
                 if user
+                    status 200
                     owner = ((account.is_owner? user[:id]) || user[:admin])
                     response = session_tokens user, owner
                     return response.to_json
@@ -737,7 +750,7 @@ class Integrations < Sinatra::Base
             end
             return response.to_json
         else
-            redirect to("/unauthorized") 
+            redirect to("/lost") 
         end
     end
 
@@ -776,7 +789,7 @@ class Integrations < Sinatra::Base
             end
             return team_response.to_json
         else
-            redirect to("/unauthorized")
+            redirect to("/lost")
         end
     end
 
@@ -810,11 +823,14 @@ class Integrations < Sinatra::Base
                 else
                     response[:errors][0] = {:detail => "Please enter a more descriptive team name"}
                 end
+                return response.to_json
             else
-                redirect to("/unauthorized")
+                redirect to("/lost")
             end
+        rescue => e
+            puts e
+            return response.to_json
         end
-        return response.to_json
     end
 
     sprints_get = lambda do
@@ -840,32 +856,14 @@ class Integrations < Sinatra::Base
         return sprint_states.to_json
     end
 
-    events_get = lambda do
-        issue = Issue.new
-        query = {:project_id => params[:project_id].to_i }
-        if params[:sprint_id] 
-            query[:sprint_id] = params[:sprint_id]
-        end
-        events = issue.get_events query
-        return events.to_json
-    end
-
-    events_get_by_sprint = lambda do
-        issue = Issue.new
-        query = {:project_id => params[:project_id].to_i }
-        events = issue.get_events query
-        return events.to_json
-    end
-
     sprints_get_by_id = lambda do
-        status 404
         issue = Issue.new
         sprint = issue.get_sprints params
         if sprint[0]
             status 200
             return sprint[0].to_json
         else
-            return {}
+            redirect to("/lost")
         end
     end
 
@@ -931,7 +929,7 @@ class Integrations < Sinatra::Base
             end
             return response.to_json
         else
-            redirect to("/unauthorized") 
+            redirect to("/lost") 
         end
     end
 
@@ -1082,7 +1080,7 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    refresh_post = lambda do
+    refresh_post = lambda do #TODO we can use this later to refresh a github project we forked with a project from another owner (will allow us to include non-wired7 org projects)
         protected!
         status 400
         response = {:github_signed => false}
@@ -1262,48 +1260,6 @@ class Integrations < Sinatra::Base
         return response.to_json
     end
 
-    comments_get = lambda do
-        user_id = (default_to_signed params[:user_id])
-        if user_id
-            issue = Issue.new
-            query = {"contributors.user_id" => user_id}
-            author = issue.get_comments query
-
-            query = {:user_id => user_id}
-            receiver = issue.get_comments query
-
-            return {:author => author, :receiver => receiver, :id => user_id}.to_json
-        end
-    end
-
-    votes_get = lambda do
-        user_id = (default_to_signed params[:user_id])
-        if user_id 
-            issue = Issue.new 
-            query = {"contributors.user_id" => user_id}
-            author = issue.get_votes query
-
-            query = {:user_id => user_id}
-            receiver = issue.get_votes query
-
-            return {:author => author, :receiver => receiver, :id => user_id}.to_json
-        end
-    end
-
-    contributors_get = lambda do
-        user_id = (default_to_signed params[:user_id])
-        if user_id 
-            issue = Issue.new 
-
-            query = {:user_id => user_id}
-
-            author = issue.get_contributors query, false #all contributions
-            receiver = issue.get_contributors query, true #winning contributions
-
-            return {:author => author, :receiver => receiver, :id => user_id}.to_json
-        end
-    end
-
     connections_request_post = lambda do
         protected!
         status 400
@@ -1415,7 +1371,7 @@ class Integrations < Sinatra::Base
             members = team.get_users params
             return members.to_json 
         else
-            redirect to("/unauthorized")
+            redirect to("/lost")
         end
     end
 
@@ -1461,7 +1417,7 @@ class Integrations < Sinatra::Base
                         response[:errors][0] = {:detail => "seat type not permitted"}
                     end
                 else
-                    redirect to("/unauthorized")
+                    redirect to("/lost")
                 end
             end
         end
@@ -1504,41 +1460,36 @@ class Integrations < Sinatra::Base
 
     get_user_notifications_by_id = lambda do
         protected!
-        status 401
-        if @session_hash["id"]
-            status 400
-            begin
-                if params[:id]
-                    account = Account.new
-                    response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
-                    if response
-                        status 201
-                    end
-                end
-            rescue => e
-                puts e
+        status 400
+        if params[:id]
+            account = Account.new
+            response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
+            if response
+                status 200
+                return response.to_json
+            else
+                redirect to("/lost")
             end
         end
-        return response.to_json
     end
 
     user_notifications_read = lambda do
         protected!
-        status 401
+
         response = {}
-        if @session_hash["id"]
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:id] && fields[:read]
-                    account = Account.new
-                    response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
-                    if response
-                        status 201
-                    end
+        status 400
+        begin
+            request.body.rewind
+            fields = JSON.parse(request.body.read, :symbolize_names => true)
+            if params[:id] && fields[:read]
+                account = Account.new
+                response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+                if response
+                    status 201
+                    return response.to_json
+                else
+                    redirect to("/lost") 
                 end
-                return response.to_json
             end
         end
     end
@@ -1599,7 +1550,7 @@ class Integrations < Sinatra::Base
     get "/projects", &projects_get
     get "/projects/:id", allows: [:id], &projects_get_by_id
 
-    #    post "/projects/:project_id/refresh", &refresh_post
+    #    post "/projects/:project_id/refresh", &refresh_post #TODO - later
     post "/projects/:project_id/contributors", &contributors_post
     patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
     get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
@@ -1611,16 +1562,10 @@ class Integrations < Sinatra::Base
     get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
     post "/sprint-states", &sprint_states_post
 
-    get "/projects/:project_id/events", &events_get
-
     post "/contributors/:id/comments", &contributors_post_comments
     post "/contributors/:id/votes", &contributors_post_votes
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
-
-    #    get "/aggregate-comments", &comments_get
-    #    get "/aggregate-votes", &votes_get
-    #    get "/aggregate-contributors", &contributors_get
 
     post "/teams", &teams_post
     get "/teams", &teams_get
@@ -1635,6 +1580,11 @@ class Integrations < Sinatra::Base
     get '/unauthorized' do
         status 401
         return {:error => "unauthorized"}.to_json
+    end
+
+    get '/lost' do
+        status 404
+        return {:error => "lost"}.to_json
     end
 
     error RequiredParamMissing do

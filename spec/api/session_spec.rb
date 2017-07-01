@@ -121,22 +121,29 @@ describe "API" do
         end
     end
 
-    context "POST /forgot" do
-        context "valid email, even if not in DB" do
+    context "POST /forgot", do
+        context "valid email in db" do
+            fixtures :users
+            before(:each) do
+                post "/forgot", { :email => users(:adam).email}.to_json 
+            end
+            it_behaves_like "created"
+            it "should return success = true" do
+                puts last_response.body
+                expect(JSON.parse(last_response.body)["success"]).to be true
+            end 
+        end
+        context "valid email but not in DB" do
             before(:each) do
                 post "/forgot", { :email => "a@a.co" }.to_json 
             end
-            it "should return success = true" do
-                expect(JSON.parse(last_response.body)["success"]).to be true
-            end
+            it_behaves_like "error", "We couldn't find this email address"
         end
         context "invalid email" do
             before(:each) do 
                 post "/forgot", { :email => "a@.c" }.to_json 
             end
-            it "should return success = false" do
-                expect(JSON.parse(last_response.body)["success"]).to be false
-            end
+            it_behaves_like "error", "Please enter a valid email address"
         end
     end
 

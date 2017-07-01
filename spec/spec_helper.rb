@@ -62,3 +62,49 @@ RSpec.configure do |config|
 
 end
 
+
+shared_examples_for "unauthorized" do
+    before(:each) do
+        follow_redirect!
+    end
+    it "should return a 401" do
+        expect(last_response.status).to eq 401
+    end
+    it "should return unauthorized message" do
+        expect(JSON.parse(last_response.body)["error"]).to eq("unauthorized")
+    end
+end
+
+shared_examples_for "lost" do
+    before(:each) do
+        follow_redirect!
+    end                 
+    it "should return a 404" do
+        expect(last_response.status).to eq 404
+    end                     
+    it "should return unauthorized message" do
+        expect(JSON.parse(last_response.body)["error"]).to eq("unauthorized")
+    end                         
+end
+
+shared_examples_for "error" do |message|
+    it "should return a 400" do
+        expect(last_response.status).to eq 400
+    end                                                     
+    it "should return an error message" do
+        expect(JSON.parse(last_response.body)["errors"][0]["detail"]).to eq message
+    end                                                 
+end
+
+shared_examples_for "created" do 
+    it "should return a 201" do
+        expect(last_response.status).to eq 201
+    end     
+end 
+
+shared_examples_for "ok" do
+    it "should return a 200" do
+        expect(last_response.status).to eq 200
+    end                 
+end
+
