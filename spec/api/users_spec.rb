@@ -500,4 +500,72 @@ describe "/users" do
             it_behaves_like "unauthorized"  
         end                                         
     end
+
+    shared_examples_for "user_notifications" do
+        it "should return id" do
+            @notification_results.each_with_index do |n,i|
+                expect(n["id"]).to eq(@res[i]["id"])
+            end 
+        end 
+    end
+
+    describe "GET /me/notifications" do
+        fixtures :sprint_timelines, :user_notifications
+        context "signed in" do 
+            before(:each) do
+                get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}")
+            end
+            it_behaves_like "user_notifications"
+            it_behaves_like "ok"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/me/notifications"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "GET /me/notifications/:id" do
+        fixtures :sprint_timelines, :user_notifications
+        context "signed in" do
+            before(:each) do
+                get "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
+            end
+            it_behaves_like "user_notifications"
+            it_behaves_like "ok"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/me/notifications/125"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "PATCH /me/notifications/:id" do
+        fixtures :sprint_timelines, :user_notifications
+        context "signed in" do
+            before(:each) do                
+                patch "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {:read => true}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]                         
+                @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
+            end
+            it_behaves_like "user_notifications"                                                            
+            it_behaves_like "ok"
+            it "should set read = true" do
+                expect(@res[0]["read"]).to be true
+            end
+        end                                                         
+        context "not signed in" do                                          
+            before(:each) do        
+                get "/users/me/notifications/125"
+            end                                                         
+            it_behaves_like "unauthorized"                                          
+        end                                                     
+    end
 end

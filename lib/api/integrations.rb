@@ -1293,10 +1293,12 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:read], "read"
         account = Account.new
-        response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+        notification = account.get_user_notifications_by_id @session_hash["id"], params[:id]
         response || return_not_found
+        notification.read = fields[:read] 
+        notification.save
         status 200
-        return response.to_json
+        return notification.to_json
     end
 
     #API
