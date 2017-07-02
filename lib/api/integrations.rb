@@ -1145,81 +1145,51 @@ class Integrations < Sinatra::Base
 
     connections_request_post = lambda do
         protected!
-        status 400
-        response = {}
-
-        if params[:id]
-            account = Account.new
-            connection_request = account.create_connection_request @session_hash["id"], params[:id]
-
-            if connection_request
-                status 201
-                response = connection_request
-            end
-        end
-        return response.to_json
+        check_required_field params[:id], "id"
+        account = Account.new
+        status 201
+        return (account.create_connection_request @session_hash["id"], params[:id]).to_json
     end
 
     connections_requests_get = lambda do
         protected!
         account = Account.new 
         query = {"user_connections.contact_id" => @session_hash["id"]}
-        connections = account.get_user_connections query
-        return connections.to_json
+        status 200
+        return (account.get_user_connections query).to_json
     end
 
     get_exist_request = lambda do
         protected!
-        if params[:id]
-            account = Account.new
-            query = {"user_connections.contact_id" =>  params[:id], :user_id => @session_hash["id"]}
-            requests = account.get_user_connections query
-            if requests[0]
-                return requests[0].to_json
-            else
-                return {:id => 0}.to_json
-            end
-        else
-            return {}.to_json
-        end
+        check_required_field params[:id], "id"
+        account = Account.new
+        query = {"user_connections.contact_id" =>  params[:id], :user_id => @session_hash["id"]}
+        requests = account.get_user_connections query
+        requests || (return_error "request not found")
+        status 200
+        return requests[0].to_json
     end
 
     connections_requests_get_by_id = lambda do
         protected!
-        status 400 
-        response = {}
-
-        if params[:id]
-            status 200
-            account = Account.new
-            query = {:id =>  params[:id], :contact_id => @session_hash["id"]} 
-            requests = account.get_user_connections query
-            if requests
-                response = requests[0]
-            end
-        end
-
-        return response.to_json
+        check_required_field params[:id], "id"
+        account = Account.new
+        query = {:id =>  params[:id], :contact_id => @session_hash["id"]} 
+        requests = account.get_user_connections query
+        requests || (return_error "request not found")
+        status 200
+        return requests[0].to_json
     end
 
     user_connections_patch = lambda do
         protected!
-        status 400
-        response = {}
-
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:user_id] && fields[:read] && fields[:confirmed]
-                status 201
-                account = Account.new
-                response = (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed])
-            end  
-        rescue => e
-            puts e
-        end
-
-        return response.to_json
+        fields = get_json
+        check_required_field fields[:user_id], "user_id"
+        check_required_field fields[:read], "read"
+        check_required_field fields[:confirmed], "confirmed"
+        account = Account.new
+        status 200
+        return (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed]).to_json
     end
 
     user_teams_patch = lambda do
