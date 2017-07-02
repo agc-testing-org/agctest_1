@@ -154,8 +154,10 @@ class Account
                     }
                 })
             end
+            return true
         rescue Exception => e
             puts e
+            return false
         end
     end
 
@@ -247,8 +249,7 @@ class Account
     end
 
     def create_email user 
-        mail user.email, "Wired7 Registration", "#{user.first_name},<br><br>Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{user.first_name},\n\nThanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.\n\n\n- Adam Cockell\nWired7 Founder"
-        return true
+        return mail user.email, "Wired7 Registration", "#{user.first_name},<br><br>Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{user.first_name},\n\nThanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.\n\n\n- Adam Cockell\nWired7 Founder"
     end
 
     def request_token email
@@ -263,8 +264,9 @@ class Account
                 name = "Hi"
             end
 
-            mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
-            return user.save
+            user.save
+
+            return mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
         else
             return false
         end
@@ -347,7 +349,7 @@ class Account
     end
 
     def mail_invite invite
-        mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+        return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
     end
 
     def refresh_team_invite token
@@ -365,27 +367,19 @@ class Account
 
     end
 
-    def check_user actual_user_id, record_user_id
-        if actual_user_id != nil
-            return actual_user_id == record_user_id
-        else
-            return true
-        end
-    end
-
     def get_invitation token
         begin 
-            UserTeam.where(:token => token)
+            return UserTeam.where(:token => token)
         rescue => e
             puts e
             return nil
         end
     end
 
-    def join_team invitation, user_id
+    def join_team invitation
         begin
             invite = invitation.where("updated_at >= now() - INTERVAL 1 DAY").take
-            if invite && (check_user user_id, invite.user_id)
+            if invite 
                 invite.update_attributes!({accepted: true, token: nil})
                 invitation = invite.as_json
                 invitation.delete("token")

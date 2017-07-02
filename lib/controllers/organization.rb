@@ -63,10 +63,20 @@ class Organization
         end
     end
 
+    def invite_expired? invitation
+        begin
+            return invitation.where("updated_at >= now() - INTERVAL 1 DAY").take
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def get_member_invite token
         begin
-            return UserTeam.find_by(:token => token)
+            return UserTeam.where(:token => token)
         rescue => e
+            puts e
             return nil
         end
     end

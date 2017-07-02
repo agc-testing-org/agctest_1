@@ -18,6 +18,16 @@ adam_confirmed:
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: member
 
+adam_confirmed_expired:
+  sender: adam_admin
+  user: adam_confirmed
+  team: ateam
+  accepted: true
+  token: "ABCCC8"
+  updated_at: <%= 25.hour.ago.to_s(:db) %>
+  created_at: <%= 25.hour.ago.to_s(:db) %>
+  seat: member
+
 adam_invited_expired:
   sender: adam_confirmed
   user: adam

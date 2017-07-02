@@ -68,7 +68,7 @@ shared_examples_for "unauthorized" do
         expect(last_response.status).to eq 401
     end
     it "should return unauthorized message" do
-        expect(JSON.parse(last_response.body)["error"]).to eq("unauthorized")
+        expect(JSON.parse(last_response.body)["error"][0]["detail"]).to "unauthorized"
     end
 end
 
@@ -76,8 +76,8 @@ shared_examples_for "not_found" do
     it "should return a 404" do
         expect(last_response.status).to eq 404
     end                     
-    it "should return unauthorized message" do
-        expect(JSON.parse(last_response.body)["error"]).to eq("not found")
+    it "should return not found message" do
+        expect(JSON.parse(last_response.body)["errors"][0]["detail"]).to eq "not found"
     end                         
 end
 

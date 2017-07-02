@@ -221,14 +221,14 @@ class Integrations < Sinatra::Base
         response = {:errors => [{
             :detail => "not found"
         }]}
-        halt 404
+        halt 404, response.to_json
     end
 
     def return_unauthorized
         response = {:errors => [{
             :detail => "unauthorized"
         }]}                     
-        halt 401
+        halt 401, response.to_json
     end 
 
     def return_error message
@@ -307,8 +307,8 @@ class Integrations < Sinatra::Base
         password_length = fields[:password].to_s.length
         (password_length > 7 && password_length < 31) || (return_error "your password must be 8-30 characters")
         invitation = account.get_invitation fields[:token]
-        invitation.first || (return_error "this invitation is invalid")
-        team = account.join_team invitation, nil
+        invitation.first.user_id || (return_error "this invitation is invalid")
+        team = account.join_team invitation
         team || (return_error "this invitation has expired")
         user_params = {:id => team["user_id"]}
         user = account.get user_params
@@ -1224,104 +1224,71 @@ class Integrations < Sinatra::Base
 
     user_teams_patch = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:token]
-                account = Account.new
-                team = account.join_team fields[:token], @session_hash["id"]
-                if team
-                    status 201
-                    response = team
-                else
-                    response[:error] = "This invite is invalid or has expired"
-                end
-            else
-                response[:error] = "Missing token"
-            end
-        end
-        return response.to_json
+        fields = get_json
+        check_required_field fields[:token], "token"
+        account = Account.new
+        invitation = account.get_invitation fields[:token]
+        (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
+        (@session_hash["id"] == invitation.first.user_id) || (return_error "this invitation is invalid")
+        team = account.join_team invitation
+        team || (return_error "this invitation has expired")
+        status 200
+        return team.to_json 
     end
 
     user_teams_get = lambda do
         protected!
+        check_required_field params["team_id"], "team_id"
         account = Account.new
         seat = account.get_seat @session_hash["id"], params["team_id"]
-        if (seat && (seat == "member"))|| @session_hash["admin"]
-            team = Organization.new
-            members = team.get_users params
-            return members.to_json 
-        else
-            return_not_found 
-        end
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        team = Organization.new
+        status 200
+        return (team.get_users params).to_json
     end
 
     user_teams_post = lambda do
         protected!
-        status 400
-        response = {} 
-        response[:errors] = []
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if fields[:team_id] && fields[:user_email] && fields[:seat_id]
-                account = Account.new
-                seat = account.get_seat @session_hash["id"], fields[:team_id]
-                if (seat && (seat == "member"))|| @session_hash["admin"]
-                    team = Organization.new
+        fields = get_json
+        check_required_field fields[:team_id], "team_id"
+        check_required_field fields[:seat_id], "seat_id"
+        
+        account = Account.new
+        (account.valid_email fields[:user_email]) || (return_error "please enter a valid email address")
 
-                    query = {:email => fields[:user_email]}
-                    user = account.get query
+        seat = account.get_seat @session_hash["id"], fields[:team_id]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        team = Organization.new
 
-                    team_info = team.get_team fields[:team_id]
+        team_info = team.get_team fields[:team_id]
+        allowed_seats = team.allowed_seat_types team_info, @session_hash["admin"]
+        (team.check_allowed_seats allowed_seats, fields[:seat_id]) || (return_error "invalid seat_id")
 
-                    allowed_seats = team.allowed_seat_types team_info, @session_hash["admin"]
-
-                    if team.check_allowed_seats allowed_seats, fields[:seat_id]
-
-                        if !user
-                            user = account.create fields[:user_email], nil, nil, request.ip
-                        end
-
-                        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
-
-                        if invitation
-                            status 201
-                            account.mail_invite invitation
-                            invitation = invitation.as_json
-                            invitation.delete("token") #don't return token
-                            response = invitation
-                        else
-                            response[:errors][0] = {:detail => "an error has occurred"}
-                        end
-                    else
-                        response[:errors][0] = {:detail => "seat type not permitted"}
-                    end
-                else
-                    return_not_found 
-                end
-            end
-        end
-        return response.to_json
+        query = {:email => fields[:user_email]}
+        user = account.get query
+        user = (user || (account.create fields[:user_email], nil, nil, request.ip))
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
+        (invitation && (account.mail_invite invitation)) || (return_error "invite error")
+        invitation = invitation.as_json
+        invitation.delete("token")
+        status 201
+        return invitation.to_json
     end
 
     team_invites_get = lambda do
-        status 200
+        check_required_field params[:token], "token"
         team = Organization.new
         invite = team.get_member_invite params[:token]
-        if invite
-            return {
-                id: invite.id,
-                name: invite.team.name,
-                sender_email: invite.sender.email,
-                sender_first_name: invite.sender.first_name,
-                registered: invite.user.confirmed
-            }.to_json
-        else
-            return {:id => params[:token]}.to_json
-        end
+        (invite && invite.first) || (return_error "this invitation is invalid")
+        (team.invite_expired? invite) || (return_error "this invitation has expired")
+        status 200
+        return {
+            id: invite.first.id,
+            name: invite.first.team.name,
+            sender_email: invite.first.sender.email,
+            sender_first_name: invite.first.sender.first_name,
+            registered: invite.first.user.confirmed
+        }.to_json
     end
 
     connections_get = lambda do

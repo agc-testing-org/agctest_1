@@ -37,14 +37,19 @@ describe "/user-teams" do
             before(:each) do
                 @team = teams(:ateam).id
                 @email = "adam+gets+invited@wired7.com"
-                @user_id = users(:adam).id
                 @seat = seats(:member).id
+            end
+            context "invalid email" do
+                before(:each) do
+                    post "/user-teams", { :user_email => "a@1.", :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+                it_behaves_like "error", "please enter a valid email address"
             end
             context "non-member" do
                 before(:each) do
                     post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
-                it_behaves_like "unauthorized"
+                it_behaves_like "not_found"
             end
             context "member" do
                 fixtures :user_teams
@@ -71,15 +76,13 @@ describe "/user-teams" do
                         expect(@team_invite_result.first["token"]).to_not be nil
                     end
                     it_behaves_like "invites_teams"
+                    it_behaves_like "created"
                 end 
                 context "unauthorized seat id" do
                     before(:each) do
                         post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => seats(:owner).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                        @res = JSON.parse(last_response.body)
                     end
-                    it "should return error message" do
-                        expect(@res["errors"][0]["detail"]).to eq("seat type not permitted")
-                    end
+                    it_behaves_like "error", "invalid seat_id"
                 end
             end
             context "admin" do
@@ -97,18 +100,18 @@ describe "/user-teams" do
                     @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
                     post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
-                it_behaves_like "unauthorized"
+                it_behaves_like "not_found"
             end
         end
         context "invalid team_id" do
             before(:each) do
                 post "/user-teams", { :user_email => "adam+123@wired7.com", :team_id => 27, :seat_id => seats(:member).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
-            it_behaves_like "unauthorized"
+            it_behaves_like "not_found"
         end
     end
 
-    describe "POST /" do
+    describe "POST /token" do
         fixtures :teams, :user_teams
         context "valid token" do
             before(:each) do
@@ -123,25 +126,26 @@ describe "/user-teams" do
             it "should update the record" do
                 expect(@team_invite_result.first["accepted"]).to eq 1
             end
+            it_behaves_like "ok"
         end
         context "invalid token" do
-            after(:each) do 
-                expect(JSON.parse(last_response.body)["error"]).to eq("This invite is invalid or has expired")
-            end
             context "expired" do
-                it "should return error message" do
-                    post "/user-teams/token", { :token => user_teams(:adam_invited_expired).token  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                before(:each) do
+                    post "/user-teams/token", { :token => user_teams(:adam_confirmed_expired).token  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
+                it_behaves_like "error", "this invitation has expired"
             end
             context "bogus" do
-                it "should return error message" do
+                before(:each) do 
                     post "/user-teams/token", { :token => "999"  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
+                it_behaves_like "error", "this invitation is invalid"
             end
             context "another user's" do
-                it "should return error message" do
+                before(:each) do 
                     post "/user-teams/token", { :token => user_teams(:adam_protected).token }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
+                it_behaves_like "error", "this invitation is invalid"
             end
         end
     end
@@ -156,7 +160,7 @@ describe "/user-teams" do
                 before(:each) do
                     get "/user-teams?team_id=#{@team}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
-                it_behaves_like "unauthorized"
+                it_behaves_like "not_found"
             end
             context "member" do
                 fixtures :user_teams
@@ -173,14 +177,14 @@ describe "/user-teams" do
                     @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
                     get "/user-teams?team_id=#{@team}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
-                it_behaves_like "unauthorized"
+                it_behaves_like "not_found"
             end
         end
         context "invalid team_id" do
             before(:each) do
                 get "/user-teams?team_id=27", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
-            it_behaves_like "unauthorized"
+            it_behaves_like "not_found"
         end
     end
 end
