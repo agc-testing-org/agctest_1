@@ -1296,52 +1296,37 @@ class Integrations < Sinatra::Base
         account = Account.new
         accepted = account.get_user_connections_accepted @session_hash["id"] 
         requested = account.get_user_connections_requested @session_hash["id"] 
+        status 200
         return (accepted + requested).to_json
     end
 
     get_user_notifications = lambda do
-        user_id = (default_to_signed params[:user_id]) #TODO - this should always be the user id since notifications are private.
-        if user_id
-            account = Account.new
-            user_notification = account.get_user_notifications user_id
-            return user_notification.to_json
-        end
+        protected!
+        account = Account.new
+        status 200
+        return (account.get_user_notifications @session_hash["id"]).to_json
     end
 
     get_user_notifications_by_id = lambda do
         protected!
-        status 400
-        if params[:id]
-            account = Account.new
-            response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
-            if response
-                status 200
-                return response.to_json
-            else
-                return_not_found 
-            end
-        end
+        check_required_field params[:id], "id"
+        account = Account.new
+        response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
+        response || return_not_found
+        status 200
+        return response.to_json
     end
 
     user_notifications_read = lambda do
         protected!
-
-        response = {}
-        status 400
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-            if params[:id] && fields[:read]
-                account = Account.new
-                response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
-                if response
-                    status 201
-                    return response.to_json
-                else
-                    return_not_found 
-                end
-            end
-        end
+        check_required_field params[:id], "id"
+        fields = get_json
+        check_required_field fields[:read], "read"
+        account = Account.new
+        response = (account.read_user_notifications @session_hash["id"], params[:id], fields[:read])
+        response || return_not_found
+        status 200
+        return response.to_json
     end
 
     #API
@@ -1368,10 +1353,14 @@ class Integrations < Sinatra::Base
     get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
     patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
 
-    get "/users/connections", &connections_get 
-    get "/users/requests", &connections_requests_get
-    get "/users/requests/:id", &connections_requests_get_by_id
-    patch "/users/requests/:id", &user_connections_patch
+    get "/users/me/notifications", &get_user_notifications
+    patch "/users/me/notifications/:id", &user_notifications_read
+    get "/users/me/notifications/:id", &get_user_notifications_by_id
+
+    get "/users/me/connections", &connections_get 
+    get "/users/me/requests", &connections_requests_get
+    get "/users/me/requests/:id", &connections_requests_get_by_id
+    patch "/users/me/requests/:id", &user_connections_patch
 
     post "/users/:id/requests", &connections_request_post
     get "/users/:id/requests", &get_exist_request
@@ -1379,10 +1368,6 @@ class Integrations < Sinatra::Base
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request
     get "/users/:id", allows: [:id], &users_get_by_id
-
-    get "/account/notifications", &get_user_notifications
-    patch "/account/notifications/:id", &user_notifications_read 
-    get "/account/notifications/:id", &get_user_notifications_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get

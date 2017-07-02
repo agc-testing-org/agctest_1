@@ -520,8 +520,7 @@ class Account
 
     def get_user_notifications_by_id user_id, id
         begin      
-            ss = UserNotification.find_or_initialize_by(:user_id => user_id, :id => id)
-            return {:id => ss.id}
+            return UserNotification.find_or_initialize_by(:user_id => user_id, :id => id).select(:id)
         rescue => e
             puts e
             return nil
@@ -532,7 +531,7 @@ class Account
         begin
             ss = UserNotification.find_or_initialize_by(:user_id => user_id, :id => id)
             ss.update_attributes!(:read => read)
-            return {:id => ss.id}
+            return ss.select(:id)
         rescue => e
             puts e
             return nil
