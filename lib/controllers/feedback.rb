@@ -127,7 +127,7 @@ class Feedback
       response = []
       query.each_with_index do |contributor, i|
         response[i] = contributor.as_json
-        response[i][:sprint] = contributor.sprint
+        response[i][:sprint] = contributor.sprint_id
         response[i][:project] = contributor.project
         response[i][:sprint_state] = contributor.sprint_state
         response[i][:contributor] = contributor.id
