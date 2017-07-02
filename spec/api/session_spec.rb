@@ -62,9 +62,7 @@ describe "API" do
                 @logins = @mysql_client.query("select * from logins").first
             end
             context "response" do
-                it "should return code of 201" do
-                    expect(last_response.status).to eq 201
-                end
+                it_behaves_like "created"
                 it "should return success = true" do
                     expect(@res[:success]).to be true
                 end
@@ -112,16 +110,30 @@ describe "API" do
                 post "/register", {:first_name => @first_name, :email=> @email, :roles => @roles}.to_json
                 @users = @mysql_client.query("select * from users where email = '#{@email}'").first
             end
-            it_behaves_like "register" # don't want to let user know account exists, unless owner -- send email
+            it_behaves_like "error", "this email is already registered (or has been invited)"
             context "database" do
                 it "does not update the record" do
                     expect(@users["created_at"].to_s(:db)).to eq(users(:adam).created_at.to_s(:db))
                 end
             end
         end
+        context "first name too short" do
+            before(:each) do
+                @first_name = "A" 
+                post "/register", {:first_name => @first_name}.to_json
+            end
+            it_behaves_like "error", "your first name must be 2-30 characters (only letters, numbers, dashes)"
+        end
+        context "first name too long" do
+            before(:each) do
+                @first_name = "A"*31
+                post "/register", {:first_name => @first_name}.to_json
+            end                                                                                         
+            it_behaves_like "error", "your first name must be 2-30 characters (only letters, numbers, dashes)"
+        end
     end
 
-    context "POST /forgot", do
+    context "POST /forgot" do
         context "valid email in db" do
             fixtures :users
             before(:each) do
@@ -129,7 +141,6 @@ describe "API" do
             end
             it_behaves_like "created"
             it "should return success = true" do
-                puts last_response.body
                 expect(JSON.parse(last_response.body)["success"]).to be true
             end 
         end
@@ -137,13 +148,13 @@ describe "API" do
             before(:each) do
                 post "/forgot", { :email => "a@a.co" }.to_json 
             end
-            it_behaves_like "error", "We couldn't find this email address"
+            it_behaves_like "error", "we couldn't find this email address"
         end
         context "invalid email" do
             before(:each) do 
                 post "/forgot", { :email => "a@.c" }.to_json 
             end
-            it_behaves_like "error", "Please enter a valid email address"
+            it_behaves_like "error", "please enter a valid email address"
         end
     end
 
@@ -159,23 +170,21 @@ describe "API" do
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
+            it_behaves_like "ok"
         end
         context "invalid" do
-            after(:each) do
-                res = JSON.parse(last_response.body)
-                expect(res["success"]).to be false
-                expect(last_response.status).to eq 401
-            end
             context "email" do
                 before(:each) do
                     password = "adam12345"
                     post "/login", { :password => password, :email => users(:adam).email }.to_json
                 end
+                it_behaves_like "error", "email or password incorrect"
             end
             context "password" do
                 before(:each) do
                     post "/login", { :password => "123", :email => users(:adam_confirmed).email }.to_json
                 end
+                it_behaves_like "error", "email or password incorrect"
             end
         end
     end
@@ -210,6 +219,7 @@ describe "API" do
             it "should not return key" do
                 expect(@res["key"]).to be nil
             end
+            it_behaves_like "ok"
         end
 
     end
@@ -233,6 +243,7 @@ describe "API" do
             it "should set accepted = true" do
                 expect(@user_teams_result.first["accepted"]).to be 1
             end
+            it_behaves_like "ok"
         end
         context "expired token" do
             before(:each) do
@@ -240,9 +251,13 @@ describe "API" do
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
-            it "should return success = false" do
-                expect(@res["success"]).to eq(false)
+            it_behaves_like "error", "this invitation has expired" 
+        end
+        context "invalid token" do
+            before(:each) do
+                post "/accept", { :password => @password, :firstName => @first_name, :token => "A11A" }.to_json
             end
+            it_behaves_like "error", "this invitation is invalid" 
         end
     end
 
@@ -255,6 +270,7 @@ describe "API" do
                 @res = JSON.parse(last_response.body)
                 @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_invited_expired).team_id}")
             end
+            it_behaves_like "created"
             it "should update token" do
                 expect(@user_teams_result.first["token"]).to_not eq @token
             end
@@ -265,11 +281,14 @@ describe "API" do
         context "invalid token" do
             before(:each) do
                 post "/resend", { :token => "YYYZ" }.to_json
-                @res = JSON.parse(last_response.body)
             end
-            it "should return success = true" do
-                expect(@res["success"]).to eq(true)
+            it_behaves_like "error", "we couldn't find this invitation"
+        end
+        context "missing token" do
+            before(:each) do
+                post "/resend", {}.to_json
             end
+            it_behaves_like "error", "missing token field"
         end
     end
 
@@ -293,6 +312,7 @@ describe "API" do
                     end
                     it_behaves_like "session_response"
                     it_behaves_like "new_session"
+                    it_behaves_like "ok"
                 end
                 context "protected account" do
                     before(:each) do
@@ -307,6 +327,7 @@ describe "API" do
                     end
                     it_behaves_like "session_response"
                     it_behaves_like "new_session"
+                    it_behaves_like "ok"
                 end
             end
             context "with token older than 24 hours / invalid" do
@@ -317,12 +338,7 @@ describe "API" do
                     post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                     @res = JSON.parse(last_response.body)
                 end
-                it "should return success = false" do
-                    expect(@res["success"]).to eq(false)
-                end
-                it "should not save password" do
-                    expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
-                end
+                it_behaves_like "error", "this token has expired"
             end
             context "with invalid password" do
                 before(:each) do
@@ -333,12 +349,7 @@ describe "API" do
                     post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json
                     @res = JSON.parse(last_response.body)
                 end
-                it "should return success = false" do
-                    expect(@res["success"]).to eq(false)
-                end
-                it "should not save password" do
-                    expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
-                end
+                it_behaves_like "error", "your password must be 8-30 characters"
             end
         end
     end
@@ -361,7 +372,7 @@ describe "API" do
                 Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
                     :access_token => nil 
                 }.to_json, object_class: OpenStruct) }
-                Octokit::Client.any_instance.stub(:login) { @username }
+                Octokit::Client.any_instance.stub(:login) { nil }
 
                 post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
@@ -389,9 +400,7 @@ describe "API" do
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
-            it "should return success = true" do
-                expect(@res["success"]).to be true
-            end 
+            it_behaves_like "ok"
             context "redis" do
                 it "should save github token" do
                     account = Account.new
@@ -527,6 +536,7 @@ describe "API" do
         it "should delete refresh token" do
             expect(@mysql_client.query("select * from users where jwt = '#{@access_token}'").first["refresh"]).to be nil
         end
+        it_behaves_like "ok"
     end
 
     describe "POST /session" do
@@ -541,6 +551,7 @@ describe "API" do
 
         it_behaves_like "session_response"
         it_behaves_like "new_session"
+        it_behaves_like "ok"
 
         it "should add a TTL to the previous token" do
             expect(@redis.ttl("session:#{@original_jwt}")).to be < 31

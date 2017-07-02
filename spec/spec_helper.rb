@@ -64,9 +64,6 @@ end
 
 
 shared_examples_for "unauthorized" do
-    before(:each) do
-        follow_redirect!
-    end
     it "should return a 401" do
         expect(last_response.status).to eq 401
     end
@@ -75,15 +72,12 @@ shared_examples_for "unauthorized" do
     end
 end
 
-shared_examples_for "lost" do
-    before(:each) do
-        follow_redirect!
-    end                 
+shared_examples_for "not_found" do
     it "should return a 404" do
         expect(last_response.status).to eq 404
     end                     
     it "should return unauthorized message" do
-        expect(JSON.parse(last_response.body)["error"]).to eq("unauthorized")
+        expect(JSON.parse(last_response.body)["error"]).to eq("not found")
     end                         
 end
 

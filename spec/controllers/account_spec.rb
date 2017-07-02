@@ -297,11 +297,11 @@ describe ".Account" do
                 it "should include downcased email" do
                     expect(@mysql["email"]).to eq(@email.downcase)
                 end
-                it "should include downcased first name" do
-                    expect(@mysql["first_name"]).to eq(@first_name.downcase)
+                it "should include first name" do
+                    expect(@mysql["first_name"]).to eq(@first_name)
                 end
-                it "should include downcased last name" do
-                    expect(@mysql["last_name"]).to eq(@last_name.downcase)
+                it "should include last name" do
+                    expect(@mysql["last_name"]).to eq(@last_name)
                 end
                 it "should include admin = 0" do
                     expect(@mysql["admin"]).to eq(0)
@@ -311,9 +311,6 @@ describe ".Account" do
                 end
                 it "should include ip" do
                     expect(@mysql["ip"]).to eq @ip
-                end
-                it "should include token" do
-                    expect(@mysql["token"]).to_not be nil 
                 end
             end
         end
