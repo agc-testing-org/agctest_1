@@ -16,7 +16,7 @@ export default Ember.Route.extend({
         }
     },
     model: function(params){
-
+        var splitUrl = params.id.split("-");
         this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
         var skillsets = this.store.query('skillset', {});
         this.store.adapterFor('skillset').set('namespace','');
@@ -25,7 +25,7 @@ export default Ember.Route.extend({
             id: params.id,
             project: this.modelFor("develop.project").project,
             states: this.modelFor("develop.project").states,
-            sprint: this.store.findRecord('sprint', params.id),
+            sprint: this.store.findRecord('sprint', splitUrl[0]),
             skillsets: skillsets, 
             sprint_states: this.store.query('sprint-state', {
                 sprint_id: params.id

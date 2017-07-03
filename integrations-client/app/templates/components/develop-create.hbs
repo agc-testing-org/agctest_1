@@ -20,7 +20,7 @@
                 </div>
                 {{else}}
                     <h3 class="text-center">
-                        created {{#link-to "develop.project" project.id}}{{project.org}}/{{project.name}}{{/link-to}}
+                        created {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name)}}{{project.org}}/{{project.name}}{{/link-to}}
                     </h3>
                 {{/unless}}
             {{/unless}}

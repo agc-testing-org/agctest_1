@@ -8,7 +8,7 @@
 
         {{#each model.sprints as |sprint|}}
             <div class="list-group-item rounded">
-                <h3 class="line">{{#link-to "develop.project.sprint" sprint.id}}{{sprint.title}}{{/link-to}}</h3>
+                <h3 class="line">{{#link-to "develop.project.sprint" (concat sprint.id "-" sprint.title)}}{{sprint.title}}{{/link-to}}</h3>
                 <div class="line">{{sprint.description}}</div>
                 <small class="line text-muted">created {{moment-from-now sprint.created_at}}</small>
             </div>
