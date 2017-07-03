@@ -14,13 +14,9 @@ export default Ember.Component.extend({
             var requestRead = store.findRecord('request', id).then(function (request) {
                 request.set('read', read);
                 request.save().then(function () {
-
+                     store.adapterFor('requests').set('namespace', '');
                 });
-            }).catch((reason) => {
-
-            }).then(function() {
-                store.adapterFor('requests').set('namespace', '');
-            })
+            });
         }
     }
 });

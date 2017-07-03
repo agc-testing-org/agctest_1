@@ -441,7 +441,7 @@ class Account
 
     def get_user_connections query
         begin    
-            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id").where(query).select("user_connections.*","users.first_name").as_json
+            return UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").as_json
         rescue => e
             puts e
             return nil

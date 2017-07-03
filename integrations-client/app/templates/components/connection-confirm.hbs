@@ -1,12 +1,12 @@
-{{#if (eq confirmed "1")}}
-    <span class="text-capitalize">{{first_name}}</span> is interested in contacting you. Would you like to share your contact information?
-    <span {{action "confirmeUserConnectionRequests" request_id 2}} class="badge badge-info rounded cursor-pointer">Share</span>
-    <span {{action "confirmeUserConnectionRequests" request_id 3}} class="badge badge-warning rounded cursor-pointer">Reject</span>
-{{else if (eq confirmed "2")}}
-    Your are sharing contact information with <span class="text-capitalize">{{first_name}}</span>
-    <span {{action "confirmeUserConnectionRequests" request_id 3}} class="badge badge-warning rounded cursor-pointer">Cancel</span>
-{{else if (eq confirmed "3")}}
-    Your are not sharing contact information with <span class="text-capitalize">{{first_name}}</span>
-    <span {{action "confirmeUserConnectionRequests" request_id 2}} class="badge badge-info rounded cursor-pointer">Share</span>
+{{#if (eq request.confirmed "1")}}
+    <span class="text-capitalize">{{#link-to "profile" request.user_id}}{{request.first_name}}{{/link-to}}</span> is interested in contacting you. Would you like to share your contact information?
+    <span {{action "confirmeUserConnectionRequests" request.id 2}} class="badge badge-info rounded cursor-pointer">Share</span>
+    <span {{action "confirmeUserConnectionRequests" request.id 3}} class="badge badge-warning rounded cursor-pointer">Reject</span>
+{{else if (eq request.confirmed "2")}}
+    You are sharing contact information with <span class="text-capitalize">{{#link-to "profile" request.user_id}}{{request.first_name}}{{/link-to}}</span>
+    <span {{action "confirmeUserConnectionRequests" request.id 3}} class="badge badge-warning rounded cursor-pointer">Cancel</span>
+{{else if (eq request.confirmed "3")}}
+    You are not sharing contact information with <span class="text-capitalize">{{#link-to "profile" request.user_id}}{{request.first_name}}{{/link-to}}</span>
+    <span {{action "confirmeUserConnectionRequests" request.id 2}} class="badge badge-info rounded cursor-pointer">Share</span>
 {{/if}}
 

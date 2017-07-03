@@ -14,13 +14,9 @@ export default Ember.Component.extend({
             var requestConfirme = store.findRecord('request', id).then(function (request) {
                 request.set('confirmed', confirmed);
                 request.save().then(function () {
-
+                    store.adapterFor('requests').set('namespace', '');
                 });
-            }).catch((reason) => {
-
-            }).then(function() {
-                 store.adapterFor('requests').set('namespace', '');
-            })
+            });
         }
     }
 });

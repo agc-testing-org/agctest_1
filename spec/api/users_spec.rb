@@ -399,7 +399,7 @@ describe "/users" do
             before(:each) do
                 get "/users/me/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.contact_id=users.id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.user_id=users.id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info" 
@@ -419,7 +419,7 @@ describe "/users" do
             before(:each) do
                 get "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.user_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info" 
@@ -477,13 +477,33 @@ describe "/users" do
     describe "GET /:id/requests" do
         fixtures :user_connections
         context "signed in" do
-            before(:each) do
-                get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_id = #{@user}")
+            context "existing" do
+                before(:each) do
+                    get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_id = #{@user}")
+                end
+                it_behaves_like "contact"
+                it_behaves_like "ok"
             end
-            it_behaves_like "contact"
-            it_behaves_like "ok"
+            context "not existing" do
+                before(:each) do
+                    get "/users/222/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = JSON.parse(last_response.body) 
+                end
+                it "should return empty" do
+                    expect(@res["id"]).to eq 0
+                end
+            end
+            context "user already requested you", :focus => true do
+                before(:each) do
+                    get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).user_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where user_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND contact_id = #{@user}")
+                end
+                it_behaves_like "contact"
+                it_behaves_like "ok"
+            end
         end
         context "not signed in" do
             before(:each) do    

@@ -1080,11 +1080,23 @@ class Integrations < Sinatra::Base
         protected!
         check_required_field params[:id], "id"
         account = Account.new
-        query = {"user_connections.contact_id" =>  params[:id], :user_id => @session_hash["id"]}
-        requests = account.get_user_connections query
-        requests || (return_error "request not found")
+        query = {"user_connections.contact_id" =>  params[:id], :user_id => @session_hash["id"]} 
+        outgoing = account.get_user_connections query
+        query = {"user_connections.user_id" =>  params[:id], "user_connections.contact_id" => @session_hash["id"]}
+        incoming = account.get_user_connections query
+        all = (outgoing + incoming)
+        (all && all[0]) || (halt 200, {:id => 0}.to_json) 
         status 200
-        return requests[0].to_json
+        return all[0].to_json
+    end
+
+    connections_get = lambda do
+        protected!
+        account = Account.new
+        accepted = account.get_user_connections_accepted @session_hash["id"]
+        requested = account.get_user_connections_requested @session_hash["id"]
+        status 200
+        return (accepted + requested).to_json
     end
 
     connections_requests_get_by_id = lambda do
@@ -1176,15 +1188,6 @@ class Integrations < Sinatra::Base
             sender_first_name: invite.first.sender.first_name,
             registered: invite.first.user.confirmed
         }.to_json
-    end
-
-    connections_get = lambda do
-        protected!
-        account = Account.new
-        accepted = account.get_user_connections_accepted @session_hash["id"] 
-        requested = account.get_user_connections_requested @session_hash["id"] 
-        status 200
-        return (accepted + requested).to_json
     end
 
     get_user_notifications = lambda do

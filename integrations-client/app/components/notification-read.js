@@ -9,7 +9,7 @@ export default Ember.Component.extend({
 
             var store = this.get('store');
 
-            store.adapterFor('notification').set('namespace', 'account');
+            store.adapterFor('notification').set('namespace', 'users/me');
 
             var notificationRead = store.findRecord('notification', id).then(function (notification) {
                 notification.set('read', read);
