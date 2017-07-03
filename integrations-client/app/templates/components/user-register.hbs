@@ -29,7 +29,7 @@
                         <div class="alert alert-info rounded text-center">We will email you an invite as soon as we can!</div>
                     {{else}}
 
-                    {{#if errorMessage}}<div class="alert alert-warning rounded text-center">{{errorMessage}}</div>{{/if}}
+                    {{application-error error=errorMessage}}
 
                     <div class="form-group">
                         <label>First Name</label>
