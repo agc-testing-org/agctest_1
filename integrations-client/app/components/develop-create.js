@@ -15,7 +15,8 @@ export default Ember.Component.extend({
                 org: org,
                 name: name
             }).save().then(function(response){
-                _this.get("routes").redirect("me");
+              //  _this.get("routes").redirectWithId("develop.project",response);
+              _this.get("routes").redirect("me");
             });
         },
         refresh(){
