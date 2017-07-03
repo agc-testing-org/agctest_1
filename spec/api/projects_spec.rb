@@ -70,7 +70,7 @@ describe "/projects" do
                 @mysql = @mysql_client.query("select * from projects")
             end
             context "response" do
-                it_should_behave_like "unauthorized"
+                it_should_behave_like "unauthorized_admin"
             end
             context "projects table" do
                 it "should not include an id" do
@@ -89,6 +89,7 @@ describe "/projects" do
                     expect(@projects[0]["name"]).to eq(@name)
                 end
                 it_should_behave_like "projects"
+                it_should_behave_like "created"
             end
         end
     end
@@ -101,6 +102,7 @@ describe "/projects" do
             @project_results = @mysql_client.query("select * from projects")
         end
         it_should_behave_like "projects"
+        it_should_behave_like "ok"
     end 
 
     describe "GET /:id" do
@@ -112,6 +114,7 @@ describe "/projects" do
             @project_results = @mysql_client.query("select * from projects where id = #{project_id}")
         end
         it_should_behave_like "projects"
+        it_should_behave_like "ok"
     end
 
     describe "POST /:id/refresh" do

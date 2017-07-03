@@ -65,11 +65,8 @@ describe "/users" do
         context "invalid user" do
             before(:each) do
                 get "/users/930", {},  {}
-                @res = JSON.parse(last_response.body)
+                it_behaves_like "not_found"
             end                                             
-            it "should return no result" do
-                expect(@res).to be_empty
-            end
         end
     end
 
@@ -125,7 +122,7 @@ describe "/users" do
         end
     end
 
-    describe "GET /:user_id/skillsets/:skillset_id" do
+    describe "GET /me/skillsets/:skillset_id" do
         fixtures :skillsets
         before(:each) do
             @user_id = users(:adam).id
@@ -133,7 +130,7 @@ describe "/users" do
         end
         context "no user_skillsets" do
             before(:each) do
-                get "/users/#{@user_id}/skillsets/#{@skillset_id}", {},  {}
+                get "/users/me/skillsets/#{@skillset_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                 @res = [JSON.parse(last_response.body)]
             end
             it_behaves_like "user_skillsets"
@@ -141,10 +138,16 @@ describe "/users" do
         context "user_skillsets" do
             fixtures :user_skillsets
             before(:each) do
-                get "/users/#{@user_id}/skillsets/#{@skillset_id}", {},  {}
+                get "/users/me/skillsets/#{@skillset_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                 @res = [JSON.parse(last_response.body)]
             end
             it_behaves_like "user_skillsets"
+        end
+        context "signed out" do
+            before(:each) do
+                get "/users/me/skillsets/2"
+            end
+            it_behaves_like "unauthorized"
         end
     end
 
@@ -161,51 +164,40 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /:user_id/skillsets" do
+    describe "PATCH /me/skillsets" do
         fixtures :skillsets
         before(:each) do
             @user_id = users(:adam_confirmed).id
             @skillset_id = skillsets(:skillset_1).id 
         end
-        context "admin" do
+        context "owner" do
             context "skillset exists" do
                 before(:each) do
                     @active = false
-                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    patch "/users/me/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_skillsets").first
                 end
                 it_behaves_like "user_skillset_update"
+                it_behaves_like "ok"
             end 
             context "skillset does not exist" do
                 before(:each) do
                     @active = true
-                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    patch "/users/me/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_skillsets").first
                 end
                 it_behaves_like "user_skillset_update"
-            end
-        end
-        context "non-authorized" do
-            before(:each) do
-                @active = false
-                patch "/users/#{users(:adam).id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-            end
-            it "should return 401" do
-                expect(last_response.status).to eq(401) 
+                it_behaves_like "ok"
             end
         end
         context "lost 'active' key" do
             before(:each) do
                 @active = false
-                patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
+                patch "/users/me/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
-            it "should return 400" do
-                expect(last_response.status).to eq(400) 
-            end
+            it_behaves_like "error", "missing active field"
         end
     end 
 
@@ -242,6 +234,7 @@ describe "/users" do
                 @res = JSON.parse(last_response.body)
             end 
             it_behaves_like "user_roles"
+            it_behaves_like "ok"
         end
     end
 
@@ -258,6 +251,7 @@ describe "/users" do
                 @res = JSON.parse(last_response.body)
             end
             it_behaves_like "user_roles"
+            it_behaves_like "ok"
         end
     end
 
@@ -277,7 +271,7 @@ describe "/users" do
         end
     end
 
-    describe "GET /:user_id/roles/:role_id" do
+    describe "GET /me/roles/:role_id" do
         fixtures :roles
         before(:each) do
             @user_id = users(:adam).id
@@ -286,11 +280,18 @@ describe "/users" do
         context "user_roles" do
             fixtures :user_roles
             before(:each) do
-                get "/users/#{@user_id}/roles/#{@role_id}", {}, {} 
+                get "/users/me/roles/#{@role_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it_behaves_like "user_role"
+            it_behaves_like "ok"
         end
+        context "signed out" do
+            before(:each) do
+                get "/users/me/roles/2"
+            end
+            it_behaves_like "unauthorized" 
+        end 
     end
 
     shared_examples_for "user_role_update" do
@@ -306,31 +307,22 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /:user_id/roles" do
+    describe "PATCH /me/roles" do
         fixtures :roles
         before(:each) do
             @user_id = users(:adam_confirmed).id
             @role_id = roles(:product).id 
         end
-        context "authorized" do
+        context "owner" do
             context "role exists" do
                 before(:each) do
                     @active = false
-                    patch "/users/#{@user_id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    patch "/users/me/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_roles").first
                 end
                 it_behaves_like "user_role_update"
-            end
-        end
-        context "non-authorized" do
-            before(:each) do
-                @active = false
-                patch "/users/#{users(:adam).id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-            end
-            it "should return 401" do
-                expect(last_response.status).to eq(401) 
+                it_behaves_like "ok"
             end
         end
     end

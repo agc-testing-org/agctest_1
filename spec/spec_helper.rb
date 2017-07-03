@@ -72,6 +72,15 @@ shared_examples_for "unauthorized" do
     end
 end
 
+shared_examples_for "unauthorized_admin" do
+    it "should return a 400" do
+        expect(last_response.status).to eq 400
+    end
+    it "should return unauthorized message" do
+        expect(JSON.parse(last_response.body)["errors"][0]["detail"]).to eq "this action requires additional authorization"
+    end
+end
+
 shared_examples_for "not_found" do
     it "should return a 404" do
         expect(last_response.status).to eq 404

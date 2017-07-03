@@ -229,7 +229,14 @@ class Integrations < Sinatra::Base
             :detail => "unauthorized"
         }]}                     
         halt 401, response.to_json
-    end 
+    end
+
+    def return_unauthorized_admin
+        response = {:errors => [{
+            :detail => "this action requires additional authorization"
+        }]}
+        halt 400, response.to_json # we don't want to return a 401 here; this is more like a submission error
+    end
 
     def return_error message
         response = {:errors => [{
@@ -307,7 +314,7 @@ class Integrations < Sinatra::Base
         password_length = fields[:password].to_s.length
         (password_length > 7 && password_length < 31) || (return_error "your password must be 8-30 characters")
         invitation = account.get_invitation fields[:token]
-        invitation.first.user_id || (return_error "this invitation is invalid")
+        (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
         user_params = {:id => team["user_id"]}
@@ -417,15 +424,11 @@ class Integrations < Sinatra::Base
     end
 
     users_get_by_id = lambda do
-        status 404
         account = Account.new
         user = account.get_users params
-        if user[0]
-            status 200
-            return user[0].to_json
-        else
-            return {}.to_json
-        end
+        user[0] || return_not_found
+        status 200
+        return user[0].to_json
     end
 
     users_get_by_me = lambda do
@@ -435,7 +438,8 @@ class Integrations < Sinatra::Base
 
     users_roles_get = lambda do
         account = Account.new
-        return (account.get_account_roles params[:user_id], {}).to_json
+        status 200
+        return (account.get_account_roles params[:user_id], nil).to_json
     end
 
     users_roles_get_by_me = lambda do
@@ -444,96 +448,89 @@ class Integrations < Sinatra::Base
     end
 
     users_roles_get_by_role = lambda do
+        protected!
+        check_required_field params[:role_id], "role_id"
         account = Account.new
         query = {:id => params[:role_id]}
-        return (account.get_account_roles params[:user_id], query)[0].to_json
+        status 200
+        return (account.get_account_roles @session_hash["id"], query)[0].to_json
     end
 
     users_roles_patch_by_id = lambda do
         protected!
-        status 401
-        response = {}
-        user_id=params[:user_id]
-        if @session_hash["id"].to_i.equal?(user_id.to_i)
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:user_id] && params[:role_id] && fields.key?(:active)
-                    account = Account.new
-                    response = (account.update_user_role user_id, params[:role_id], fields[:active])
-                    if response
-                        status 201
-                    end
-                end
-            rescue => e
-                puts e
-            end
-        end
-        return response.to_json    
+        check_required_field params[:role_id], "role_id"
+        fields = get_json
+        check_required_field !fields[:active].nil?, "active"
+        account = Account.new
+        response = (account.update_user_role @session_hash["id"], params[:role_id], fields[:active])
+        response || (return_error "unable not update role")
+        status 200
+        return response.to_json
     end
 
     roles_get = lambda do
         account = Account.new
+        status 200
         return account.get_roles.to_json
     end
 
     states_get = lambda do
         issue = Issue.new
-        query = {}
-        return (issue.get_states query).to_json
+        status 200
+        return (issue.get_states nil).to_json
     end
 
     skillsets_get = lambda do
         issue = Issue.new
+        status 200
         return (issue.get_skillsets).to_json
     end
 
     plans_get = lambda do
+        status 200
         return (Plan.all.as_json).to_json
     end
 
     seats_get = lambda do
+        status 200
         return (Seat.all.as_json).to_json
     end
 
     sprint_skillsets_get = lambda do
+        check_required_field params[:sprint_id], "sprint_id"
         issue = Issue.new
-        return (issue.get_sprint_skillsets params[:sprint_id], {}).to_json
+        status 200
+        return (issue.get_sprint_skillsets params[:sprint_id], nil).to_json
     end
 
     sprint_skillsets_get_by_skillset = lambda do
+        check_required_field params[:sprint_id], "sprint_id"
+        check_required_field params[:skillset_id], "skillset_id"
         issue = Issue.new
         query = {:id => params[:skillset_id]}
+        status 200
         return (issue.get_sprint_skillsets params[:sprint_id], query)[0].to_json
     end
 
     sprint_skillsets_patch = lambda do
-        protected!
-        status 401          
-        response = {}  
-        if @session_hash["admin"]
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:sprint_id] && params[:skillset_id]
-                    issue = Issue.new
-                    response = (issue.update_skillsets params[:sprint_id], params[:skillset_id], fields[:active])           
-                    if response
-                        status 201
-                    end
-                end
-            rescue => e
-                puts e
-            end
-        end
+        protected! 
+        @session_hash["admin"] || return_unauthorized_admin
+        check_required_field params[:sprint_id], "sprint_id"
+        check_required_field params[:skillset_id], "skillset_id"
+        fields = get_json
+        check_required_field !fields[:active].nil?, "active"
+        issue = Issue.new
+        response = (issue.update_skillsets params[:sprint_id], params[:skillset_id], fields[:active])
+        response || (return_error "unable to update skillset")
+        status 200
         return response.to_json
     end
 
     users_skillsets_get = lambda do
+        check_required_field params[:user_id], "user_id"
         issue = Issue.new
-        return (issue.get_user_skillsets params[:user_id], {}).to_json
+        status 200
+        return (issue.get_user_skillsets params[:user_id], nil).to_json
     end
 
     users_skillsets_get_by_me = lambda do
@@ -542,35 +539,25 @@ class Integrations < Sinatra::Base
     end
 
     users_skillsets_get_by_skillset = lambda do
+        protected!
+        check_required_field params[:skillset_id], "skillset_id"
         issue = Issue.new
         query = {:id => params[:skillset_id]}
-        return (issue.get_user_skillsets params[:user_id], query)[0].to_json
+        status 200
+        return (issue.get_user_skillsets @session_hash["id"], query)[0].to_json
     end
 
     users_skillsets_patch = lambda do
         protected!
-        status 401
-        response = {}
-        user_id=params[:user_id]
-        if @session_hash["id"].to_i.equal?(user_id.to_i)
-            status 400
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if params[:user_id] && params[:skillset_id] && fields.key?(:active)
-                    issue = Issue.new
-                    response = (issue.update_user_skillsets user_id, params[:skillset_id], fields[:active])
-                    if response
-                        status 201
-                    end
-                end
-            rescue => e
-                puts e
-            end
-        end
+        check_required_field params[:skillset_id], "skillset_id"
+        fields = get_json
+        check_required_field !fields[:active].nil?, "active"  
+        issue = Issue.new
+        response = (issue.update_user_skillsets @session_hash["id"], params[:skillset_id], fields[:active])
+        response || (return_error "unable to update skillset")
+        status 200
         return response.to_json
     end
-
 
     repositories_get = lambda do
         protected!
@@ -588,233 +575,163 @@ class Integrations < Sinatra::Base
         rescue => e
             puts e
         end
+        status 200
         return repositories.to_json
     end
 
     projects_get = lambda do
         issue = Issue.new
-        projects = issue.get_projects nil 
-        if projects
-            status 200
-            return projects.to_json
-        else
-            return {}
-        end
+        projects = issue.get_projects nil
+        status 200
+        return projects.to_json
     end
 
     projects_get_by_id = lambda do
-        status 404
         issue = Issue.new
         project = issue.get_projects params
-        if project[0]
-            status 200
-            return project[0].to_json
-        else
-            return {}
-        end
+        (project && project[0]) || return_not_found
+        status 200
+        return project[0].to_json
     end
 
     projects_post = lambda do
         protected!
-        status 400
-        if @session_hash["admin"]
-            response = {}
-            account = Account.new
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:org] && fields[:name]
-                    issue = Issue.new
-                    project = issue.create_project @session_hash["admin"], fields[:org], fields[:name]
-                    if project 
-                        response = project 
-                        status 201
-                    end
-                end
-            end
-            return response.to_json
-        else
-            return_not_found 
-        end
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:org], "org"
+        check_required_field fields[:org], "name"
+        issue = Issue.new
+        project = issue.create_project @session_hash["id"], fields[:org], fields[:name]
+        project || (return_error "unable to create project")
+        status 201
+        return project.to_json
     end
 
     teams_get = lambda do
         protected!
         account = Account.new
-        teams = account.get_teams @session_hash["id"]
-        if teams
-            status 200
-            return teams.to_json
-        else
-            return {}
-        end
+        status 200
+        return (account.get_teams @session_hash["id"]).to_json
     end
 
     teams_get_by_id = lambda do
         protected!
+        check_required_field params["id"], "id"
         account = Account.new
         seat = account.get_seat @session_hash["id"], params["id"]
-        if seat || @session_hash["admin"]
-            org = Organization.new
-            team = org.get_team params["id"]
-            allowed_seats = org.allowed_seat_types team, @session_hash["admin"]
-            team_response = team.as_json
-            team_response["user"] = {
-                :first_name => team.user.first_name,
-                :last_name => team.user.last_name,
-                :email => team.user.email,
-                :id => team.user.id
-            }
-            team_response["show"] = ((seat && (seat == "member")) || @session_hash["admin"])
-            team_response["seats"] = allowed_seats
-            if team.plan
-                team_response["plan"] = team.plan
-                team_response["default_seat_id"] = team.plan.seat.id
-            end
-            return team_response.to_json
-        else
-            return_not_found 
+        (seat || @session_hash["admin"]) || return_not_found
+        org = Organization.new
+        team = org.get_team params["id"]
+        team || (return_error "unable to retrieve team")
+        allowed_seats = org.allowed_seat_types team, @session_hash["admin"]
+        allowed_seats || (return_error "unable to retrieve team")
+        team_response = team.as_json
+        team_response["user"] = {
+            :first_name => team.user.first_name,
+            :last_name => team.user.last_name,
+            :email => team.user.email,
+            :id => team.user.id
+        }
+        team_response["show"] = ((seat && (seat == "member")) || @session_hash["admin"])
+        team_response["seats"] = allowed_seats
+        if team.plan
+            team_response["plan"] = team.plan
+            team_response["default_seat_id"] = team.plan.seat.id
         end
+        status 200
+        return team_response.to_json
     end
 
     teams_post = lambda do
         protected!
-        status 400
-        response = {}
-        response[:errors] = []
-        begin
-            account = Account.new
-            if (@session_hash["owner"] || @session_hash["admin"])
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:name] && fields[:name].length > 2
-                    if fields[:plan_id]
-                        org = Organization.new
-                        team = org.create_team fields[:name], @session_hash["id"], fields[:plan_id]
-                        if team && team["id"]
-                            if (org.add_owner @session_hash["id"], team["id"])
-                                response = team
-                                status 201
-                            else
-                                response[:errors][0] = {:detail => "An error has occurred"}
-                            end
-                        else
-                            response[:errors][0] = {:detail => "This name is not available"}
-                        end
-                    else
-                        response[:errors][0] = {:detail => "Please select a team type"}
-                    end
-                else
-                    response[:errors][0] = {:detail => "Please enter a more descriptive team name"}
-                end
-                return response.to_json
-            else
-                return_not_found 
-            end
-        rescue => e
-            puts e
-            return response.to_json
-        end
+        (@session_hash["owner"] || @session_hash["admin"]) || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:name], "name"
+        check_required_field fields[:plan_id], "plan_id"
+        name_length = fields[:name].to_s.length
+        account = Account.new
+        (name_length < 31 && name_length > 1) || (return_error "team name must be 2-30 characters") 
+        (Plan.find_by(:id => fields[:plan_id])) || (return_error "invalid plan_id")
+        org = Organization.new
+        team = org.create_team fields[:name], @session_hash["id"], fields[:plan_id]
+        (team && team["id"]) || (return_error "this name is not available")
+        (org.add_owner @session_hash["id"], team["id"]) || (return_error "unable to create team")
+        status 201
+        return team.to_json
     end
 
     sprints_get = lambda do
         issue = Issue.new
         sprints = issue.get_sprints params
-        if sprints
-            status 200
-            return sprints.to_json
-        else
-            return {}
-        end
+        status 200
+        return sprints.to_json
     end
 
     sprint_states_get = lambda do
         @session = retrieve_token
         authorized?
         issue = Issue.new
-        if @session_hash
-            sprint_states = issue.get_sprint_states params, @session_hash["id"]
-        else
-            sprint_states = issue.get_sprint_states params, nil
-        end
+        sprint_states = issue.get_sprint_states params, ((@session_hash["id"] if @session_hash) || nil)
+        status 200
         return sprint_states.to_json
     end
 
     sprints_get_by_id = lambda do
         issue = Issue.new
         sprint = issue.get_sprints params
-        if sprint[0]
-            status 200
-            return sprint[0].to_json
-        else
-            return_not_found 
-        end
+        (sprint && sprint[0]) || return_not_found
+        status 200
+        return sprint[0].to_json
     end
 
     sprints_post = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
+        fields = get_json
+        check_required_field fields[:title], "title"
+        check_required_field fields[:description], "description"
+        check_required_field fields[:project_id], "project_id"
 
-            if fields[:title] && fields[:title].length > 5
-                if fields[:description] && fields[:description].length > 5
-                    issue = Issue.new
-                    sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
-                    if sprint
-                        state = State.find_by(:name => "idea").id
-                        sprint_state = issue.create_sprint_state sprint.id, state, nil
-                        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :diff => "new"}
-                        if sprint_state && (issue.log_event log_params) 
-                            status 201
-                            response = sprint                            
-                        end
-                    else
-                        response[:error] = "This project does not exist"
-                    end
-                else
-                    response[:error] = "Please enter a more detailed description"                    
-                end
-            else
-                response[:error] = "Please enter a more descriptive title"
-            end
-        end
-        return response.to_json
+        account = Account.new
+        title_length = fields[:title].to_s.length
+        (title_length < 101 && title_length > 4) || (return_error "title must be 5-100 characters")
+
+        description_length = fields[:description].to_s.length
+        (description_length < 501 && description_length > 4) || (return_error "description must be 5-500 characters")
+        
+        issue = Issue.new
+        sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
+        sprint || (return_error "unable to create sprint for this project")
+
+        state = State.find_by(:name => "idea").id
+        sprint_state = issue.create_sprint_state sprint.id, state, nil
+        sprint_state || (return_error "unable to create sprint")
+        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :diff => "new"}
+        (issue.log_event log_params) || (return_error "unable to create sprint")
+        status 201
+        return sprint.to_json
     end
 
     sprint_states_post = lambda do
         protected!
-        if @session_hash["admin"]
-            status 400
-            response = {}
-            begin
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-                if fields[:state]
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:state], "state"
+        check_required_field fields[:sprint], "sprint"
 
-                    issue = Issue.new
-                    sprint = (issue.get_sprint fields[:sprint])
-
-                    repo = Repo.new
-                    github = (repo.github_client github_authorization)
-
-                    sha = github.branch("#{sprint.project.org}/#{sprint.project.name}","master").commit.sha
-
-                    sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
-
-                    log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :diff => "transition"} 
-                    if sprint_state && (issue.log_event log_params) 
-                        status 201
-                        response = sprint_state.as_json
-                    end
-                end
-            end
-            return response.to_json
-        else
-            return_not_found 
-        end
+        issue = Issue.new
+        sprint = (issue.get_sprint fields[:sprint])
+        sprint || return_not_found
+        repo = Repo.new
+        github = (repo.github_client github_authorization)
+        sprint || (return_error "unable to connect to github")
+        sha = github.branch("#{sprint.project.org}/#{sprint.project.name}","master").commit.sha
+        sha || (return_error "unable to retrieve sha")
+        sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
+        sprint_state || (return_error "unable to create sprint state")
+        log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :diff => "transition"} 
+        (issue.log_event log_params) ||  (return_error "unable to create sprint state")
+        status 201
+        return sprint_state.to_json
     end
 
     contributors_post_comments = lambda do
@@ -1222,7 +1139,7 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:team_id], "team_id"
         check_required_field fields[:seat_id], "seat_id"
-        
+
         account = Account.new
         (account.valid_email fields[:user_email]) || (return_error "please enter a valid email address")
 
@@ -1317,13 +1234,13 @@ class Integrations < Sinatra::Base
 
     get "/users/me/skillsets", &users_skillsets_get_by_me # must precede :user_id request
     get "/users/:user_id/skillsets", &users_skillsets_get
-    get "/users/:user_id/skillsets/:skillset_id", &users_skillsets_get_by_skillset
-    patch "/users/:user_id/skillsets/:skillset_id", &users_skillsets_patch 
+    get "/users/me/skillsets/:skillset_id", &users_skillsets_get_by_skillset
+    patch "/users/me/skillsets/:skillset_id", &users_skillsets_patch 
 
     get "/users/me/roles", &users_roles_get_by_me # must precede :user_id request
     get "/users/:user_id/roles", &users_roles_get
-    get "/users/:user_id/roles/:role_id", &users_roles_get_by_role
-    patch "/users/:user_id/roles/:role_id", &users_roles_patch_by_id
+    get "/users/me/roles/:role_id", &users_roles_get_by_role
+    patch "/users/me/roles/:role_id", &users_roles_patch_by_id
 
     get "/users/me/notifications", &get_user_notifications
     patch "/users/me/notifications/:id", &user_notifications_read
@@ -1339,7 +1256,7 @@ class Integrations < Sinatra::Base
 
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request
-    get "/users/:id", allows: [:id], &users_get_by_id
+    get "/users/:id", allows: [:id], needs: [:id], &users_get_by_id
 
     get "/roles", &roles_get
     get "/states", &states_get
@@ -1355,7 +1272,7 @@ class Integrations < Sinatra::Base
 
     post "/projects", &projects_post
     get "/projects", &projects_get
-    get "/projects/:id", allows: [:id], &projects_get_by_id
+    get "/projects/:id", allows: [:id], needs: [:id], &projects_get_by_id
 
     #    post "/projects/:project_id/refresh", &refresh_post #TODO - later
     post "/projects/:project_id/contributors", &contributors_post
@@ -1363,7 +1280,7 @@ class Integrations < Sinatra::Base
     get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
 
     get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
-    get "/sprints/:id", allows: [:id], &sprints_get_by_id
+    get "/sprints/:id", allows: [:id], needs: [:id], &sprints_get_by_id
     post "/sprints", &sprints_post
 
     get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
