@@ -27,10 +27,9 @@ export default Component.extend({
                         _this.set('errorMessage', "A reset link will be sent to "+email);
                     }
                 }, function(xhr, status, error) {
-                    var response = xhr.responseText;
-                    Ember.run(function() {
-                        reject(response);
-                    });
+                    var response = JSON.parse(xhr.responseText);
+                    var response = response.errors[0].detail;
+                    _this.set("errorMessage",response);
                 });
 
             }
