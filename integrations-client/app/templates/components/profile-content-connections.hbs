@@ -9,7 +9,13 @@
 
                 {{#each connections as |connection|}}
                     <div class="list-group-item rounded highlight-{{notification.read}}">
-                        <h4 class="line text-capitalize">{{connection.first_name}} {{connection.last_name}}</h4>
+                        <h4 class="line text-capitalize">
+                            {{#if (eq connection.contact_id sessionAccount.account.id)}}
+                                {{#link-to "profile" connection.user_id}}{{connection.first_name}} {{connection.last_name}}{{/link-to}}
+                            {{else}}
+                                {{#link-to "profile" connection.contact_id}}{{connection.first_name}} {{connection.last_name}}{{/link-to}} 
+                            {{/if}} 
+                        </h4>
                         <p class="line"><span class="text-muted">E:</span> {{connection.email}}</p>
                         <small class="line text-muted">{{moment-from-now connection.updated_at}}</small>
                     </div>

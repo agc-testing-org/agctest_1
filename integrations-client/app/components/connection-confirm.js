@@ -9,7 +9,7 @@ export default Ember.Component.extend({
 
             var store = this.get('store');
 
-            store.adapterFor('requests').set('namespace', 'users/');
+            store.adapterFor('requests').set('namespace', 'users/me');
 
             var requestConfirme = store.findRecord('request', id).then(function (request) {
                 request.set('confirmed', confirmed);

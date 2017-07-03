@@ -8,7 +8,7 @@ describe "/team-invites" do
     describe "GET /?token=" do
         fixtures :teams, :user_teams
         before(:each) do
-            @invite = user_teams(:adam_invited_expired)
+            @invite = user_teams(:adam_confirmed_b_team)
         end
         context "valid token" do
             before(:each) do
@@ -27,19 +27,21 @@ describe "/team-invites" do
             it "should return sender name" do
                 expect(@res["sender_first_name"]).to eq @invite.sender.first_name
             end
+            it_behaves_like "ok"
+        end
+        context "expired token" do
+            before(:each) do
+                @invite = user_teams(:adam_invited_expired) 
+                get "/team-invites?token=#{@invite.token}"
+            end
+            it_behaves_like "error", "this invitation has expired"
         end
         context "invalid token" do
             before(:each) do
                 @token = "YYEEA"
                 get "/team-invites?token=#{@token}"
-                @res = JSON.parse(last_response.body)
             end
-            it "should return id" do
-                expect(@res["id"]).to eq(@token)
-            end
-            it "should return no other keys" do
-                expect(@res.keys).to eq ["id"]
-            end
+            it_behaves_like "error", "this invitation is invalid"
         end
     end
 end

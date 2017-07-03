@@ -9,7 +9,7 @@ export default Ember.Component.extend({
 
             var store = this.get('store');
 
-            store.adapterFor(type).set('namespace', 'users/'+userId ); 
+            store.adapterFor(type).set('namespace', 'users/me'); 
 
             var update = store.findRecord(type,itemId).then(function(item) {
                 item.set('active', active);

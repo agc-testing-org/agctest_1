@@ -70,7 +70,7 @@ describe "/projects" do
                 @mysql = @mysql_client.query("select * from projects")
             end
             context "response" do
-                it_should_behave_like "unauthorized"
+                it_should_behave_like "unauthorized_admin"
             end
             context "projects table" do
                 it "should not include an id" do
@@ -89,6 +89,7 @@ describe "/projects" do
                     expect(@projects[0]["name"]).to eq(@name)
                 end
                 it_should_behave_like "projects"
+                it_should_behave_like "created"
             end
         end
     end
@@ -101,6 +102,7 @@ describe "/projects" do
             @project_results = @mysql_client.query("select * from projects")
         end
         it_should_behave_like "projects"
+        it_should_behave_like "ok"
     end 
 
     describe "GET /:id" do
@@ -112,41 +114,13 @@ describe "/projects" do
             @project_results = @mysql_client.query("select * from projects where id = #{project_id}")
         end
         it_should_behave_like "projects"
-    end
-
-
-    describe "GET /:id/events" do
-        fixtures :sprints, :states, :projects, :sprint_timelines
-        context "no filter" do
-            before(:each) do
-                project_id = projects(:demo).id
-                get "/projects/#{project_id}/events"
-                @timeline = JSON.parse(last_response.body)
-                @timeline_result = @mysql_client.query("select * from sprint_timelines where project_id = #{project_id}")
-            end
-            it_behaves_like "sprint_timelines"
-        end
-        context "filter by sprint_id" do
-            before(:each) do
-                project_id = projects(:demo).id
-                @sprint_id = sprints(:sprint_1).id
-                get "/projects/#{project_id}/events?sprint_id=#{@sprint_id}"
-                @timeline = JSON.parse(last_response.body)
-                @timeline_result = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_id}")
-            end
-            it "should return only sprint_1 events" do
-                @timeline_result.each_with_index do |t,i|
-                    expect(@timeline[i]["sprint"]["id"]).to eq(@sprint_id)
-                end
-            end
-            it_behaves_like "sprint_timelines"
-        end
+        it_should_behave_like "ok"
     end
 
     describe "POST /:id/refresh" do
         fixtures :projects, :sprints, :sprint_states, :contributors
         before(:each) do
-            skip "I don't think we're using this anymore..."
+            skip "We'll use this later with a bit of refactoring"
             Octokit::Client.any_instance.stub(:login) { @username }
             Octokit::Client.any_instance.stub(:create_repository) { {} }
 

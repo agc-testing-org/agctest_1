@@ -65,11 +65,8 @@ describe "/users" do
         context "invalid user" do
             before(:each) do
                 get "/users/930", {},  {}
-                @res = JSON.parse(last_response.body)
+                it_behaves_like "not_found"
             end                                             
-            it "should return no result" do
-                expect(@res).to be_empty
-            end
         end
     end
 
@@ -125,7 +122,7 @@ describe "/users" do
         end
     end
 
-    describe "GET /:user_id/skillsets/:skillset_id" do
+    describe "GET /me/skillsets/:skillset_id" do
         fixtures :skillsets
         before(:each) do
             @user_id = users(:adam).id
@@ -133,7 +130,7 @@ describe "/users" do
         end
         context "no user_skillsets" do
             before(:each) do
-                get "/users/#{@user_id}/skillsets/#{@skillset_id}", {},  {}
+                get "/users/me/skillsets/#{@skillset_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                 @res = [JSON.parse(last_response.body)]
             end
             it_behaves_like "user_skillsets"
@@ -141,10 +138,16 @@ describe "/users" do
         context "user_skillsets" do
             fixtures :user_skillsets
             before(:each) do
-                get "/users/#{@user_id}/skillsets/#{@skillset_id}", {},  {}
+                get "/users/me/skillsets/#{@skillset_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                 @res = [JSON.parse(last_response.body)]
             end
             it_behaves_like "user_skillsets"
+        end
+        context "signed out" do
+            before(:each) do
+                get "/users/me/skillsets/2"
+            end
+            it_behaves_like "unauthorized"
         end
     end
 
@@ -161,51 +164,40 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /:user_id/skillsets" do
+    describe "PATCH /me/skillsets" do
         fixtures :skillsets
         before(:each) do
             @user_id = users(:adam_confirmed).id
             @skillset_id = skillsets(:skillset_1).id 
         end
-        context "admin" do
+        context "owner" do
             context "skillset exists" do
                 before(:each) do
                     @active = false
-                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    patch "/users/me/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_skillsets").first
                 end
                 it_behaves_like "user_skillset_update"
+                it_behaves_like "ok"
             end 
             context "skillset does not exist" do
                 before(:each) do
                     @active = true
-                    patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    patch "/users/me/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_skillsets").first
                 end
                 it_behaves_like "user_skillset_update"
-            end
-        end
-        context "non-authorized" do
-            before(:each) do
-                @active = false
-                patch "/users/#{users(:adam).id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                puts @res = JSON.parse(last_response.body)
-            end
-            it "should return 401" do
-                expect(last_response.status).to eq(401) 
+                it_behaves_like "ok"
             end
         end
         context "lost 'active' key" do
             before(:each) do
                 @active = false
-                patch "/users/#{@user_id}/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                puts @res = JSON.parse(last_response.body)
+                patch "/users/me/skillsets/#{@skillset_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
-            it "should return 400" do
-                expect(last_response.status).to eq(400) 
-            end
+            it_behaves_like "error", "missing active field"
         end
     end 
 
@@ -242,6 +234,7 @@ describe "/users" do
                 @res = JSON.parse(last_response.body)
             end 
             it_behaves_like "user_roles"
+            it_behaves_like "ok"
         end
     end
 
@@ -258,6 +251,7 @@ describe "/users" do
                 @res = JSON.parse(last_response.body)
             end
             it_behaves_like "user_roles"
+            it_behaves_like "ok"
         end
     end
 
@@ -277,7 +271,7 @@ describe "/users" do
         end
     end
 
-    describe "GET /:user_id/roles/:role_id" do
+    describe "GET /me/roles/:role_id" do
         fixtures :roles
         before(:each) do
             @user_id = users(:adam).id
@@ -286,11 +280,18 @@ describe "/users" do
         context "user_roles" do
             fixtures :user_roles
             before(:each) do
-                get "/users/#{@user_id}/roles/#{@role_id}", {}, {} 
+                get "/users/me/roles/#{@role_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it_behaves_like "user_role"
+            it_behaves_like "ok"
         end
+        context "signed out" do
+            before(:each) do
+                get "/users/me/roles/2"
+            end
+            it_behaves_like "unauthorized" 
+        end 
     end
 
     shared_examples_for "user_role_update" do
@@ -306,35 +307,26 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /:user_id/roles" do
+    describe "PATCH /me/roles" do
         fixtures :roles
         before(:each) do
             @user_id = users(:adam_confirmed).id
             @role_id = roles(:product).id 
         end
-        context "authorized" do
+        context "owner" do
             context "role exists" do
                 before(:each) do
                     @active = false
-                    patch "/users/#{@user_id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    patch "/users/me/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from user_roles").first
                 end
                 it_behaves_like "user_role_update"
-            end
-        end
-        context "non-authorized" do
-            before(:each) do
-                @active = false
-                patch "/users/#{users(:adam).id}/roles/#{@role_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-            end
-            it "should return 401" do
-                expect(last_response.status).to eq(401) 
+                it_behaves_like "ok"
             end
         end
     end
-    
+
     shared_examples_for "contact_info" do
         it "should include user_name" do
             @contact_result.each_with_index do |r,i|
@@ -381,80 +373,84 @@ describe "/users" do
         end
     end
 
-    describe "GET /connections" do
+    describe "GET /me/connections" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
-                get "/users/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:adam_confirmed_request_adam_accepted).user_id} where user_connections.confirmed=2) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:adam_confirmed_request_adam_accepted).user_id})")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info"
+            it_behaves_like "ok"
         end
         context "not signed in" do
             before(:each) do
-                get "/users/connections"
+                get "/users/me/connections"
             end
-            it_behaves_like "unauthorized" 
+            it_behaves_like "unauthorized"
         end
     end
 
-    describe "GET /requests" do
+    describe "GET /requests/me" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
-                get "/users/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                get "/users/me/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.contact_id=users.id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.user_id=users.id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info" 
+            it_behaves_like "ok"
         end
         context "not signed in" do
             before(:each) do
-                get "/users/requests"
+                get "/users/me/requests"
             end
             it_behaves_like "unauthorized"
         end
     end
 
-    describe "GET /requests/:id" do
+    describe "GET /me/requests/:id" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
-                get "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                get "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.user_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info" 
+            it_behaves_like "ok"
         end
         context "not signed in" do
             before(:each) do
-                get "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
+                get "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
             end
             it_behaves_like "unauthorized"
         end
     end
 
-    describe "PATCH /requests/:id" do
+    describe "PATCH /me/requests/:id" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
                 @confirmed = 2
-                patch "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                patch "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
                 @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
             it_behaves_like "contact" 
+            it_behaves_like "ok"
             it "should update confirmed" do
                 expect(@res[0]["confirmed"]).to eq @confirmed
             end
         end
         context "not signed in" do
             before(:each) do
-                patch "/users/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
+                patch "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
             end
             it_behaves_like "unauthorized"
         end
@@ -468,6 +464,7 @@ describe "/users" do
                 @contact_result = @mysql_client.query("select * from user_connections where user_id = #{users(:adam_admin).id}")
             end
             it_behaves_like "contact"
+            it_behaves_like "created"
         end
         context "not signed in" do
             before(:each) do
@@ -480,12 +477,33 @@ describe "/users" do
     describe "GET /:id/requests" do
         fixtures :user_connections
         context "signed in" do
-            before(:each) do
-                get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_id = #{@user}")
+            context "existing" do
+                before(:each) do
+                    get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_id = #{@user}")
+                end
+                it_behaves_like "contact"
+                it_behaves_like "ok"
             end
-            it_behaves_like "contact"
+            context "not existing" do
+                before(:each) do
+                    get "/users/222/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = JSON.parse(last_response.body) 
+                end
+                it "should return empty" do
+                    expect(@res["id"]).to eq 0
+                end
+            end
+            context "user already requested you", :focus => true do
+                before(:each) do
+                    get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).user_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where user_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND contact_id = #{@user}")
+                end
+                it_behaves_like "contact"
+                it_behaves_like "ok"
+            end
         end
         context "not signed in" do
             before(:each) do    
@@ -493,5 +511,73 @@ describe "/users" do
             end                                                 
             it_behaves_like "unauthorized"  
         end                                         
+    end
+
+    shared_examples_for "user_notifications" do
+        it "should return id" do
+            @notification_results.each_with_index do |n,i|
+                expect(n["id"]).to eq(@res[i]["id"])
+            end 
+        end 
+    end
+
+    describe "GET /me/notifications" do
+        fixtures :sprint_timelines, :user_notifications
+        context "signed in" do 
+            before(:each) do
+                get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}")
+            end
+            it_behaves_like "user_notifications"
+            it_behaves_like "ok"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/me/notifications"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "GET /me/notifications/:id" do
+        fixtures :sprint_timelines, :user_notifications
+        context "signed in" do
+            before(:each) do
+                get "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
+            end
+            it_behaves_like "user_notifications"
+            it_behaves_like "ok"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/users/me/notifications/125"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    describe "PATCH /me/notifications/:id" do
+        fixtures :sprint_timelines, :user_notifications
+        context "signed in" do
+            before(:each) do                
+                patch "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {:read => true}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]                         
+                @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
+            end
+            it_behaves_like "user_notifications"                                                            
+            it_behaves_like "ok"
+            it "should set read = true" do
+                expect(@res[0]["read"]).to be true
+            end
+        end                                                         
+        context "not signed in" do                                          
+            before(:each) do        
+                get "/users/me/notifications/125"
+            end                                                         
+            it_behaves_like "unauthorized"                                          
+        end                                                     
     end
 end

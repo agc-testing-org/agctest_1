@@ -11,6 +11,7 @@ describe "/teams" do
 
     shared_examples_for "teams" do
         it "should return id" do
+            expect(@team_results.count).to be > 0
             @team_results.each_with_index do |team_result,i|
                 expect(@teams[i]["id"]).to eq(team_result["id"])
             end
@@ -67,37 +68,30 @@ describe "/teams" do
                     end
                 end
                 context "invalid fields" do
-                    context "name < 3 char" do
+                    context "name < 2 char" do
                         before(:each) do
-                            post "/teams", { :name => "12", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                            @team_results = @mysql_client.query("select * from teams")
-                            @error = JSON.parse(last_response.body)
-                        end
-                        it "should not save the result" do
-                            expect(@team_results.count).to eq(0)
-                        end
-                        it "should return error message" do
-                            expect(@error["errors"][0]["detail"]).to eq("Please enter a more descriptive team name")
-                        end
+                            post "/teams", { :name => "A", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                        end 
+                        it_behaves_like "error", "team name must be 2-30 characters" 
+                    end
+                    context "name > 30 char" do
+                        before(:each) do
+                            post "/teams", { :name => "A"*31, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                        end 
+                        it_behaves_like "error", "team name must be 2-30 characters" 
                     end
                     context "name (exists already)" do
                         fixtures :teams
                         before(:each) do
-                            post "/teams", { :name => "ATEAM", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                            @error = JSON.parse(last_response.body)
+                            post "/teams", { :name => "ATEAM", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"} 
                         end
-                        it "should return error message" do
-                            expect(@error["errors"][0]["detail"]).to eq("This name is not available")
-                        end
+                        it_behaves_like "error", "this name is not available"
                     end
                     context "invalid plan id" do
                         before(:each) do
                             post "/teams", { :name => "ATEAMNEW", :plan_id => 33 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                            @error = JSON.parse(last_response.body)
                         end
-                        it "should return error message" do
-                            expect(@error["errors"][0]["detail"]).to eq("This name is not available")
-                        end
+                        it_behaves_like "error", "invalid plan_id"
                     end
                 end
             end
@@ -115,7 +109,7 @@ describe "/teams" do
             before(:each) do
                 post "/teams", { :name => "12", :plan_id => plans(:manager) }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
-            it_behaves_like "unauthorized"
+            it_behaves_like "unauthorized_admin"
         end
     end
 
@@ -149,7 +143,7 @@ describe "/teams" do
             fixtures :user_teams
             before(:each) do
                 get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} and teams.id = #{@team}")
+                @team_results = @mysql_client.query("select teams.* from teams where teams.id = #{@team}")
                 @teams = [JSON.parse(last_response.body)]
             end
             it_behaves_like "teams"
@@ -170,7 +164,7 @@ describe "/teams" do
             fixtures :user_teams
             before(:each) do
                 get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} and teams.id = #{@team}")
+                @team_results = @mysql_client.query("select teams.* from teams where teams.id = #{@team}")
                 @teams = [JSON.parse(last_response.body)]
             end
             it_behaves_like "teams"
@@ -186,7 +180,7 @@ describe "/teams" do
             before(:each) do
                 @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
                 get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} and teams.id = #{@team}")
+                @team_results = @mysql_client.query("select teams.* from teams where teams.id = #{@team}")
                 @teams = [JSON.parse(last_response.body)]
             end
             it_behaves_like "teams"
@@ -198,7 +192,7 @@ describe "/teams" do
             before(:each) do
                 get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end 
-            it_behaves_like "unauthorized"
+            it_behaves_like "not_found"
         end
     end
 end
