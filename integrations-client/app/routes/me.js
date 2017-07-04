@@ -38,7 +38,8 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             skillsets: skillsets,
             roles: roles,
             user: user,
-            states: states
+            states: states,
+            params: params
         });
     }
 });

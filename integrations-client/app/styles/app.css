@@ -692,6 +692,9 @@ button{
 .main .slide .skillsets{
     margin-bottom:20px;
 }
+.main .slide .skillsets a{
+    text-decoration:none;
+}
 .main .slide.hidden-md-up .about{
     margin-bottom:10px;
 }
