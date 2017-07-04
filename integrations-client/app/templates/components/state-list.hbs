@@ -11,7 +11,7 @@
         All
     {{/link-to}}
     {{#each states as |state|}}
-    {{#link-to "develop.project.state" state.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+    {{#link-to "develop.project.state" (concat state.id "-" state.name) tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
     <div class="icon hidden-sm-down">
         <i class="fa fa-fw fa-2x {{state.fa_icon}}"></i>
     </div>

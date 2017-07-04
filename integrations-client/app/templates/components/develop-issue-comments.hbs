@@ -4,8 +4,11 @@
     <div class="list-group-item rounded">
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
+        {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
             posted {{moment-from-now comment.created_at}}
+            {{#unless (eq comment.user_id sessionAccount.account.id)}}
              by {{#link-to "profile" comment.user_id}}{{#if comment.user_profile}}a {{user-profile-descriptor user_profile=comment.user_profile class="d-inline"}}{{else}}someone{{/if}}{{/link-to}}
+            {{/unless}}
         </small>
     </div>
 {{/each}}

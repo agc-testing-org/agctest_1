@@ -744,7 +744,7 @@ describe ".Account" do
                 expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
             end
             it "should include user_name" do
-                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
+                expect(@res["first_name"]).to eq(user_connections(:user_2_connection_1).user.first_name)
             end
             it "should include created_at" do
                 expect(@res["created_at"]).to_not be nil

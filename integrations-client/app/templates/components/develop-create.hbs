@@ -7,6 +7,7 @@
                     {{user-login-oauth provider="github" as_text=true text="Sign in with Github" refresh="refresh" class="d-inline"}} to fetch your github projects
                 </h3>
             {{else}}
+                {{#unless project}}
                 <div class="dropdown btn btn-secondary btn-block rounded">
                     <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Project List
@@ -17,6 +18,11 @@
                         {{/each}}
                     </div>
                 </div>
+                {{else}}
+                    <h3 class="text-center">
+                        created {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name)}}{{project.org}}/{{project.name}}{{/link-to}}
+                    </h3>
+                {{/unless}}
             {{/unless}}
     </div>
 </form>

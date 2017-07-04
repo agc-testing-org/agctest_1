@@ -14,7 +14,7 @@ export default Ember.Component.extend({
             var _this = this;
             var name = this.get('name');
             var plan = this.get('planId');
-            if(name && name.length > 2){
+            if(name && (name.length > 1)&&(name.length < 31)){
                 if(plan){
                     var team = this.get('store').createRecord('team', {
                         name: name,

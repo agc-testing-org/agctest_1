@@ -16,7 +16,7 @@
                 Wired7 is gradually onboarding users through invitations. 
                 
                 {{#if invitation}}
-                    <span class="text-capitalize">{{invitation.sender_first_name}}</span> ({{invitation.sender_email}}) would like for you to join the {{invitation.name}} team.
+                    Would you like to join the <span class="text-capitalize">{{invitation.name}} team</span>?
                 {{else}}
                     Create an account and we will invite you as soon as we can! 
                 {{/if}}
@@ -29,7 +29,7 @@
                         <div class="alert alert-info rounded text-center">We will email you an invite as soon as we can!</div>
                     {{else}}
 
-                    {{#if errorMessage}}<div class="alert alert-warning rounded text-center">{{errorMessage}}</div>{{/if}}
+                    {{application-error error=errorMessage}}
 
                     <div class="form-group">
                         <label>First Name</label>
