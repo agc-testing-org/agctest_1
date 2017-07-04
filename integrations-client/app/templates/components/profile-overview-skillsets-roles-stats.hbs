@@ -1,11 +1,15 @@
-{{#each roles as |role|}}
-    {{#if role.active}}
-        <span {{action "filter" role.id}} class="badge badge-default rounded selected cursor-pointer">{{role.name}}</span>
+{{#each items as |item|}}
+    {{#if item.active}}
+        {{#if (eq type "role_id")}}
+           {{#link-to (query-params role_id=item.id)}}<span class="badge badge-default rounded selected cursor-pointer">{{item.name}}</span>{{/link-to}}        
+        {{else if (eq type "skillset_id")}}
+            {{#link-to (query-params skillset_id=item.id)}}<span class="badge badge-default rounded selected cursor-pointer">{{item.name}}</span>{{/link-to}} 
+        {{/if}}
     {{/if}}
 {{/each}}
 
-{{#each skillsets as |skillset|}}
-    {{#if skillset.active}}
-        <span {{action "filter" skillset.id}} class="badge badge-default rounded selected cursor-pointer">{{skillset.name}}</span>
-    {{/if}}
-{{/each}}
+{{#if (eq type "role_id")}}
+    {{#link-to (query-params role_id="")}}<span class="badge badge-default rounded selected cursor-pointer">clear roles</span>{{/link-to}} 
+{{else if (eq type "skillset_id")}}
+    {{#link-to (query-params skillset_id="")}}<span class="badge badge-default rounded selected cursor-pointer">clear skillsets</span>{{/link-to}}              
+{{/if}}

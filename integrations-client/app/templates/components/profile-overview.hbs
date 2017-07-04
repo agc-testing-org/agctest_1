@@ -20,7 +20,13 @@
                 {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
             {{/if}}
             <h4 class="about section text-capitalize">Feedback by Skillset and Role</h4>
-            {{profile-overview-skillsets-roles-stats skillsets=skillsets roles=roles class="skillsets"}}
+            {{#if me}}
+                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" route="me.overview" class="skillsets"}}
+                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" route="me.overview" class="skillsets"}}
+            {{else}}
+                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" class="skillsets"}}
+                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" class="skillsets"}}
+            {{/if}}
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
                     {{sprint-state-overview-score total=5000 title="Example Stat A"}}
