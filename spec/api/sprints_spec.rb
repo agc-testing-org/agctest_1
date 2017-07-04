@@ -86,29 +86,42 @@ describe "/sprints" do
         end
         context "invalid fields" do
             after(:each) do
-                expect(last_response.status).to eq 400
                 expect(@mysql_client.query("select * from sprints").count).to eq 0
             end
-            context "title < 6 chars" do
-                it "should return error message" do
-                    post "sprints", {:title => "ABCDE", :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    res = JSON.parse(last_response.body)
-                    expect(res["error"]).to eq "Please enter a more descriptive title"
+            context "title < 5 chars" do
+                before(:each) do 
+                    post "sprints", {:title => "A"*4, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
+                it_behaves_like "error", "title must be 5-100 characters" 
+
             end
-            context "description < 6 chars" do
-                it "should return error message" do
-                    post "sprints", {:title => @title, :description => "12345", :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    res = JSON.parse(last_response.body) 
-                    expect(res["error"]).to eq "Please enter a more detailed description"
+            context "title > 100 chars" do
+                before(:each) do 
+                    post "sprints", {:title => "A"*101, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
+                it_behaves_like "error", "title must be 5-100 characters"
+
+            end
+            context "description < 5 chars" do
+                before(:each) do 
+                    post "sprints", {:title => @title, :description => "A"*4, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+                it_behaves_like "error", "description must be 5-500 characters"
+
+            end
+            context "description > 500 chars" do
+                before(:each) do 
+                    post "sprints", {:title => @title, :description => "A"*501, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+                it_behaves_like "error", "description must be 5-500 characters"
+
             end
             context "non-existing project" do
-                it "should return error message" do
+                before(:each) do 
                     post "sprints", {:title => @title, :description => @description, :project_id => 993 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    res = JSON.parse(last_response.body)
-                    expect(res["error"]).to eq "This project does not exist"
                 end
+                it_behaves_like "error", "unable to create sprint for this project"
+
             end
         end
         context "valid fields" do
@@ -120,6 +133,7 @@ describe "/sprints" do
                 @sprints = [JSON.parse(last_response.body)]
             end
             it_behaves_like "sprints"
+            it_behaves_like "created"
             context "sprint_states" do
                 it "should include sprint_id" do
                     expect(@sprint_state["sprint_id"]).to eq @sprints[0]["id"]
@@ -154,6 +168,7 @@ describe "/sprints" do
                         @sprint_results = @mysql_client.query("select sprints.* from sprints INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id where project_id = #{project_id}")
                     end
                     it_behaves_like "sprints"
+                    it_behaves_like "ok"
                 end
                 context "sprint_states.state_id" do
                     before(:each) do
@@ -165,6 +180,7 @@ describe "/sprints" do
                         @sprint_results = @mysql_client.query("select sprints.* from sprints INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id where sprint_states.state_id = #{state_id} AND project_id = #{project_id}")
                     end
                     it_behaves_like "sprints"
+                    it_behaves_like "ok"
                 end
                 context "id" do
                     before(:each) do
@@ -174,6 +190,7 @@ describe "/sprints" do
                         @sprint_results = @mysql_client.query("select sprints.* from sprints INNER JOIN sprint_states ON sprint_states.sprint_id = sprints.id INNER JOIN (SELECT MAX(id) last_id FROM sprint_states GROUP BY sprint_id) last_sprint_state ON sprint_states.id = last_sprint_state.last_id where sprints.id = #{id}")
                     end
                     it_behaves_like "sprints"
+                    it_behaves_like "ok"
                 end
             end
         end
@@ -188,6 +205,7 @@ describe "/sprints" do
             @sprint_results = @mysql_client.query("select * from sprints where id = #{sprint.id}")
         end
         it_behaves_like "sprints"
+        it_behaves_like "ok"
     end
 
     describe "GET /:sprint_id/skillsets" do
@@ -201,6 +219,7 @@ describe "/sprints" do
                 @res = JSON.parse(last_response.body)
             end
             it_behaves_like "sprint_skillsets"
+            it_behaves_like "ok"
         end
         context "sprint_skillsets" do
             fixtures :sprint_skillsets
@@ -209,6 +228,7 @@ describe "/sprints" do
                 @res = JSON.parse(last_response.body)
             end 
             it_behaves_like "sprint_skillsets"
+            it_behaves_like "ok"
         end
 
     end
@@ -225,6 +245,7 @@ describe "/sprints" do
                 @res = [JSON.parse(last_response.body)]
             end
             it_behaves_like "sprint_skillsets"
+            it_behaves_like "ok"
         end
         context "sprint_skillsets" do
             fixtures :sprint_skillsets
@@ -233,6 +254,7 @@ describe "/sprints" do
                 @res = [JSON.parse(last_response.body)]
             end
             it_behaves_like "sprint_skillsets"
+            it_behaves_like "ok"
         end
     end
 
@@ -253,15 +275,16 @@ describe "/sprints" do
                     @mysql = @mysql_client.query("select * from sprint_skillsets where id = #{sprint_skillsets(:sprint_1_skillset_1).id}").first
                 end
                 it_behaves_like "sprint_skillset_update"
+                it_behaves_like "ok"
             end 
             context "skillset does not exist" do
                 before(:each) do
                     @active = true
-                    patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    patch "/sprints/#{@sprint_id}/skillsets/1221", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                     @res = JSON.parse(last_response.body)
                     @mysql = @mysql_client.query("select * from sprint_skillsets").first
                 end
-                it_behaves_like "sprint_skillset_update"
+                it_behaves_like "error", "unable to update skillset"
             end
         end
         context "non-admin" do
@@ -270,9 +293,7 @@ describe "/sprints" do
                 patch "/sprints/#{@sprint_id}/skillsets/#{@skillset_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
                 @res = JSON.parse(last_response.body)
             end
-            it "should return 401" do
-                expect(last_response.status).to eq(401) 
-            end
+            it_behaves_like "unauthorized_admin"
         end
     end
 

@@ -31,7 +31,7 @@ describe "/contributors" do
         context "valid comment" do
             before(:each) do
                 @text = "AB"
-                post "/contributors/#{@contributor_id}/comments", {:text => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/contributors/#{@contributor_id}/comments", {:text => @text, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @mysql = @mysql_client.query("select * from comments").first
                 @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
@@ -60,14 +60,14 @@ describe "/contributors" do
         context "invalid comment" do
             context "< 2 char" do
                 it "should return error message" do
-                    post "/contributors/#{@contributor_id}/comments", {:text => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    post "/contributors/#{@contributor_id}/comments", {:text => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     res = JSON.parse(last_response.body)
                     expect(res["message"]).to eq("Please enter a more detailed comment")
                 end
             end
             context "greater than 4999 characters" do
                 it "should return error message" do
-                    post "/contributors/#{@contributor_id}/comments", {:text => "A"*5000, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                    post "/contributors/#{@contributor_id}/comments", {:text => "A"*5000, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     res = JSON.parse(last_response.body)
                     expect(res["message"]).to eq("Comments must be less than 5000 characters")
                 end
@@ -81,7 +81,7 @@ describe "/contributors" do
             @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
             @contributor_id = contributors(:adam_confirmed_1).id
             @project = projects(:demo).id
-            post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from votes").first
             @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
@@ -111,7 +111,7 @@ describe "/contributors" do
         end
         context "duplicate vote" do
             before(:each) do
-                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @mysql = @mysql_client.query("select * from votes")
             end
@@ -125,7 +125,7 @@ describe "/contributors" do
         context "different vote" do
             before(:each) do
                 @new_contributor_id = contributors(:adam_admin_1).id
-                post "/contributors/#{@new_contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+                post "/contributors/#{@new_contributor_id}/votes", {:sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @mysql = @mysql_client.query("select * from votes")
                 @res = JSON.parse(last_response.body)
             end
@@ -162,7 +162,7 @@ describe "/contributors" do
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
             Octokit::Client.any_instance.stub(:create_pull_request => @body)
 
-            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from sprint_states").first
             @timeline = @mysql_client.query("select * from sprint_timelines").first
@@ -210,8 +210,8 @@ describe "/contributors" do
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
             Octokit::Client.any_instance.stub(:create_pull_request => @body)
             Octokit::Client.any_instance.stub(:merge_pull_request => @body)
-            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
-            post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}", "HTTP_AUTHORIZATION_GITHUB" => "Bearer #{@non_admin_github_token}"}
+            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+            post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from sprint_states").first
         end

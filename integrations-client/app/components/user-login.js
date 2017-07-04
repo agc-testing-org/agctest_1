@@ -20,7 +20,8 @@ export default Component.extend({
                 if(password && (password.length > 7)){
                     var credentials = this.getProperties('email', 'password', 'path');
                     this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
-                        this.set('errorMessage', JSON.parse(reason).message);
+                        var response = JSON.parse(reason).errors[0].detail;
+                        _this.set("errorMessage",response);
                     }).then(function(){
 
                     });

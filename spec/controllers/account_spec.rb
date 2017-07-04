@@ -121,7 +121,8 @@ describe ".Account" do
             @type = "auth"
             @token = "1234567890"
             @value = "VALUE"
-            @res = @account.save_token @type, @token, @value
+            @expiration = 10
+            @res = @account.save_token @type, @token, @value, @expiration
         end
         it "should return true" do
             expect(@res).to be true
@@ -133,8 +134,8 @@ describe ".Account" do
             it "should save the value" do
                 expect(@redis.get("#{@type}:#{@token}")).to eq(@value)
             end
-            it "should add a TTL of 3 hours to the token" do
-                expect(@redis.ttl("#{@type}:#{@token}")).to eq(60*60*3)
+            it "should add a TTL of #{@expiration} seconds to the token" do
+                expect(@redis.ttl("#{@type}:#{@token}")).to eq(@expiration)
             end
         end
     end
@@ -230,7 +231,8 @@ describe ".Account" do
             @access_token = "123456"
             @session = "ABC"
             @provider_token = @account.create_token @id, @key, @access_token
-            @account.save_token "session", @session, {:key => @key}.to_json
+            @expiration = 10
+            @account.save_token "session", @session, {:key => @key}.to_json, @expiration
 
         end
         context "valid token" do
@@ -295,11 +297,11 @@ describe ".Account" do
                 it "should include downcased email" do
                     expect(@mysql["email"]).to eq(@email.downcase)
                 end
-                it "should include downcased first name" do
-                    expect(@mysql["first_name"]).to eq(@first_name.downcase)
+                it "should include first name" do
+                    expect(@mysql["first_name"]).to eq(@first_name)
                 end
-                it "should include downcased last name" do
-                    expect(@mysql["last_name"]).to eq(@last_name.downcase)
+                it "should include last name" do
+                    expect(@mysql["last_name"]).to eq(@last_name)
                 end
                 it "should include admin = 0" do
                     expect(@mysql["admin"]).to eq(0)
@@ -309,9 +311,6 @@ describe ".Account" do
                 end
                 it "should include ip" do
                     expect(@mysql["ip"]).to eq @ip
-                end
-                it "should include token" do
-                    expect(@mysql["token"]).to_not be nil 
                 end
             end
         end
@@ -745,7 +744,7 @@ describe ".Account" do
                 expect(@res["confirmed"]).to eq(user_connections(:user_2_connection_1).confirmed)
             end
             it "should include user_name" do
-                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
+                expect(@res["first_name"]).to eq(user_connections(:user_2_connection_1).user.first_name)
             end
             it "should include created_at" do
                 expect(@res["created_at"]).to_not be nil

@@ -5,7 +5,7 @@
         {{/link-to}}
     </div>
     {{#each sprint_states as |sprint_state|}}
-    {{#link-to "develop.project.sprint.state" sprint_state.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+    {{#link-to "develop.project.sprint.state" (concat sprint_state.id "-" sprint_state.state_id.name) tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
     <div class="icon hidden-sm-down">
         <i class="fa fa-fw fa-2x {{sprint_state.state_id.fa_icon}}"></i>
     </div>

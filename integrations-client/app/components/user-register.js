@@ -21,7 +21,6 @@ export default Component.extend({
             else {
                 obj.set("active",true); 
             }
-            console.log(obj.get("name")+ " set to "+obj.get("active"));
         },
         accept(){
             var password = this.get("password");
@@ -32,8 +31,8 @@ export default Component.extend({
                     if(password === passwordb){
                         var credentials = this.getProperties('token', 'password', 'path','firstName');
                         this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
-                            console.log(reason);
-                            this.set('errorMessage', JSON.parse(reason).message);
+                            var response = JSON.parse(reason).errors[0].detail;
+                            _this.set("errorMessage",response);  
                         });
                     }
                     else {
@@ -79,17 +78,15 @@ export default Component.extend({
                     }).then(function(response) {                                                                        
                         var res = JSON.parse(response);
                         if(res["success"] === true){
-                            console.log("REGISTERED");
                             _this.set("registered",true);
                         }
                         else {
 
                         }
                     }, function(xhr, status, error) {
-                        var response = xhr.responseText;
-                        Ember.run(function() {
-                            reject(response);
-                        });
+                        var response = JSON.parse(xhr.responseText);
+                        var response = response.errors[0].detail;
+                        _this.set("errorMessage",response);   
                     });
                 }
                 else {                                           

@@ -10,23 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 201706161200001) do
+ActiveRecord::Schema.define(version: 20170628152419) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
     t.integer "sprint_state_id", null: false
-    t.integer "comment_id"
     t.integer "contributor_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "text", null: false
-    t.index ["contributor_id"], name: "fk_rails_a1385053cc"
+    t.index ["contributor_id"], name: "index_comments_on_contributor_id"
     t.index ["sprint_state_id"], name: "index_comments_on_sprint_state_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
-  end
-
-  create_table "connection_states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "name", null: false
   end
 
   create_table "contributors", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -38,19 +33,8 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.string "commit"
     t.string "commit_remote"
     t.boolean "commit_success"
-    t.integer "insertions"
-    t.integer "deletions"
-    t.integer "lines"
-    t.integer "files"
-    t.string "project_id", null: false
     t.index ["sprint_state_id"], name: "index_contributors_on_sprint_state_id"
     t.index ["user_id"], name: "index_contributors_on_user_id"
-  end
-
-  create_table "labels", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.string "name", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "logins", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -71,6 +55,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   end
 
   create_table "projects", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
     t.string "org", null: false
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -99,7 +84,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   create_table "skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
   create_table "sprint_skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -115,7 +99,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   create_table "sprint_states", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "sprint_id", null: false
     t.integer "state_id", null: false
-    t.datetime "deadline"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "contributor_id"
@@ -123,16 +106,15 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.integer "arbiter_id"
     t.boolean "merged"
     t.integer "pull_request"
-    t.index ["arbiter_id"], name: "fk_rails_a961915d3b"
-    t.index ["contributor_id"], name: "fk_rails_52fb9ef0eb"
+    t.index ["arbiter_id"], name: "index_sprint_states_on_arbiter_id"
+    t.index ["contributor_id"], name: "index_sprint_states_on_contributor_id"
     t.index ["sprint_id"], name: "index_sprint_states_on_sprint_id"
-    t.index ["state_id"], name: "fk_rails_bececa531a"
+    t.index ["state_id"], name: "index_sprint_states_on_state_id"
   end
 
   create_table "sprint_timelines", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "sprint_id", null: false
     t.integer "state_id"
-    t.integer "label_id"
     t.datetime "created_at", null: false
     t.integer "project_id", null: false
     t.integer "user_id", null: false
@@ -144,13 +126,13 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.integer "processed", default: 0
     t.integer "processing"
     t.integer "next_sprint_state_id"
-    t.index ["comment_id"], name: "fk_rails_1251c5b8fd"
-    t.index ["contributor_id"], name: "fk_rails_c3269fa3ec"
-    t.index ["label_id"], name: "fk_rails_1b320ef958"
+    t.index ["comment_id"], name: "index_sprint_timelines_on_comment_id"
+    t.index ["contributor_id"], name: "index_sprint_timelines_on_contributor_id"
+    t.index ["project_id"], name: "index_sprint_timelines_on_project_id"
     t.index ["sprint_id"], name: "index_sprint_timelines_on_sprint_id"
-    t.index ["sprint_state_id"], name: "fk_rails_e755d52f56"
-    t.index ["state_id"], name: "fk_rails_c9feeeb84f"
-    t.index ["vote_id"], name: "fk_rails_9f8155a22b"
+    t.index ["sprint_state_id"], name: "index_sprint_timelines_on_sprint_state_id"
+    t.index ["state_id"], name: "index_sprint_timelines_on_state_id"
+    t.index ["vote_id"], name: "index_sprint_timelines_on_vote_id"
   end
 
   create_table "sprints", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -160,8 +142,6 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.datetime "deadline"
-    t.string "sha"
     t.index ["project_id"], name: "index_sprints_on_project_id"
     t.index ["user_id"], name: "index_sprints_on_user_id"
   end
@@ -171,18 +151,18 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.string "fa_icon", null: false
     t.string "description", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
     t.text "instruction", null: false
     t.boolean "contributors", default: false, null: false
   end
 
   create_table "teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
-    t.string "user_id", null: false
+    t.integer "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "plan_id", default: 2, null: false
-    t.index ["plan_id"], name: "fk_rails_fe85bf605a"
+    t.index ["plan_id"], name: "index_teams_on_plan_id"
+    t.index ["user_id"], name: "index_teams_on_user_id"
   end
 
   create_table "user_connections", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -197,18 +177,13 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.index ["user_id"], name: "index_user_connections_on_user_id"
   end
 
-  create_table "user_contributors", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "user_id", null: false
-    t.integer "contributors_id", null: false
-    t.index ["user_id", "contributors_id"], name: "index_contributors_id_and_user_id_on_user_contributor", unique: true
-  end
-
   create_table "user_notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
     t.boolean "read", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "sprint_timeline_id", null: false
+    t.index ["sprint_timeline_id"], name: "fk_rails_2c4904d34a"
     t.index ["user_id"], name: "index_user_notifications_on_user_id"
   end
 
@@ -222,7 +197,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.string "industry"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_profile_id"], name: "fk_rails_a62e6232fa"
+    t.index ["user_profile_id"], name: "index_user_positions_on_user_profile_id"
   end
 
   create_table "user_profiles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -232,7 +207,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.string "location_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "fk_rails_87a6352e58"
+    t.index ["user_id"], name: "index_user_profiles_on_user_id"
   end
 
   create_table "user_roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -241,8 +216,8 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: false
-    t.index ["role_id"], name: "fk_rails_3369e0d5fc"
-    t.index ["user_id"], name: "index_user_roles_on_user"
+    t.index ["role_id"], name: "index_user_roles_on_role_id"
+    t.index ["user_id"], name: "index_user_roles_on_user_id"
   end
 
   create_table "user_skillsets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -266,9 +241,10 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.datetime "updated_at", null: false
     t.integer "seat_id"
     t.integer "period"
-    t.index ["sender_id"], name: "fk_rails_58c1498938"
-    t.index ["team_id"], name: "fk_rails_64c25f3fe6"
-    t.index ["user_id"], name: "index_user_team_on_user"
+    t.index ["sender_id"], name: "index_user_teams_on_sender_id"
+    t.index ["team_id"], name: "index_user_teams_on_team_id"
+    t.index ["token"], name: "index_user_teams_on_token", unique: true
+    t.index ["user_id"], name: "index_user_teams_on_user_id"
   end
 
   create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -286,17 +262,19 @@ ActiveRecord::Schema.define(version: 201706161200001) do
     t.string "token"
     t.string "github_username"
     t.string "last_name"
+    t.string "refresh"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["refresh"], name: "index_users_on_refresh", unique: true
+    t.index ["token"], name: "index_users_on_token", unique: true
   end
 
   create_table "votes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
     t.integer "sprint_state_id", null: false
-    t.integer "comment_id"
     t.integer "contributor_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["contributor_id"], name: "fk_rails_ef3485c16e"
+    t.index ["contributor_id"], name: "index_votes_on_contributor_id"
     t.index ["sprint_state_id"], name: "index_votes_on_sprint_state_id"
     t.index ["user_id"], name: "index_votes_on_user_id"
   end
@@ -317,7 +295,7 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   add_foreign_key "sprint_states", "users", column: "arbiter_id"
   add_foreign_key "sprint_timelines", "comments"
   add_foreign_key "sprint_timelines", "contributors"
-  add_foreign_key "sprint_timelines", "labels"
+  add_foreign_key "sprint_timelines", "projects"
   add_foreign_key "sprint_timelines", "sprint_states"
   add_foreign_key "sprint_timelines", "sprints"
   add_foreign_key "sprint_timelines", "states"
@@ -325,6 +303,9 @@ ActiveRecord::Schema.define(version: 201706161200001) do
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
   add_foreign_key "teams", "plans"
+  add_foreign_key "teams", "users"
+  add_foreign_key "user_notifications", "sprint_timelines"
+  add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"
   add_foreign_key "user_profiles", "users"
   add_foreign_key "user_roles", "roles"

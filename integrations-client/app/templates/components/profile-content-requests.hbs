@@ -10,10 +10,10 @@
                 <div class="list-group-item rounded">
                     <p class="line">    
                         {{#if (eq request.read false)}}
-                            {{connection-read request_id=request.id class="d-inline"}}            
-                            <span class="text-capitalize">{{request.first_name}}</span> is interested in contacting you. Would you like to share your contact information?
+                            {{connection-read request=request class="d-inline"}}            
+                            <span class="text-capitalize">{{#link-to "profile" request.user_id}}{{request.first_name}}{{/link-to}}</span> is interested in contacting you. Would you like to share your contact information?
                         {{else}}
-                            {{connection-confirm request_id=request.id confirmed=request.confirmed first_name=request.first_name class="d-inline"}}
+                            {{connection-confirm request=request class="d-inline"}}
                         {{/if}}
                     </p>
                 </div>

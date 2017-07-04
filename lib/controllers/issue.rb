@@ -96,11 +96,12 @@ class Issue
         end
     end
 
-    def create_project org, name
+    def create_project user_id, org, name
         begin
             project = Project.create({
                 org: org,
-                name: name
+                name: name,
+                user_id: user_id
             })
             return project
         rescue => e
@@ -233,7 +234,6 @@ class Issue
             SprintTimeline.where(query).each_with_index do |st,i|
                 response[i] = st.as_json
                 response[i][:sprint] = st.sprint.as_json
-                response[i][:label] = st.label.as_json
             end
             return response
         rescue => e

@@ -18,3 +18,8 @@ wired7_team:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   plan: manager
+
+adam_admin_team:
+  user: adam_admin
+  name: "ADAMSTEAM"
+  plan: recruiter

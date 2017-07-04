@@ -2,36 +2,43 @@ require 'spec_helper'
 
 describe "API" do
     shared_examples_for "session_response" do
-        it "should return success = true" do
-            expect(@res["success"]).to eq(true)
-        end
-        it "should return w7 token" do
-            expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["w7_token"])
-        end
-    end
-    shared_examples_for "new_session" do
-        it "should save w7 token in redis" do
-            expect("session:#{@res["w7_token"]}").to eq(@redis.keys("*")[0])
-        end
-        it "should save user id in redis" do
-             expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["id"]).to eq(@mysql_client.query(@query).first["id"])
-        end
-        it "should save user admin status in redis" do
-            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["admin"]).to eq(!@mysql_client.query(@query).first["admin"].zero?)
-        end
-        it "should save user first name in redis" do
-            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["first_name"]).to eq(@mysql_client.query(@query).first["first_name"])
-        end
-        it "should save user last name in redis" do
-            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["last_name"]).to eq(@mysql_client.query(@query).first["last_name"])
-        end
-        it "should save github_username in redis" do
-            expect(JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["github_username"]).to eq(@mysql_client.query(@query).first["github_username"])
+        it "should return access token" do
+            expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["access_token"])
         end
         if @password
             it "should save new password" do
                 expect(BCrypt::Password.new(@mysql_client.query(@query).first["password"])).to eq(@password)
             end
+        end
+        it "should return refresh token" do
+            expect(@mysql_client.query(@query).first["refresh"]).to eq @res["refresh_token"]
+        end
+        it "should return expires_in" do
+            expect(@redis.ttl("session:#{@res["access_token"]}")).to eq @res["expires_in"]
+        end
+
+    end
+    shared_examples_for "new_session" do
+        it "should save access token in redis" do 
+            expect(@redis.exists("session:#{@res["access_token"]}")).to be true
+        end
+        it "should save user id in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["id"]).to eq(@mysql_client.query(@query).first["id"])
+        end
+        it "should save user admin status in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["admin"]).to eq(!@mysql_client.query(@query).first["admin"].zero?)
+        end
+        it "should save user first name in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["first_name"]).to eq(@mysql_client.query(@query).first["first_name"])
+        end
+        it "should save user last name in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["last_name"]).to eq(@mysql_client.query(@query).first["last_name"])
+        end
+        it "should save github_username in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["github_username"]).to eq(@mysql_client.query(@query).first["github_username"])
+        end
+        it "should save owner in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["owner"]).to_not be nil
         end
     end
 
@@ -55,9 +62,7 @@ describe "API" do
                 @logins = @mysql_client.query("select * from logins").first
             end
             context "response" do
-                it "should return code of 201" do
-                    expect(last_response.status).to eq 201
-                end
+                it_behaves_like "created"
                 it "should return success = true" do
                     expect(@res[:success]).to be true
                 end
@@ -105,31 +110,51 @@ describe "API" do
                 post "/register", {:first_name => @first_name, :email=> @email, :roles => @roles}.to_json
                 @users = @mysql_client.query("select * from users where email = '#{@email}'").first
             end
-            it_behaves_like "register" # don't want to let user know account exists, unless owner -- send email
+            it_behaves_like "error", "this email is already registered (or has been invited)"
             context "database" do
                 it "does not update the record" do
                     expect(@users["created_at"].to_s(:db)).to eq(users(:adam).created_at.to_s(:db))
                 end
             end
         end
+        context "first name too short" do
+            before(:each) do
+                @first_name = "A" 
+                post "/register", {:first_name => @first_name}.to_json
+            end
+            it_behaves_like "error", "your first name must be 2-30 characters (only letters, numbers, dashes)"
+        end
+        context "first name too long" do
+            before(:each) do
+                @first_name = "A"*31
+                post "/register", {:first_name => @first_name}.to_json
+            end                                                                                         
+            it_behaves_like "error", "your first name must be 2-30 characters (only letters, numbers, dashes)"
+        end
     end
 
     context "POST /forgot" do
-        context "valid email, even if not in DB" do
+        context "valid email in db" do
+            fixtures :users
+            before(:each) do
+                post "/forgot", { :email => users(:adam).email}.to_json 
+            end
+            it_behaves_like "created"
+            it "should return success = true" do
+                expect(JSON.parse(last_response.body)["success"]).to be true
+            end 
+        end
+        context "valid email but not in DB" do
             before(:each) do
                 post "/forgot", { :email => "a@a.co" }.to_json 
             end
-            it "should return success = true" do
-                expect(JSON.parse(last_response.body)["success"]).to be true
-            end
+            it_behaves_like "error", "we couldn't find this email address"
         end
         context "invalid email" do
             before(:each) do 
                 post "/forgot", { :email => "a@.c" }.to_json 
             end
-            it "should return success = false" do
-                expect(JSON.parse(last_response.body)["success"]).to be false
-            end
+            it_behaves_like "error", "please enter a valid email address"
         end
     end
 
@@ -145,23 +170,21 @@ describe "API" do
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
+            it_behaves_like "ok"
         end
         context "invalid" do
-            after(:each) do
-                res = JSON.parse(last_response.body)
-                expect(res["success"]).to be false
-                expect(last_response.status).to eq 401
-            end
             context "email" do
                 before(:each) do
                     password = "adam12345"
                     post "/login", { :password => password, :email => users(:adam).email }.to_json
                 end
+                it_behaves_like "error", "email or password incorrect"
             end
             context "password" do
                 before(:each) do
                     post "/login", { :password => "123", :email => users(:adam_confirmed).email }.to_json
                 end
+                it_behaves_like "error", "email or password incorrect"
             end
         end
     end
@@ -174,8 +197,8 @@ describe "API" do
                 @email = users(:adam_confirmed).email
                 post "/login", { :password => @password, :email => @email }.to_json
                 res = JSON.parse(last_response.body)
-                w7_token = res["w7_token"]
-                get "/session",{},{"HTTP_AUTHORIZATION" => "Bearer #{w7_token}"}
+                access_token = res["access_token"]
+                get "/session",{},{"HTTP_AUTHORIZATION" => "Bearer #{access_token}"}
                 @res = JSON.parse(last_response.body)
             end
             it "should include user id" do
@@ -196,6 +219,7 @@ describe "API" do
             it "should not return key" do
                 expect(@res["key"]).to be nil
             end
+            it_behaves_like "ok"
         end
 
     end
@@ -219,6 +243,7 @@ describe "API" do
             it "should set accepted = true" do
                 expect(@user_teams_result.first["accepted"]).to be 1
             end
+            it_behaves_like "ok"
         end
         context "expired token" do
             before(:each) do
@@ -226,9 +251,13 @@ describe "API" do
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
-            it "should return success = false" do
-                expect(@res["success"]).to eq(false)
+            it_behaves_like "error", "this invitation has expired" 
+        end
+        context "invalid token" do
+            before(:each) do
+                post "/accept", { :password => @password, :firstName => @first_name, :token => "A11A" }.to_json
             end
+            it_behaves_like "error", "this invitation is invalid" 
         end
     end
 
@@ -241,6 +270,7 @@ describe "API" do
                 @res = JSON.parse(last_response.body)
                 @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_invited_expired).team_id}")
             end
+            it_behaves_like "created"
             it "should update token" do
                 expect(@user_teams_result.first["token"]).to_not eq @token
             end
@@ -251,11 +281,14 @@ describe "API" do
         context "invalid token" do
             before(:each) do
                 post "/resend", { :token => "YYYZ" }.to_json
-                @res = JSON.parse(last_response.body)
             end
-            it "should return success = true" do
-                expect(@res["success"]).to eq(true)
+            it_behaves_like "error", "we couldn't find this invitation"
+        end
+        context "missing token" do
+            before(:each) do
+                post "/resend", {}.to_json
             end
+            it_behaves_like "error", "missing token field"
         end
     end
 
@@ -279,6 +312,7 @@ describe "API" do
                     end
                     it_behaves_like "session_response"
                     it_behaves_like "new_session"
+                    it_behaves_like "ok"
                 end
                 context "protected account" do
                     before(:each) do
@@ -293,6 +327,7 @@ describe "API" do
                     end
                     it_behaves_like "session_response"
                     it_behaves_like "new_session"
+                    it_behaves_like "ok"
                 end
             end
             context "with token older than 24 hours / invalid" do
@@ -303,12 +338,7 @@ describe "API" do
                     post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                     @res = JSON.parse(last_response.body)
                 end
-                it "should return success = false" do
-                    expect(@res["success"]).to eq(false)
-                end
-                it "should not save password" do
-                    expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
-                end
+                it_behaves_like "error", "this token has expired"
             end
             context "with invalid password" do
                 before(:each) do
@@ -319,12 +349,7 @@ describe "API" do
                     post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json
                     @res = JSON.parse(last_response.body)
                 end
-                it "should return success = false" do
-                    expect(@res["success"]).to eq(false)
-                end
-                it "should not save password" do
-                    expect(@mysql_client.query(@query).first["password"]).to eq(users(:adam).password)
-                end
+                it_behaves_like "error", "your password must be 8-30 characters"
             end
         end
     end
@@ -336,29 +361,52 @@ describe "API" do
             @email = users(:adam_confirmed).email
             post "/login", { :password => @password, :email => @email }.to_json
             res = JSON.parse(last_response.body)
-            @w7_token = res["w7_token"]
+            @access_token = res["access_token"]
             @username = "adam_on_github"
         end
-        context "github" do
+        context "failure" do
             before(:each) do
                 @code = "123"
-                @access_token = "ACCESS123"
+                @github_access_token = "ACCESS123"
 
                 Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
-                    :access_token => @access_token
+                    :access_token => nil 
+                }.to_json, object_class: OpenStruct) }
+                Octokit::Client.any_instance.stub(:login) { nil }
+
+                post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it_behaves_like "session_response" 
+            it_behaves_like "new_session"
+            it "should return success = false" do
+                expect(@res["success"]).to be false 
+            end
+        end
+        context "success" do
+            before(:each) do
+                @code = "123"
+                @github_access_token = "ACCESS123"
+
+                Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
+                    :access_token => @github_access_token
                 }.to_json, object_class: OpenStruct) }
                 Octokit::Client.any_instance.stub(:login) { @username }
 
-                post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
+                post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
-            it "should return github token" do
-                account = Account.new
-                token = account.validate_token @res["github_token"], JSON.parse(@redis.get("session:#{@res["w7_token"]}"))["key"]
-                expect(token["payload"]).to eq(@access_token)
+            it_behaves_like "ok"
+            context "redis" do
+                it "should save github token" do
+                    account = Account.new
+                    session_hash = JSON.parse(@redis.get("session:#{@res["access_token"]}"))
+                    expect((account.validate_token session_hash["github_token"], session_hash["key"])["payload"]).to eq(@github_access_token)
+                end
             end
             context "users table" do
                 it "should save github_username" do
@@ -375,9 +423,26 @@ describe "API" do
             @email = users(:adam_confirmed).email
             post "/login", { :password => @password, :email => @email }.to_json
             res = JSON.parse(last_response.body)
-            @w7_token = res["w7_token"]
+            @access_token = res["access_token"]
         end
-        context "linkedin" do
+        context "failure" do
+            before(:each) do
+                access_token = "ABC"
+                code = "123"
+                LinkedIn::OAuth2.any_instance.stub(:get_access_token) { JSON.parse({
+                    :token => nil
+                }.to_json, object_class: OpenStruct) }
+                post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
+                @res = JSON.parse(last_response.body)
+                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            end
+            it_behaves_like "session_response"
+            it_behaves_like "new_session"
+            it "should return success = false" do
+                expect(@res["success"]).to be false
+            end
+        end
+        context "success" do
             before(:each) do
                 access_token = "ABC"
                 code = "123"
@@ -394,11 +459,15 @@ describe "API" do
                     :summary => @summary,
                     :positions => @positions
                 }.to_json, object_class: OpenStruct) }
-                post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
+                post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{users(:adam_confirmed).id}"
             end
             it_behaves_like "session_response"
+            it_behaves_like "new_session"
+            it "should return success = true" do
+                expect(@res["success"]).to be true
+            end
             context "user_profile" do
                 before(:each) do
                     @user_profiles = @mysql_client.query("select * from user_profiles").first
@@ -454,15 +523,38 @@ describe "API" do
             @email = users(:adam_confirmed).email
             post "/login", { :password => @password, :email => @email }.to_json
             res = JSON.parse(last_response.body)
-            @w7_token = res["w7_token"]
+            @access_token = res["access_token"]
 
-            delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@w7_token}"}
+            delete "/session", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
         end
         it "should delete session from redis" do
-            expect(@redis.exists("session:#{@w7_token}")).to be false
+            expect(@redis.exists("session:#{@access_token}")).to be false
         end
         it "should return 200" do
             expect(last_response.status).to eq 200
+        end
+        it "should delete refresh token" do
+            expect(@mysql_client.query("select * from users where jwt = '#{@access_token}'").first["refresh"]).to be nil
+        end
+        it_behaves_like "ok"
+    end
+
+    describe "POST /session" do
+        fixtures :users, :user_teams, :seats
+        before(:each) do
+            @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            @original_jwt = @mysql_client.query(@query).first["jwt"]
+            post "/session?grant_type=refresh_token&refresh_token=#{users(:adam_confirmed).refresh}"
+            @res = JSON.parse(last_response.body)
+            @query = "select * from users where id = #{users(:adam_confirmed).id}"            
+        end
+
+        it_behaves_like "session_response"
+        it_behaves_like "new_session"
+        it_behaves_like "ok"
+
+        it "should add a TTL to the previous token" do
+            expect(@redis.ttl("session:#{@original_jwt}")).to be < 31
         end
     end
 end

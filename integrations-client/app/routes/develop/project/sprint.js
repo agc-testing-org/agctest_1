@@ -12,23 +12,23 @@ export default Ember.Route.extend({
             }
         },
         refresh(){
-            console.log("refreshing router");
             this.refresh();
         }
     },
     model: function(params){
-        this.store.adapterFor('skillset').set('namespace', 'sprints/' + params.id );
+        var splitUrl = params.id.split("-");
+        this.store.adapterFor('skillset').set('namespace', 'sprints/' + splitUrl[0] );
+        var skillsets = this.store.query('skillset', {});
+        this.store.adapterFor('skillset').set('namespace','');
 
         return Ember.RSVP.hash({
-            id: params.id,
+            id: splitUrl[0],
             project: this.modelFor("develop.project").project,
             states: this.modelFor("develop.project").states,
-            sprint: this.store.findRecord('sprint', params.id),
-            skillsets: this.store.query('skillset', {
-
-            }),
+            sprint: this.store.findRecord('sprint', splitUrl[0]),
+            skillsets: skillsets, 
             sprint_states: this.store.query('sprint-state', {
-                sprint_id: params.id
+                sprint_id: splitUrl[0]
             }),
         });
     }

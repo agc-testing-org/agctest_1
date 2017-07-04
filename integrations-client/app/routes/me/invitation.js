@@ -30,6 +30,10 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         this._super(transition);
         let loginController = this.controllerFor('login');
         loginController.set('previousTransition', transition);
+    },
+    afterModel(model,transition) {
+        if(!model.invitation.get("valid")){
+            this.transitionTo('invitation.resend',model.token);
+        }
     }
-
 });

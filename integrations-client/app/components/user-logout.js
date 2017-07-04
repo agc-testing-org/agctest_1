@@ -7,7 +7,6 @@ export default Component.extend({
     actions: {
         logout() {
             var _this = this;
-            console.log("SIGNING OUT");
             this.get('session').authorize('authorizer:application', (headerName, headerValue) => {
                 Ember.$.ajax({                    
                     method: "DELETE",                                        

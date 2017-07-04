@@ -16,9 +16,9 @@ Router.map(function() {
     this.route('invitation', {path: '/invitation/:id'}, function(){
         this.route('resend');
     });
-    this.route('develop', {path: '/develop'}, function() {
-        this.route('index', {path: '/'});
-        this.route('project', {path: '/:org/:name'}, function() {
+    this.route('develop', function() {
+        this.route('new');
+        this.route('project', {path: '/:project_id'}, function() {
             this.route('state', {path: '/state/:id'});
             this.route('sprint', {path: '/sprint/:id'}, function() {
                 this.route('state', { path: '/state/:state_id' });
@@ -41,6 +41,9 @@ Router.map(function() {
         this.route('requests');
         this.route('invitation', {path: '/invitation/:id'});
     });
+
+    this.route("limit");
+    this.route("fourOhFour", { path: "*path"});
 });
 
 Router.reopen({

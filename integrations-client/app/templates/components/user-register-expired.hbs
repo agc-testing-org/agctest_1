@@ -8,18 +8,26 @@
             </div>
             <div class="modal-header subtitle">
                 <div class="text-muted">
-                
-                    This invitation appears to be invalid or expired.  If you received an email invitation from us use the button below and we'll send you a new one.
+                    This invitation appears to be
+                    {{#if invitation.expired}}
+                        expired.  Use the button below and we'll send you a new one.
+                    {{else}}
+                        invalid.
+                    {{/if}}
                 
                 </div>
             </div>
             <div class="modal-body">
 
+            {{#if invitation.expired}}
                 {{#if showResend}}
                     <form class="register-form">
                         <button {{action "resend" token}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Resend</button>
                     </form>
                 {{/if}}
+            {{/if}}
+
+            {{application-error error=message}}
 
             </div>
 

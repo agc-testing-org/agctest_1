@@ -7,9 +7,9 @@ export default OAuth2Bearer.extend({
     authorize(data, block) {
         if (!isEmpty(data)) {
             block('Authorization', `Bearer ${data.access_token}`);
-            if(!isEmpty(data.github_token)){
-                block('Authorization-Github', `Bearer ${data.github_token}`);
-            }
+//            if(!isEmpty(data.github_token)){
+//                block('Authorization-Github', `Bearer ${data.github_token}`);
+//            }
         }
     }
 });

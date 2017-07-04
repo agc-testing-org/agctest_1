@@ -106,12 +106,13 @@ describe "/sprints-states" do
                 expect(@mysql_client.query("select * from sprint_timelines").first["sprint_state_id"]).to eq(@sprint_states[0]["id"])
             end
             it_behaves_like "sprint_states"
+            it_behaves_like "created"
         end
         context "unauthorized" do
             before(:each) do
                 post "/sprint-states", {:sprint => sprints(:sprint_1).id, :state => states(:development).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
-            it_behaves_like "unauthorized"
+            it_behaves_like "unauthorized_admin"
         end
     end
 
@@ -127,6 +128,7 @@ describe "/sprints-states" do
                         @sprint_state_results = @mysql_client.query("select * from sprint_states where sprint_id = #{sprint_id}")
                     end
                     it_behaves_like "sprint_states"
+                    it_behaves_like "ok"
                 end
             end
             context "with contributors (owned) and comments" do
@@ -139,6 +141,7 @@ describe "/sprints-states" do
                     @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id} AND contributors.commit IS NOT NULL")
                 end
                 it_behaves_like "contributors"
+                it_behaves_like "ok"
                 #it_behaves_like "contributor_comments" #TODO
             end
 

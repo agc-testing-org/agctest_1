@@ -9,14 +9,14 @@ export default Ember.Route.extend({
     model: function(params){
 
         this.store.adapterFor('skillset').set('namespace', ''); // unset from 
-
+        var splitUrl = params.state_id.split("-");
         return Ember.RSVP.hash({
             sprint: this.modelFor("develop.project.sprint").sprint,
             states: this.modelFor("develop.project").states,
             skillsets: this.modelFor("develop.project.sprint").skillsets,
             project: this.modelFor("develop.project").project,
             sprint_states: this.modelFor("develop.project.sprint").sprint_states,
-            selected_state: this.store.peekRecord("sprint-state",params.state_id)
+            selected_state: this.store.peekRecord("sprint-state",splitUrl[0])
         });
     },
 
@@ -27,8 +27,9 @@ export default Ember.Route.extend({
         controller.set("last_state",all_states[all_states.length - 1]);
 
         var last_contributor_state = {};
+        var splitUrl = this.paramsFor("develop.project.sprint.state").state_id.split("-");
         for(var i = 0; i < all_states.length; i++){
-            if(all_states[i].id === this.paramsFor("develop.project.sprint.state").state_id){
+            if(all_states[i].id === splitUrl[0]){
                 if(i > 0){                                  
                     last_contributor_state = all_states[i - 1];                                                                
                 }                                                                                   

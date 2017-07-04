@@ -1,6 +1,5 @@
 adam_confirmed_1:
   user: adam_confirmed
-  project: demo
   repo: "git-repo-log"
   sprint_state: sprint_1_state_1
   updated_at: <%= 2.hours.ago.to_s(:db) %>
@@ -9,7 +8,6 @@ adam_confirmed_1:
 
 adam_admin_1:
   user: adam_admin
-  project: demo
   repo: "git-repo-log"
   sprint_state: sprint_1_state_1
   updated_at: <%= 2.hours.ago.to_s(:db) %>
@@ -18,7 +16,6 @@ adam_admin_1:
 
 adam_no_commit:
   user: adam
-  project: demo
   repo: "git-repo-log"
   sprint_state: sprint_1_state_1
   updated_at: <%= 2.hours.ago.to_s(:db) %>
