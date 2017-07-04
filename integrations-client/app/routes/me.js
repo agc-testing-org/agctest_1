@@ -27,12 +27,12 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         this.store.adapterFor('skillset').set('namespace', 'users/me');
         var skillsets = this.store.findAll('skillset'); 
         var roles = this.store.findAll('role');
-        var comments = this.get('store').query('comment', params);
-        var votes = this.get('store').query('vote', params);
-//        var contributors = this.get('store').query('contributor', params);
-//        var comments_received = this.get('store').query('comments-received', params);
-//        var votes_received = this.get('store').query('votes-received', params);
-//        var contributors_received = this.get('store').query('contributors-received', params);
+        var comments = this.get('store').query('aggregate-comment', params);
+        var votes = this.get('store').query('aggregate-vote', params);
+//        var contributors = this.get('store').query('aggregate-contributor', params);
+//        var comments_received = this.get('store').query('aggregate-comments-received', params);
+//        var votes_received = this.get('store').query('aggregate-votes-received', params);
+//        var contributors_received = this.get('store').query('aggregate-contributors-received', params);
 
         this.store.adapterFor('skillset').set('namespace', ''); 
 
