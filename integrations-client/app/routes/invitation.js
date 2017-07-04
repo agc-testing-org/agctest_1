@@ -7,7 +7,11 @@ export default Ember.Route.extend({
     },                                       
     actions: {
         error(error, transition) {
-            console.log(error);
+            var detail = error.errors[0].detail;
+            console.log(detail);
+            if(detail == "this invitation has expired"){
+                return true;           
+            }
         }
     },
     store: Ember.inject.service(),
@@ -21,7 +25,7 @@ export default Ember.Route.extend({
         });
     },
     afterModel(model,transition) {
-        if(model.invitation.get("sender_email")){ // more than token returned?
+        if(model.invitation.get("valid")&&!model.invitation.get("expired")){
             if(model.invitation.get("registered")){
                 this.transitionTo('me.invitation',model.token);
             }

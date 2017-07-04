@@ -232,10 +232,7 @@ class Integrations < Sinatra::Base
     end
 
     def return_unauthorized_admin
-        response = {:errors => [{
-            :detail => "this action requires additional authorization"
-        }]}
-        halt 400, response.to_json # we don't want to return a 401 here; this is more like a submission error
+        return_error "this action requires additional authorization"
     end
 
     def return_error message
@@ -1178,15 +1175,15 @@ class Integrations < Sinatra::Base
         check_required_field params[:token], "token"
         team = Organization.new
         invite = team.get_member_invite params[:token]
-        (invite && invite.first) || (return_error "this invitation is invalid")
-        (team.invite_expired? invite) || (return_error "this invitation has expired")
+        (invite && invite.first) || (halt 200, {:id => 0, :valid => false}.to_json)
+        (team.invite_expired? invite) || (halt 200, {:id => invite.first.id, expired: true, valid: true}.to_json)
         status 200
         return {
             id: invite.first.id,
-            name: invite.first.team.name,
-            sender_email: invite.first.sender.email,
-            sender_first_name: invite.first.sender.first_name,
-            registered: invite.first.user.confirmed
+            registered: invite.first.user.confirmed,
+            valid: true,
+            expired: false,
+            name: invite.first.team.name
         }.to_json
     end
 

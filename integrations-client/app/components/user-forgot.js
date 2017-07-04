@@ -28,7 +28,7 @@ export default Component.extend({
                     }
                 }, function(xhr, status, error) {
                     var response = JSON.parse(xhr.responseText);
-                    var response = response.errors[0].detail;
+                    response = response.errors[0].detail;
                     _this.set("errorMessage",response);
                 });
 

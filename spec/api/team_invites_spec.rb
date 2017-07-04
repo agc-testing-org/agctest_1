@@ -21,27 +21,38 @@ describe "/team-invites" do
             it "should return team name" do
                 expect(@res["name"]).to eq @invite.team.name
             end
-            it "should return email" do
-                expect(@res["sender_email"]).to eq @invite.sender.email
+            it "should return valid" do
+                expect(@res["valid"]).to be true
             end
-            it "should return sender name" do
-                expect(@res["sender_first_name"]).to eq @invite.sender.first_name
-            end
+            it "should return expired" do
+                expect(@res["expired"]).to be false
+            end 
             it_behaves_like "ok"
         end
         context "expired token" do
             before(:each) do
                 @invite = user_teams(:adam_invited_expired) 
                 get "/team-invites?token=#{@invite.token}"
+                @res = JSON.parse(last_response.body)
             end
-            it_behaves_like "error", "this invitation has expired"
+            it "should return valid" do
+                expect(@res["valid"]).to be true
+            end 
+            it "should return expired" do
+                expect(@res["expired"]).to be true 
+            end
+            it_behaves_like "ok"
         end
         context "invalid token" do
             before(:each) do
                 @token = "YYEEA"
                 get "/team-invites?token=#{@token}"
+                @res = JSON.parse(last_response.body)
             end
-            it_behaves_like "error", "this invitation is invalid"
+            it_behaves_like "ok"
+            it "should return valid" do
+                expect(@res["valid"]).to be false
+            end
         end
     end
 end
