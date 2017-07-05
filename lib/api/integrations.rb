@@ -778,8 +778,7 @@ class Integrations < Sinatra::Base
         repo = Repo.new
         github = (repo.github_client github_authorization)
         github || (return_error "unable to authenticate github")
-        pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
-        pr || (return_error "unable to create pull request") 
+        (pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})) rescue (return_error "unable to create pull request") # could exist already
         parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
         sprint_state.update_attributes!(parameters) rescue (return_error "unable to set winner") 
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
