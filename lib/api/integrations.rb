@@ -1331,10 +1331,6 @@ class Integrations < Sinatra::Base
     get "/users/me", &users_get_by_me #must precede :id request
     get "/users/:id", allows: [:id], needs: [:id], &users_get_by_id
 
-    get "/account/notifications", &get_user_notifications
-    patch "/account/notifications/:id", &user_notifications_read 
-    get "/account/notifications/:id", &get_user_notifications_by_id
-
     get "/roles", &roles_get
     get "/states", &states_get
     get "/skillsets", &skillsets_get

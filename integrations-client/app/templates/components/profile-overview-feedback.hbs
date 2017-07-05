@@ -1,0 +1,14 @@
+{{#each items as |item|}}
+<div class="list-group-item rounded">
+    <p class="line mb-0">
+        {{#if item.comment}}
+        <span class="quotation">
+            <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{item.comment.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+        </span>
+        {{/if}}
+        on the {{#link-to "develop.project.sprint.state" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title) (concat item.next_sprint_state.id "-" item.next_sprint_state.state_id.name)}}{{item.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title)}}{{item.sprint.title}}{{/link-to}}
+        {{moment-from-now item.item.created_at}}
+    </p>
+
+</div>
+{{/each}}
