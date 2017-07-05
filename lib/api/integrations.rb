@@ -1215,31 +1215,36 @@ class Integrations < Sinatra::Base
     get_user_comments_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_comments_received_by_skillset_and_roles params
-        return requests.to_json
+        requests || (return_error "unable to retrieve comments") 
+        return (feedback.build_feedback requests).to_json
     end
 
     get_user_votes_cast_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_cast_by_skillset_and_roles params
-        return requests.to_json
+        requests || (return_error "unable to retrieve votes")
+        return (feedback.build_feedback requests).to_json
     end
 
     get_user_votes_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_received_by_skillset_and_roles params
-        return requests.to_json
+        requests || (return_error "unable to retrieve votes")
+        return (feedback.build_feedback requests).to_json
     end
 
     get_user_contributions_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_created_by_skillset_and_roles params
-        return requests.to_json
+        requests || (return_error "unable to retrieve contribution")
+        return (feedback.build_contribution_feedback requests).to_json
     end
 
     get_user_contributions_selected_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_selected_by_skillset_and_roles params
-        return requests.to_json
+        requests || (return_error "unable to retrieve winner")
+        return (feedback.build_feedback requests).to_json
     end
 
     get_user_comments_created_by_skillset_and_roles_by_me = lambda do
