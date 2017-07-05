@@ -32,7 +32,7 @@ class Repo
         end
     end
 
-    def create user_id, sprint_state_id, repo, query
+    def create user_id, sprint_state_id, repo
         begin
             repo = Contributor.create({
                 user_id: user_id,

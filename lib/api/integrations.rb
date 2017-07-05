@@ -733,148 +733,80 @@ class Integrations < Sinatra::Base
 
     contributors_post_comments = lambda do
         protected! 
-        status 400
-        response = {}
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-
-            if fields[:text] && fields[:text].length > 1
-                if fields[:text].length < 5000
-                    issue = Issue.new
-                    comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
-
-                    sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-
-                    sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
-                    next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-
-                    log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "comment"}
-
-                    if comment && (issue.log_event log_params)
-                        status 201
-                        response = comment
-                    end
-                else
-                    response[:message] = "Comments must be less than 5000 characters"
-                end
-            else
-                response[:message] = "Please enter a more detailed comment"
-            end
-        end
-        return response.to_json
+        fields = get_json
+        check_required_field fields[:text], "text"
+        check_required_field fields[:sprint_state_id], "sprint_state_id"
+        comment_length = fields[:text].to_s.length
+        (comment_length > 1 && comment_length < 5001) || (return_error "comments must be 2-5000 characters") 
+        issue = Issue.new
+        comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
+        comment || (return_error "unable to save comment")
+        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+        sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+        next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+        log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "comment"}        
+        (issue.log_event log_params) || (return_error "an error has occurred")
+        status 201
+        return comment.to_json
     end
 
     contributors_post_votes = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
-
-            issue = Issue.new
-            vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
-
-            sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-
-            sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
-            next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-
-            log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "vote"}
-
-            if vote 
-                if vote[:created]
-                    (issue.log_event log_params)
-                end
-                status 201
-                response = vote
-            end
-
-        end
-        return response.to_json
+        fields = get_json
+        check_required_field fields[:sprint_state_id], "sprint_state_id"
+        issue = Issue.new
+        vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
+        vote || (return_error "unable to save vote")
+        vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
+        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+        sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+        next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+        log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "vote"}
+        (issue.log_event log_params) || (return_error "an error has occurred")
+        status 201
+        return vote.to_json
     end
 
     contributors_post_winner = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-            if @session_hash["admin"]
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-
-                issue = Issue.new
-                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-
-                if sprint_state
-
-                    repo = Repo.new
-                    github = (repo.github_client github_authorization)
-                    pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
-
-                    if pr
-                        parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
-                        winner = issue.set_winner fields[:sprint_state_id], parameters
-                        if winner
-                            sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
-                            next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-
-                            log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id => sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :project_id => sprint_state.sprint.project.id, :contributor_id => params[:id], :diff => "winner" }
-                            if sprint_state && (issue.log_event log_params)
-                                status 201
-                                response = winner 
-                            else
-
-                            end
-                        else
-
-                        end
-                    end
-                end
-            else
-                return_not_found 
-            end
-        end
-        return response.to_json
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:sprint_state_id], "sprint_state_id"
+        issue = Issue.new
+        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+        sprint_state || return_not_found
+        repo = Repo.new
+        github = (repo.github_client github_authorization)
+        github || (return_error "unable to authenticate github")
+        (pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})) rescue (return_error "unable to create pull request") # could exist already
+        parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
+        sprint_state.update_attributes!(parameters) rescue (return_error "unable to set winner") 
+        sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+        next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+        log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id => sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :project_id => sprint_state.sprint.project.id, :contributor_id => params[:id], :diff => "winner" }
+        (sprint_state && (issue.log_event log_params)) || (return_error "an error has occurred")
+        status 201
+        return sprint_state.to_json 
     end
 
     contributors_post_merge = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-            if @session_hash["admin"]
-                request.body.rewind
-                fields = JSON.parse(request.body.read, :symbolize_names => true)
-
-                issue = Issue.new
-
-                query = {:id => fields[:project_id].to_i}
-                project = (issue.get_projects query)[0]
-
-                winner = issue.get_winner fields[:sprint_state_id]
-
-                repo = Repo.new
-                github = (repo.github_client github_authorization)
-                pr = github.merge_pull_request("#{project["org"]}/#{project["name"]}", winner.pull_request, commit_message = "Wired7 #{winner.id}_#{winner.contributor_id} to master", options = {})
-
-                if pr
-                    parameters = {merged: true}
-                    winner = issue.set_winner fields[:sprint_state_id], parameters
-                    status 201
-                    response = winner
-                else
-                    parameters = {merged: false}
-                    winner = issue.set_winner fields[:sprint_state_id], parameters
-                    status 400
-                    response = winner
-                end
-            else
-                return_not_found 
-            end
-        end
-        return response.to_json
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:sprint_state_id], "sprint_state_id"
+        issue = Issue.new
+        winner = issue.get_sprint_state fields[:sprint_state_id]
+        winner || return_not_found
+        winner.contributor_id || (return_error "a contribution has not been selected")
+        repo = Repo.new
+        github = (repo.github_client github_authorization)
+        github || (return_error "unable to authenticate github")
+        pr = github.merge_pull_request("#{winner.sprint.project.org}/#{winner.sprint.project.name}", winner.pull_request, commit_message = "Wired7 #{winner.id}_#{winner.contributor_id} to master", options = {})
+        pr || (return_error "unable to find pull request")
+        winner.merged = true
+        winner.save
+        status 201
+        return winner.to_json 
     end
 
     refresh_post = lambda do #TODO we can use this later to refresh a github project we forked with a project from another owner (will allow us to include non-wired7 org projects)
@@ -914,147 +846,77 @@ class Integrations < Sinatra::Base
 
     contributors_post = lambda do
         protected!
-        status 400
-        response = {:github_signed => false}
-        begin
-            request.body.rewind
-            fields = JSON.parse(request.body.read, :symbolize_names => true)
+        fields = get_json
+        check_required_field fields[:sprint_state_id], "sprint_state_id"
+        issue = Issue.new
+        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+        (sprint_state && sprint_state.state) || return_not_found
+        sprint_state.state.contributors || (return_error "unable to join this phase")
 
-            issue = Issue.new
+        repo = Repo.new
+        github = (repo.github_client github_authorization)
+        github || (return_error "unable to authenticate github")
+        username = github.login
+        username || (return_error "unable to fetch github username")
 
-            query = {:id => params[:project_id].to_i}
-            project = (issue.get_projects query)[0] 
+        query = {"sprint_states.sprint_id" => sprint_state.sprint_id, :user_id => @session_hash["id"] } #check for sprint, not sprint state
+        contributor = repo.get_contributor query
+        (contributor && (name = contributor.repo)) || (name = repo.name)
 
-            if project
-
-                sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-
-                if sprint_state && sprint_state.state && sprint_state.state.contributors
-
-                    repo = Repo.new
-                    github = (repo.github_client github_authorization)
-                    username = github.login
-
-                    if username
-
-                        response[:github_signed] = true
-
-                        repo = Repo.new
-                        query = {"sprint_states.sprint_id" => sprint_state.sprint_id, :user_id => @session_hash["id"] } #check for sprint, not sprint state
-                        contributor = repo.get_contributor query
-
-                        if !contributor
-                            name = repo.name
-                            query = {:id => sprint_state.sprint_id}
-                        else
-                            name = contributor.repo
-                        end
-
-                        created = repo.create @session_hash["id"], sprint_state.id, name, query
-
-                        if !contributor
-                            begin
-                                github.create_repository(name)
-                            rescue => e
-                                puts e
-                            end
-                        end
-
-                        if created
-                            status 201
-                            response[:id] = created
-                            issue = Issue.new
-                            sha = (issue.get_sprint_state sprint_state.id).sha
-
-                            repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, sprint_state.id, false
-                            repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, project["org"], project["name"], username, name, "master", sha, "master", false
-
-                            if sprint_state.state.name == "requirements design" && !contributor # only need to create doc if first time contributing
-                                idea = issue.get_sprint sprint_state.sprint_id 
-
-                                github.create_contents("#{username}/#{name}",
-                                                       "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
-                                                           "adding placeholder for requirements",
-                                                           "# #{idea.title}\n\n### Description\n#{idea.description}", #space required between markdown header and first letter
-                                                           :branch => sprint_state.id.to_s)
-                            end
-                        else
-                            response[:message] = "Something has gone wrong" 
-                        end
-                        # background job
-                    else
-                        response[:message] = "Please sign in to Github" 
-                    end
-                else
-                    response[:message] = "We are not accepting contributions at this time"
-                end
-            else
-                response[:message] = "This project is not available"
+        created = repo.create @session_hash["id"], sprint_state.id, name
+        created || (return_error "unable to join")
+        if !contributor
+            begin
+                github.create_repository(name)
+            rescue => e
+                puts e
             end
-
         end
-        return response.to_json
+
+        sha = (issue.get_sprint_state sprint_state.id).sha
+        (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, sprint_state.id, false) || (return_error "unable to update sprint phase branch")
+        (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, "master", false) || (return_error "unable to update master branch")
+
+        (sprint_state.state.name == "requirements design" && !contributor) || (halt 201, {:id => created}.to_json) # only need to create doc if first time contributing
+        (github.create_contents("#{username}/#{name}",
+                                "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
+                                    "adding placeholder for requirements",
+                                    "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
+                                    :branch => sprint_state.id.to_s)) || (return_error "unable to create requirements document")
+        status 201
+        return {:id => created}.to_json
     end
 
     contributors_patch_by_id = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-
-            repo = Repo.new
-            query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
-
-            contributor = (repo.get_contributor query)
-
-            if contributor
-                contributor.save #update timestamp
-
-                issue = Issue.new
-
-                query = {:id => params[:project_id].to_i}
-                project = (issue.get_projects query)[0]
-
-                fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
-
-                if fetched
-                    contributor.commit = fetched[:sha]
-                    contributor.commit_success = fetched[:success]
-                    contributor.save
-                    status 201
-                    response = contributor
-                else
-                    response[:message] = "An error has occurred"
-                end
-            else
-                response[:message] = "You have not joined yet!"
-            end
-
-        rescue => e
-            puts e
-        end
-        return response.to_json
+        repo = Repo.new
+        check_required_field params[:contributor_id], "contributor_id"
+        query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
+        contributor = repo.get_contributor query
+        contributor || return_not_found
+        contributor.save #update timestamp
+        issue = Issue.new
+        query = {:id => params[:project_id].to_i}
+        project = (issue.get_projects query)[0]
+        project || (return_error "unable to update contribution")
+        fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
+        fetched || (return_error "unable to update contribution")
+        contributor.commit = fetched[:sha]
+        contributor.commit_success = fetched[:success]
+        contributor.save
+        status 200
+        return contributor.to_json 
     end
 
     contributors_get_by_id = lambda do
         protected!
-        status 400
-        response = {}
-        begin
-            repo = Repo.new
-            query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
-            contributor = repo.get_contributor query
-            if contributor
-                status 200
-                response = contributor
-            else
-                response[:id] = -1
-                response[:message] = "You have not joined yet!"
-            end
-        rescue => e
-            puts e
-        end
-        return response.to_json
+        repo = Repo.new
+        check_required_field params[:contributor_id], "contributor_id"
+        query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
+        contributor = repo.get_contributor query
+        contributor || return_not_found
+        status 200
+        return contributor.to_json
     end
 
     connections_request_post = lambda do
