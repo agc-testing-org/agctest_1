@@ -4,27 +4,36 @@ class Feedback
 
   end
 
-  def user_comments_created_by_skillset_and_roles params
-    user_id = params['id']
-    skillset_id = params['skillset_id']
-    role_id = params['role_id']
-    if skillset_id && role_id
-      query = SprintTimeline.joins("INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id=sprint_timelines.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id=sprint_skillsets.skillset_id INNER JOIN comments ON sprint_timelines.comment_id=comments.id INNER JOIN projects ON sprint_timelines.project_id=projects.id INNER JOIN role_states ON comments.sprint_state_id=role_states.state_id").where("role_states.role_id=? and user_skillsets.active=1 and user_skillsets.skillset_id=? and sprint_skillsets.active=1 and  sprint_skillsets.skillset_id=? and sprint_timelines.comment_id is not NULL and sprint_timelines.user_id=?", role_id, skillset_id, skillset_id, user_id).select("DISTINCT sprint_timelines.id, sprint_timelines.sprint_id, sprint_timelines.project_id, sprint_timelines.next_sprint_state_id, sprint_timelines.comment_id, projects.name, projects.org")
-    elsif skillset_id
-      query = SprintTimeline.joins("INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id=sprint_timelines.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id=sprint_skillsets.skillset_id INNER JOIN comments ON sprint_timelines.comment_id=comments.id INNER JOIN projects ON sprint_timelines.project_id=projects.id").where("user_skillsets.active=1 and user_skillsets.skillset_id=? and sprint_skillsets.active=1 and  sprint_skillsets.skillset_id=? and sprint_timelines.comment_id is not NULL and sprint_timelines.user_id=?", skillset_id, skillset_id, user_id).select("DISTINCT sprint_timelines.id, sprint_timelines.sprint_id, sprint_timelines.project_id, sprint_timelines.next_sprint_state_id, sprint_timelines.comment_id, projects.name, projects.org")
-    else
-      query = SprintTimeline.joins("INNER JOIN comments ON sprint_timelines.comment_id=comments.id INNER JOIN role_states ON comments.sprint_state_id=role_states.state_id INNER JOIN projects ON sprint_timelines.project_id=projects.id").where("role_states.role_id=? and sprint_timelines.comment_id is not NULL and sprint_timelines.user_id=?", role_id, user_id).select("DISTINCT sprint_timelines.id, sprint_timelines.sprint_id, sprint_timelines.project_id, sprint_timelines.next_sprint_state_id, sprint_timelines.comment_id, projects.name, projects.org")
-    end
+  def build_feedback results
     begin
       response = []
-      query.each_with_index do |comment, i|
-        response[i] = comment.as_json
-        response[i][:sprint] = comment.sprint
-        response[i][:project] = comment.project
-        response[i][:next_sprint_state] = comment.next_sprint_state
-        response[i][:comment] = comment.comment
+      results.each_with_index do |result,i|
+        response[i] = result.as_json
+        response[i][:sprint] = result.sprint
+        response[i][:project] = result.project
+        response[i][:sprint_state] = result.sprint_state
+        response[i][:next_sprint_state] = result.next_sprint_state
+        response[i][:comment] = result.comment
+        response[i][:vote] = result.vote
       end
-      return response
+      return response.as_json
+    rescue => e
+        puts e
+        return nil
+    end
+  end
+
+  def assign_param_to_model params, key, model
+      params["#{model}.#{key}"] = params[key]
+      params.delete(key)
+      return params
+  end
+
+  def user_comments_created_by_skillset_and_roles params
+    params = assign_param_to_model params, "skillset_id", "user_skillsets"
+    params = assign_param_to_model params, "role_id", "user_roles"
+    begin      
+      return SprintTimeline.joins("INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1)").where(params).select("sprint_timelines.*").group("sprint_timelines.id")
     rescue => e
       puts e
       return nil

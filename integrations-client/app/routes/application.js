@@ -20,21 +20,21 @@ export default Ember.Route.extend(ApplicationRouteMixin,{
 
     actions: {
         error(error, transition) {
-            if(error && error.errors[0].status === "403"){
+            if(error && error.errors && error.errors[0].status === "403"){
                 this.transitionTo("/limit");
                 return false;
             }
-            else if(error && error.errors[0].status === "401"){
+            else if(error && error.errors && error.errors[0].status === "401"){
                 //                            this.get('session').invalidate();
                 this.transitionTo("/login");
                 return false;
             }
 
-            else if(error && error.errors[0].status === "400"){
+            else if(error && error.errors && error.errors[0].status === "400"){
                 return true;
             }
 
-            else if(error && error.errors[0].status === "404"){
+            else if(error && error.errors && error.errors[0].status === "404"){
                 this.transitionTo("/lost");
                 return false;
             }
