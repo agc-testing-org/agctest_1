@@ -233,11 +233,8 @@ describe "/projects" do
                 @project = projects(:demo).id
                 @sprint_state_id = 99
                 post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
             end
-            it "should return nil" do
-                expect(@res["message"]).to_not be nil
-            end
+            it_behaves_like "not_found"
         end
         context "sprint_state_id with contributor = false" do
             fixtures :sprint_states, :states,  :projects
@@ -247,12 +244,7 @@ describe "/projects" do
                 post "/projects/#{@project}/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
-            it "should return not return contributor id" do
-                expect(@res.keys).to_not include("id")
-            end
-            it "should return error message" do
-                expect(@res["message"]).to eq("We are not accepting contributions at this time")
-            end
+            it_behaves_like "error", "unable to join this phase"
         end
     end
 
@@ -320,9 +312,7 @@ describe "/projects" do
                 patch "/projects/#{@project}/contributors/33", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
             end
-            it "should return nil" do
-                expect(@res["message"]).to_not be nil
-            end
+            it_behaves_like "not_found"
         end
     end
 end

@@ -757,7 +757,7 @@ class Integrations < Sinatra::Base
         issue = Issue.new
         vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
         vote || (return_error "unable to save vote")
-        vote.id || (halt 200, vote.to_json) # vote already cast, don't save another event
+        vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
@@ -781,8 +781,7 @@ class Integrations < Sinatra::Base
         pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})
         pr || (return_error "unable to create pull request") 
         parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
-        sprint_state.update_attributes!(parameters) || (return_error "unable to set winner")
-        
+        sprint_state.update_attributes!(parameters) rescue (return_error "unable to set winner") 
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
         log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id => sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :project_id => sprint_state.sprint.project.id, :contributor_id => params[:id], :diff => "winner" }
@@ -798,7 +797,8 @@ class Integrations < Sinatra::Base
         check_required_field fields[:sprint_state_id], "sprint_state_id"
         issue = Issue.new
         winner = issue.get_sprint_state fields[:sprint_state_id]
-        (winner && winner.contributor_id) || (return_error "a contribution has not been selected")
+        winner || return_not_found
+        winner.contributor_id || (return_error "a contribution has not been selected")
         repo = Repo.new
         github = (repo.github_client github_authorization)
         github || (return_error "unable to authenticate github")
@@ -878,12 +878,12 @@ class Integrations < Sinatra::Base
         (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, sprint_state.id, false) || (return_error "unable to update sprint phase branch")
         (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, "master", false) || (return_error "unable to update master branch")
 
-        (sprint_state.state.name == "requirements design" && !contributor) || halt 201, {:id => created}.to_json # only need to create doc if first time contributing
+        (sprint_state.state.name == "requirements design" && !contributor) || (halt 201, {:id => created}.to_json) # only need to create doc if first time contributing
         (github.create_contents("#{username}/#{name}",
                                 "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                     "adding placeholder for requirements",
                                     "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
-                                    :branch => sprint_state.id.to_s)) || return_error ("unable to create requirements document")
+                                    :branch => sprint_state.id.to_s)) || (return_error "unable to create requirements document")
         status 201
         return {:id => created}.to_json
     end
