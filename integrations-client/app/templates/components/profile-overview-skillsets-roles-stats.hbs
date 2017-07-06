@@ -1,5 +1,5 @@
-{{#each items as |item|}}
-    {{#if item.active}}
+{{#each active as |item|}}
+
         {{#if (eq type "role_id")}}
             {{#link-to (query-params role_id=item.id)}}
                 {{#if (eq params.role_id item.id)}}
@@ -17,11 +17,13 @@
                 {{/if}}
             {{/link-to}}
         {{/if}}
-    {{/if}}
+
 {{/each}}
 
+{{#if active}}
 {{#if (eq type "role_id")}}
     {{#link-to (query-params role_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">reset role</span>{{/link-to}} 
 {{else if (eq type "skillset_id")}}
     {{#link-to (query-params skillset_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">reset skillset</span>{{/link-to}} 
+{{/if}}
 {{/if}}

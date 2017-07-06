@@ -1,10 +1,7 @@
 {{#if requests}}
     <div class="full">
-        <div class="list-group rounded text-left">
-            <div class="list-group-item active rounded">
-                <h4>My Contact Requests</h4>
-            </div>
-        
+        <h4 class="about section">My Contact Requests</h4>
+        <div class="list-group rounded text-left">        
             {{#each requests as |request|}}
                 {{#unless (eq request.id 0)}}
                 <div class="list-group-item rounded">

@@ -61,28 +61,32 @@
 {{#if last-contributor-state.contributors.length}}
 <div class="full">
 
-        {{#each last-contributor-state.contributors as |contributor|}}
-
-            <div class="list-group rounded text-left">
-                <div class="list-group-item active rounded">
-                    <h4>
-                        {{#if (eq contributor.id last-contributor-state.contributor_id)}}
-                            <i class="fa fa-trophy mr-1" aria-hidden="true"></i>
-                            {{#if last-contributor-state.merged}}
-                                <span class="badge badge-default rounded mr-1">MERGED</span>
-                            {{else}}
-                                <span class="badge badge-default rounded mr-1">NOT MERGED</span>
-                            {{/if}}
-                        {{/if}}
-                        <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">{{project.org}}/{{project.name}} branch {{last-contributor-state.id}}_{{contributor.id}}</a>
-                    </h4>
-                </div>
+    <h4 class="about section mb-3">
+        Proposed Contributions
+    </h4>
+        <div class="list-group rounded text-left">
+        {{#each last-contributor-state.contributors as |contributor index|}}
+            <div class="list-group-item rounded active">
+            <h4 class="mb-0">
+                {{#if (eq contributor.id last-contributor-state.contributor_id)}}
+                    {{stacked-icon value="fa-trophy" icon="fa-certificate" size="1" class="d-inline"}}
+                    {{#if last-contributor-state.merged}}
+                        <span class="badge badge-default rounded mr-1">MERGED</span>
+                    {{else}}
+                        <span class="badge badge-default rounded mr-1">NOT MERGED</span>
+                    {{/if}}
+                {{/if}}
+                <i class="fa fa-tag fa-fw mr-0" aria-hidden="true"></i> 
+                Branch {{last-contributor-state.id}}_{{contributor.id}} 
+                 (<a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">
+                    <i class="fa fa-window-restore" aria-hidden="true"></i> View on Github
+                </a>)
+            </h4>
             </div>
             {{develop-issue-comments comments=contributor.comments}}
             {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
-
         {{/each}}
-
+        </div>
 </div>
 {{else}}
 <div class="vertical-align-hold">
