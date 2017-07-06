@@ -73,6 +73,9 @@ a:hover {
 .fa-stack{
     margin-top:-3px;
 }
+.fa-stack{
+    text-decoration:none;
+}
 .fa-stack .value{
     color: #fff;
 }
@@ -274,7 +277,7 @@ button{
     padding-top:4px;
 }
 .list-group-item.active a{
-    color: #fff;
+    color: orange;
 }
 .list-group-item p{
     font-weight:300;
@@ -686,11 +689,17 @@ button{
     color: #a5a5a5;
 }
 .main .about.section{
-    padding-bottom:2px;
-    border-bottom: 1px solid #d7d7d7;
+    padding-bottom:0px;
+    margin-bottom:2px;
+}
+.main h4.about.section{
+    margin-bottom:5px;
 }
 .main .slide .skillsets{
     margin-bottom:20px;
+}
+.main .slide .skillsets a{
+    text-decoration:none;
 }
 .main .slide.hidden-md-up .about{
     margin-bottom:10px;
@@ -729,6 +738,11 @@ button{
 }
 .main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name, .main .slide.hidden-md-up .about{
     text-align:left !important;   
+}
+.main .overview .score{
+    margin-bottom:10px;
+    padding:10px;
+    border-bottom:5px solid #f9f9f9; 
 }
 .main .overview .score .title {
 

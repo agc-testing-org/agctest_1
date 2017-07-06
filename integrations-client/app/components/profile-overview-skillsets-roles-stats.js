@@ -1,11 +1,10 @@
 import Ember from 'ember';
 
-export default Ember.Component.extend({
-    session: Ember.inject.service('session'),
-    actions: {
-        filter(id){
-            //show statistics based on skillset and role
+const { inject: { service }, Component } = Ember;
 
-        }
-    }
+export default Component.extend({
+    session: service('session'),
+    sessionAccount: Ember.inject.service('session-account'),
+    store: Ember.inject.service(),
+    active: Ember.computed.filterBy('items','active', true),
 });

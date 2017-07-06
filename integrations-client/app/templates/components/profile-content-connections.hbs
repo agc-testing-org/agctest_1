@@ -2,11 +2,9 @@
         {{#if connections}}
         <div class="full">
 
-            <div class="list-group rounded text-left">
-                <div class="list-group-item active rounded">
-                    <h4>My Contacts</h4>
-                </div>
+            <h4 class="about section">My Contacts</h4>
 
+            <div class="list-group rounded text-left">
                 {{#each connections as |connection|}}
                     <div class="list-group-item rounded highlight-{{notification.read}}">
                         <h4 class="line text-capitalize">

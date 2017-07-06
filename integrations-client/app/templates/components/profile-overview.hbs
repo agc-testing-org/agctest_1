@@ -19,17 +19,32 @@
                 <div class="about section text-capitalize">Your Roles</div>
                 {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
             {{/if}}
-            <h4 class="about section text-capitalize">Feedback by Skillset and Role</h4>
-            {{profile-overview-skillsets-roles-stats skillsets=skillsets roles=roles class="skillsets"}}
+            <h4 class="about section text-capitalize">Performance by Role and Skillset</h4>
+            {{#if me}}
+                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
+                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
+            {{else}}
+                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
+                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
+            {{/if}}
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=5000 title="Example Stat A"}}
+                    {{sprint-state-overview-score total=comments.length title="Comments Posted"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=110 title="Example Stat B"}}
+                    {{sprint-state-overview-score total=votes.length title="Votes Cast"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=300 title="Example Stat C"}}
+                    {{sprint-state-overview-score total=contributors.length title="Solutions"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=comments_received.length title="Comments Received"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=votes_received.length title="Votes Received"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=contributors_received.length title="Winning Solutions"}}
                 </div>
             </div>
         </div>

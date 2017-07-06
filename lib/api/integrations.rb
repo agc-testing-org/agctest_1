@@ -25,6 +25,7 @@ require_relative '../controllers/issue.rb'
 require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
+require_relative '../controllers/feedback.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -83,23 +84,23 @@ class Integrations < Sinatra::Base
     key_prefix = :t_
 
     # Session-Related Routes (less liberal)
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 15, :rules => { :method => :post, :url => /register/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /(resend|forgot|reset|accept)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /login/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 15, :rules => { :method => :post, :url => /register/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /(resend|forgot|reset|accept)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /login/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
 
     # Service-Based Routes
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(users|account)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(users|account)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(users|account|contributors)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 1600, :rules => { :method => :get, :url => /(users)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(users)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(users|contributors)/ }
 
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
 
     # Other Routes
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 800, :rules => { :method => :get }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 2400, :rules => { :method => :get }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
 
     LinkedIn.configure do |config|
         config.client_id     = ENV["INTEGRATIONS_LINKEDIN_CLIENT_ID"]
@@ -156,21 +157,7 @@ class Integrations < Sinatra::Base
         end
     end
 
-    def default_to_signed field
-        if field
-            return field
-        else
-            @session = retrieve_token
-            if authorized?
-                return @session_hash["id"]
-            else
-                status 404
-                return nil
-            end
-        end
-    end
-
-    def session_tokens user, owner 
+    def session_tokens user, owner, initial 
 
         account = Account.new
         user_secret = SecureRandom.hex(32) #session secret, not password
@@ -204,7 +191,7 @@ class Integrations < Sinatra::Base
             account.save_token "session", user[:jwt], session_hash, 30 #expire old token in 30s 
         end
 
-        if (account.save_token "session", jwt, session_hash, expiration) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+        if (account.save_token "session", jwt, session_hash, expiration) && (account.update user[:id], update_fields)
             response = {
                 :success => true,
                 :access_token => jwt,
@@ -212,6 +199,7 @@ class Integrations < Sinatra::Base
                 :expires_in => expiration,
                 :refresh_token => user_refresh
             }
+            initial && (account.record_login user[:id], request.ip)
             status 200
             return response
         end
@@ -319,7 +307,7 @@ class Integrations < Sinatra::Base
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
         owner = ((account.is_owner? user[:id]) || user[:admin])
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, true).to_json
     end
 
     reset_post = lambda do
@@ -334,7 +322,7 @@ class Integrations < Sinatra::Base
         (account.confirm_user user, fields[:password], user.first_name, request.ip) || (return_error "unable to reset your password at this time")
         owner = ((account.is_owner? user[:id]) || user[:admin])
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, true).to_json
     end
 
     login_post = lambda do
@@ -346,7 +334,7 @@ class Integrations < Sinatra::Base
         user || (return_error "email or password incorrect")
         owner = ((account.is_owner? user[:id]) || user[:admin]) 
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, true).to_json
     end
 
     session_provider_linkedin_post = lambda do
@@ -365,7 +353,7 @@ class Integrations < Sinatra::Base
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
         (profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
-        response = (session_tokens user, @session_hash["owner"]) 
+        response = (session_tokens user, @session_hash["owner"], false) 
         response[:success] = !profile_id.nil?
         status 200
         return response.to_json
@@ -386,7 +374,7 @@ class Integrations < Sinatra::Base
         @session_hash["github_username"] = github.login || nil
         provider_token = account.create_token @session_hash["id"], @key, access_token 
         @session_hash["github_token"] = provider_token
-        response = (session_tokens user, @session_hash["owner"])
+        response = (session_tokens user, @session_hash["owner"], false)
         response[:success] = !@session_hash["github_username"].nil?
         status 200
         return response.to_json
@@ -401,7 +389,7 @@ class Integrations < Sinatra::Base
         user || return_unauthorized 
         owner = ((account.is_owner? user[:id]) || user[:admin])
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, false).to_json
     end
 
     session_delete = lambda do
@@ -1080,6 +1068,84 @@ class Integrations < Sinatra::Base
         return notification.to_json
     end
 
+    get_user_comments_created_by_skillset_and_roles = lambda do
+        feedback = Feedback.new
+        requests = feedback.user_comments_created_by_skillset_and_roles params
+        requests || (return_error "unable to retrieve comments") 
+        return (feedback.build_feedback requests).to_json
+    end
+
+    get_user_comments_received_by_skillset_and_roles = lambda do
+        feedback = Feedback.new
+        requests = feedback.user_comments_received_by_skillset_and_roles params
+        requests || (return_error "unable to retrieve comments") 
+        return (feedback.build_feedback requests).to_json
+    end
+
+    get_user_votes_cast_by_skillset_and_roles = lambda do
+        feedback = Feedback.new
+        requests = feedback.user_votes_cast_by_skillset_and_roles params
+        requests || (return_error "unable to retrieve votes")
+        return (feedback.build_feedback requests).to_json
+    end
+
+    get_user_votes_received_by_skillset_and_roles = lambda do
+        feedback = Feedback.new
+        requests = feedback.user_votes_received_by_skillset_and_roles params
+        requests || (return_error "unable to retrieve votes")
+        return (feedback.build_feedback requests).to_json
+    end
+
+    get_user_contributions_created_by_skillset_and_roles = lambda do
+        feedback = Feedback.new
+        requests = feedback.user_contributions_created_by_skillset_and_roles params
+        requests || (return_error "unable to retrieve contribution")
+        return (feedback.build_contribution_feedback requests).to_json
+    end
+
+    get_user_contributions_selected_by_skillset_and_roles = lambda do
+        feedback = Feedback.new
+        requests = feedback.user_contributions_selected_by_skillset_and_roles params
+        requests || (return_error "unable to retrieve winner")
+        return (feedback.build_feedback requests).to_json
+    end
+
+    get_user_comments_created_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/aggregate-comments?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_votes_cast_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/aggregate-votes?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_contributions_created_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/aggregate-contributors?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_comments_received_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/aggregate-comments-received?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_votes_received_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/aggregate-votes-received?#{params.to_param}"
+        redirect to url
+    end
+
+    get_user_contributions_selected_by_skillset_and_roles_by_me = lambda do
+        protected!
+        url = "/users/#{@session_hash["id"]}/aggregate-contributors-received?#{params.to_param}"
+        redirect to url
+    end
+
     #API
 
     post "/register", &register_post
@@ -1115,6 +1181,20 @@ class Integrations < Sinatra::Base
 
     post "/users/:id/requests", &connections_request_post
     get "/users/:id/requests", &get_exist_request
+
+    get "/users/me/aggregate-comments", allows: [:skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-votes", allows: [:skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-contributors", allows: [:skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-comments-received", allows: [:skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-votes-received", allows: [:skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-contributors-received", allows: [:skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
+
+    get "/users/:user_id/aggregate-comments", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_created_by_skillset_and_roles
+    get "/users/:user_id/aggregate-votes", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_cast_by_skillset_and_roles
+    get "/users/:user_id/aggregate-contributors", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_created_by_skillset_and_roles
+    get "/users/:user_id/aggregate-comments-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_received_by_skillset_and_roles
+    get "/users/:user_id/aggregate-votes-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_received_by_skillset_and_roles
+    get "/users/:user_id/aggregate-contributors-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_selected_by_skillset_and_roles
 
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request
