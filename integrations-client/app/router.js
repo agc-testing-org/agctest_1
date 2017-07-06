@@ -30,6 +30,7 @@ Router.map(function() {
         this.route('select', {path: '/:id'}, function(){
             this.route('members');
             this.route('talent');
+            this.route('owners');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile
