@@ -733,6 +733,14 @@ button{
 .main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name, .main .slide.hidden-md-up .about{
     text-align:left !important;   
 }
+.main .overview .score{
+
+}
+.main .overview .score.block{
+    margin-bottom:10px;
+    padding:10px;
+    background-color:#fff;
+}
 .main .overview .score .title {
 
 }

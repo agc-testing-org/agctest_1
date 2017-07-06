@@ -1,32 +1,15 @@
 <div class="full">
-    <div class="about section">Comments Posted</div>
-    <div class="list-group rounded text-left">
-        {{profile-overview-feedback items=comments}}
-    </div>
 
-    <div class="about section mt-2">Votes Cast</div>
-    <div class="list-group rounded text-left">
-        {{profile-overview-feedback items=votes}}
-    </div>
+        {{profile-overview-feedback items=comments metric="comments posted"}}
 
-    <div class="about section">Solutions Proposed</div>
-    <div class="list-group rounded text-left">
-        {{profile-overview-feedback items=contributors}}
-    </div>
+        {{profile-overview-feedback items=votes metric="votes cast"}}
 
-    <div class="about section">Comments Received</div>
-    <div class="list-group rounded text-left">
-        {{profile-overview-feedback items=comments_received}}
-    </div>
+        {{profile-overview-feedback items=contributors metric="solutions proposed"}}
 
-    <div class="about section mt-2">Votes Received</div>
-    <div class="list-group rounded text-left">
-        {{profile-overview-feedback items=votes_received}}
-    </div>
+        {{profile-overview-feedback items=comments_received metric="comments received"}}
 
-    <div class="about section">Winning Solutions</div>
-    <div class="list-group rounded text-left">
-        {{profile-overview-feedback items=contributors_received}}
-    </div>
+        {{profile-overview-feedback items=votes_received metric="votes received"}}
+
+        {{profile-overview-feedback items=contributors_received metric="winning solutions"}}
 
 </div>
