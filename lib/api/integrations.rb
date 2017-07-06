@@ -157,7 +157,7 @@ class Integrations < Sinatra::Base
         end
     end
 
-    def session_tokens user, owner 
+    def session_tokens user, owner, initial 
 
         account = Account.new
         user_secret = SecureRandom.hex(32) #session secret, not password
@@ -191,7 +191,7 @@ class Integrations < Sinatra::Base
             account.save_token "session", user[:jwt], session_hash, 30 #expire old token in 30s 
         end
 
-        if (account.save_token "session", jwt, session_hash, expiration) && (account.update user[:id], update_fields) && (account.record_login user[:id], request.ip)
+        if (account.save_token "session", jwt, session_hash, expiration) && (account.update user[:id], update_fields)
             response = {
                 :success => true,
                 :access_token => jwt,
@@ -199,6 +199,7 @@ class Integrations < Sinatra::Base
                 :expires_in => expiration,
                 :refresh_token => user_refresh
             }
+            initial && (account.record_login user[:id], request.ip)
             status 200
             return response
         end
@@ -306,7 +307,7 @@ class Integrations < Sinatra::Base
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
         owner = ((account.is_owner? user[:id]) || user[:admin])
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, true).to_json
     end
 
     reset_post = lambda do
@@ -321,7 +322,7 @@ class Integrations < Sinatra::Base
         (account.confirm_user user, fields[:password], user.first_name, request.ip) || (return_error "unable to reset your password at this time")
         owner = ((account.is_owner? user[:id]) || user[:admin])
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, true).to_json
     end
 
     login_post = lambda do
@@ -333,7 +334,7 @@ class Integrations < Sinatra::Base
         user || (return_error "email or password incorrect")
         owner = ((account.is_owner? user[:id]) || user[:admin]) 
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, true).to_json
     end
 
     session_provider_linkedin_post = lambda do
@@ -352,7 +353,7 @@ class Integrations < Sinatra::Base
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
         (profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
-        response = (session_tokens user, @session_hash["owner"]) 
+        response = (session_tokens user, @session_hash["owner"], false) 
         response[:success] = !profile_id.nil?
         status 200
         return response.to_json
@@ -373,7 +374,7 @@ class Integrations < Sinatra::Base
         @session_hash["github_username"] = github.login || nil
         provider_token = account.create_token @session_hash["id"], @key, access_token 
         @session_hash["github_token"] = provider_token
-        response = (session_tokens user, @session_hash["owner"])
+        response = (session_tokens user, @session_hash["owner"], false)
         response[:success] = !@session_hash["github_username"].nil?
         status 200
         return response.to_json
@@ -388,7 +389,7 @@ class Integrations < Sinatra::Base
         user || return_unauthorized 
         owner = ((account.is_owner? user[:id]) || user[:admin])
         status 200
-        return (session_tokens user, owner).to_json
+        return (session_tokens user, owner, false).to_json
     end
 
     session_delete = lambda do
