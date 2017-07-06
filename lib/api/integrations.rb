@@ -84,23 +84,23 @@ class Integrations < Sinatra::Base
     key_prefix = :t_
 
     # Session-Related Routes (less liberal)
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 15, :rules => { :method => :post, :url => /register/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /(resend|forgot|reset|accept)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /login/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 15, :rules => { :method => :post, :url => /register/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /(resend|forgot|reset|accept)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 30, :rules => { :method => :post, :url => /login/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
 
     # Service-Based Routes
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 1200, :rules => { :method => :get, :url => /(users)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(users)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(users|contributors)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 1600, :rules => { :method => :get, :url => /(users)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(users)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(users|contributors)/ }
 
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
 
     # Other Routes
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 800, :rules => { :method => :get }
-    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => :key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 2400, :rules => { :method => :get }
+    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
 
     LinkedIn.configure do |config|
         config.client_id     = ENV["INTEGRATIONS_LINKEDIN_CLIENT_ID"]
