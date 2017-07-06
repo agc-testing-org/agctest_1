@@ -40,8 +40,12 @@ class Feedback
   end
   
   def assign_param_to_model params, key, model
-      params["#{model}.#{key}"] = params[key]
-      params.delete(key)
+      if !params[key].nil? && !params[key].empty?
+        params["#{model}.#{key}"] = params[key]
+        params.delete(key)
+      else
+        params.delete(key)
+      end
       return params
   end
 

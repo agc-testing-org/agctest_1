@@ -7,5 +7,6 @@ inflector.uncountable('token');
 inflector.uncountable('session');
 inflector.uncountable('winner');
 inflector.uncountable('merge');
+inflector.uncountable('received');
 
 export default {};
