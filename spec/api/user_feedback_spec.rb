@@ -51,7 +51,7 @@ describe "/user-feedback" do
   end
 
   shared_examples_for "user_feedback_contributor" do
-      it "should return comment" do
+      it "should return contributor" do
           @feedback_results.each_with_index do |feedback_result, i|
               expect(@feedback[i]["contributor_id"]).to eq(feedback_result["contributor_id"])
           end
