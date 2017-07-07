@@ -10,7 +10,10 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         },
         role_id: {
             refreshModel: true
-        },    
+        },
+        page: {
+            refreshModel: true
+        }
     },
     actions: {
         refresh(){

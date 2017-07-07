@@ -10,6 +10,9 @@ export default Ember.Route.extend({
         role_id: {
             refreshModel: true
         },
+        page: {
+            refreshModel: true
+        }
     },
 
     model: function(params) {     
