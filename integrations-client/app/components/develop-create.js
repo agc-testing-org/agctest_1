@@ -5,6 +5,7 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     routes: Ember.inject.service('route-injection'),
     sessionAccount: Ember.inject.service('session-account'),
+    project: null,
     init() { 
         this._super(...arguments);   
     },
@@ -15,7 +16,7 @@ export default Ember.Component.extend({
                 org: org,
                 name: name
             }).save().then(function(response){
-                _this.get("routes").redirect("me");
+                _this.set("project",response);
             });
         },
         refresh(){

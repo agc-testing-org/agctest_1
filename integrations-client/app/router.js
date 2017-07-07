@@ -16,10 +16,9 @@ Router.map(function() {
     this.route('invitation', {path: '/invitation/:id'}, function(){
         this.route('resend');
     });
-    this.route('develop', {path: '/develop'}, function() {
-        this.route('index', {path: '/'});
+    this.route('develop', function() {
         this.route('new');
-        this.route('project', {path: '/:org/:name'}, function() {
+        this.route('project', {path: '/:project_id'}, function() {
             this.route('state', {path: '/state/:id'});
             this.route('sprint', {path: '/sprint/:id'}, function() {
                 this.route('state', { path: '/state/:state_id' });
@@ -31,13 +30,16 @@ Router.map(function() {
         this.route('select', {path: '/:id'}, function(){
             this.route('members');
             this.route('talent');
+            this.route('owners');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile
         this.route('requests');
+        this.route('overview');
     });
     this.route('me', function() { // private profile (logged in)
         this.route('notifications');
+        this.route('overview');
         this.route('connections');
         this.route('requests');
         this.route('invitation', {path: '/invitation/:id'});

@@ -11,7 +11,7 @@ export default Ember.Route.extend({
 
     afterModel(model, transition){
         var all = model.sprint_states.toArray();
-        this.transitionTo('develop.project.sprint.state',all[all.length - 1].id);
+        this.transitionTo('develop.project.sprint.state',all[all.length - 1].id+"-"+all[all.length - 1].get("state_id.name"));
     }
       
 });

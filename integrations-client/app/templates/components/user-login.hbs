@@ -15,7 +15,7 @@
                 
                 <form class="register-form" {{action 'login' on="submit"}}>
 
-                    {{#if errorMessage}}<div class="alert alert-warning text-center rounded">{{errorMessage}}</div>{{/if}}
+                    {{application-error error=errorMessage}}
 
                     {{input type="email" value=email placeholder="Email" class="form-control rounded"}}
                     {{input type="password" value=password placeholder="Password" class="form-control rounded"}}

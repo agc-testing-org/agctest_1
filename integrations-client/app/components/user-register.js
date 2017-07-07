@@ -31,8 +31,8 @@ export default Component.extend({
                     if(password === passwordb){
                         var credentials = this.getProperties('token', 'password', 'path','firstName');
                         this.get('session').authenticate('authenticator:custom', credentials).catch((reason) => {
-                            console.log(reason);
-                            this.set('errorMessage', JSON.parse(reason).message);
+                            var response = JSON.parse(reason).errors[0].detail;
+                            _this.set("errorMessage",response);  
                         });
                     }
                     else {
@@ -84,10 +84,9 @@ export default Component.extend({
 
                         }
                     }, function(xhr, status, error) {
-                        var response = xhr.responseText;
-                        Ember.run(function() {
-                            reject(response);
-                        });
+                        var response = JSON.parse(xhr.responseText);
+                        var response = response.errors[0].detail;
+                        _this.set("errorMessage",response);   
                     });
                 }
                 else {                                           

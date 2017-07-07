@@ -59,18 +59,22 @@ describe "/contributors" do
         end
         context "invalid comment" do
             context "< 2 char" do
-                it "should return error message" do
+                before(:each) do
                     post "/contributors/#{@contributor_id}/comments", {:text => "A", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    res = JSON.parse(last_response.body)
-                    expect(res["message"]).to eq("Please enter a more detailed comment")
                 end
+                it_behaves_like "error", "comments must be 2-5000 characters"
             end
-            context "greater than 4999 characters" do
-                it "should return error message" do
-                    post "/contributors/#{@contributor_id}/comments", {:text => "A"*5000, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    res = JSON.parse(last_response.body)
-                    expect(res["message"]).to eq("Comments must be less than 5000 characters")
+            context "greater than 5000 characters" do
+                before(:each) do
+                    post "/contributors/#{@contributor_id}/comments", {:text => "A"*5001, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
+                it_behaves_like "error", "comments must be 2-5000 characters"
+            end
+            context "invalid id" do
+                before(:each) do
+                    post "/contributors/76262/comments", {:text => "AA", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                end
+                it_behaves_like "error", "unable to save comment"
             end
         end
     end
@@ -168,26 +172,42 @@ describe "/contributors" do
             @timeline = @mysql_client.query("select * from sprint_timelines").first
             @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
         end
-        context "admin" do
-            it "should return sprint_state id" do
-                expect(@res["id"]).to eq(@sprint_state_id)
+        context "valid" do
+            context "admin" do
+                it "should return sprint_state id" do
+                    expect(@res["id"]).to eq(@sprint_state_id)
+                end
+                context "sprint_state" do
+                    it "should save contributor_id (winner)" do
+                        expect(@mysql["contributor_id"]).to eq(@contributor_id)
+                    end
+                    it "should save arbiter (judge)" do
+                        expect(@mysql["arbiter_id"]).to eq(users(:adam_admin).id)
+                    end
+                    it "should save pull request" do
+                        expect(@mysql["pull_request"]).to eq(@pull_id)
+                    end
+                end
+                context "sprint_timelines" do
+                    it "should set diff = winner" do
+                        expect(@sprint_timeline["diff"]).to eq("winner")
+                    end  
+                    it_behaves_like "sprint_timelines_for_feedback_actions"
+                end
             end
-            context "sprint_state" do
-                it "should save contributor_id (winner)" do
-                    expect(@mysql["contributor_id"]).to eq(@contributor_id)
+        end
+        context "invalid" do
+            context "sprint state" do
+                before(:each) do
+                    post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => 787}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 end
-                it "should save arbiter (judge)" do
-                    expect(@mysql["arbiter_id"]).to eq(users(:adam_admin).id)
-                end
-                it "should save pull request" do
-                    expect(@mysql["pull_request"]).to eq(@pull_id)
-                end
+                it_behaves_like "not_found"
             end
-            context "sprint_timelines" do
-                it "should set diff = winner" do
-                    expect(@sprint_timeline["diff"]).to eq("winner")
-                end  
-                it_behaves_like "sprint_timelines_for_feedback_actions"
+            context "contributor" do
+                before(:each) do
+                    post "/contributors/787/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                end
+                it_behaves_like "error", "unable to set winner"
             end
         end
     end
@@ -210,20 +230,39 @@ describe "/contributors" do
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
             Octokit::Client.any_instance.stub(:create_pull_request => @body)
             Octokit::Client.any_instance.stub(:merge_pull_request => @body)
-            post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-            post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-            @res = JSON.parse(last_response.body)
-            @mysql = @mysql_client.query("select * from sprint_states").first
         end
-        context "admin" do
-            it "should return sprint_state id" do
-                expect(@res["id"]).to eq(@sprint_state_id)
-            end
-            context "sprint_state" do
-                it "should update merged" do
-                    expect(@mysql["merged"]).to eq(1)
+        context "valid" do
+            context "admin" do
+                before(:each) do
+                    post "/contributors/#{@contributor_id}/winner", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from sprint_states").first
+                end
+                it "should return sprint_state id" do
+                    expect(@res["id"]).to eq(@sprint_state_id)
+                end
+                context "sprint_state" do
+                    it "should update merged" do
+                        expect(@mysql["merged"]).to eq(1)
+                    end
                 end
             end
+        end
+        context "invalid" do
+            context "sprint state" do
+                before(:each) do
+                    post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => 1221}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                end
+                it_behaves_like "not_found"
+            end
+            context "no winner" do
+                before(:each) do
+                    post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                end
+                it_behaves_like "error", "a contribution has not been selected"
+            end
+            
         end
     end
 end

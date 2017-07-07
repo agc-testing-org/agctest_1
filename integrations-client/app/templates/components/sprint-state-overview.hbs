@@ -1,4 +1,4 @@
-<div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state_id.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for {{#link-to "develop.project" project.id}}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
+<div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state_id.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) }}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview text-center">

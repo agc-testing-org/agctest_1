@@ -110,26 +110,6 @@ class Issue
         end
     end
 
-    def get_winner sprint_state_id
-        begin
-            winner = SprintState.find_by(id: sprint_state_id)
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def set_winner sprint_state_id, params 
-        begin
-            winner = SprintState.find_by(id: sprint_state_id)
-            winner.update_attributes!(params)
-            return winner
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def get_projects query
         begin
             return Project.where(query).as_json

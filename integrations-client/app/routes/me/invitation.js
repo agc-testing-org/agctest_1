@@ -32,7 +32,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         loginController.set('previousTransition', transition);
     },
     afterModel(model,transition) {
-        if(!model.invitation.get("sender_email")){ // more than token returned?
+        if(!model.invitation.get("valid")){
             this.transitionTo('invitation.resend',model.token);
         }
     }

@@ -6,6 +6,7 @@ export default Component.extend({
     session: service('session'),
     store: Ember.inject.service(),
     routes: Ember.inject.service('route-injection'),
+    errorMessage: null,
     didRender() {
         this._super(...arguments);
         this.$('#register-modal').modal('show');
@@ -18,11 +19,12 @@ export default Component.extend({
             store.adapterFor('token').set('namespace', 'user-teams' );
             var token = store.createRecord('token', {
                 token: inviteId 
-            }).save();
-            
-            token.then(function(payload) {
+            }).save().then(function(payload) {
                 store.adapterFor('token').set('namespace', '');
                 _this.get("routes").redirectWithId("team.select",payload.get("team_id"));
+            }, function(xhr, status, error) {
+                var response = xhr.errors[0].detail;
+                _this.set("errorMessage",response);
             });
         },
     }

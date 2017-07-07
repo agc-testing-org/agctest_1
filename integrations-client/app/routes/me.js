@@ -4,7 +4,14 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
-
+    queryParams: {
+        skillset_id: {
+            refreshModel: true
+        },
+        role_id: {
+            refreshModel: true
+        },    
+    },
     actions: {
         refresh(){
             this.refresh();
@@ -20,6 +27,13 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         this.store.adapterFor('skillset').set('namespace', 'users/me');
         var skillsets = this.store.findAll('skillset'); 
         var roles = this.store.findAll('role');
+        var comments = this.get('store').query('aggregate-comment', params);
+        var votes = this.get('store').query('aggregate-vote', params);
+        var contributors = this.get('store').query('aggregate-contributor', params);
+        var comments_received = this.get('store').query('aggregate-comments-received', params);
+        var votes_received = this.get('store').query('aggregate-votes-received', params);
+        var contributors_received = this.get('store').query('aggregate-contributors-received', params);
+
         this.store.adapterFor('skillset').set('namespace', ''); 
 
         return Ember.RSVP.hash({
@@ -27,7 +41,14 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             skillsets: skillsets,
             roles: roles,
             user: user,
-            states: states
+            states: states,
+            params: params,
+            comments: comments,
+            votes: votes,
+            contributors: contributors,
+            comments_received: comments_received,
+            votes_received: votes_received,
+            contributors_received: contributors_received
         });
     }
 });

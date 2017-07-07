@@ -7,11 +7,11 @@ export default Ember.Component.extend({
     errorMessage: null,
     actions: {
         comment(contributor_id,sprint_state_id){
+            this.set("errorMessage", "");
             var _this = this;
             var comment = this.get("comment");
             if(comment && (comment.length > 1)){
-                if(comment.length < 5000){
-                    this.set('errorMessage', "");
+                if(comment.length < 5001){ 
                     var store = this.get('store');
                     store.adapterFor('comment').set('namespace', 'contributors/' + contributor_id );
 
@@ -22,8 +22,10 @@ export default Ember.Component.extend({
                     }).save().then(function(payload) {
                         store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
                         _this.set("comment",null);
+                    }, function(xhr, status, error) {
+                        var response = xhr.errors[0].detail;
+                        _this.set("errorMessage",response);
                     });
-
                 }
                 else{
                     this.set('errorMessage', "Comments must be less than 5000 characters"); 
@@ -34,6 +36,8 @@ export default Ember.Component.extend({
             }
         },
         vote(contributor_id,sprint_state_id){
+            this.set("errorMessage", "");
+            var _this = this;
             var store = this.get('store');
             store.adapterFor('vote').set('namespace', 'contributors/' + contributor_id );
             var feedback = store.createRecord('vote', {
@@ -48,9 +52,15 @@ export default Ember.Component.extend({
                     }
                     store.peekRecord('contributor',contributor_id).get('votes').addObject(payload);
                 }
-            });                                                                             
+            }, function(xhr, status, error) {
+                if(error){ // handle non-api error
+                    var response = xhr.errors[0].detail;
+                    _this.set("errorMessage",response);
+                }
+            });
         },
         judge(contributor_id,sprint_state_id,project_id){
+            this.set("errorMessage", "");
             var store = this.get('store');
             store.adapterFor('winner').set('namespace', 'contributors/' + contributor_id );
             var _this = this;
@@ -61,9 +71,15 @@ export default Ember.Component.extend({
             }).save().then(function(payload) {
                 store.peekRecord('sprint-state',sprint_state_id).set('winner',payload.get("id"));
                 _this.sendAction("refresh");                                  
+            }, function(xhr, status, error) {
+                if(error){
+                    var response = xhr.errors[0].detail;
+                    _this.set("errorMessage",response);
+                }
             });
         },
         merge(contributor_id,sprint_state_id,project_id){
+            this.set("errorMessage", "");
             var store = this.get('store');
             store.adapterFor('merge').set('namespace', 'contributors/' + contributor_id );
             var _this = this;
@@ -74,6 +90,9 @@ export default Ember.Component.extend({
             }).save().then(function(payload) {
                 store.peekRecord('sprint-state',sprint_state_id).set('merge',payload.get("merged"));
                 _this.sendAction("refresh");                                  
+            }, function(xhr, status, error) {
+                var response = xhr.errors[0].detail;
+                _this.set("errorMessage",response);
             });
         }
     }

@@ -1,7 +1,7 @@
 {{#each-in (limited values count) as |key model|}}
 <div class="box box-nested">
     <div class="point circular"></div>
-    {{#link-to "develop.project.sprint" model.sprint_state.sprint.project.org model.sprint_state.sprint.project.id model.sprint_state.sprint.id}}
+    {{#link-to "develop.project.sprint" model.sprint_state.sprint.project.id model.sprint_state.sprint.id}}
     {{model.sprint_state.sprint.project.org}}/{{model.sprint_state.sprint.project.name}} Sprint {{model.sprint_state.sprint.id}} 
     {{/link-to}}
     {{#if model.text}}
