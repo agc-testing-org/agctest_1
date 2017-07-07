@@ -1221,6 +1221,23 @@ class Integrations < Sinatra::Base
         return notification.to_json
     end
 
+    team_connections_get = lambda do
+        protected!
+        account = Account.new
+
+        team_id = params[:id]
+        seat = account.get_seat @session_hash["id"], params[:id]
+
+        if seat == "member"
+            accepted = account.get_team_connections_accepted team_id
+            requested = account.get_team_connections_requested team_id
+            status 200
+        else
+            return_not_found
+        end
+        return (accepted + requested).to_json
+    end
+
     #API
 
     post "/register", &register_post
@@ -1298,6 +1315,8 @@ class Integrations < Sinatra::Base
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
+
+    get "/team/:id/connections", &team_connections_get 
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post

@@ -481,8 +481,26 @@ class Account
     end
 
     def get_user_connections_accepted user_id
-        begin      
+        begin  
             return UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_team_connections_requested team_id 
+        begin
+            return User.joins("INNER JOIN user_connections ON users.id = user_connections.user_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ?", team_id).select("user_connections.user_id, users.first_name, users.email").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_team_connections_accepted team_id
+        begin   
+            return User.joins("INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ? and user_connections.confirmed=2", team_id).select("user_connections.contact_id as user_id, users.first_name, users.email").as_json
         rescue => e
             puts e
             return nil
