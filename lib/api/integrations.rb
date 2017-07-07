@@ -1157,10 +1157,13 @@ class Integrations < Sinatra::Base
             accepted = account.get_team_connections_accepted team_id
             requested = account.get_team_connections_requested team_id
             status 200
+
+            temp = accepted + requested
+            response = temp.uniq { |h| h["id"] }
         else
             return_not_found
         end
-        return (accepted + requested).to_json
+        return response.to_json
     end
 
     #API
