@@ -18,6 +18,7 @@ require 'linkedin-oauth2'
 require 'sidekiq'
 require 'whenever'
 require 'rack/throttle'
+require 'aws-sdk'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -67,6 +68,11 @@ set :database, {
     database: "integrations_#{ENV['RACK_ENV']}"
 }  
 
+Aws.config.update({
+    region: ENV["AWS_REGION"],
+    credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
+})
+
 Sidekiq.configure_server do |config|
     config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
 end
@@ -90,16 +96,16 @@ class Integrations < Sinatra::Base
     use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 60, :rules => { :method => :post, :url => /session/ }
 
     # Service-Based Routes
-#    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 1600, :rules => { :method => :get, :url => /(users)/ }
+    #    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 1600, :rules => { :method => :get, :url => /(users)/ }
     use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(users)/ }
     use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(users|contributors)/ }
 
-#    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
+    #    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 500, :rules => { :method => :get, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
     use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :patch, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
     use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 70, :rules => { :method => :post, :url => /(sprints|projects|sprint-states|teams|user-teams)/ }
 
     # Other Routes
-#    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 2400, :rules => { :method => :get }
+    #    use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 2400, :rules => { :method => :get }
     use Rack::Throttle::Hourly, :cache => redis, :key_prefix => key_prefix, :message => message, :max => 60, :rules => { :method => :delete }
 
     LinkedIn.configure do |config|
@@ -682,7 +688,7 @@ class Integrations < Sinatra::Base
 
         description_length = fields[:description].to_s.length
         (description_length < 501 && description_length > 4) || (return_error "description must be 5-500 characters")
-        
+
         issue = Issue.new
         sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
         sprint || (return_error "unable to create sprint for this project")
@@ -1249,6 +1255,16 @@ class Integrations < Sinatra::Base
 
     # Ember
     get "*" do
-        send_file File.expand_path('index.html',settings.public_folder)
+        content_type 'text/html'
+        client = Aws::S3::Client.new
+        index_version = params[:s3_version] || "index.html"
+        if ENV["RACK_ENV"] == "production"
+            return client.get_object({
+                bucket: ENV["INTEGRATIONS_S3_BUCKET"], 
+                key: index_version
+            }).body.read
+        else
+            send_file File.expand_path('index.html',settings.public_folder)
+        end
     end
 end
