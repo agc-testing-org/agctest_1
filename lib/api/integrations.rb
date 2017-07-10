@@ -1042,7 +1042,7 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         status 200
-        return (account.get_user_notifications @session_hash["id"]).to_json
+        return (account.get_user_notifications @session_hash["id"], params).to_json
     end
 
     get_user_notifications_by_id = lambda do
@@ -1171,7 +1171,7 @@ class Integrations < Sinatra::Base
     get "/users/me/roles/:role_id", &users_roles_get_by_role
     patch "/users/me/roles/:role_id", &users_roles_patch_by_id
 
-    get "/users/me/notifications", &get_user_notifications
+    get "/users/me/notifications", allows: [:page], &get_user_notifications
     patch "/users/me/notifications/:id", &user_notifications_read
     get "/users/me/notifications/:id", &get_user_notifications_by_id
 
