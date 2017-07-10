@@ -1257,7 +1257,7 @@ class Integrations < Sinatra::Base
     get "*" do
         content_type 'text/html'
         client = Aws::S3::Client.new
-        index_version = "index.html:#{params[:s3_version]}" || "index.html"
+        index_version = ("index.html:#{params[:s3_version]}" if !params[:s3_version].nil?) || "index.html"
         if ENV["RACK_ENV"] == "production"
             return client.get_object({
                 bucket: ENV["INTEGRATIONS_S3_BUCKET"], 
