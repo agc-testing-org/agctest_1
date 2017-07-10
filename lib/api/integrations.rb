@@ -890,6 +890,7 @@ class Integrations < Sinatra::Base
         fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         fetched || (return_error "unable to update contribution")
         contributor.commit = fetched[:sha]
+        contributor.commit_remote = fetched[:sha_remote]
         contributor.commit_success = fetched[:success]
         contributor.save
         status 200
@@ -1182,14 +1183,14 @@ class Integrations < Sinatra::Base
     post "/users/:id/requests", &connections_request_post
     get "/users/:id/requests", &get_exist_request
 
-    get "/users/me/aggregate-comments", allows: [:skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-comments", allows: [:page, :skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles_by_me
     get "/users/me/aggregate-votes", allows: [:skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
     get "/users/me/aggregate-contributors", allows: [:skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
     get "/users/me/aggregate-comments-received", allows: [:skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
     get "/users/me/aggregate-votes-received", allows: [:skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
     get "/users/me/aggregate-contributors-received", allows: [:skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
 
-    get "/users/:user_id/aggregate-comments", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_created_by_skillset_and_roles
+    get "/users/:user_id/aggregate-comments", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_created_by_skillset_and_roles
     get "/users/:user_id/aggregate-votes", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_cast_by_skillset_and_roles
     get "/users/:user_id/aggregate-contributors", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_created_by_skillset_and_roles
     get "/users/:user_id/aggregate-comments-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_received_by_skillset_and_roles

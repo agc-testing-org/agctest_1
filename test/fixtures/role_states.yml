@@ -2,6 +2,6 @@ product_requirements_design:
   role: product
   state: requirements_design
 
-product_requirements_design:
+product_idea:
   role: product
   state: idea

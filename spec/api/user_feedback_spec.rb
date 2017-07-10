@@ -7,6 +7,7 @@ describe "/user-feedback" do
 
   before(:all) do
     @CREATE_TOKENS=true
+    @per_page = 10
   end
 
   shared_examples_for "user_feedback" do
@@ -58,7 +59,7 @@ describe "/user-feedback" do
       end
   end
 
-  describe "GET /aggregate-comments" do
+  describe "GET /aggregate-comments", :focus => true do
       fixtures :users, :comments, :sprint_timelines, :sprint_skillsets, :user_skillsets, :skillsets, :roles, :user_roles, :sprint_states, :role_states, :projects, :sprints
       context "user_id" do
           before(:each) do
@@ -71,7 +72,7 @@ describe "/user-feedback" do
                   before(:each) do
                       get "/users/#{@user_id}/aggregate-comments", {:skillset_id => @skillset_id}.to_json
                       @feedback = JSON.parse(last_response.body)
-                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_skillsets.skillset_id = #{@skillset_id} GROUP BY sprint_timelines.id")
+                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_skillsets.skillset_id = #{@skillset_id} GROUP BY sprint_timelines.id limit #{@per_page}")
                   end
                   it_behaves_like "ok"
                   it_behaves_like "user_feedback_comment"
@@ -80,7 +81,7 @@ describe "/user-feedback" do
                   before(:each) do
                       get "/users/#{@user_id}/aggregate-comments", {:role_id => @role_id}.to_json
                       @feedback = JSON.parse(last_response.body)
-                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_roles.role_id = #{@role_id} GROUP BY sprint_timelines.id")
+                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_roles.role_id = #{@role_id} GROUP BY sprint_timelines.id limit #{@per_page}")
                   end
                   it_behaves_like "ok"
                   it_behaves_like "user_feedback_comment"
@@ -89,7 +90,17 @@ describe "/user-feedback" do
                   before(:each) do
                       get "/users/#{@user_id}/aggregate-comments", {:skillset_id => @skillset_id, :role_id => @role_id}.to_json
                       @feedback = JSON.parse(last_response.body)
-                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} GROUP BY sprint_timelines.id")
+                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} GROUP BY sprint_timelines.id limit #{@per_page}")
+                  end
+                  it_behaves_like "ok"
+                  it_behaves_like "user_feedback_comment"
+              end
+              context "paging" do
+                  before(:each) do
+                      @page = 2
+                      get "/users/#{@user_id}/aggregate-comments", {:skillset_id => @skillset_id, :role_id => @role_id, :page => @page}.to_json
+                      @feedback = JSON.parse(last_response.body)
+                      @feedback_results = @mysql_client.query("SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE sprint_timelines.user_id = #{@user_id} AND user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} GROUP BY sprint_timelines.id limit #{@per_page} offset #{(@page - 1) * @per_page}")
                   end
                   it_behaves_like "ok"
                   it_behaves_like "user_feedback_comment"
