@@ -125,3 +125,25 @@ Monitoring Background Jobs
 
     Go to https://localhost:3000/sidekiq
     Enter the vars you have set for INTEGRATIONS_SIDEKIQ_USERNAME and INTEGRATIONS_SIDEKIQ_PASSWORD
+
+
+### Deployment
+
+Shell 1:
+
+Ensure production server has the following (in addition to the vars listed above for the bashrc):
+
+    export AWS_ACCESS_KEY_ID=''
+    export AWS_SECRET_ACCESS_KEY=''
+    export AWS_REGION='us-west-2'
+
+These are used to connect the backend to the s3 assets
+
+eb deploy
+
+Shell 2:
+ 
+    source ~/.bashrc_wired7_production (includes RACK_ENV, Github/Linkedin client IDs, host)
+    ember deploy production
+    ember deploy:list production
+    ember deploy:activate production --revision #####
