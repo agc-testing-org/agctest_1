@@ -20,7 +20,7 @@
     {{/if}}
     <div class="list-group-item rounded">
         <h4 class="line">Synchronize (let us know when you're done)</h4>
-        <p class="line">Last Commit: {{moment-from-now contributor.updated_at}} {{#if contributor.commit}}({{contributor.commit}}){{/if}}</p>
+        <p class="line">Last Commit: {{moment-from-now contributor.updated_at}} {{#if contributor.commit_success}}({{contributor.commit_remote}}){{/if}}</p>
         {{#if sprint_state.pull_request}}
         {{#unless sprint_state.merged}}
             <small class="line text-muted">Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></small>

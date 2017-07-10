@@ -890,6 +890,7 @@ class Integrations < Sinatra::Base
         fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         fetched || (return_error "unable to update contribution")
         contributor.commit = fetched[:sha]
+        contributor.commit_remote = fetched[:sha_remote]
         contributor.commit_success = fetched[:success]
         contributor.save
         status 200

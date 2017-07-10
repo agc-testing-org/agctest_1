@@ -45,6 +45,16 @@ describe "/sprints-states" do
                         expect(@contributors[i]["repo"]).to eq(contributor_result["repo"])
                     end
                 end
+                @contributor_results.each_with_index do |contributor_result,i|
+                    if @user == contributor_result["user_id"]
+                        expect(@contributors[i]["commit_success"]).to eq(contributor_result["commit_success"])
+                    end
+                end
+                @contributor_results.each_with_index do |contributor_result,i|
+                    if @user == contributor_result["user_id"]
+                        expect(@contributors[i]["commit_remote"]).to eq(contributor_result["commit_remote"])
+                    end
+                end
             end
             it "should return active_contribution_id (last 'join' by signed in user)" do
                 @contributor_results.each_with_index do |contributor_result,i|

@@ -7,6 +7,7 @@ export default DS.Model.extend({
     updated_at: attr('date'),
     repo: attr('string'),
     commit: attr('string'),
+    commit_remote: attr('string'),
     commit_success: attr('boolean'),
     sprint_state_id: attr('number'),
     comments: DS.hasMany('comment'),

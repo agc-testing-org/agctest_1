@@ -150,7 +150,7 @@ describe "/projects" do
                 before(:each) do
                     @git = %x(cd #{@uri}; git checkout master; git log)
                 end
-                it "should update head", :focus => true do
+                it "should update head" do
                     expect(@git).to eq(@head)
                 end
             end
@@ -274,7 +274,7 @@ describe "/projects" do
             body = {
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
+                    :sha=>contributors(:adam_confirmed_1).commit
                 }
             }
 
@@ -294,7 +294,7 @@ describe "/projects" do
             end
             context "contributor" do
                 it "should include commit" do
-                    expect(@sql["commit"]).to eq(@sha)
+                    expect(@sql["commit"]).to eq(contributors(:adam_confirmed_1).commit)
                 end
                 it "should include commit_success" do
                     expect(@sql["commit_success"]).to eq(1)
