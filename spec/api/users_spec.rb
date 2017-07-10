@@ -6,6 +6,7 @@ describe "/users" do
     fixtures :users, :seats
     before(:all) do
         @CREATE_TOKENS=true
+        @per_page = 10
     end
 
     shared_examples_for "user_skillsets" do
@@ -521,13 +522,13 @@ describe "/users" do
         end 
     end
 
-    describe "GET /me/notifications" do
+    describe "GET /me/notifications", :focus => true do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do 
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}")
+                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user} limit #{@per_page}")
             end
             it_behaves_like "user_notifications"
             it_behaves_like "ok"
@@ -537,6 +538,16 @@ describe "/users" do
                 get "/users/me/notifications"
             end
             it_behaves_like "unauthorized"
+        end
+        context "paging" do
+            before(:each) do
+                @page = 2
+                get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user} limit #{@per_page} offset #{(@page - 1) * @per_page}")
+            end
+            it_behaves_like "ok"
+            it_behaves_like "user_notifications"
         end
     end
 
