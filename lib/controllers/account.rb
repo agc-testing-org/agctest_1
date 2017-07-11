@@ -4,21 +4,6 @@ class Account
         @per_page = 10
     end
 
-    def drop_key params, key
-        if !params[key].nil? && !params[key].empty?
-            params.delete(key) 
-        end
-        return params
-    end
-
-    def assign_param_to_model params, key, model
-        if !params[key].nil? && !params[key].empty?
-            params["#{model}.#{key}"] = params[key]
-        end
-        drop_key params, key 
-        return params
-    end
-
     def linkedin_client access_token
         begin
             return LinkedIn::API.new(access_token)
@@ -506,7 +491,8 @@ class Account
 
     def get_user_notifications user_id, params
         page = (params["page"].to_i > 0) || 1
-        params = drop_key params, "page"
+        params_helper = ParamsHelper.new
+        params = params_helper.drop_key params, "page"
         begin     
             response = []
             SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page).each_with_index do |notification,i|

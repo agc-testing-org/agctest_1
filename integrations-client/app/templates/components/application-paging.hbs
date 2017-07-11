@@ -1,0 +1,17 @@
+{{#if (eq last 10)}}
+    {{#if page}}
+        {{#link-to (query-params page=(plus page 1))}}
+            Next 
+        {{/link-to}}
+    {{else}}
+        {{#link-to (query-params page=2)}}
+            Next
+        {{/link-to}}
+    {{/if}}
+{{/if}}
+
+{{#if (greater-than page 1)}}
+    {{#link-to (query-params page=(plus page -1))}}
+        Back
+    {{/link-to}}
+{{/if}}

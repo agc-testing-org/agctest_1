@@ -26,6 +26,7 @@ require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
 require_relative '../controllers/feedback.rb'
+require_relative '../controllers/params_helper.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -1073,42 +1074,42 @@ class Integrations < Sinatra::Base
         feedback = Feedback.new
         requests = feedback.user_comments_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 
     get_user_comments_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_comments_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_votes_cast_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_cast_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_votes_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_contributions_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve contribution")
-        return (feedback.build_contribution_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_contribution_feedback requests)}.to_json 
     end
 
     get_user_contributions_selected_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_selected_by_skillset_and_roles params
         requests || (return_error "unable to retrieve winner")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 
     get_user_comments_created_by_skillset_and_roles_by_me = lambda do

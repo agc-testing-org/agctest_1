@@ -42,7 +42,11 @@ export default Ember.Route.extend({
             contributors: contributors,
             comments_received: comments_received,
             votes_received: votes_received,
-            contributors_received: contributors_received
+            contributors_received: contributors_received,
+            me: false
         });
+    },
+    renderTemplate() {
+        this.render('me');
     }
 });

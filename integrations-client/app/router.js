@@ -43,6 +43,12 @@ Router.map(function() {
         this.route('connections');
         this.route('requests');
         this.route('invitation', {path: '/invitation/:id'});
+        this.route('comments');
+        this.route('votes');
+        this.route('contributions');
+        this.route('comments-received');
+        this.route('votes-received');
+        this.route('contributions-selected');
     });
 
     this.route("limit");
