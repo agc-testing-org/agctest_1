@@ -49,7 +49,7 @@ class Feedback
   end
   
   def user_comments_created_by_skillset_and_roles params
-    page = (params["page"].to_i > 0) || 1
+    page = (params["page"].to_i if params["page"].to_i > 0) || 1
     params_helper = ParamsHelper.new
     params = params_helper.drop_key params, "page"
     params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
@@ -63,7 +63,7 @@ class Feedback
   end
 
   def user_comments_received_by_skillset_and_roles params
-    page = (params["page"].to_i > 0) || 1
+    page = (params["page"].to_i if params["page"].to_i > 0) || 1 
     params_helper = ParamsHelper.new
     params = params_helper.drop_key params, "page"
     params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
@@ -79,7 +79,7 @@ class Feedback
   end
 
   def user_votes_cast_by_skillset_and_roles params
-    page = (params["page"].to_i > 0) || 1
+    page = (params["page"].to_i if params["page"].to_i > 0) || 1 
     params_helper = ParamsHelper.new
     params = params_helper.drop_key params, "page"
     params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
@@ -93,7 +93,7 @@ class Feedback
   end
 
   def user_votes_received_by_skillset_and_roles params
-    page = (params["page"].to_i > 0) || 1
+    page = (params["page"].to_i if params["page"].to_i > 0) || 1 
     params_helper = ParamsHelper.new
     params = params_helper.drop_key params, "page"
     params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
@@ -108,7 +108,7 @@ class Feedback
   end
 
   def user_contributions_created_by_skillset_and_roles params  
-    page = (params["page"].to_i > 0) || 1
+    page = (params["page"].to_i if params["page"].to_i > 0) || 1 
     params_helper = ParamsHelper.new
     params = params_helper.drop_key params, "page"
     params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
@@ -123,7 +123,7 @@ class Feedback
   end
 
   def user_contributions_selected_by_skillset_and_roles params
-    page = (params["page"].to_i > 0) || 1
+    page = (params["page"].to_i if params["page"].to_i > 0) || 1 
     params_helper = ParamsHelper.new
     params = params_helper.drop_key params, "page"
     params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"

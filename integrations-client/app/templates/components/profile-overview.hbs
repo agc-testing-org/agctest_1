@@ -29,22 +29,22 @@
             {{/if}}
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=comments.length title="Comments Posted"}}
+                    {{sprint-state-overview-score total=comments.meta.count title="Comments Posted"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=votes.length title="Votes Cast"}}
+                    {{sprint-state-overview-score total=votes.meta.count title="Votes Cast"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=contributors.length title="Solutions"}}
+                    {{sprint-state-overview-score total=contributors.meta.count title="Solutions"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=comments_received.length title="Comments Received"}}
+                    {{sprint-state-overview-score total=comments_received.meta.count title="Comments Received"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=votes_received.length title="Votes Received"}}
+                    {{sprint-state-overview-score total=votes_received.meta.count title="Votes Received"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=contributors_received.length title="Winning Solutions"}}
+                    {{sprint-state-overview-score total=contributors_received.meta.count title="Winning Solutions"}}
                 </div>
             </div>
         </div>

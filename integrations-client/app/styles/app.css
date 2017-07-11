@@ -167,6 +167,7 @@ label{
     background-color: transparent !important;
     margin-left: 25px !important;
     margin-top: 10px !important;
+    margin-bottom:5px !important;
 }
 .highlight-true{
     background-color: #fff;
@@ -739,6 +740,9 @@ button{
 }
 .main .still .full{
     margin-top:94px;
+}
+.main .still.relative{
+    position:relative;
 }
 .main .overview .description{
     font-weight:300;

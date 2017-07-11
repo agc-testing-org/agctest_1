@@ -46,7 +46,7 @@
                     </small>
                 </div>
             {{/each}}
-            {{application-paging page=params.page last=notifications.length}}
+            {{application-paging page=params.page last=notifications.length count=notifications.meta.count}}
             {{else}}
                 <div class="list-group-item rounded highlight-false">
                     <h3 class="line">Welcome to Wired7!</h3>

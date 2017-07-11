@@ -1,12 +1,16 @@
 {{#if (eq last 10)}}
     {{#if page}}
-        {{#link-to (query-params page=(plus page 1))}}
-            Next 
-        {{/link-to}}
+        {{#if (greater-than count (times page 10))}}
+            {{#link-to (query-params page=(plus page 1))}}
+                Next 
+            {{/link-to}}
+        {{/if}}
     {{else}}
-        {{#link-to (query-params page=2)}}
-            Next
-        {{/link-to}}
+        {{#if (greater-than count 10)}}
+            {{#link-to (query-params page=2)}}
+                Next
+            {{/link-to}}
+        {{/if}}
     {{/if}}
 {{/if}}
 
