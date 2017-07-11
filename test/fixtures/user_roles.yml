@@ -3,6 +3,11 @@ adam_confirmed_product:
   role: product
   active: 1
 
+adam_admin_product:
+  user: adam_admin
+  role: product
+  active: 1
+
 notification_role_product:
   user: masha_post_connection_request
   role_id: 1

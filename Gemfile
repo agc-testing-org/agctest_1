@@ -16,6 +16,7 @@ gem 'sidekiq'
 gem 'sidekiq-client-cli'
 gem 'whenever', :require => false
 gem 'improved-rack-throttle'
+gem 'aws-sdk', '~> 2'
 
 group :development do
     gem 'passenger', '~> 5.0.30'

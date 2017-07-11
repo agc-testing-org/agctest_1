@@ -83,7 +83,7 @@ describe ".Activity" do
         it_behaves_like "user_notifications"
     end
 
-    context "#user_notifications_by_roles" do
+    context "#user_notifications_by_roles", :focus => true do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
         before(:each) do
             @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
@@ -168,7 +168,7 @@ describe ".Activity" do
         end
     end
 
-    context "#user_notifications_distinct", :focus => true do
+    context "#user_notifications_distinct" do
         fixtures :users
         before(:each) do
             object = User.where(:id => users(:adam_confirmed).id).select("id as user_id")
