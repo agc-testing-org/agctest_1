@@ -20,5 +20,10 @@
             </p>
         </div>
     {{/each}}
+    {{#if me}}
+        {{application-paging-no-model page=params.page last=items.length count=items.meta.count route=(concat "me." route) class="text-right"}}
+    {{else}}
+        {{application-paging page=params.page last=items.length count=items.meta.count route=(concat "profile." route) route_id=user.id class="text-right"}}
+    {{/if}}
 </div>
 {{/if}}

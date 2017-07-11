@@ -3,17 +3,17 @@
     <div class="vertical-align-cell">
         <div class="overview text-center">
             <h1 class="name text-capitalize">{{team.name}}</h1>
-            <div class="description">created {{moment-from-now team.created_at}} by <span class="text-capitalize">{{team.user.first_name}}</span> ({{team.user.email}})</div>
             {{#if team.show}}
-                <div class="about">share access to talent with teams</div>
+                <h3 class="about">Share access to talent with teams</h3>
                 <div class="row">
                     <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
                         {{sprint-state-overview-score total=user_teams.length title="Invitations"}}
                     </div>
                 </div>
             {{else}}
-                <div class="about">teams allow your sponsors to track your performance</div>
+                <h3 class="about">Teams allow your sponsors to track your performance</h3>
             {{/if}}
+            <div class="description">created {{moment-from-now team.created_at}} by <span class="text-capitalize">{{team.user.first_name}}</span> ({{team.user.email}})</div>
         </div>
     </div>
 </div>

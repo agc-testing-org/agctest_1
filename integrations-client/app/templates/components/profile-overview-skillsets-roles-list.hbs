@@ -1,0 +1,5 @@
+{{#each items as |item|}}
+    {{#if item.active}}
+        <span class="badge badge-default rounded selected {{type}}">{{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} {{item.name}}</span>
+    {{/if}}
+{{/each}}

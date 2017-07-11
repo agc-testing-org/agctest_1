@@ -36,6 +36,12 @@ Router.map(function() {
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile
         this.route('requests');
         this.route('overview');
+        this.route('comments');
+        this.route('votes');
+        this.route('contributions');
+        this.route('comments-received');
+        this.route('votes-received');
+        this.route('contributions-selected');
     });
     this.route('me', function() { // private profile (logged in)
         this.route('notifications');

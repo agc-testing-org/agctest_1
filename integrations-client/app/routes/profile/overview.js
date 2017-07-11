@@ -11,7 +11,8 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     },
     model: function(params) { 
 
-        this.store.adapterFor('aggregate-comment').set('namespace', 'users/me');
+        params["id"] = this.paramsFor("profile").id;
+        this.store.adapterFor('aggregate-comment').set('namespace', 'users/'+params.id);
         var comments = this.get('store').query('aggregate-comment', params);
         var votes = this.get('store').query('aggregate-vote', params);
         var contributors = this.get('store').query('aggregate-contributor', params);
@@ -22,10 +23,10 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
         return Ember.RSVP.hash({
             teams: this.store.findAll('team'),
-            skillsets: this.modelFor("me").skillsets,
-            roles: this.modelFor("me").roles,
-            user: this.modelFor("me").user,
-            states: this.modelFor("me").states,
+            skillsets: this.modelFor("profile").skillsets,
+            roles: this.modelFor("profile").roles,
+            user: this.modelFor("profile").user,
+            states: this.modelFor("profile").states,
             params: params,
             comments: comments,
             votes: votes,
@@ -33,7 +34,10 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             comments_received: comments_received,
             votes_received: votes_received,
             contributors_received: contributors_received,
-            me: true
+            me: false 
         });
+    },
+    renderTemplate() {
+        this.render('me.overview');
     }
 });
