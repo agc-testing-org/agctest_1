@@ -496,7 +496,7 @@ describe "/users" do
                     expect(@res["id"]).to eq 0
                 end
             end
-            context "user already requested you", :focus => true do
+            context "user already requested you" do
                 before(:each) do
                     get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).user_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                     @res = [JSON.parse(last_response.body)]
@@ -527,9 +527,14 @@ describe "/users" do
         context "signed in" do 
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user} limit #{@per_page}")
+                @res = JSON.parse(last_response.body)["data"]
+                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}"
+                @notification_results = @mysql_client.query("#{base_query} limit #{@per_page}")
+                @notification_count = @mysql_client.query(base_query).count
             end
+            it "should return count" do
+                expect(JSON.parse(last_response.body)["meta"]["count"]).to eq @notification_count
+            end 
             it_behaves_like "user_notifications"
             it_behaves_like "ok"
         end
@@ -543,8 +548,13 @@ describe "/users" do
             before(:each) do
                 @page = 2
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-                @notification_results = @mysql_client.query("select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user} limit #{@per_page} offset #{(@page - 1) * @per_page}")
+                @res = JSON.parse(last_response.body)["data"]
+                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}"
+                @notification_results = @mysql_client.query("#{base_query} limit #{@per_page} offset #{(@page - 1) * @per_page}")
+                @notification_count = @mysql_client.query(base_query).count
+            end
+            it "should return count" do
+                expect(JSON.parse(last_response.body)["meta"]["count"]).to eq @notification_count
             end
             it_behaves_like "ok"
             it_behaves_like "user_notifications"
