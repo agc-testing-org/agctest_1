@@ -27,6 +27,7 @@ require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
 require_relative '../controllers/feedback.rb'
+require_relative '../controllers/params_helper.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -1048,7 +1049,7 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         status 200
-        return (account.get_user_notifications @session_hash["id"]).to_json
+        return (account.get_user_notifications @session_hash["id"], params).to_json
     end
 
     get_user_notifications_by_id = lambda do
@@ -1079,42 +1080,42 @@ class Integrations < Sinatra::Base
         feedback = Feedback.new
         requests = feedback.user_comments_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 
     get_user_comments_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_comments_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_votes_cast_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_cast_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_votes_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_contributions_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve contribution")
-        return (feedback.build_contribution_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_contribution_feedback requests)}.to_json 
     end
 
     get_user_contributions_selected_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_selected_by_skillset_and_roles params
         requests || (return_error "unable to retrieve winner")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 
     get_user_comments_created_by_skillset_and_roles_by_me = lambda do
@@ -1177,7 +1178,7 @@ class Integrations < Sinatra::Base
     get "/users/me/roles/:role_id", &users_roles_get_by_role
     patch "/users/me/roles/:role_id", &users_roles_patch_by_id
 
-    get "/users/me/notifications", &get_user_notifications
+    get "/users/me/notifications", allows: [:page], &get_user_notifications
     patch "/users/me/notifications/:id", &user_notifications_read
     get "/users/me/notifications/:id", &get_user_notifications_by_id
 
@@ -1190,18 +1191,18 @@ class Integrations < Sinatra::Base
     get "/users/:id/requests", &get_exist_request
 
     get "/users/me/aggregate-comments", allows: [:page, :skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-votes", allows: [:skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-contributors", allows: [:skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-comments-received", allows: [:skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-votes-received", allows: [:skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-contributors-received", allows: [:skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-votes", allows: [:page, :skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-contributors", allows: [:page, :skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-comments-received", allows: [:page, :skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-votes-received", allows: [:page, :skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-contributors-received", allows: [:page, :skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
 
     get "/users/:user_id/aggregate-comments", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_created_by_skillset_and_roles
-    get "/users/:user_id/aggregate-votes", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_cast_by_skillset_and_roles
-    get "/users/:user_id/aggregate-contributors", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_created_by_skillset_and_roles
-    get "/users/:user_id/aggregate-comments-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_received_by_skillset_and_roles
-    get "/users/:user_id/aggregate-votes-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_received_by_skillset_and_roles
-    get "/users/:user_id/aggregate-contributors-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_selected_by_skillset_and_roles
+    get "/users/:user_id/aggregate-votes", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_cast_by_skillset_and_roles
+    get "/users/:user_id/aggregate-contributors", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_created_by_skillset_and_roles
+    get "/users/:user_id/aggregate-comments-received", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_received_by_skillset_and_roles
+    get "/users/:user_id/aggregate-votes-received", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_received_by_skillset_and_roles
+    get "/users/:user_id/aggregate-contributors-received", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_selected_by_skillset_and_roles
 
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request

@@ -167,6 +167,7 @@ label{
     background-color: transparent !important;
     margin-left: 25px !important;
     margin-top: 10px !important;
+    margin-bottom:5px !important;
 }
 .highlight-true{
     background-color: #fff;
@@ -588,6 +589,13 @@ button{
     display:block;
     position:relative;
 }
+.sidebar .nav li.nested, .sidebar.hidden-md-up .nav li.nested{
+    color:#fff;
+    background-color: #4C4C4C;
+    padding-top:4px;
+    padding-bottom:4px;
+    line-height: 16px;
+}
 .sidebar.hidden-md-up .nav .legal li{
     padding-left:10px !important;
     padding-right:10px !important;
@@ -739,6 +747,9 @@ button{
 }
 .main .still .full{
     margin-top:94px;
+}
+.main .still.relative{
+    position:relative;
 }
 .main .overview .description{
     font-weight:300;

@@ -1,0 +1,21 @@
+{{#if (eq last 10)}}
+    {{#if page}}
+        {{#if (greater-than count (times page 10))}}
+            {{#link-to route (query-params page=(plus page 1))}}
+                Next 
+            {{/link-to}}
+        {{/if}}
+    {{else}}
+        {{#if (greater-than count 10)}}
+            {{#link-to route (query-params page=2)}}
+                Next
+            {{/link-to}}
+        {{/if}}
+    {{/if}}
+{{/if}}
+
+{{#if (greater-than page 1)}}
+    {{#link-to route (query-params page=(plus page -1))}}
+        Back
+    {{/link-to}}
+{{/if}}
