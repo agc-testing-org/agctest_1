@@ -2,12 +2,8 @@
 /* global require, module */
 var EmberApp = require('ember-cli/lib/broccoli/ember-app');
 
-        // Add options here
-// prepend: 'https://s3-'+process.env.AWS_REGION+'.amazonaws.com/'+process.env.INTEGRATIONS_S3_BUCKET+'/'
-
-
 module.exports = function(defaults) {
-
+   
     var env = EmberApp.env()|| 'development';
     var isProductionLikeBuild = ['production', 'staging'].indexOf(env) > -1;
 
@@ -17,23 +13,23 @@ module.exports = function(defaults) {
     };
 
     switch (env) {
-        case 'development':
-            fingerprintOptions.prepend = 'http://localhost:3000/';
-            break;
         case 'staging':
             fingerprintOptions.prepend = 'TODO';
             break;
         case 'production':
             fingerprintOptions.prepend = 'https://s3-'+process.env.AWS_REGION+'.amazonaws.com/'+process.env.INTEGRATIONS_S3_BUCKET+'/';
             break;
-    }
+    } 
 
     var app = new EmberApp(defaults, {
-        fingerprint: fingerprintOptions,
+
+        fingerprint: fingerprintOptions || !isProductionLikeBuild,
+        /*
         emberCLIDeploy: {
             runOnPostBuild: (env === 'development') ? 'development-postbuild' : false,
             shouldActivate: true
         },
+        */
         sourcemaps: {
             enabled: !isProductionLikeBuild,
         },
@@ -42,6 +38,7 @@ module.exports = function(defaults) {
 
         tests: process.env.EMBER_CLI_TEST_COMMAND || !isProductionLikeBuild,
         hinting: process.env.EMBER_CLI_TEST_COMMAND || !isProductionLikeBuild
+
     });
 
     // Use `app.import` to add additional libraries to the generated
