@@ -33,7 +33,7 @@
 
             {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-users"></i>
+                    <i class="fa fa-fw fa-2x fa-handshake-o"></i>
                 </div>
                 Contacts
             {{/link-to}}
@@ -45,14 +45,20 @@
                 Contact Requests
             {{/link-to}}
 
-            {{#each teams as |team|}}
-            {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <li {{action "displayTeams"}} class="cursor-pointer nav-item text-center text-capitalize">
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-users"></i>
                 </div>
-                Team {{team.name}}
+                {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
+            </li>
+
+            {{#if showTeams}}
+            {{#each teams as |team|}}
+            {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-left text-capitalize nested" }}
+                {{team.name}}
             {{/link-to}}
             {{/each}}
+            {{/if}}
 
             {{#if sessionAccount.account.owner}}
                 {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}

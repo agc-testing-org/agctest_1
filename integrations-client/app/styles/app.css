@@ -589,6 +589,13 @@ button{
     display:block;
     position:relative;
 }
+.sidebar .nav li.nested, .sidebar.hidden-md-up .nav li.nested{
+    color:#fff;
+    background-color: #4C4C4C;
+    padding-top:4px;
+    padding-bottom:4px;
+    line-height: 16px;
+}
 .sidebar.hidden-md-up .nav .legal li{
     padding-left:10px !important;
     padding-right:10px !important;
