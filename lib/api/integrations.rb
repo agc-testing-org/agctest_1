@@ -69,11 +69,6 @@ set :database, {
     database: "integrations_#{ENV['RACK_ENV']}"
 }  
 
-Aws.config.update({
-    region: ENV["AWS_REGION"],
-    credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
-})
-
 Sidekiq.configure_server do |config|
     config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
 end
@@ -85,6 +80,13 @@ end
 class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
+
+    if settings.production?
+        Aws.config.update({
+            region: ENV["AWS_REGION"],
+            credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
+        })
+    end
 
     redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
     message = "you have hit our rate limit"
@@ -1257,9 +1259,9 @@ class Integrations < Sinatra::Base
     # Ember
     get "*" do
         content_type 'text/html'
-        client = Aws::S3::Client.new
-        index_version = ("index.html:#{params[:s3_version]}" if !params[:s3_version].nil?) || "index.html"
         if ENV["RACK_ENV"] == "production"
+            client = Aws::S3::Client.new
+            index_version = ("index.html:#{params[:s3_version]}" if !params[:s3_version].nil?) || "index.html"
             return client.get_object({
                 bucket: ENV["INTEGRATIONS_S3_BUCKET"], 
                 key: index_version

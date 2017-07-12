@@ -20,26 +20,32 @@ module.exports = function(defaults) {
             fingerprintOptions.prepend = 'https://s3-'+process.env.AWS_REGION+'.amazonaws.com/'+process.env.INTEGRATIONS_S3_BUCKET+'/';
             break;
     } 
-
+    
     var app = new EmberApp(defaults, {
 
-        fingerprint: fingerprintOptions || !isProductionLikeBuild,
-        /*
-        emberCLIDeploy: {
-            runOnPostBuild: (env === 'development') ? 'development-postbuild' : false,
-            shouldActivate: true
-        },
-        */
-        sourcemaps: {
-            enabled: !isProductionLikeBuild,
-        },
-        minifyCSS: { enabled: isProductionLikeBuild },
-        minifyJS: { enabled: isProductionLikeBuild },
+    }); 
 
-        tests: process.env.EMBER_CLI_TEST_COMMAND || !isProductionLikeBuild,
-        hinting: process.env.EMBER_CLI_TEST_COMMAND || !isProductionLikeBuild
+    if(env === "production"){
+        app = new EmberApp(defaults, {
 
-    });
+            fingerprint: fingerprintOptions || !isProductionLikeBuild,
+
+            emberCLIDeploy: {
+                runOnPostBuild: (env === 'development') ? 'development-postbuild' : false,
+                shouldActivate: true
+            },
+
+            sourcemaps: {
+                enabled: !isProductionLikeBuild,
+            },
+            minifyCSS: { enabled: isProductionLikeBuild },
+            minifyJS: { enabled: isProductionLikeBuild },
+
+            tests: process.env.EMBER_CLI_TEST_COMMAND || !isProductionLikeBuild,
+            hinting: process.env.EMBER_CLI_TEST_COMMAND || !isProductionLikeBuild
+
+        });
+    }
 
     // Use `app.import` to add additional libraries to the generated
     // output files.
