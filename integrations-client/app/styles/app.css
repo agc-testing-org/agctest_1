@@ -293,12 +293,12 @@ button{
     position:relative;
     width:100%;
     margin-bottom:5px;
+    font-weight:300;
 }
 .list-group-item .line.quotation{
     color: #999;
     padding:10px;
 }
-
 .input-group-addon{
     background-color:#fff;
     border:0px solid #fff !important;
