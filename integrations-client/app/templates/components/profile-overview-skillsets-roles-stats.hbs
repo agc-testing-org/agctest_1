@@ -22,8 +22,8 @@
 
 {{#if active}}
 {{#if (eq type "role_id")}}
-    {{#link-to (query-params role_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">reset role</span>{{/link-to}} 
+    {{#link-to (query-params role_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">all roles</span>{{/link-to}} 
 {{else if (eq type "skillset_id")}}
-    {{#link-to (query-params skillset_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">reset skillset</span>{{/link-to}} 
+    {{#link-to (query-params skillset_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">all skillsets</span>{{/link-to}} 
 {{/if}}
 {{/if}}

@@ -171,6 +171,7 @@ class Issue
                         if c.user_id == user_id
                             response[i][:contributors][k][:commit] = c.commit
                             response[i][:contributors][k][:commit_success] =  c.commit_success
+                            response[i][:contributors][k][:commit_remote] =  c.commit_remote
                             response[i][:contributors][k][:repo] = c.repo
                             response[i][:active_contribution_id] = c.id
                         end

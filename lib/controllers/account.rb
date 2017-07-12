@@ -1,7 +1,7 @@
 class Account
 
     def initialize
-
+        @per_page = 10
     end
 
     def linkedin_client access_token
@@ -489,10 +489,14 @@ class Account
         end
     end
 
-    def get_user_notifications user_id
+    def get_user_notifications user_id, params
+        page = (params["page"].to_i if params["page"].to_i > 0) || 1
+        params_helper = ParamsHelper.new
+        params = params_helper.drop_key params, "page"
         begin     
             response = []
-            SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').each_with_index do |notification,i|
+            notifications = SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            notifications.each_with_index do |notification,i|
                 params = {:id => notification.user_id}
                 user = get_users params
                 if user
@@ -510,7 +514,7 @@ class Account
 
             end
 
-            return response
+            return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
 
         rescue => e
             puts e

@@ -54,8 +54,7 @@ class Repo
         begin
             if (clear_clone sprint_state_id, contributor_id)
                 r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
-                local_hash = log_head r
-
+                original_hash = log_head r
                 if session
                     account = Account.new
                     github_secret = account.unlock_github_token session, github_token
@@ -79,8 +78,9 @@ class Repo
                     end
                     push_remote r, sprint_state_id, branch_to_push 
                     remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
-                    clear_clone sprint_state_id, contributor_id
-                    return {:success => (remote_hash == local_hash), :sha => remote_hash}
+                    local_hash = log_head r
+                    cleared = clear_clone sprint_state_id, contributor_id
+                    return {:success => (cleared && (remote_hash == local_hash)), :sha => remote_hash, :sha_remote => original_hash }
                 else
                     return false
                 end

@@ -14,37 +14,33 @@
                     {{profile-overview-skillsets-roles-instruction type="skillsets" text="to be notified of relevant events" items=skillsets}}
                     {{profile-overview-skillsets-roles-instruction type="roles" text="to be notified of relevant contribution opportunities" items=roles}}
                 </div>
-                <h4 class="about section text-capitalize">Your Skillsets</h4>
-                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
                 <div class="about section text-capitalize">Your Roles</div>
                 {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
-            {{/if}}
-            <h4 class="about section text-capitalize">Performance by Role and Skillset</h4>
-            {{#if me}}
-                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
-                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
+                <h4 class="about section text-capitalize">Your Skillsets</h4>
+                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
             {{else}}
-                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
-                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
+                {{profile-overview-skillsets-roles-list items=roles type="role" class="skillsets"}}
+                {{profile-overview-skillsets-roles-list items=skillsets type="skillset" class="skillsets"}}
             {{/if}}
+
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=comments.length title="Comments Posted"}}
+                    {{sprint-state-overview-score total=comments.meta.count title="Comments Posted"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=votes.length title="Votes Cast"}}
+                    {{sprint-state-overview-score total=votes.meta.count title="Votes Cast"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=contributors.length title="Solutions"}}
+                    {{sprint-state-overview-score total=contributors.meta.count title="Solutions Proposed"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=comments_received.length title="Comments Received"}}
+                    {{sprint-state-overview-score total=comments_received.meta.count title="Comments Received"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=votes_received.length title="Votes Received"}}
+                    {{sprint-state-overview-score total=votes_received.meta.count title="Votes Received"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=contributors_received.length title="Winning Solutions"}}
+                    {{sprint-state-overview-score total=contributors_received.meta.count title="Winning Solutions"}}
                 </div>
             </div>
         </div>

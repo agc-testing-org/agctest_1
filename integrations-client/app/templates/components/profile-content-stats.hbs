@@ -1,15 +1,15 @@
 <div class="full">
 
-        {{profile-overview-feedback items=comments metric="comments posted"}}
+        {{profile-overview-feedback user=user me=me params=params items=comments metric="comments posted" route="comments"}}
 
-        {{profile-overview-feedback items=votes metric="votes cast"}}
+        {{profile-overview-feedback user=user me=me params=params items=votes metric="votes cast" route="votes"}}
 
-        {{profile-overview-feedback items=contributors metric="solutions proposed"}}
+        {{profile-overview-feedback user=user me=me params=params items=contributors metric="solutions proposed" route="contributions"}}
 
-        {{profile-overview-feedback items=comments_received metric="comments received"}}
+        {{profile-overview-feedback user=user me=me params=params items=comments_received metric="comments received" route="comments-received"}}
 
-        {{profile-overview-feedback items=votes_received metric="votes received"}}
+        {{profile-overview-feedback user=user me=me params=params items=votes_received metric="votes received" route="votes-received"}}
 
-        {{profile-overview-feedback items=contributors_received metric="winning solutions"}}
+        {{profile-overview-feedback user=user me=me params=params items=contributors_received metric="winning solutions" route="contributions-selected"}}
 
 </div>
