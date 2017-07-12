@@ -441,7 +441,7 @@ class Account
 
     def get_user_connections query
         begin    
-            return UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").as_json
+            return UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil
@@ -473,7 +473,7 @@ class Account
 
     def get_user_connections_requested user_id # people that request are automatically added as contacts
         begin
-            return UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").as_json
+            return UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil
@@ -482,7 +482,7 @@ class Account
 
     def get_user_connections_accepted user_id
         begin      
-            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").as_json
+            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil

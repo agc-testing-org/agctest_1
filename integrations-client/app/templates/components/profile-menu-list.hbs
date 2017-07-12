@@ -36,13 +36,6 @@
                 Contacts
             {{/link-to}}
 
-            {{#link-to "me.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-user-plus"></i>
-                </div>
-                Contact Requests
-            {{/link-to}}
-
             {{#each teams as |team|}}
             {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
