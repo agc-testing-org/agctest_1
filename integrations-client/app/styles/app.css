@@ -149,8 +149,6 @@ label{
     padding: 10px;
     margin: 4px;
 }
-
-
 .dropdown-menu{
     width:100%;
 }
@@ -698,8 +696,7 @@ button{
     z-index:1;
 }
 .main .about{
-    padding:5px;
-    padding-top:0px;
+    padding-bottom:5px;
     font-weight:300;
     margin-bottom:10px;
     color: #a5a5a5;

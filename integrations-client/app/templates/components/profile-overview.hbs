@@ -9,14 +9,13 @@
             <h3 class="description">{{user-profile-descriptor user_profile=user}}</h3>
             <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
             {{#if me}}
-                <div class="text-left">
-                    {{profile-overview-linkedin complete=user.title refresh="refresh"}}
-                    {{profile-overview-skillsets-roles-instruction type="skillsets" text="to be notified of relevant events" items=skillsets}}
-                    {{profile-overview-skillsets-roles-instruction type="roles" text="to be notified of relevant contribution opportunities" items=roles}}
-                </div>
-                <div class="about section text-capitalize">Your Roles</div>
+
+                {{profile-overview-linkedin complete=user.title refresh="refresh"}}
+                
+                {{profile-overview-skillsets-roles-instruction type="roles" text="to subscribe to relevant contribution opportunities" items=roles}}
                 {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
-                <h4 class="about section text-capitalize">Your Skillsets</h4>
+              
+                {{profile-overview-skillsets-roles-instruction type="skillsets" text="to subscribe to specific interests" items=skillsets}}
                 {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
             {{else}}
                 {{profile-overview-skillsets-roles-list items=roles type="role" class="skillsets"}}
@@ -25,10 +24,7 @@
 
             <div class="row">
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=comments.meta.count title="Comments Posted"}}
-                </div>
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=votes.meta.count title="Votes Cast"}}
+                    {{sprint-state-overview-score total=contributors_received.meta.count title="Winning Solutions"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
                     {{sprint-state-overview-score total=contributors.meta.count title="Solutions Proposed"}}
@@ -37,10 +33,13 @@
                     {{sprint-state-overview-score total=comments_received.meta.count title="Comments Received"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
+                    {{sprint-state-overview-score total=comments.meta.count title="Comments Posted"}}
+                </div>
+                <div class="col-md-4 col-sm-4 col-4">
                     {{sprint-state-overview-score total=votes_received.meta.count title="Votes Received"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=contributors_received.meta.count title="Winning Solutions"}}
+                    {{sprint-state-overview-score total=votes.meta.count title="Votes Cast"}}
                 </div>
             </div>
         </div>
