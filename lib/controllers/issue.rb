@@ -86,9 +86,7 @@ class Issue
     def log_event params 
         begin
             sprint_event = SprintTimeline.create(params)
-            if ENV['RACK_ENV'] != "test"
-                UserNotificationWorker.perform_async sprint_event.id
-            end
+            UserNotificationWorker.perform_async sprint_event.id
             return sprint_event.id
         rescue => e
             puts e
@@ -148,12 +146,13 @@ class Issue
                 response[i][:active_contribution_id] = nil
                 response[i][:contributors] = []
                 ss.contributors.each_with_index do |c,k|
+                    contributor_length = response[i][:contributors].length
                     if c.commit || ((sprint_state_results.length - 1) == i) # don't show empty results unless this is the current sprint_state
                         comments = c.comments.as_json
                         c.comments.each_with_index do |com,x|
                             comments[x][:user_profile] = account.get_profile com.user
                         end
-                        response[i][:contributors][k] = {
+                        response[i][:contributors][contributor_length] = {
                             :id => c.id,
                             :created_at => c.created_at,
                             :updated_at => c.updated_at,
@@ -161,10 +160,10 @@ class Issue
                             :votes => c.votes.as_json
                         }
                         if c.user_id == user_id
-                            response[i][:contributors][k][:commit] = c.commit
-                            response[i][:contributors][k][:commit_success] =  c.commit_success
-                            response[i][:contributors][k][:commit_remote] =  c.commit_remote
-                            response[i][:contributors][k][:repo] = c.repo
+                            response[i][:contributors][contributor_length][:commit] = c.commit
+                            response[i][:contributors][contributor_length][:commit_success] =  c.commit_success
+                            response[i][:contributors][contributor_length][:commit_remote] =  c.commit_remote
+                            response[i][:contributors][contributor_length][:repo] = c.repo
                             response[i][:active_contribution_id] = c.id
                         end
                     end

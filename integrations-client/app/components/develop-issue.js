@@ -11,7 +11,6 @@ export default Ember.Component.extend({
         join(project_id, sprint_states){
             var _this = this;
             var store = this.get('store');
-            store.adapterFor('contributor').set('namespace', 'projects/' + project_id );
 
             var sprint_state_array = sprint_states.toArray();
 

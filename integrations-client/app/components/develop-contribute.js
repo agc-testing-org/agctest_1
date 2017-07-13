@@ -9,7 +9,6 @@ export default Ember.Component.extend({
             var _this = this;
             var store = this.get('store');
 
-            store.adapterFor('contributor').set('namespace', 'projects/' + project_id );
             var contributorUpdate = store.findRecord('contributor',contributor_id).then(function(contributor) {
                 contributor.save().then(function() {
                     _this.sendAction("refresh");

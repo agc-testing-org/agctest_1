@@ -8,6 +8,7 @@ require 'rspec/rails'
 require 'redis'
 require 'webmock/rspec'
 require 'ostruct'
+require 'sidekiq/testing'
 
 require File.join(File.dirname(__FILE__), '..', 'lib/api/integrations.rb')
 
@@ -15,6 +16,8 @@ set :environment, :test
 set :run, false
 set :raise_errors, true
 set :logging, true
+
+Sidekiq::Testing.inline!
 
 def app
     Integrations 
