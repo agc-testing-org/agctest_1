@@ -7,6 +7,15 @@ describe "/contributors" do
 
     before(:all) do
         @CREATE_TOKENS=true
+        destroy_repo
+    end
+
+    before(:each) do
+        prepare_repo
+    end
+
+    after(:each) do
+        destroy_repo
     end
 
     shared_examples_for "sprint_timelines_for_feedback_actions" do
@@ -18,6 +27,171 @@ describe "/contributors" do
         end
         it "should record next_sprint_state_id" do
             expect(@sprint_timeline["next_sprint_state_id"]).to eq(sprint_states(:sprint_1_state_2).id)
+        end
+    end
+
+    shared_examples_for "contributors_post" do
+        context "contributor" do
+            it "should include repo name" do
+                expect(@sql["repo"]).to_not be nil
+            end
+            it "should include user_id" do
+                expect(@sql["user_id"]).to eq(users(:adam_confirmed).id)
+            end
+            it "should include sprint_state_id" do
+                expect(@sql["sprint_state_id"]).to eq(@sprint_state_id)
+            end
+            it "should set prepared = 1" do
+                expect(@sql["prepared"]).to eq 1
+            end
+            it "should set preparing = 0" do
+                expect(@sql["preparing"]).to eq 0
+            end
+        end
+        it "should return contributor id" do
+            expect(@res["id"]).to eq(@sql["id"])
+        end
+        context "repo" do
+            before(:each) do
+                @git = %x(cd "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; git branch)
+            end
+            it "should create master branch" do
+                expect(@git).to include("master")
+            end
+            it "should create sprint_state branch" do
+                expect(@git).to include(@sprint_state_id.to_s)
+            end
+        end
+    end
+
+    describe "POST /contributors" do
+        fixtures :projects, :sprints, :sprint_states
+        before(:each) do
+            Octokit::Client.any_instance.stub(:login) { @username }
+            Octokit::Client.any_instance.stub(:create_repository) { %x( mkdir "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; cd "test/#{@username}/#{@mysql_client.query("select * from contributors").first["repo"]}"; git init --bare)}
+
+            body = {
+                :name=>"1",
+                :commit=>{
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
+            }
+
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:branch => @body)
+        end
+        context "valid sprint_state_id" do
+            fixtures :sprint_states, :states, :projects
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1_state_1).id
+                @project = projects(:demo).id
+                post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
+            end
+            it_behaves_like "contributors_post"
+        end
+        context "same sprint, different state" do
+            fixtures :sprint_states, :states, :projects, :contributors
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1_state_2).id
+                @project = projects(:demo).id
+                %x( mkdir "test/#{@username}/#{@mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}").first["repo"]}"; cd "test/#{@username}/#{@mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}").first["repo"]}"; git init --bare)
+                post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors where sprint_state_id = #{@sprint_state_id} ORDER BY ID DESC").first
+            end
+            it "should use the same repo" do
+                expect(@sql["repo"]).to eq(contributors(:adam_confirmed_1).repo)
+            end
+            it_behaves_like "contributors_post"
+        end
+        context "invalid sprint_state_id" do
+            fixtures :projects
+            before(:each) do
+                @project = projects(:demo).id
+                @sprint_state_id = 99
+                post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end
+            it_behaves_like "not_found"
+        end
+        context "sprint_state_id with contributor = false" do
+            fixtures :sprint_states, :states,  :projects
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1_no_contributors).id
+                @project = projects(:demo).id
+                post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it_behaves_like "error", "unable to join this phase"
+        end
+    end
+
+    describe "GET /contributors/:contributor_id" do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            @project = projects(:demo).id
+        end
+        context "valid contributor" do
+            before(:each) do
+                get "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
+                @res = JSON.parse(last_response.body)
+            end
+            it "should return contributor id" do
+                expect(@res["id"]).to eq(@sql["id"])
+            end
+        end
+    end
+
+    describe "PATCH /contributors/:contributor_id" do
+        fixtures :projects, :sprints, :sprint_states, :contributors
+        before(:each) do
+            Octokit::Client.any_instance.stub(:login) { @username }
+            Octokit::Client.any_instance.stub(:create_repository) { {} }
+
+            body = {
+                :name=>"1",
+                :commit=>{
+                    :sha=>contributors(:adam_confirmed_1).commit
+                }
+            }
+
+            @body = JSON.parse(body.to_json, object_class: OpenStruct)
+            Octokit::Client.any_instance.stub(:branch => @body)
+        end
+        context "valid contributor" do
+            fixtures :sprint_states, :projects, :contributors
+            before(:each) do
+                @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+                @project = projects(:demo).id
+
+                %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
+                patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
+            end
+            context "contributor" do
+                it "should include commit" do
+                    expect(@sql["commit"]).to eq(contributors(:adam_confirmed_1).commit)
+                end
+                it "should include commit_success" do
+                    expect(@sql["commit_success"]).to eq(1)
+                end
+            end
+            it "should return contributor id" do
+                expect(@res["id"]).to eq(@sql["id"])
+            end
+        end
+        context "invalid contributor" do
+            fixtures :projects
+            before(:each) do
+                @project = projects(:demo).id
+                @sprint_state_id = 99
+                patch "/contributors/33", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it_behaves_like "not_found"
         end
     end
 
@@ -262,7 +436,7 @@ describe "/contributors" do
                 end
                 it_behaves_like "error", "a contribution has not been selected"
             end
-            
+
         end
     end
 end

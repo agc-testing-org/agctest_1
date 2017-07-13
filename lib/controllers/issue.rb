@@ -86,9 +86,7 @@ class Issue
     def log_event params 
         begin
             sprint_event = SprintTimeline.create(params)
-            if ENV['RACK_ENV'] != "test"
-                UserNotificationWorker.perform_async sprint_event.id
-            end
+            UserNotificationWorker.perform_async sprint_event.id
             return sprint_event.id
         rescue => e
             puts e
