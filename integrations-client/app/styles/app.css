@@ -19,9 +19,15 @@ body {
     color: #4C4C4C;
     /*    -webkit-font-smoothing: subpixel-antialiased; */
 }
+
 .body-dark{
-   background-color: #111;
+    background: #28B6C3; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left top, #ededed, #fff); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, #ededed, #fff); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, #ededed, #fff); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, #ededed, #fff); /* Standard syntax */
 }
+
 .rounded{
     -webkit-border-radius: 3px !important;
     -moz-border-radius: 3px !important;
@@ -116,17 +122,17 @@ label{
 }
 .btn-group label{
     margin-left:4px !important;
-    background-color: #3a3a3a;
+    background-color: #ccc;
     color: #fff !important;
     font-weight:400 !important;
 }
 .btn-group label:hover{
-    background-color: #28B6C3;
-    color: #fff !important;
+    background-color: #ededed;
+    color: #28B6C3 !important;
 }
 .btn-group label.active{
-    background-color: #28B6C3;
-    color: #fff !important;
+    background-color: #ededed;
+    color: #28B6C3 !important;
 }
 
 .badge, .btn-group label{
@@ -308,19 +314,19 @@ button{
 .modal{
     position:relative;
 }
+.modal-backdrop{
+    background-color: transparent;
+}
 .modal.modal-fixed{
     position: fixed !important;
 }
 .modal-content{
-    background-color: #333;
+    background-color: #fff;
     border:0px;
-    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+    border: 1px solid #edede;;
 }
 .modal.in {
     display:block;
-}
-.modal-content{
-
 }
 .modal-header{
     border:0px;
@@ -332,6 +338,7 @@ button{
 }
 .modal-header .title{
     font-size:22px;
+    color: #4C4C4C;
     font-weight:400;
 }
 .modal-header.subtitle{
@@ -342,9 +349,9 @@ button{
     padding-top:10px;
 }
 .modal-foot{
-    padding: 10px;
+    padding: 0px;
     border: 0px;
-    background-color: #3a3a3a;
+    background-color: #ededed;
 }
 .modal-foot a{
     text-decoration:none;
@@ -358,7 +365,7 @@ button{
     left:0px;
     height:100%;
     width:100%;
-    background: url("italy.jpg")no-repeat center center fixed;
+    /*background: url("italy.jpg")no-repeat center center fixed;*/
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -418,12 +425,11 @@ button{
 
 }
 .register-form input{
-    background-color: #3a3a3a;
-    color: #fff !important;
+    color: #28B6C3 !important;
 }
 .register-form button{
     margin-top:10px;
-    background-color: orange;
+ 
     font-size:20px;
 }
 .register-form .btn-group label{
@@ -432,10 +438,10 @@ button{
 }
 .register-form .tos{
     margin-top:10px; 
-    color: #fff;
 }
 .register-form .form-control,.register-form .form-control[disabled]{
-    background-color: #3a3a3a;
+    background-color: #fff;
+    border: 1px solid #ededed !important;
 }
 
 /* CUSTOMIZE THE CAROUSEL
@@ -618,7 +624,7 @@ button{
 }
 .legal{
     font-size:12px;
-    color:#666;
+    color:#ccc;
 }
 .menu.legal li{
     padding:3px !important;
