@@ -215,6 +215,21 @@ class Account
         end
     end
 
+    def get_profile user
+        if user.user_profile && user.user_profile.user_position
+            return {
+                :id => user.id,
+                :location => user.user_profile.location_name,
+                :title => user.user_profile.user_position.title,
+                :industry => user.user_profile.user_position.industry,
+                :size => user.user_profile.user_position.size,
+                :created_at => user.user_profile.created_at
+            }
+        else
+            return nil
+        end
+    end
+
     def get_users params # can be used if we add search functionality later
         begin
             return User.joins("LEFT JOIN user_profiles ON user_profiles.user_id = users.id LEFT JOIN user_positions ON user_positions.user_profile_id = user_profiles.id").where(params).select(:id, :created_at, "user_profiles.location_name as location", "user_positions.title", "user_positions.industry", "user_positions.size").as_json
@@ -496,15 +511,9 @@ class Account
         begin     
             response = []
             notifications = SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
-            notifications.each_with_index do |notification,i|
-                params = {:id => notification.user_id}
-                user = get_users params
-                if user
-                    user = user[0]
-                end
-
+            notifications.each_with_index do |notification,i| 
                 response[i] = notification.as_json
-                response[i][:user_profile] = user
+                response[i][:user_profile] = get_profile notification.user
                 response[i][:sprint] = notification.sprint
                 response[i][:project] = notification.project
                 response[i][:sprint_state] = notification.sprint_state

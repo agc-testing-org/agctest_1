@@ -361,7 +361,7 @@ class Integrations < Sinatra::Base
         pulled = account.pull_linkedin_profile linkedin
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-        (profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
+        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
         response = (session_tokens user, @session_hash["owner"], false) 
         response[:success] = !profile_id.nil?
         status 200
@@ -1024,7 +1024,9 @@ class Integrations < Sinatra::Base
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
         invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
-        (invitation && (account.mail_invite invitation)) || (return_error "invite error")
+        invitation || (return_error "invite error")
+        invitation.id || (return_error "this email address has an existing invitation")
+        (account.mail_invite invitation) || (return_error "invite error")
         invitation = invitation.as_json
         invitation.delete("token")
         status 201
