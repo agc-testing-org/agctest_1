@@ -22,8 +22,6 @@ export default Ember.Route.extend({
         });
     },
     renderTemplate(controller,model) {
-        console.log(controller);
-        console.log(model);
         this.render('me', {
             into: 'application',
             controller: controller, 

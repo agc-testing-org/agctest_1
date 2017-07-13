@@ -414,11 +414,11 @@ describe "/users" do
         end
     end
 
-    describe "GET /me/requests/:id" do
+    describe "GET /me/connections/:id" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
-                get "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                get "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
                 @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.user_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
@@ -428,18 +428,18 @@ describe "/users" do
         end
         context "not signed in" do
             before(:each) do
-                get "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
+                get "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
             end
             it_behaves_like "unauthorized"
         end
     end
 
-    describe "PATCH /me/requests/:id" do
+    describe "PATCH /me/connections/:id" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
                 @confirmed = 2
-                patch "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                patch "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
                 @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
@@ -451,7 +451,7 @@ describe "/users" do
         end
         context "not signed in" do
             before(:each) do
-                patch "/users/me/requests/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
+                patch "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}"
             end
             it_behaves_like "unauthorized"
         end
