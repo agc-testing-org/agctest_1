@@ -57,6 +57,8 @@ require_relative '../models/role_state.rb'
 
 # Workers
 require_relative '../workers/user_notification_worker.rb'
+require_relative '../workers/contributor_join_worker.rb'
+require_relative '../workers/contributor_sync_worker.rb'
 
 # Throttling
 require_relative 'rack'
@@ -870,18 +872,10 @@ class Integrations < Sinatra::Base
             end
         end
 
-        sha = (issue.get_sprint_state sprint_state.id).sha
-        (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, sprint_state.id, false) || (return_error "unable to update sprint phase branch")
-        (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, "master", false) || (return_error "unable to update master branch")
-
-        (sprint_state.state.name == "requirements design" && !contributor) || (halt 201, {:id => created}.to_json) # only need to create doc if first time contributing
-        (github.create_contents("#{username}/#{name}",
-                                "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
-                                    "adding placeholder for requirements",
-                                    "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
-                                    :branch => sprint_state.id.to_s)) || (return_error "unable to create requirements document")
+        ContributorJoinWorker.perform_async @session, @session_hash["github_token"], created, username
+        
         status 201
-        return {:id => created}.to_json
+        return {:id => created, :preparing => 1}.to_json
     end
 
     contributors_patch_by_id = lambda do
@@ -891,17 +885,10 @@ class Integrations < Sinatra::Base
         query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
         contributor = repo.get_contributor query
         contributor || return_not_found
-        contributor.save #update timestamp
-        issue = Issue.new
-        query = {:id => params[:project_id].to_i}
-        project = (issue.get_projects query)[0]
-        project || (return_error "unable to update contribution")
-        fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
-        fetched || (return_error "unable to update contribution")
-        contributor.commit = fetched[:sha]
-        contributor.commit_remote = fetched[:sha_remote]
-        contributor.commit_success = fetched[:success]
+        contributor.preparing = true
+        contributor.prepared = 0
         contributor.save
+        ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
         status 200
         return contributor.to_json 
     end
@@ -1229,9 +1216,9 @@ class Integrations < Sinatra::Base
     get "/projects/:id", allows: [:id], needs: [:id], &projects_get_by_id
 
     #    post "/projects/:project_id/refresh", &refresh_post #TODO - later
-    post "/projects/:project_id/contributors", &contributors_post
-    patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
-    get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
+    post "/contributors", &contributors_post
+    patch "/contributors/:contributor_id", &contributors_patch_by_id
+    get "/contributors/:contributor_id", &contributors_get_by_id
 
     get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
     get "/sprints/:id", allows: [:id], needs: [:id], &sprints_get_by_id

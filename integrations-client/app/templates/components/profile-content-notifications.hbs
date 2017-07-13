@@ -28,7 +28,7 @@
 
                     {{#if (eq notification.diff "transition")}}
                         <p class="line">
-                            {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} transitioned to the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.sprint_state.state_id.name}} phase{{/link-to}}.  {{notification.sprint_state.state_id.instruction}}
+                            {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} transitioned to the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}}.  {{notification.state_id.instruction}}
                         </p>
                     {{/if}}
 

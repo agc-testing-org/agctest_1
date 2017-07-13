@@ -38,12 +38,14 @@
                 Contacts
             {{/link-to}}
 
-            <li {{action "displayTeams"}} class="cursor-pointer nav-item text-center text-capitalize">
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-users"></i>
-                </div>
-                {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
-            </li>
+            {{#if teams}}
+                <li {{action "displayTeams"}} class="cursor-pointer nav-item text-center text-capitalize">
+                    <div class="icon hidden-sm-down">
+                        <i class="fa fa-fw fa-2x fa-users"></i>
+                    </div>
+                    {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
+                </li>
+            {{/if}}
 
             {{#if showTeams}}
             {{#each teams as |team|}}
@@ -53,7 +55,7 @@
             {{/each}}
             {{/if}}
 
-            {{#if sessionAccount.account.owner}}
+            {{#if (or sessionAccount.account.admin sessionAccount.account.owner)}}
                 {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                     <div class="icon hidden-sm-down">
                         <i class="fa fa-fw fa-2x fa-user-plus"></i>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170628152419) do
+ActiveRecord::Schema.define(version: 20170713162940) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -33,6 +33,8 @@ ActiveRecord::Schema.define(version: 20170628152419) do
     t.string "commit"
     t.string "commit_remote"
     t.boolean "commit_success"
+    t.boolean "prepared"
+    t.boolean "preparing"
     t.index ["sprint_state_id"], name: "index_contributors_on_sprint_state_id"
     t.index ["user_id"], name: "index_contributors_on_user_id"
   end
