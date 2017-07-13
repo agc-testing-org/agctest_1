@@ -316,6 +316,9 @@ button{
 }
 .modal-backdrop{
     background-color: transparent;
+    visibility:hidden;
+    width:0px;
+    height:0px;
 }
 .modal.modal-fixed{
     position: fixed !important;
@@ -323,7 +326,7 @@ button{
 .modal-content{
     background-color: #fff;
     border:0px;
-    border: 1px solid #edede;;
+    border: 1px solid #ededed;
 }
 .modal.in {
     display:block;
