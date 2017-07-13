@@ -9,12 +9,12 @@ export default Ember.Component.extend({
 
             var store = this.get('store');
 
-            store.adapterFor('requests').set('namespace', 'users/me');
+            store.adapterFor('connections').set('namespace', 'users/me');
 
-            var requestConfirme = store.findRecord('request', id).then(function (request) {
-                request.set('confirmed', confirmed);
-                request.save().then(function () {
-                    store.adapterFor('requests').set('namespace', '');
+            var requestConfirme = store.findRecord('connection', id).then(function (connection) {
+                connection.set('confirmed', confirmed);
+                connection.save().then(function () {
+                    store.adapterFor('connections').set('namespace', '');
                 });
             });
         }

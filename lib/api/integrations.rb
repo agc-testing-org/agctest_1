@@ -1188,8 +1188,8 @@ class Integrations < Sinatra::Base
 
     get "/users/me/connections", &connections_get 
     get "/users/me/requests", &connections_requests_get
-    get "/users/me/requests/:id", &connections_requests_get_by_id
-    patch "/users/me/requests/:id", &user_connections_patch
+    get "/users/me/connections/:id", &connections_requests_get_by_id
+    patch "/users/me/connections/:id", &user_connections_patch
 
     post "/users/:id/requests", &connections_request_post
     get "/users/:id/requests", &get_exist_request

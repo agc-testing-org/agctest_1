@@ -11,7 +11,8 @@ export default Ember.Route.extend({
         this.store.adapterFor('request').set('namespace', '');
         return Ember.RSVP.hash({
             connections: connections,
-            requests: requests
+            requests: requests,
+            user: this.modelFor("me").user
         });
     }
 });

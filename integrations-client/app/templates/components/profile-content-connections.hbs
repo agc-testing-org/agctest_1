@@ -1,4 +1,4 @@
-{{#if connections requests}}
+{{#if connections user}}
 <div class="full">
 
     <h4 class="about section">My Contacts and Contact Requests</h4>
@@ -15,22 +15,22 @@
                 {{/if}}
             </h4>
             <p class="line"><span class="text-muted">E:</span> {{connection.email}}</p>
-            <small class="line text-muted">{{moment-from-now connection.updated_at}}</small>
+            <small class="line text-muted">{{moment-from-now connection.created_at}}</small>
         </div>
-        {{/each}}
-        {{#each requests as |request|}}
-        {{#unless (eq request.id 0)}}
+        {{#unless (eq connection.user_id user.id)}}
+        {{#unless (eq connection.id 0)}}
         <div class="list-group-item rounded">
             <p class="line">
-                {{#if (eq request.read false)}}
-                {{connection-read request=request class="d-inline"}}
-                <span class="text-capitalize">{{#link-to "profile" request.user_id}}{{request.first_name}}{{/link-to}}</span>
+                {{#if (eq connection.read false)}}
+                {{connection-read request=connection class="d-inline"}}
+                <span class="text-capitalize">{{#link-to "profile" connection.user_id}}{{connection.first_name}}{{/link-to}}</span>
                 is interested in contacting you. Would you like to share your contact information?
                 {{else}}
-                {{connection-confirm request=request class="d-inline"}}
+                {{connection-confirm request=connection class="d-inline"}}
                 {{/if}}
             </p>
         </div>
+        {{/unless}}
         {{/unless}}
         {{/each}}
     </div>
@@ -46,6 +46,5 @@
     </div>
 </div>
 {{/if}}
-
     
 
