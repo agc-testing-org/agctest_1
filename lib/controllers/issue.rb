@@ -140,6 +140,7 @@ class Issue
 
     def get_sprint_states query, user_id
         begin
+            account = Account.new
             response = Array.new
             sprint_state_results = SprintState.joins(:sprint).where(query)
             sprint_state_results.each_with_index do |ss,i|
@@ -150,16 +151,7 @@ class Issue
                     if c.commit || ((sprint_state_results.length - 1) == i) # don't show empty results unless this is the current sprint_state
                         comments = c.comments.as_json
                         c.comments.each_with_index do |com,x|
-                            if com.user.user_profile && com.user.user_profile.user_position
-                                comments[x][:user_profile] = {
-                                    :id => com.user.user_profile.id,
-                                    :location => com.user.user_profile.location_name,
-                                    :title => com.user.user_profile.user_position.title,
-                                    :industry => com.user.user_profile.user_position.industry,
-                                    :size => com.user.user_profile.user_position.size,
-                                    :created_at => com.user.user_profile.created_at
-                                }
-                            end
+                            comments[x][:user_profile] = account.get_profile com.user
                         end
                         response[i][:contributors][k] = {
                             :id => c.id,

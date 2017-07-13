@@ -1,4 +1,4 @@
-{{#if (or contributors_received (or contributors (or comments_received (or comments (or votes_received (or votes))))))}}
+{{#if (or contributors_received.length (or contributors.length (or comments_received.length (or comments.length (or votes_received.length (or votes.length))))))}}
 <div class="full">
 
         {{profile-overview-feedback user=user me=me params=params items=contributors_received metric="winning solutions" description="Solutions selected over other submissions for a task that meet project owner standards and fulfill the requirements of a given task." route="contributions-selected"}}

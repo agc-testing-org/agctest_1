@@ -10,6 +10,8 @@ export default Ember.Route.extend({
         var roles = this.store.findAll('role');
         this.store.adapterFor('skillset').set('namespace', '');
 
+        
+
         return Ember.RSVP.hash({
             roles: roles,
             skillsets: skillsets,
@@ -19,7 +21,16 @@ export default Ember.Route.extend({
             me: false
         });
     },
-    renderTemplate() {
-        this.render('me');
+    renderTemplate(controller,model) {
+        console.log(controller);
+        console.log(model);
+        this.render('me', {
+            into: 'application',
+            controller: controller, 
+            model: model
+        });
+    },
+    afterModel(model,transition) {
+//        this.transitionTo('profile.overview',model.user.id);
     }
 });

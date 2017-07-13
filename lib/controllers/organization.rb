@@ -14,11 +14,17 @@ class Organization
 
     def get_users params
         begin
+            account = Account.new
             users = []
             UserTeam.where(params).order(:id => :desc).each do |user|
                 row = user.as_json
-                row["user_first_name"] = user.user.first_name
-                row["user_last_name"] = user.user.last_name
+                if user.accepted
+                    row["user_first_name"] = user.user.first_name
+                    row["user_last_name"] = user.user.last_name
+                    row["user_profile"] = account.get_profile user.user
+                else
+                    row.delete("user_id")
+                end
                 row["sender_first_name"] = user.sender.first_name
                 row["sender_last_name"] = user.sender.last_name
                 row.delete("token")
