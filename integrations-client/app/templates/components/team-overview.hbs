@@ -1,4 +1,4 @@
-<div class="footprint hidden-sm-down"></div>
+<div class="footprint hidden-sm-down">created {{moment-from-now team.created_at}} by <span class="text-capitalize">{{#link-to "profile" team.user.id}}{{team.user.first_name}}{{/link-to}}</span> ({{team.user.email}})</div>
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview text-center">
@@ -13,7 +13,6 @@
             {{else}}
                 <h3 class="about">Teams allow your sponsors to track your performance</h3>
             {{/if}}
-            <div class="description">created {{moment-from-now team.created_at}} by <span class="text-capitalize">{{team.user.first_name}}</span> ({{team.user.email}})</div>
         </div>
     </div>
 </div>

@@ -150,7 +150,7 @@ class Issue
                     if c.commit || ((sprint_state_results.length - 1) == i) # don't show empty results unless this is the current sprint_state
                         comments = c.comments.as_json
                         c.comments.each_with_index do |com,x|
-                            if com.user.user_profile
+                            if com.user.user_profile && com.user.user_profile.user_position
                                 comments[x][:user_profile] = {
                                     :id => com.user.user_profile.id,
                                     :location => com.user.user_profile.location_name,

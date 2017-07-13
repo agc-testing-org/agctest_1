@@ -5,7 +5,11 @@
             <h3 class="about">Notifications keep you up to date on activity related to your actions and profile settings</h3>
             <div class="row">
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4"> 
-                    {{sprint-state-overview-score total=notifications.meta.count title="Notifications"}}
+                    {{#if (eq notifications.meta.count 0)}}
+                        {{sprint-state-overview-score total=1 title="Notifications"}}
+                    {{else}}
+                        {{sprint-state-overview-score total=notifications.meta.count title="Notifications"}}
+                    {{/if}}
                 </div>
             </div>
         </div>
