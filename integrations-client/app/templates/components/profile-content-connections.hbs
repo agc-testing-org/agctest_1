@@ -1,4 +1,4 @@
-{{#if connections requests}}
+{{#if connections user}}
 <div class="full">
 
     <h4 class="about section">My Contacts and Contact Requests</h4>
@@ -17,6 +17,7 @@
             <p class="line"><span class="text-muted">E:</span> {{connection.email}}</p>
             <small class="line text-muted">{{moment-from-now connection.created_at}}</small>
         </div>
+        {{#unless (eq connection.user_id user.id)}}
         {{#unless (eq connection.id 0)}}
         <div class="list-group-item rounded">
             <p class="line">
@@ -29,6 +30,7 @@
                 {{/if}}
             </p>
         </div>
+        {{/unless}}
         {{/unless}}
         {{/each}}
     </div>
