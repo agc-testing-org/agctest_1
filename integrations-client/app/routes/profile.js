@@ -10,8 +10,6 @@ export default Ember.Route.extend({
         var roles = this.store.findAll('role');
         this.store.adapterFor('skillset').set('namespace', '');
 
-        
-
         return Ember.RSVP.hash({
             roles: roles,
             skillsets: skillsets,
