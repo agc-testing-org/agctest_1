@@ -965,6 +965,96 @@ class Integrations < Sinatra::Base
         return (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed]).to_json
     end
 
+    user_teams_get_comments = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.user_comments_created_by_skillset_and_roles filter
+        requests || (return_error "unable to retrieve comments")
+        team = Organization.new
+        team_requests = team.get_aggregate_counts requests, params
+        return team_requests.to_json
+    end
+
+    user_teams_get_votes = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.user_votes_cast_by_skillset_and_roles filter
+        requests || (return_error "unable to retrieve votes")
+        team = Organization.new
+        team_requests = team.get_aggregate_counts requests, params
+        return team_requests.to_json
+    end 
+
+    user_teams_get_contributors = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.user_contributions_created_by_skillset_and_roles filter
+        requests || (return_error "unable to retrieve contributions")
+        team = Organization.new
+        team_requests = team.get_aggregate_counts requests, params
+        return team_requests.to_json
+    end 
+
+    user_teams_get_comments_received = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.user_comments_received_by_skillset_and_roles filter
+        requests || (return_error "unable to retrieve comments received")
+        team = Organization.new
+        team_requests = team.get_aggregate_counts requests, params
+        return team_requests.to_json
+    end
+
+    user_teams_get_votes_received = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.user_votes_received_by_skillset_and_roles filter
+        requests || (return_error "unable to retrieve votes received")
+        team = Organization.new
+        team_requests = team.get_aggregate_counts requests, params                          
+        return team_requests.to_json                                                                
+    end                                                                                                 
+
+    user_teams_get_contributors_received = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new                     
+        filter = {}                                         
+        requests = feedback.user_contributions_selected_by_skillset_and_roles filter
+        requests || (return_error "unable to retrieve winning contributions")
+        team = Organization.new                                                     
+        team_requests = team.get_aggregate_counts requests, params                          
+        return team_requests.to_json                                                                
+    end  
+
     user_teams_patch = lambda do
         protected!
         fields = get_json
@@ -1240,6 +1330,13 @@ class Integrations < Sinatra::Base
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
     get "/user-teams", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get
+    get "/user-teams/:team_id/team-comments", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_comments
+    get "/user-teams/:team_id/team-votes", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_votes
+    get "/user-teams/:team_id/team-contributors", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_contributors
+
+    get "/user-teams/:team_id/team-comments-received", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_comments_received
+    get "/user-teams/:team_id/team-votes-received", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_votes_received
+    get "/user-teams/:team_id/team-contributors-received", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_contributors_received
 
     error RequiredParamMissing do
         [400, env['sinatra.error'].message]

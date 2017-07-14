@@ -764,6 +764,18 @@ button{
 .main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name, .main .slide.hidden-md-up .about{
     text-align:left !important;   
 }
+.list-group-item .score{
+    padding:4px;
+    margin-bottom:4px;
+    border-bottom:2px solid #f9f9f9;
+}
+.list-group-item .score .total{
+    font-weight: 500;
+    font-size: 24px;
+}
+.list-group-item .score .title{
+    font-weight:300;
+}
 .main .overview .score{
     margin-bottom:10px;
     padding:10px;

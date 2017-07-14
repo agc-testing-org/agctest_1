@@ -22,6 +22,12 @@ class Organization
                     row["user_first_name"] = user.user.first_name
                     row["user_last_name"] = user.user.last_name
                     row["user_profile"] = account.get_profile user.user
+                    row["team_comments"] = user.user.id
+                    row["team_votes"] = user.user.id
+                    row["team_contributors"] = user.user.id
+                    row["team_comments_received"] = user.user.id
+                    row["team_votes_received"] = user.user.id
+                    row["team_contributors_received"] = user.user.id
                 else
                     row.delete("user_id")
                 end
@@ -35,6 +41,13 @@ class Organization
             puts e
         end
     end
+
+    def get_aggregate_counts result, params
+        params_helper = ParamsHelper.new
+        params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
+        params = params_helper.assign_param_to_model params, "team_id", "user_teams"
+        return result.except(:order,:select,:limit,:offset).joins("INNER JOIN user_teams ON (users.id = user_teams.user_id)").select("user_teams.user_id,count(sprint_timelines.id)").where(params).group("user_teams.user_id")
+    end 
 
     def create_team name, user_id, plan_id
         begin
