@@ -656,6 +656,21 @@ class Integrations < Sinatra::Base
         return team.to_json
     end
 
+    team_connections_get = lambda do
+        protected!
+        check_required_field params[:id], "id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params[:id]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+
+        accepted = account.get_team_connections_accepted params[:id]
+        requested = account.get_team_connections_requested params[:id]
+        temp = accepted + requested
+        response = temp.uniq { |h| h["id"] }
+        status 200
+        return response.to_json
+    end
+
     sprints_get = lambda do
         issue = Issue.new
         sprints = issue.get_sprints params
@@ -873,7 +888,7 @@ class Integrations < Sinatra::Base
         end
 
         ContributorJoinWorker.perform_async @session, @session_hash["github_token"], created, username
-        
+
         status 201
         return {:id => created, :preparing => 1}.to_json
     end
@@ -1145,26 +1160,6 @@ class Integrations < Sinatra::Base
         redirect to url
     end
 
-    team_connections_get = lambda do
-        protected!
-        account = Account.new
-
-        team_id = params[:id]
-        seat = account.get_seat @session_hash["id"], params[:id]
-
-        if seat == "member"
-            accepted = account.get_team_connections_accepted team_id
-            requested = account.get_team_connections_requested team_id
-            status 200
-
-            temp = accepted + requested
-            response = temp.uniq { |h| h["id"] }
-        else
-            return_not_found
-        end
-        return response.to_json
-    end
-
     #API
 
     post "/register", &register_post
@@ -1255,9 +1250,8 @@ class Integrations < Sinatra::Base
     post "/teams", &teams_post
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
+    get "/teams/:id/connections", &team_connections_get
     get "/team-invites", &team_invites_get
-
-    get "/team/:id/connections", &team_connections_get 
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post

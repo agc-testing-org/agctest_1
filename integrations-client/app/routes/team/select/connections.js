@@ -10,15 +10,13 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
 
-        var memberSeatId = this.store.peekAll("seat").findBy("name","member").get("id");
+        this.store.adapterFor('connection').set('namespace', 'teams/'+this.paramsFor("team.select").id);
+        var connections = this.store.findAll('connection');
+        this.store.adapterFor('connection').set('namespace', '');
 
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
-            user_teams: this.store.query('user-team', {
-                team_id: this.paramsFor("team.select").id,
-                seat_id: memberSeatId
-            }),
-            default_seat_id: memberSeatId
+            connections: connections
         });
     },
 });

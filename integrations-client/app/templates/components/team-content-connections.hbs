@@ -1,10 +1,8 @@
-{{#if team-connections}}
+{{#if connections}}
 <div class="full">
-
     <h4 class="about section">Team Contacts</h4>
-
     <div class="list-group rounded text-left">
-        {{#each team-connections as |connection|}}
+        {{#each connections as |connection|}}
         <div class="list-group-item rounded highlight-{{notification.read}}">
             <h4 class="line text-capitalize">
                 {{#link-to "profile" connection.id}}{{connection.first_name}} {{/link-to}}
