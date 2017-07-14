@@ -10,7 +10,7 @@
                 <span class="badge badge-info uppercase rounded">Accepted</span>
             {{/if}}
             {{#if user.user_first_name}}
-                {{#link-to "profile" user.id}}{{user.user_first_name}} {{user.user_last_name}}{{/link-to}} {{#if user.user_email}}({{user.user_email}}){{/if}} {{#if user.user_profile}}-{{/if}} {{user-profile-descriptor user_profile=user.user_profile class="d-inline"}}
+                {{#link-to "profile" user.user_id}}{{user.user_first_name}} {{user.user_last_name}}{{/link-to}} {{#if user.user_email}}({{user.user_email}}){{/if}} {{#if user.user_profile}}-{{/if}} {{user-profile-descriptor user_profile=user.user_profile class="d-inline"}}
             {{else}}
                 {{user.user_email}}
             {{/if}}
