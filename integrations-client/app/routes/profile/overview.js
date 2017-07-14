@@ -37,7 +37,11 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             me: false 
         });
     },
-    renderTemplate() {
-        this.render('me.overview');
+    renderTemplate(controller,model) {
+        this.render('me.overview', {
+            controller: controller,
+            model: model
+        });
+
     }
 });
