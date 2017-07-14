@@ -28,33 +28,34 @@
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-sort-amount-desc"></i>
                 </div>
-                Overview
+                Profile 
             {{/link-to}}
 
             {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-users"></i>
+                    <i class="fa fa-fw fa-2x fa-handshake-o"></i>
                 </div>
                 Contacts
             {{/link-to}}
 
-            {{#link-to "me.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-user-plus"></i>
-                </div>
-                Contact Requests
-            {{/link-to}}
+            {{#if teams}}
+                <li {{action "displayTeams"}} class="cursor-pointer nav-item text-center text-capitalize">
+                    <div class="icon hidden-sm-down">
+                        <i class="fa fa-fw fa-2x fa-users"></i>
+                    </div>
+                    {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
+                </li>
+            {{/if}}
 
+            {{#if showTeams}}
             {{#each teams as |team|}}
-            {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-users"></i>
-                </div>
-                Team {{team.name}}
+            {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-left text-capitalize nested" }}
+                {{team.name}}
             {{/link-to}}
             {{/each}}
+            {{/if}}
 
-            {{#if sessionAccount.account.owner}}
+            {{#if (or sessionAccount.account.admin sessionAccount.account.owner)}}
                 {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                     <div class="icon hidden-sm-down">
                         <i class="fa fa-fw fa-2x fa-user-plus"></i>

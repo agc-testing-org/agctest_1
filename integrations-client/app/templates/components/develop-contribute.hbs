@@ -1,6 +1,6 @@
 <div class="list-group rounded text-left">
     <div class="list-group-item active rounded justify-content-between">
-        <h4>How to Contribute</h4>
+        <h4>{{#if contributor.preparing}}{{application-loading size=1 class="d-inline"}}{{/if}} How to Contribute</h4>
         <button class="btn btn-secondary btn-sm rounded" {{action "submit" project.id contributor.id }}>Synchronize</button>
     </div>
     <div class="list-group-item rounded">

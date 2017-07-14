@@ -12,6 +12,7 @@ export default DS.Model.extend({
     user_id: attr('number'),
     user_first_name: attr('string'),
     user_last_name: attr('string'),
+    user_profile: DS.belongsTo('user-profile'), 
     user_email: attr('string'),
     registered: attr('boolean'),
     name: attr('string'),

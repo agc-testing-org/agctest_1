@@ -10,6 +10,5 @@ export default DS.Model.extend({
     created_at: attr('date'),
     sprint_state: DS.belongsTo('sprint-state'),
     next_sprint_state: DS.belongsTo('sprint-state'),
-    user_profile: DS.belongsTo('user-profile'),
 });
 

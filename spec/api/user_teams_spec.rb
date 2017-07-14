@@ -77,7 +77,13 @@ describe "/user-teams" do
                     end
                     it_behaves_like "invites_teams"
                     it_behaves_like "created"
-                end 
+                    context "already invited" do
+                        before(:each) do
+                            post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        end
+                        it_behaves_like "error", "this email address has an existing invitation"
+                    end
+                end
                 context "unauthorized seat id" do
                     before(:each) do
                         post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => seats(:owner).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}

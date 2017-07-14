@@ -37,7 +37,8 @@ class Repo
             repo = Contributor.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
-                repo: repo
+                repo: repo,
+                preparing: true
             })
 
             return repo.id
@@ -45,6 +46,48 @@ class Repo
             puts e
             return nil
         end
+    end
+
+    def sync contributor_id, username
+
+        issue = Issue.new 
+        params = {:id => contributor_id}
+        contributor = get_contributor params
+
+        fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], contributor.sprint_state.sprint.project.org, contributor.sprint_state.sprint.project.name, contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
+        contributor.preparing = false
+        if fetched
+            contributor.prepared = true
+            contributor.commit = fetched[:sha]
+            contributor.commit_remote = fetched[:sha_remote]
+            contributor.commit_success = fetched[:success]
+            return contributor.save #updates timestamp
+        else
+            contributor.prepared = false
+            return (contributor.save && contributor.prepared)
+        end
+    end
+
+    def join session, github_token, contributor_id, username
+        issue = Issue.new 
+        params = {:id => contributor_id}
+        contributor = get_contributor params
+        sprint_state = contributor.sprint_state
+
+        refreshed_sprint_state = refresh session, github_token, contributor_id, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, contributor.repo, "master", sprint_state.sha, sprint_state.id, false
+        refreshed_master = refresh session, github_token, contributor_id, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, contributor.repo, "master", sprint_state.sha, "master", false
+
+        if sprint_state.state.name == "requirements design" && !contributor.prepared # only need to create doc if first time contributing
+            (github.create_contents("#{username}/#{name}",
+                                    "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
+                                        "adding placeholder for requirements",
+                                        "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
+                                        :branch => sprint_state.id.to_s)) || (return_error "unable to create requirements document")
+        end
+
+        contributor.prepared = (refreshed_sprint_state && refreshed_master)
+        contributor.preparing = false
+        return (contributor.save && contributor.prepared)
     end
 
     def refresh session, github_token, contributor_id, sprint_state_id, master_username, master_project, slave_username, slave_project, branch, sha, branch_to_push, anonymous

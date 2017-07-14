@@ -1,5 +1,6 @@
 {{#if items}}
-<div class="about section text-capitalize">{{metric}}</div>
+<h3 class="description section text-capitalize mb-0 mt-3">{{metric}}</h3>
+<div class="about section">{{description}}</div>
     <div class="list-group rounded text-left">
     {{#each items as |item|}}
         <div class="list-group-item rounded">
@@ -9,10 +10,22 @@
                         <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{item.comment.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
                     </span>
                 {{/if}}
-                on the {{#link-to "develop.project.sprint.state" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title) (concat item.next_sprint_state.id "-" item.next_sprint_state.state_id.name)}}{{item.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title)}}{{item.sprint.title}}{{/link-to}}
+                on the 
+                {{#if item.next_sprint_state}}
+                    {{#link-to "develop.project.sprint.state" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title) (concat item.next_sprint_state.id "-" item.next_sprint_state.state_id.name)}}{{item.next_sprint_state.state_id.name}} phase{{/link-to}}
+                {{else}}
+                    {{#link-to "develop.project.sprint.state" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title) (concat item.sprint_state.id "-" item.sprint_state.state_id.name)}}{{item.sprint_state.state_id.name}} phase{{/link-to}}
+                {{/if}}
+                of {{#link-to "develop.project.sprint" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title)}}{{item.sprint.title}}{{/link-to}}
         {{moment-from-now item.created_at}}
+        {{#if item.user_id}}from {{#link-to "profile" item.user_id}}{{#if item.user_profile}}a {{user-profile-descriptor user_profile=item.user_profile class="d-inline"}}{{else}}Someone{{/if}}{{/link-to}}{{/if}}
             </p>
         </div>
     {{/each}}
+    {{#if me}}
+        {{application-paging-no-model page=params.page last=items.length count=items.meta.count route=(concat "me." route) class="text-right"}}
+    {{else}}
+        {{application-paging page=params.page last=items.length count=items.meta.count route=(concat "profile." route) route_id=user.id class="text-right"}}
+    {{/if}}
 </div>
 {{/if}}

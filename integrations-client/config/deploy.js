@@ -11,21 +11,6 @@ module.exports = function(deployTarget) {
         // include other plugin configuration that applies to all deploy targets here
     };
 
-    ENV['s3'] = {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        bucket: 'app.wired7.com',
-        region: process.env.AWS_REGION
-    };
-
-    ENV['s3-index'] = {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-        bucket: 'app.wired7.com',
-        region: process.env.AWS_REGION,
-        allowOverwrite: true
-    };
-
     if (deployTarget === 'development') {
         ENV.build.environment = 'development';
         // configure other plugins for development deploy target here
@@ -38,6 +23,20 @@ module.exports = function(deployTarget) {
 
     if (deployTarget === 'production') {
         ENV.build.environment = 'production';
+        ENV['s3'] = {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            bucket: 'app.wired7.com',
+            region: process.env.AWS_REGION
+        };
+
+        ENV['s3-index'] = {
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+            bucket: 'app.wired7.com',
+            region: process.env.AWS_REGION,
+            allowOverwrite: true
+        };
         // configure other plugins for production deploy target here
     }
 

@@ -1,7 +1,7 @@
 class Account
 
     def initialize
-
+        @per_page = 10
     end
 
     def linkedin_client access_token
@@ -211,6 +211,21 @@ class Account
             end
         rescue => e
             puts e
+            return nil
+        end
+    end
+
+    def get_profile user
+        if user.user_profile && user.user_profile.user_position
+            return {
+                :id => user.id,
+                :location => user.user_profile.location_name,
+                :title => user.user_profile.user_position.title,
+                :industry => user.user_profile.user_position.industry,
+                :size => user.user_profile.user_position.size,
+                :created_at => user.user_profile.created_at
+            }
+        else
             return nil
         end
     end
@@ -441,7 +456,7 @@ class Account
 
     def get_user_connections query
         begin    
-            return UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").as_json
+            return UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil
@@ -473,7 +488,7 @@ class Account
 
     def get_user_connections_requested user_id # people that request are automatically added as contacts
         begin
-            return UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").as_json
+            return UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil
@@ -481,8 +496,8 @@ class Account
     end
 
     def get_user_connections_accepted user_id
-        begin  
-            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").as_json
+        begin      
+            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil
@@ -507,18 +522,16 @@ class Account
         end
     end
 
-    def get_user_notifications user_id
+    def get_user_notifications user_id, params
+        page = (params["page"].to_i if params["page"].to_i > 0) || 1
+        params_helper = ParamsHelper.new
+        params = params_helper.drop_key params, "page"
         begin     
             response = []
-            SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').each_with_index do |notification,i|
-                params = {:id => notification.user_id}
-                user = get_users params
-                if user
-                    user = user[0]
-                end
-
+            notifications = SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            notifications.each_with_index do |notification,i| 
                 response[i] = notification.as_json
-                response[i][:user_profile] = user
+                response[i][:user_profile] = get_profile notification.user
                 response[i][:sprint] = notification.sprint
                 response[i][:project] = notification.project
                 response[i][:sprint_state] = notification.sprint_state
@@ -528,7 +541,7 @@ class Account
 
             end
 
-            return response
+            return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
 
         rescue => e
             puts e

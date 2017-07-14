@@ -27,6 +27,7 @@ require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
 require_relative '../controllers/feedback.rb'
+require_relative '../controllers/params_helper.rb'
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -56,6 +57,8 @@ require_relative '../models/role_state.rb'
 
 # Workers
 require_relative '../workers/user_notification_worker.rb'
+require_relative '../workers/contributor_join_worker.rb'
+require_relative '../workers/contributor_sync_worker.rb'
 
 # Throttling
 require_relative 'rack'
@@ -68,11 +71,6 @@ set :database, {
     database: "integrations_#{ENV['RACK_ENV']}"
 }  
 
-Aws.config.update({
-    region: ENV["AWS_REGION"],
-    credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
-})
-
 Sidekiq.configure_server do |config|
     config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
 end
@@ -84,6 +82,13 @@ end
 class Integrations < Sinatra::Base
 
     set :public_folder, File.expand_path('integrations-client/dist')
+
+    if settings.production?
+        Aws.config.update({
+            region: ENV["AWS_REGION"],
+            credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"], ENV["AWS_SECRET_ACCESS_KEY"])
+        })
+    end
 
     redis = Redis.new(:host => ENV['INTEGRATIONS_REDIS_HOST'], :port => ENV['INTEGRATIONS_REDIS_PORT'], :db => ENV['INTEGRATIONS_REDIS_DB'])
     message = "you have hit our rate limit"
@@ -358,7 +363,7 @@ class Integrations < Sinatra::Base
         pulled = account.pull_linkedin_profile linkedin
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-        (profile_id && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
+        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
         response = (session_tokens user, @session_hash["owner"], false) 
         response[:success] = !profile_id.nil?
         status 200
@@ -867,18 +872,10 @@ class Integrations < Sinatra::Base
             end
         end
 
-        sha = (issue.get_sprint_state sprint_state.id).sha
-        (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, sprint_state.id, false) || (return_error "unable to update sprint phase branch")
-        (repo.refresh @session, @session_hash["github_token"], created, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, name, "master", sha, "master", false) || (return_error "unable to update master branch")
-
-        (sprint_state.state.name == "requirements design" && !contributor) || (halt 201, {:id => created}.to_json) # only need to create doc if first time contributing
-        (github.create_contents("#{username}/#{name}",
-                                "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
-                                    "adding placeholder for requirements",
-                                    "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
-                                    :branch => sprint_state.id.to_s)) || (return_error "unable to create requirements document")
+        ContributorJoinWorker.perform_async @session, @session_hash["github_token"], created, username
+        
         status 201
-        return {:id => created}.to_json
+        return {:id => created, :preparing => 1}.to_json
     end
 
     contributors_patch_by_id = lambda do
@@ -888,17 +885,10 @@ class Integrations < Sinatra::Base
         query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
         contributor = repo.get_contributor query
         contributor || return_not_found
-        contributor.save #update timestamp
-        issue = Issue.new
-        query = {:id => params[:project_id].to_i}
-        project = (issue.get_projects query)[0]
-        project || (return_error "unable to update contribution")
-        fetched = repo.refresh nil, nil, contributor[:id], contributor[:sprint_state_id], @session_hash["github_username"], contributor[:repo], project["org"], project["name"], contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
-        fetched || (return_error "unable to update contribution")
-        contributor.commit = fetched[:sha]
-        contributor.commit_remote = fetched[:sha_remote]
-        contributor.commit_success = fetched[:success]
+        contributor.preparing = true
+        contributor.prepared = 0
         contributor.save
+        ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
         status 200
         return contributor.to_json 
     end
@@ -1021,7 +1011,9 @@ class Integrations < Sinatra::Base
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
         invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
-        (invitation && (account.mail_invite invitation)) || (return_error "invite error")
+        invitation || (return_error "invite error")
+        invitation.id || (return_error "this email address has an existing invitation")
+        (account.mail_invite invitation) || (return_error "invite error")
         invitation = invitation.as_json
         invitation.delete("token")
         status 201
@@ -1048,7 +1040,7 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         status 200
-        return (account.get_user_notifications @session_hash["id"]).to_json
+        return (account.get_user_notifications @session_hash["id"], params).to_json
     end
 
     get_user_notifications_by_id = lambda do
@@ -1079,42 +1071,42 @@ class Integrations < Sinatra::Base
         feedback = Feedback.new
         requests = feedback.user_comments_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 
     get_user_comments_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_comments_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_votes_cast_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_cast_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_votes_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_votes_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
     end
 
     get_user_contributions_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve contribution")
-        return (feedback.build_contribution_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_contribution_feedback requests)}.to_json 
     end
 
     get_user_contributions_selected_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         requests = feedback.user_contributions_selected_by_skillset_and_roles params
         requests || (return_error "unable to retrieve winner")
-        return (feedback.build_feedback requests).to_json
+        return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 
     get_user_comments_created_by_skillset_and_roles_by_me = lambda do
@@ -1197,31 +1189,31 @@ class Integrations < Sinatra::Base
     get "/users/me/roles/:role_id", &users_roles_get_by_role
     patch "/users/me/roles/:role_id", &users_roles_patch_by_id
 
-    get "/users/me/notifications", &get_user_notifications
+    get "/users/me/notifications", allows: [:page], &get_user_notifications
     patch "/users/me/notifications/:id", &user_notifications_read
     get "/users/me/notifications/:id", &get_user_notifications_by_id
 
     get "/users/me/connections", &connections_get 
     get "/users/me/requests", &connections_requests_get
-    get "/users/me/requests/:id", &connections_requests_get_by_id
-    patch "/users/me/requests/:id", &user_connections_patch
+    get "/users/me/connections/:id", &connections_requests_get_by_id
+    patch "/users/me/connections/:id", &user_connections_patch
 
     post "/users/:id/requests", &connections_request_post
     get "/users/:id/requests", &get_exist_request
 
     get "/users/me/aggregate-comments", allows: [:page, :skillset_id, :role_id], &get_user_comments_created_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-votes", allows: [:skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-contributors", allows: [:skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-comments-received", allows: [:skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-votes-received", allows: [:skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
-    get "/users/me/aggregate-contributors-received", allows: [:skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-votes", allows: [:page, :skillset_id, :role_id], &get_user_votes_cast_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-contributors", allows: [:page, :skillset_id, :role_id], &get_user_contributions_created_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-comments-received", allows: [:page, :skillset_id, :role_id], &get_user_comments_received_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-votes-received", allows: [:page, :skillset_id, :role_id], &get_user_votes_received_by_skillset_and_roles_by_me
+    get "/users/me/aggregate-contributors-received", allows: [:page, :skillset_id, :role_id], &get_user_contributions_selected_by_skillset_and_roles_by_me
 
     get "/users/:user_id/aggregate-comments", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_created_by_skillset_and_roles
-    get "/users/:user_id/aggregate-votes", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_cast_by_skillset_and_roles
-    get "/users/:user_id/aggregate-contributors", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_created_by_skillset_and_roles
-    get "/users/:user_id/aggregate-comments-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_received_by_skillset_and_roles
-    get "/users/:user_id/aggregate-votes-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_received_by_skillset_and_roles
-    get "/users/:user_id/aggregate-contributors-received", allows: [:user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_selected_by_skillset_and_roles
+    get "/users/:user_id/aggregate-votes", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_cast_by_skillset_and_roles
+    get "/users/:user_id/aggregate-contributors", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_created_by_skillset_and_roles
+    get "/users/:user_id/aggregate-comments-received", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_comments_received_by_skillset_and_roles
+    get "/users/:user_id/aggregate-votes-received", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_votes_received_by_skillset_and_roles
+    get "/users/:user_id/aggregate-contributors-received", allows: [:page, :user_id, :skillset_id, :role_id], needs: [:user_id], &get_user_contributions_selected_by_skillset_and_roles
 
     # do not add a /users request with a single namespace below this
     get "/users/me", &users_get_by_me #must precede :id request
@@ -1244,9 +1236,9 @@ class Integrations < Sinatra::Base
     get "/projects/:id", allows: [:id], needs: [:id], &projects_get_by_id
 
     #    post "/projects/:project_id/refresh", &refresh_post #TODO - later
-    post "/projects/:project_id/contributors", &contributors_post
-    patch "/projects/:project_id/contributors/:contributor_id", &contributors_patch_by_id
-    get "/projects/:project_id/contributors/:contributor_id", &contributors_get_by_id
+    post "/contributors", &contributors_post
+    patch "/contributors/:contributor_id", &contributors_patch_by_id
+    get "/contributors/:contributor_id", &contributors_get_by_id
 
     get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
     get "/sprints/:id", allows: [:id], needs: [:id], &sprints_get_by_id
@@ -1278,9 +1270,9 @@ class Integrations < Sinatra::Base
     # Ember
     get "*" do
         content_type 'text/html'
-        client = Aws::S3::Client.new
-        index_version = ("index.html:#{params[:s3_version]}" if !params[:s3_version].nil?) || "index.html"
         if ENV["RACK_ENV"] == "production"
+            client = Aws::S3::Client.new
+            index_version = ("index.html:#{params[:s3_version]}" if !params[:s3_version].nil?) || "index.html"
             return client.get_object({
                 bucket: ENV["INTEGRATIONS_S3_BUCKET"], 
                 key: index_version
