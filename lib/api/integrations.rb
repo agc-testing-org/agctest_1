@@ -638,6 +638,13 @@ class Integrations < Sinatra::Base
         return team_response.to_json
     end
 
+    teams_notifications_get = lambda do
+        protected!
+        account = Account.new
+        status 200
+        return (account.get_team_notifications params).to_json
+    end
+
     teams_post = lambda do
         protected!
         (@session_hash["owner"] || @session_hash["admin"]) || return_unauthorized_admin
@@ -1236,6 +1243,7 @@ class Integrations < Sinatra::Base
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
+    get "/teams/:id/notifications", allows: [:id], needs: [:id], &teams_notifications_get
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
