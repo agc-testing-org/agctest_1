@@ -7,7 +7,7 @@
         {{#each team-connections as |connection|}}
         <div class="list-group-item rounded highlight-{{notification.read}}">
             <h4 class="line text-capitalize">
-                {{#link-to "profile" connection.user_id}}{{connection.first_name}} {{connection.last_name}}{{/link-to}}
+                {{#link-to "profile" connection.id}}{{connection.first_name}} {{/link-to}}
             </h4>
             <p class="line"><span class="text-muted">E:</span> {{connection.email}}</p>
         </div>
