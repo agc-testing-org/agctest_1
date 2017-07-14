@@ -506,7 +506,7 @@ class Account
 
     def get_team_connections_requested team_id 
         begin
-            return User.joins("INNER JOIN user_connections ON users.id = user_connections.user_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ?", team_id).select("users.id, users.first_name, users.email").group("users.id").as_json
+            return User.joins("INNER JOIN user_connections ON users.id = user_connections.user_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ?", team_id).select("users.id, users.first_name, users.email, user_teams.seat_id").as_json
         rescue => e
             puts e
             return nil
@@ -515,7 +515,7 @@ class Account
 
     def get_team_connections_accepted team_id
         begin   
-            return User.joins("INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ? and user_connections.confirmed=2", team_id).select("users.id, users.first_name, users.email").group("users.id").as_json
+            return User.joins("INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ? and user_connections.confirmed=2", team_id).select("users.id, users.first_name, users.email,user_teams.seat_id").as_json
         rescue => e
             puts e
             return nil
