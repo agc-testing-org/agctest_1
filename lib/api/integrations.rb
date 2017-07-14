@@ -1243,7 +1243,7 @@ class Integrations < Sinatra::Base
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
-    get "/teams/:id/notifications", allows: [:id], needs: [:id], &teams_notifications_get
+    get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
