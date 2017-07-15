@@ -1250,7 +1250,7 @@ class Integrations < Sinatra::Base
     post "/teams", &teams_post
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
-    get "/teams/:id/connections", &team_connections_get
+    get "/teams/:id/connections", allows: [:id], needs: [:id], &team_connections_get
     get "/team-invites", &team_invites_get
 
     post "/user-teams/token", &user_teams_patch
