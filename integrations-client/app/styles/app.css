@@ -161,6 +161,12 @@ label{
 .dropdown-menu{
     width:100%;
 }
+.card{
+    border: 1px solid #ededed;
+}
+.card-title{
+    font-weight:400;
+}
 .orange{
     color: orange;
 }
