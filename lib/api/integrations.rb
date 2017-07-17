@@ -63,6 +63,9 @@ require_relative '../models/role_state.rb'
 require_relative '../workers/user_notification_worker.rb'
 require_relative '../workers/contributor_join_worker.rb'
 require_relative '../workers/contributor_sync_worker.rb'
+require_relative '../workers/user_invite_worker.rb'
+require_relative '../workers/user_password_reset_worker.rb'
+require_relative '../workers/user_register_worker.rb'
 
 # Throttling
 require_relative 'rack'
@@ -270,7 +273,8 @@ class Integrations < Sinatra::Base
         fields = get_json
         account = Account.new
         (account.valid_email fields[:email]) || (return_error "please enter a valid email address")
-        (account.request_token fields[:email]) || (return_error "we couldn't find this email address")
+        (user = account.request_token fields[:email]) || (return_error "we couldn't find this email address")
+        UserPasswordResetWorker.perform_async user.first_name, fields[:email], user.token
         status 201
         return {:success => true}.to_json
     end
@@ -281,7 +285,7 @@ class Integrations < Sinatra::Base
         check_required_field fields[:token], "token"
         invite = account.refresh_team_invite fields[:token]
         invite || (return_error "we couldn't find this invitation")
-        account.mail_invite invite
+        UserInviteWorker.perform_async invite.token 
         status 201
         return {:success => true}.to_json
     end
@@ -295,7 +299,7 @@ class Integrations < Sinatra::Base
         (account.valid_email fields[:email]) || (return_error "please enter a valid email address.")
         user = account.create fields[:email], fields[:first_name], fields[:last_name], request.ip
         (user && user.id) || (return_error "this email is already registered (or has been invited)")
-        account.create_email user
+        UserRegisterWorker.perform_async user.email, user.first_name
         if fields[:roles].length < 5 #accept roles from people that sign up without an invite
             fields[:roles].each do |r|
                 account.update_role decrypt(user.id), r[:id], r[:active]
@@ -1021,7 +1025,7 @@ class Integrations < Sinatra::Base
         invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
         invitation || (return_error "invite error")
         invitation.id || (return_error "this email address has an existing invitation")
-        (account.mail_invite invitation) || (return_error "invite error")
+        UserInviteWorker.perform_async invitation.token
         invitation = invitation.as_json
         invitation.delete("token")
         status 201
