@@ -547,7 +547,7 @@ class Account
         params = params_helper.drop_key params, "page"
         begin     
             response = []
-            notifications = SprintTimeline.joins("inner join user_notifications inner join user_teams").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = ? and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (1, 2)", team_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            notifications = SprintTimeline.joins("inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = ? and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (1, 2) AND sprint_timelines.diff IN('vote','comment','winner') and contributors.user_id != sprint_timelines.user_id", team_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
             notifications.each_with_index do |notification,i| 
                 response[i] = notification.as_json
                 response[i][:user_profile] = get_profile notification.user
@@ -557,8 +557,9 @@ class Account
                 response[i][:next_sprint_state] = notification.next_sprint_state
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
-
-            end
+                response[i][:first_name] = notification.contributor.user.first_name
+                response[i][:user_id] = notification.contributor.user.id
+                 end
 
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
 
