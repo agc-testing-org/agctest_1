@@ -641,8 +641,11 @@ class Integrations < Sinatra::Base
     teams_notifications_get = lambda do
         protected!
         account = Account.new
+        seat = account.get_seat @session_hash["id"], params["id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
         status 200
-        return (account.get_team_notifications params).to_json
+        org = Organization.new
+        return (org.get_team_notifications params).to_json
     end
 
     teams_post = lambda do
@@ -880,7 +883,7 @@ class Integrations < Sinatra::Base
         end
 
         ContributorJoinWorker.perform_async @session, @session_hash["github_token"], created, username
-        
+
         status 201
         return {:id => created, :preparing => 1}.to_json
     end
