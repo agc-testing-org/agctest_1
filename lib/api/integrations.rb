@@ -20,6 +20,9 @@ require 'whenever'
 require 'rack/throttle'
 require 'aws-sdk'
 
+#Helpers
+require_relative '../helpers/obfuscate.rb'
+
 # Controllers
 require_relative '../controllers/account.rb'
 require_relative '../controllers/issue.rb'
@@ -28,6 +31,7 @@ require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
 require_relative '../controllers/feedback.rb'
 require_relative '../controllers/params_helper.rb'
+
 # Models
 require_relative '../models/user.rb'
 require_relative '../models/user_role.rb'
@@ -80,6 +84,8 @@ Sidekiq.configure_client do |config|
 end
 
 class Integrations < Sinatra::Base
+
+    include Obfuscate
 
     set :public_folder, File.expand_path('integrations-client/dist')
 
@@ -292,7 +298,7 @@ class Integrations < Sinatra::Base
         account.create_email user
         if fields[:roles].length < 5 #accept roles from people that sign up without an invite
             fields[:roles].each do |r|
-                account.update_role user.id, r[:id], r[:active]
+                account.update_role decrypt(user.id), r[:id], r[:active]
             end
         end
         status 201
@@ -313,7 +319,7 @@ class Integrations < Sinatra::Base
         (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
-        user_params = {:id => team["user_id"]}
+        user_params = {:id => decrypt(team["user_id"])}
         user = account.get user_params
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
         owner = ((account.is_owner? user[:id]) || user[:admin])
@@ -416,11 +422,12 @@ class Integrations < Sinatra::Base
     session_get = lambda do
         protected!
         status 200
-        return {:id => @session_hash["id"], :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => !@session_hash["github_token"].nil?, :github_username => @session_hash["github_username"]}.to_json
+        return {:id => encrypt(@session_hash["id"]), :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => !@session_hash["github_token"].nil?, :github_username => @session_hash["github_username"]}.to_json
     end
 
     users_get_by_id = lambda do
-        account = Account.new
+        account = Account.new 
+        params["id"] = decrypt params["id"]
         user = account.get_users params
         user[0] || return_not_found
         status 200
@@ -429,18 +436,18 @@ class Integrations < Sinatra::Base
 
     users_get_by_me = lambda do
         protected!
-        redirect to("/users/#{@session_hash["id"]}")
+        redirect to("/users/#{encrypt(@session_hash["id"])}")
     end
 
     users_roles_get = lambda do
         account = Account.new
         status 200
-        return (account.get_account_roles params[:user_id], nil).to_json
+        return (account.get_account_roles decrypt(params[:user_id]), nil).to_json
     end
 
     users_roles_get_by_me = lambda do
         protected!
-        redirect to("/users/#{@session_hash["id"]}/roles")
+        redirect to("/users/#{encrypt(@session_hash["id"])}/roles")
     end
 
     users_roles_get_by_role = lambda do
@@ -526,12 +533,12 @@ class Integrations < Sinatra::Base
         check_required_field params[:user_id], "user_id"
         issue = Issue.new
         status 200
-        return (issue.get_user_skillsets params[:user_id], nil).to_json
+        return (issue.get_user_skillsets decrypt(params[:user_id]), nil).to_json
     end
 
     users_skillsets_get_by_me = lambda do
         protected!
-        redirect to("/users/#{@session_hash["id"]}/skillsets")
+        redirect to("/users/#{encrypt(@session_hash["id"])}/skillsets")
     end
 
     users_skillsets_get_by_skillset = lambda do
@@ -924,9 +931,10 @@ class Integrations < Sinatra::Base
         protected!
         check_required_field params[:id], "id"
         account = Account.new
-        query = {"user_connections.contact_id" =>  params[:id], :user_id => @session_hash["id"]} 
+        id = decrypt(params[:id]) || (halt 200, {:id => 0}.to_json)  
+        query = {"user_connections.contact_id" => id, :user_id => @session_hash["id"]} 
         outgoing = account.get_user_connections query
-        query = {"user_connections.user_id" =>  params[:id], "user_connections.contact_id" => @session_hash["id"]}
+        query = {"user_connections.user_id" => id, "user_connections.contact_id" => @session_hash["id"]}
         incoming = account.get_user_connections query
         all = (outgoing + incoming)
         (all && all[0]) || (halt 200, {:id => 0}.to_json) 
@@ -947,7 +955,7 @@ class Integrations < Sinatra::Base
         protected!
         check_required_field params[:id], "id"
         account = Account.new
-        query = {:id =>  params[:id], :contact_id => @session_hash["id"]} 
+        query = {:id => params[:id], :contact_id => @session_hash["id"]} 
         requests = account.get_user_connections query
         requests || (return_error "request not found")
         status 200
@@ -962,7 +970,7 @@ class Integrations < Sinatra::Base
         check_required_field fields[:confirmed], "confirmed"
         account = Account.new
         status 200
-        return (account.update_user_connections @session_hash["id"], fields[:user_id], fields[:read], fields[:confirmed]).to_json
+        return (account.update_user_connections @session_hash["id"], decrypt(fields[:user_id]), fields[:read], fields[:confirmed]).to_json
     end
 
     user_teams_patch = lambda do
@@ -972,7 +980,7 @@ class Integrations < Sinatra::Base
         account = Account.new
         invitation = account.get_invitation fields[:token]
         (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
-        (@session_hash["id"] == invitation.first.user_id) || (return_error "this invitation is invalid")
+        (@session_hash["id"] == decrypt(invitation.first.user_id).to_i) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
         status 200
@@ -1069,6 +1077,7 @@ class Integrations < Sinatra::Base
 
     get_user_comments_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
+        params["user_id"] = decrypt(params["user_id"])
         requests = feedback.user_comments_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
@@ -1076,6 +1085,7 @@ class Integrations < Sinatra::Base
 
     get_user_comments_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
+        params["user_id"] = decrypt(params["user_id"])
         requests = feedback.user_comments_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
@@ -1083,6 +1093,7 @@ class Integrations < Sinatra::Base
 
     get_user_votes_cast_by_skillset_and_roles = lambda do
         feedback = Feedback.new
+        params["user_id"] = decrypt(params["user_id"])
         requests = feedback.user_votes_cast_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
@@ -1090,6 +1101,7 @@ class Integrations < Sinatra::Base
 
     get_user_votes_received_by_skillset_and_roles = lambda do
         feedback = Feedback.new
+        params["user_id"] = decrypt(params["user_id"])
         requests = feedback.user_votes_received_by_skillset_and_roles params
         requests || (return_error "unable to retrieve votes")
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json 
@@ -1097,6 +1109,7 @@ class Integrations < Sinatra::Base
 
     get_user_contributions_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
+        params["user_id"] = decrypt(params["user_id"]) 
         requests = feedback.user_contributions_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve contribution")
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_contribution_feedback requests)}.to_json 
@@ -1104,6 +1117,7 @@ class Integrations < Sinatra::Base
 
     get_user_contributions_selected_by_skillset_and_roles = lambda do
         feedback = Feedback.new
+        params["user_id"] = decrypt(params["user_id"])
         requests = feedback.user_contributions_selected_by_skillset_and_roles params
         requests || (return_error "unable to retrieve winner")
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
@@ -1111,37 +1125,37 @@ class Integrations < Sinatra::Base
 
     get_user_comments_created_by_skillset_and_roles_by_me = lambda do
         protected!
-        url = "/users/#{@session_hash["id"]}/aggregate-comments?#{params.to_param}"
+        url = "/users/#{encrypt(@session_hash["id"])}/aggregate-comments?#{params.to_param}"
         redirect to url
     end
 
     get_user_votes_cast_by_skillset_and_roles_by_me = lambda do
         protected!
-        url = "/users/#{@session_hash["id"]}/aggregate-votes?#{params.to_param}"
+        url = "/users/#{encrypt(@session_hash["id"])}/aggregate-votes?#{params.to_param}"
         redirect to url
     end
 
     get_user_contributions_created_by_skillset_and_roles_by_me = lambda do
         protected!
-        url = "/users/#{@session_hash["id"]}/aggregate-contributors?#{params.to_param}"
+        url = "/users/#{encrypt(@session_hash["id"])}/aggregate-contributors?#{params.to_param}"
         redirect to url
     end
 
     get_user_comments_received_by_skillset_and_roles_by_me = lambda do
         protected!
-        url = "/users/#{@session_hash["id"]}/aggregate-comments-received?#{params.to_param}"
+        url = "/users/#{encrypt(@session_hash["id"])}/aggregate-comments-received?#{params.to_param}"
         redirect to url
     end
 
     get_user_votes_received_by_skillset_and_roles_by_me = lambda do
         protected!
-        url = "/users/#{@session_hash["id"]}/aggregate-votes-received?#{params.to_param}"
+        url = "/users/#{encrypt(@session_hash["id"])}/aggregate-votes-received?#{params.to_param}"
         redirect to url
     end
 
     get_user_contributions_selected_by_skillset_and_roles_by_me = lambda do
         protected!
-        url = "/users/#{@session_hash["id"]}/aggregate-contributors-received?#{params.to_param}"
+        url = "/users/#{encrypt(@session_hash["id"])}/aggregate-contributors-received?#{params.to_param}"
         redirect to url
     end
 

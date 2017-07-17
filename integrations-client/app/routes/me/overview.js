@@ -5,9 +5,9 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     actions: {
-        refresh(){
-            this.refresh();
-        }
+//        refresh(){
+//            this.refresh(); // let parent handle 
+//        }
     },
     model: function(params) { 
 

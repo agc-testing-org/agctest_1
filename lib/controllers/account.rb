@@ -218,7 +218,7 @@ class Account
     def get_profile user
         if user.user_profile && user.user_profile.user_position
             return {
-                :id => user.id,
+                :id => user.user_profile.user_id,
                 :location => user.user_profile.location_name,
                 :title => user.user_profile.user_position.title,
                 :industry => user.user_profile.user_position.industry,

@@ -9,7 +9,7 @@ export default DS.Model.extend({
     sender_id: attr('number'),
     sender_first_name: attr('string'),
     sender_last_name: attr('string'),
-    user_id: attr('number'),
+    user_id: attr('string'),
     user_first_name: attr('string'),
     user_last_name: attr('string'),
     user_profile: DS.belongsTo('user-profile'), 

@@ -16,7 +16,7 @@ describe "/user-teams" do
         end
         it "should return sender_id" do
             @team_invite_result.each_with_index do |r,i|
-                expect(@res[i]["sender_id"]).to eq(r["sender_id"])
+                expect(decrypt(@res[i]["sender_id"]).to_i).to eq(r["sender_id"])
             end
         end
         it "should return seat_id" do
@@ -67,10 +67,10 @@ describe "/user-teams" do
                         expect(@single_res["accepted"]).to be false
                     end 
                     it "should create a new user" do
-                        expect(@mysql_client.query("select * from users where id = #{@single_res["user_id"]}").count).to eq 1
+                        expect(@mysql_client.query("select * from users where id = #{decrypt(@single_res["user_id"]).to_i}").count).to eq 1
                     end
                     it "should return user_id" do
-                        expect(@single_res["user_id"]).to eq(@team_invite_result.first["user_id"]) 
+                        expect(decrypt(@single_res["user_id"]).to_i).to eq(@team_invite_result.first["user_id"]) 
                     end
                     it "should store token" do
                         expect(@team_invite_result.first["token"]).to_not be nil
@@ -103,7 +103,7 @@ describe "/user-teams" do
             context "talent not member" do
                 fixtures :user_teams
                 before(:each) do
-                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{decrypt(@user).to_i}")
                     post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
                 it_behaves_like "not_found"
@@ -180,7 +180,7 @@ describe "/user-teams" do
             context "talent not member" do
                 fixtures :user_teams
                 before(:each) do
-                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{decrypt(@user).to_i}")
                     get "/user-teams?team_id=#{@team}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
                 it_behaves_like "not_found"
