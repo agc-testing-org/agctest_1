@@ -470,8 +470,8 @@ describe ".Account" do
                 @res = @account.request_token @email
                 @upload_query = "select * from users where id = #{decrypt(users(:adam).id).to_i}"
             end
-            it "should return true" do
-                expect(@res).to eq(true)
+            it "should return object" do
+                expect(@res.email).to eq(@email)
             end
             it "should save a token to the database" do
                 expect(@mysql_client.query(@upload_query).first["token"]).to_not be_empty
@@ -484,7 +484,7 @@ describe ".Account" do
         end
         context "when an account does not exist" do
             it "should return false" do
-                expect(@account.request_token "adam12345@wired7.com").to eq(false)
+                expect(@account.request_token "adam12345@wired7.com").to be nil 
             end
         end
     end
