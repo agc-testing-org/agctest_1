@@ -1,5 +1,4 @@
 # Additional setup for API tests
-
 RSpec.configure do |config|
     config.before(:each) do
         if @CREATE_TOKENS # if users fixtures are loaded

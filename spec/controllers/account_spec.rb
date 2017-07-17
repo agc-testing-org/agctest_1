@@ -324,8 +324,8 @@ describe ".Account" do
                 :ip => @ip,
                 :jwt => @jwt
             }
-            @res = @account.update users(:adam).id, update_fields 
-            @record = @mysql_client.query("select * from users where id = #{users(:adam).id}").first
+            @res = @account.update decrypt(users(:adam).id).to_i, update_fields 
+            @record = @mysql_client.query("select * from users where id = #{decrypt(users(:adam).id).to_i}").first
         end
         context "response" do
             it "should return boolean for success" do
@@ -345,7 +345,7 @@ describe ".Account" do
         context "account exists" do
             fixtures :users
             before(:each) do
-                params = {:id => users(:adam).id}
+                params = {:id => decrypt(users(:adam).id).to_i}
                 @res = @account.get params
             end
             context "object" do
@@ -383,10 +383,10 @@ describe ".Account" do
             fixtures :users
             before(:each) do
                 @ip = "192.168.1.1"
-                @id = users(:adam).id
+                @id = decrypt(users(:adam).id).to_i
                 @provider = 1
                 @res = @account.record_login @id, @ip
-                @record = @mysql_client.query("select * from logins where user_id = #{users(:adam).id}").first
+                @record = @mysql_client.query("select * from logins where user_id = #{@id}").first
             end
             context "response" do
                 it "should return id of login" do
@@ -468,7 +468,7 @@ describe ".Account" do
             before(:each) do
                 @email = users(:adam).email
                 @res = @account.request_token @email
-                @upload_query = "select * from users where id = #{users(:adam).id}"
+                @upload_query = "select * from users where id = #{decrypt(users(:adam).id).to_i}"
             end
             it "should return true" do
                 expect(@res).to eq(true)
@@ -495,7 +495,7 @@ describe ".Account" do
             before(:each) do
                 @email = users(:adam).email
                 @email_hash = Digest::MD5.hexdigest(@email)
-                @query = "select * from users where id = #{users(:adam).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam).id).to_i}"
             end
             context "token generated 24 hours +" do
                 before(:each) do
@@ -542,7 +542,7 @@ describe ".Account" do
             @email = users(:adam).email
             @email_hash = Digest::MD5.hexdigest(@email)
             @account.request_token @email
-            @query = "select * from users where id = #{users(:adam).id}"
+            @query = "select * from users where id = #{decrypt(users(:adam).id).to_i}"
             @token = @mysql_client.query(@query).first["token"]
         end
         context "with user object" do
@@ -598,7 +598,7 @@ describe ".Account" do
     context "#update_role" do
         fixtures :users, :roles
         before(:each) do
-            @user_id = users(:adam).id
+            @user_id = decrypt(users(:adam).id).to_i
             @role_id = roles(:product).id
             @active = true
             @account.update_role @user_id, @role_id, @active
@@ -649,7 +649,7 @@ describe ".Account" do
                 context "when confirmed" do
                     it "should return user object" do
                         @email = users(:adam_confirmed).email
-                        expect((@account.sign_in @email, @password, @ip)[:id]).to eq(users(:adam_confirmed).id)                    
+                        expect((@account.sign_in @email, @password, @ip)[:id]).to eq(decrypt(users(:adam_confirmed).id).to_i)                    
                     end
                 end
             end
@@ -680,7 +680,7 @@ describe ".Account" do
         end
         context "is a member" do
             before(:each) do
-                @user_id = user_teams(:adam_confirmed).user_id
+                @user_id = decrypt(user_teams(:adam_confirmed).user_id).to_i
                 @res = @account.get_seat @user_id, @team_id
             end
             it "should return owner" do
@@ -689,7 +689,7 @@ describe ".Account" do
         end
         context "has not accepted" do
             before(:each) do
-                @user_id = user_teams(:adam_invited_expired).user_id
+                @user_id = decrypt(user_teams(:adam_invited_expired).user_id).to_i
                 @res = @account.get_seat @user_id, @team_id
             end
             it "should return false" do
@@ -702,7 +702,7 @@ describe ".Account" do
         fixtures :users, :teams, :user_teams, :seats
         context "is owner on any team" do
             before(:each) do
-                @user_id = user_teams(:adam_confirmed).user_id
+                @user_id = decrypt(user_teams(:adam_confirmed).user_id).to_i
                 @res = @account.is_owner? @user_id
             end
             it "should return true" do
@@ -711,7 +711,7 @@ describe ".Account" do
         end
         context "not an owner" do
             before(:each) do
-                @user_id = user_teams(:adam_invited_expired).user_id
+                @user_id = decrypt(user_teams(:adam_invited_expired).user_id).to_i
                 @mysql_client.query("update user_teams set accepted = true where id = #{user_teams(:adam_invited_expired).id}")
                 @res = @account.is_owner? @user_id
             end
@@ -727,7 +727,7 @@ describe ".Account" do
         context "connections" do
             fixtures :user_connections
             before(:each) do
-                user_id = users(:masha_get_connection_request).id
+                user_id = decrypt(users(:masha_get_connection_request).id).to_i
                 query = {"user_connections.contact_id" => user_id}
                 @res = (@account.get_user_connections query).first
             end
@@ -760,7 +760,7 @@ describe ".Account" do
         context "user_info" do
             fixtures :user_connections
             before(:each) do
-                user_id = users(:masha_post_connection_request).id
+                user_id = decrypt(users(:masha_post_connection_request).id).to_i
                 @res = (@account.get_user_connections_accepted user_id).first
             end
             it "should include user_id" do
@@ -777,8 +777,8 @@ describe ".Account" do
         context "connection_request_read" do
             fixtures :user_connections
             before(:each) do
-                contact_id = (users(:masha_get_connection_request).id)
-                user_id = (users(:masha_post_connection_request).id)
+                contact_id = (decrypt(users(:masha_get_connection_request).id).to_i)
+                user_id = (decrypt(users(:masha_post_connection_request).id).to_i)
                 @read = false
                 @confirmed = 3
                 @res = (@account.update_user_connections contact_id, user_id, @read, @confirmed)
@@ -794,15 +794,15 @@ describe ".Account" do
         context "connection_request_confirmed" do
             fixtures :user_connections
             before(:each) do
-                @contact_id = (users(:adam_protected).id)
-                @user_id = (users(:adam).id)
+                @contact_id = (decrypt(users(:adam_protected).id).to_i)
+                @user_id = (decrypt(users(:adam).id).to_i)
                 @res = (@account.create_connection_request @user_id, @contact_id)
             end
             it "should include user_id" do
-                expect(@res["user_id"]).to eq(@user_id)
+                expect(decrypt(@res["user_id"]).to_i).to eq(@user_id)
             end
             it "should include contact_id" do
-                expect(@res["contact_id"]).to eq(@contact_id)
+                expect(decrypt(@res["contact_id"]).to_i).to eq(@contact_id)
             end
             it "should include read" do
                 expect(@res["read"]).to eq(false)

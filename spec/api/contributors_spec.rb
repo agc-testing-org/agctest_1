@@ -36,7 +36,7 @@ describe "/contributors" do
                 expect(@sql["repo"]).to_not be nil
             end
             it "should include user_id" do
-                expect(@sql["user_id"]).to eq(users(:adam_confirmed).id)
+                expect(@sql["user_id"]).to eq(decrypt(users(:adam_confirmed).id).to_i)
             end
             it "should include sprint_state_id" do
                 expect(@sql["sprint_state_id"]).to eq(@sprint_state_id)
@@ -135,7 +135,7 @@ describe "/contributors" do
         context "valid contributor" do
             before(:each) do
                 get "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
                 @res = JSON.parse(last_response.body)
             end
             it "should return contributor id" do
@@ -169,7 +169,7 @@ describe "/contributors" do
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
                 patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @sql = @mysql_client.query("select * from contributors where user_id = #{contributors(:adam_confirmed_1).user_id} ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
             end
             context "contributor" do
                 it "should include commit" do
@@ -356,7 +356,7 @@ describe "/contributors" do
                         expect(@mysql["contributor_id"]).to eq(@contributor_id)
                     end
                     it "should save arbiter (judge)" do
-                        expect(@mysql["arbiter_id"]).to eq(users(:adam_admin).id)
+                        expect(@mysql["arbiter_id"]).to eq(decrypt(users(:adam_admin).id).to_i)
                     end
                     it "should save pull request" do
                         expect(@mysql["pull_request"]).to eq(@pull_id)

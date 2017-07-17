@@ -298,7 +298,7 @@ class Integrations < Sinatra::Base
         account.create_email user
         if fields[:roles].length < 5 #accept roles from people that sign up without an invite
             fields[:roles].each do |r|
-                account.update_role user.id, r[:id], r[:active]
+                account.update_role decrypt(user.id), r[:id], r[:active]
             end
         end
         status 201
@@ -319,7 +319,7 @@ class Integrations < Sinatra::Base
         (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
-        user_params = {:id => team["user_id"]}
+        user_params = {:id => decrypt(team["user_id"])}
         user = account.get user_params
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
         owner = ((account.is_owner? user[:id]) || user[:admin])
@@ -426,8 +426,7 @@ class Integrations < Sinatra::Base
     end
 
     users_get_by_id = lambda do
-        account = Account.new
-        puts params.inspect
+        account = Account.new 
         params["id"] = decrypt params["id"]
         user = account.get_users params
         user[0] || return_not_found
@@ -932,7 +931,7 @@ class Integrations < Sinatra::Base
         protected!
         check_required_field params[:id], "id"
         account = Account.new
-        id = decrypt(params[:id])
+        id = decrypt(params[:id]) || (halt 200, {:id => 0}.to_json)  
         query = {"user_connections.contact_id" => id, :user_id => @session_hash["id"]} 
         outgoing = account.get_user_connections query
         query = {"user_connections.user_id" => id, "user_connections.contact_id" => @session_hash["id"]}
@@ -956,7 +955,7 @@ class Integrations < Sinatra::Base
         protected!
         check_required_field params[:id], "id"
         account = Account.new
-        query = {:id =>  decrypt(params[:id]), :contact_id => @session_hash["id"]} 
+        query = {:id => params[:id], :contact_id => @session_hash["id"]} 
         requests = account.get_user_connections query
         requests || (return_error "request not found")
         status 200
@@ -981,7 +980,7 @@ class Integrations < Sinatra::Base
         account = Account.new
         invitation = account.get_invitation fields[:token]
         (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
-        (@session_hash["id"] == invitation.first.user_id) || (return_error "this invitation is invalid")
+        (@session_hash["id"] == decrypt(invitation.first.user_id).to_i) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
         status 200
@@ -1081,7 +1080,6 @@ class Integrations < Sinatra::Base
         params["user_id"] = decrypt(params["user_id"])
         requests = feedback.user_comments_created_by_skillset_and_roles params
         requests || (return_error "unable to retrieve comments") 
-        puts requests.first.inspect
         return {:meta => {:count => (feedback.get_count requests)}, :data => (feedback.build_feedback requests)}.to_json
     end
 

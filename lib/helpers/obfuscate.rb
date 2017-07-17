@@ -15,9 +15,16 @@ module Obfuscate
     end
 
     def decrypt(value)
-        c = cipher.decrypt
-        c.key = Digest::SHA256.digest(cipher_key)
-        c.update(Base64.urlsafe_decode64(value.to_s)) + c.final
+        if value
+            begin
+                c = cipher.decrypt
+                c.key = Digest::SHA256.digest(cipher_key)
+                c.update(Base64.urlsafe_decode64(value.to_s)) + c.final
+            rescue => e
+                puts e
+                return nil
+            end
+        end
     end
 
     def encrypt(value)
