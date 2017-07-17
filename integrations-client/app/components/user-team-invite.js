@@ -21,6 +21,7 @@ export default Ember.Component.extend({
                     seat_id: selectedSeat 
                 });
                 invitation.save().then(function(){
+                    _this.set("email","");
                     _this.sendAction("refresh");
                 }, function(xhr, status, error) {
                     var response = xhr.errors[0].detail;
