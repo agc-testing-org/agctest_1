@@ -1,4 +1,5 @@
 class Issue 
+    include Obfuscate
     def initialize
 
     end 
@@ -159,7 +160,7 @@ class Issue
                             :comments => comments,
                             :votes => c.votes.as_json
                         }
-                        if c.user_id == user_id
+                        if decrypt(c.user_id).to_i == user_id
                             response[i][:contributors][contributor_length][:commit] = c.commit
                             response[i][:contributors][contributor_length][:commit_success] =  c.commit_success
                             response[i][:contributors][contributor_length][:commit_remote] =  c.commit_remote
