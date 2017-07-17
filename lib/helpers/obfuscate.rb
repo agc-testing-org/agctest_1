@@ -11,7 +11,7 @@ module Obfuscate
     end
 
     def cipher_key
-        'blah!'
+        ENV['INTEGRATIONS_ID_CIPHER']
     end
 
     def decrypt(value)

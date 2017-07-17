@@ -11,17 +11,19 @@ export default Ember.Route.extend({
     model: function(params) {
 
         var defaultSeat = null;
+        var defaultSeatId = null;
         if(this.modelFor("team.select").team.get("default_seat_id")){
             defaultSeat = this.modelFor("team.select").team.get("default_seat_id");
+            defaultSeatId = defaultSeat.get("id")
         }
 
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
             user_teams: this.store.query('user-team', {
                 team_id: this.paramsFor("team.select").id,
-                seat_id: defaultSeat
+                seat_id: defaultSeatId
             }),
-            default_seat_id: defaultSeat
+            default_seat: defaultSeat
         });
     },
 });
