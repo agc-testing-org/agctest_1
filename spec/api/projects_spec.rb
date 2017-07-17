@@ -36,7 +36,7 @@ describe "/projects" do
         end
         it "should return user_id" do
             @project_results.each_with_index do |project_result,i|
-                expect(@projects[i]["user_id"]).to eq(project_result["user_id"])
+                expect(decrypt(@projects[i]["user_id"]).to_i).to eq(project_result["user_id"])
             end
         end
     end
@@ -49,7 +49,7 @@ describe "/projects" do
         end
         it "should return the user_id" do
             @timeline_result.each_with_index do |t,i|
-                expect(@timeline[i]["user_id"]).to eq(t["user_id"])
+                expect(decrypt(@timeline[i]["user_id"]).to_i).to eq(t["user_id"])
             end
         end
         it "should return the state_id" do

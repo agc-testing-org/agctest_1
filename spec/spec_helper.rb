@@ -23,6 +23,8 @@ def app
     Integrations 
 end
 
+include Obfuscate
+
 RSpec.configure do |config|
     config.include Rack::Test::Methods
     config.fixture_path = File.expand_path("../../test/fixtures", __FILE__)

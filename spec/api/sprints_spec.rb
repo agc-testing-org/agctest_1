@@ -17,7 +17,7 @@ describe "/sprints" do
         end
         it "should return user_id" do
             @sprint_results.each_with_index do |sprint_result,i|
-                expect(@sprints[i]["user_id"]).to eq(sprint_result["user_id"])
+                expect(decrypt(@sprints[i]["user_id"]).to_i).to eq(sprint_result["user_id"])
             end
         end
         it "should return title" do

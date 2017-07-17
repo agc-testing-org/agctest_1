@@ -78,11 +78,14 @@ class Repo
         refreshed_master = refresh session, github_token, contributor_id, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, contributor.repo, "master", sprint_state.sha, "master", false
 
         if sprint_state.state.name == "requirements design" && !contributor.prepared # only need to create doc if first time contributing
-            (github.create_contents("#{username}/#{name}",
+            account = Account.new
+            github_secret = account.unlock_github_token session, github_token
+            github = github_client github_secret
+            (github.create_contents("#{username}/#{contributor.repo}",
                                     "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                         "adding placeholder for requirements",
                                         "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
-                                        :branch => sprint_state.id.to_s)) || (return_error "unable to create requirements document")
+                                        :branch => sprint_state.id.to_s)) 
         end
 
         contributor.prepared = (refreshed_sprint_state && refreshed_master)
