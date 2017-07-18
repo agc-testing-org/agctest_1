@@ -7,6 +7,7 @@ export default Ember.Route.extend({
         }
     },
     model: function (params) {
+        var states = this.store.findAll('state');
         var id = this.paramsFor("team.select").id
         this.store.adapterFor('notification').set('namespace', 'teams/'+id);
         var notifications = this.store.query('notification',params);
@@ -14,7 +15,8 @@ export default Ember.Route.extend({
 
         return Ember.RSVP.hash({
             notifications: notifications,
-            params: params
+            params: params,
+            states: states
         });
     }
 });

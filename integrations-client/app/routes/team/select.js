@@ -22,7 +22,7 @@ export default Ember.Route.extend({
     },
     afterModel(model,transition) {
         if(model.team.get("show")){
-            this.transitionTo('team.select.members');
+            this.transitionTo('team.select.notifications');
         }
     }
 });

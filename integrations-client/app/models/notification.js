@@ -14,10 +14,10 @@ export default DS.Model.extend({
     next_sprint_state: DS.belongsTo('sprint-state'),
     user_profile: DS.belongsTo('user-profile'),
     user_id: attr('string'),
+    talent_profile: DS.belongsTo('user-profile'),
+    talent_id: attr('string'),
+    talent_first_name: attr('string'),
     sprint_state_id: attr('number'),
-    state_id: DS.belongsTo('state'),
-    first_name: attr('string'),
-    user_id: attr('number')
-
+    state_id: DS.belongsTo('state')
 });
 
