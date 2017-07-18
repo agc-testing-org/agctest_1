@@ -11,11 +11,13 @@ export default Ember.Route.extend({
     model: function(params) {
 
         var memberSeat = this.store.peekAll("seat").findBy("name","member");
+        var memberSeatId = memberSeat.get("id");
 
         this.store.adapterFor('team-comment').set('namespace', 'user-teams/' + this.paramsFor("team.select").id);
         var user_teams_comments = this.store.query('team-comment', {
             seat_id: memberSeatId
         });
+        /*
         var user_teams_votes = this.store.query('team-vote', {
             seat_id: memberSeatId
         });
@@ -29,8 +31,9 @@ export default Ember.Route.extend({
             seat_id: memberSeatId
         });                                 
         var user_teams_contributors = this.store.query('team-contributors-received', {
-            seat_id: memberSeatId       
+            seat_id: memberSeatId
         }); 
+        */
         this.store.adapterFor('team-comment').set('namespace', '');
 
         return Ember.RSVP.hash({
@@ -38,7 +41,7 @@ export default Ember.Route.extend({
             user_teams_comments: user_teams_comments,
             user_teams: this.store.query('user-team', {
                 team_id: this.paramsFor("team.select").id,
-                seat_id: memberSeat.get("id")
+                seat_id: memberSeatId
             }),
             default_seat: memberSeat
         });
