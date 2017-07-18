@@ -344,12 +344,12 @@ describe "/users" do
     shared_examples_for "contact" do
         it "should include user_id" do
             @contact_result.each_with_index do |r,i|
-                expect(@res[i]["user_id"]).to eq(r["user_id"])
+                expect(decrypt(@res[i]["user_id"]).to_i).to eq(r["user_id"])
             end
         end
         it "should include contact_id" do
             @contact_result.each_with_index do |r,i|
-                expect(@res[i]["contact_id"]).to eq(r["contact_id"])
+                expect(decrypt(@res[i]["contact_id"]).to_i).to eq(r["contact_id"])
             end
         end
         it "should include read" do
@@ -380,7 +380,7 @@ describe "/users" do
             before(:each) do
                 get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:adam_confirmed_request_adam_accepted).user_id} where user_connections.confirmed=2) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:adam_confirmed_request_adam_accepted).user_id})")
+                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} where user_connections.confirmed=2) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i})")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info"
@@ -400,7 +400,7 @@ describe "/users" do
             before(:each) do
                 get "/users/me/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.user_id=users.id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.user_id=users.id where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i}")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info" 
@@ -420,7 +420,7 @@ describe "/users" do
             before(:each) do
                 get "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.user_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.user_id where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info" 
@@ -441,7 +441,7 @@ describe "/users" do
                 @confirmed = 2
                 patch "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
+                @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
             it_behaves_like "contact" 
             it_behaves_like "ok"
@@ -462,7 +462,7 @@ describe "/users" do
             before(:each) do
                 post "/users/#{users(:adam_admin).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select * from user_connections where user_id = #{users(:adam_admin).id}")
+                @contact_result = @mysql_client.query("select * from user_connections where user_id = #{decrypt(users(:adam_admin).id).to_i}")
             end
             it_behaves_like "contact"
             it_behaves_like "created"
@@ -482,7 +482,7 @@ describe "/users" do
                 before(:each) do
                     get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = [JSON.parse(last_response.body)]
-                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND user_id = #{@user}")
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id)} AND user_id = #{decrypt(@user).to_i}")
                 end
                 it_behaves_like "contact"
                 it_behaves_like "ok"
@@ -500,7 +500,7 @@ describe "/users" do
                 before(:each) do
                     get "/users/#{user_connections(:adam_confirmed_request_adam_admin_pending).user_id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                     @res = [JSON.parse(last_response.body)]
-                    @contact_result = @mysql_client.query("select * from user_connections where user_id = #{user_connections(:adam_confirmed_request_adam_admin_pending).contact_id} AND contact_id = #{@user}")
+                    @contact_result = @mysql_client.query("select * from user_connections where user_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i} AND contact_id = #{decrypt(@user).to_i}")
                 end
                 it_behaves_like "contact"
                 it_behaves_like "ok"
@@ -522,13 +522,13 @@ describe "/users" do
         end 
     end
 
-    describe "GET /me/notifications", :focus => true do
+    describe "GET /me/notifications" do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do 
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}"
+                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i}"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end
@@ -549,7 +549,7 @@ describe "/users" do
                 @page = 2
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{@user}"
+                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i}"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page} offset #{(@page - 1) * @per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end

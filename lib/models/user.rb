@@ -1,6 +1,12 @@
 require 'sinatra/activerecord'
 
 class User < ActiveRecord::Base
+    include Obfuscate
+
+    def id
+        encrypt self[:id]
+    end
+
     validates_uniqueness_of :email
     has_many :sprints
     has_many :contributors
@@ -13,4 +19,19 @@ class User < ActiveRecord::Base
     has_many :user_notifications
     has_many :user_connections
     has_many :projects
+
+    #    attr_accessor :public_id
+    #    def attributes
+    #        super.merge('public_id' => self.public_id)
+    #    end
+
+    #    def public_id
+    #        decrypt self[:id]
+    #    end
+
+    #    def self.find(id)
+    #        puts id.inspect
+    #        id = decrypt id
+    #        super 
+    #    end
 end

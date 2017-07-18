@@ -41,7 +41,7 @@ describe ".Repo" do
         context "contributor exists" do
             fixtures :contributors
             it "should return last contribution" do
-                query = {:sprint_state_id => contributors(:adam_confirmed_1).sprint_state_id, :user_id => contributors(:adam_confirmed_1).user_id }
+                query = {:sprint_state_id => contributors(:adam_confirmed_1).sprint_state_id, :user_id => decrypt(contributors(:adam_confirmed_1).user_id).to_i }
                 expect((@repo.get_contributor query)).to eq(contributors(:adam_confirmed_1))
             end
         end

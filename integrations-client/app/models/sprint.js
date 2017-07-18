@@ -5,7 +5,7 @@ const { attr, Model } = DS;
 export default DS.Model.extend({
     title: attr('string'),
     description: attr('string'),
-    user_id: attr('number'),
+    user_id: attr('string'),
     state_id: attr('number'),
     project: DS.belongsTo('project'),
     project_id: attr('number'),

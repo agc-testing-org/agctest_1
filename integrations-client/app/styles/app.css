@@ -41,6 +41,10 @@ body {
 .shadow{
     box-shadow: 0 2px 3px rgba(0,0,0,.1);
 }
+.underline{
+    border-bottom:5px solid #ededed;
+    padding-bottom:4px;
+}
 h1{
     font-size:42px;
     line-height:48px;
@@ -72,6 +76,9 @@ a {
 }
 a:hover {
     color: #20919c;
+}
+li {
+    list-style-position:inside;
 }
 .cursor-pointer{
     cursor:pointer;
@@ -136,7 +143,7 @@ label{
 }
 
 .badge, .btn-group label{
-    font-weight: 300;
+    font-weight: 400;
     font-size: 12px;
     box-shadow: 0 1px 1px rgba(0,0,0,.1);
     margin:1px;
@@ -158,11 +165,17 @@ label{
 .dropdown-menu{
     width:100%;
 }
+.card{
+    border: 1px solid #ededed;
+}
+.card-title{
+    font-weight:400;
+}
 .orange{
     color: orange;
 }
 .text-muted{
-    color: #a5a5a5;
+    color: #989898;
 }
 .logo{
     background-image: url(w7_logo_white.png);
@@ -301,6 +314,9 @@ button{
     margin-bottom:5px;
     font-weight:300;
 }
+.list-group-item li.line{
+    padding-left:10px;
+}
 .list-group-item .line.quotation{
     color: #999;
     padding:10px;
@@ -383,7 +399,7 @@ button{
     left:0px; 
     top:0px;
     height: 100%;
-    width: 100%;    
+    width: 100%;
 }
 .hidden-md-up .vertical-align-hold{
     position: relative;
@@ -708,7 +724,7 @@ button{
     padding-bottom:5px;
     font-weight:300;
     margin-bottom:10px;
-    color: #a5a5a5;
+    color: #989898;
 }
 .main .about.section{
     padding-bottom:0px;
@@ -716,6 +732,7 @@ button{
 }
 .main h4.about.section{
     margin-bottom:5px;
+    font-weight:400;
 }
 .main .slide .skillsets{
     margin-bottom:20px;
@@ -829,9 +846,6 @@ button{
     -moz-border-radius: 0 !important;
     border-radius: 0 !important; 
 }
-.badge{
-}
-
 .form-control{
     color: #4C4C4C !important;
     font-weight:300;

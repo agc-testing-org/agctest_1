@@ -10,7 +10,7 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
 
-        var memberSeatId = this.store.peekAll("seat").findBy("name","member").get("id");
+        var memberSeat = this.store.peekAll("seat").findBy("name","member");
 
         this.store.adapterFor('team-comment').set('namespace', 'user-teams/' + this.paramsFor("team.select").id);
         var user_teams_comments = this.store.query('team-comment', {
@@ -38,9 +38,9 @@ export default Ember.Route.extend({
             user_teams_comments: user_teams_comments,
             user_teams: this.store.query('user-team', {
                 team_id: this.paramsFor("team.select").id,
-                seat_id: memberSeatId
+                seat_id: memberSeat.get("id")
             }),
-            default_seat_id: memberSeatId
+            default_seat: memberSeat
         });
     },
 });

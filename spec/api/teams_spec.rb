@@ -23,8 +23,7 @@ describe "/teams" do
         end 
         it "should return owner" do
             @team_results.each_with_index do |team_result,i|
-                expect(@teams[i]["user_id"]).to_not be nil
-                expect(@teams[i]["user_id"]).to eq(team_result["user_id"])
+                expect(decrypt(@teams[i]["user_id"]).to_i).to eq(team_result["user_id"])
             end                                                    
         end 
         it "should return plan_id" do
@@ -54,10 +53,10 @@ describe "/teams" do
                             @user_team_result = @mysql_client.query("select * from user_teams ORDER BY id DESC").first
                         end
                         it "saves owner as sender_id" do
-                            expect(@user_team_result["sender_id"]).to eq(@user)
+                            expect(@user_team_result["sender_id"]).to eq(decrypt(@user).to_i)
                         end
                         it "saves owner as user_id" do
-                            expect(@user_team_result["user_id"]).to eq(@user)
+                            expect(@user_team_result["user_id"]).to eq(decrypt(@user).to_i)
                         end 
                         it "saves accepted as true" do
                             expect(@user_team_result["accepted"]).to eq 1 
@@ -118,7 +117,7 @@ describe "/teams" do
             fixtures :teams, :user_teams
             before(:each) do
                 get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{@user} AND user_teams.accepted = true")
+                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true")
                 @teams = JSON.parse(last_response.body)
             end
             it_behaves_like "teams"
@@ -178,7 +177,7 @@ describe "/teams" do
         context "non-member seat" do
             fixtures :user_teams
             before(:each) do
-                @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{decrypt(@user).to_i}")
                 get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @team_results = @mysql_client.query("select teams.* from teams where teams.id = #{@team}")
                 @teams = [JSON.parse(last_response.body)]

@@ -5,6 +5,7 @@ class Feedback
   end
 
   def build_feedback results
+    account = Account.new
     begin
       response = []
       results.each_with_index do |result,i|
@@ -15,6 +16,7 @@ class Feedback
         response[i][:next_sprint_state] = result.next_sprint_state
         response[i][:comment] = result.comment
         response[i][:vote] = result.vote
+        response[i][:user_profile] = account.get_profile result.user
       end
       return response.as_json
     rescue => e
