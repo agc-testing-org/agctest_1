@@ -1,5 +1,4 @@
 require 'spec_helper'
-
 describe "API" do
     shared_examples_for "session_response" do
         it "should return access token" do
@@ -166,7 +165,7 @@ describe "API" do
                 @email = users(:adam_confirmed).email
                 post "/login", { :password => @password, :email => @email }.to_json 
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
@@ -235,7 +234,7 @@ describe "API" do
                 @token = user_teams(:adam_confirmed_b_team).token
                 post "/accept", { :password => @password, :firstName => @first_name, :token => @token }.to_json
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
                 @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
             end 
             it_behaves_like "session_response"
@@ -249,7 +248,7 @@ describe "API" do
             before(:each) do
                 post "/accept", { :password => @password, :firstName => @first_name, :token => user_teams(:adam_invited_expired).token }.to_json
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             end
             it_behaves_like "error", "this invitation has expired" 
         end
@@ -302,13 +301,13 @@ describe "API" do
             context "with valid token" do
                 context "non-protected account" do
                     before(:each) do
-                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                        @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
                         @token = users(:adam_confirmed).token
                         @email = users(:adam_confirmed).email
                         @email_hash = Digest::MD5.hexdigest(users(:adam_confirmed).email)
                         post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                         @res = JSON.parse(last_response.body)
-                        @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                        @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
                     end
                     it_behaves_like "session_response"
                     it_behaves_like "new_session"
@@ -316,11 +315,11 @@ describe "API" do
                 end
                 context "protected account" do
                     before(:each) do
-                        @query = "select * from users where id = #{users(:adam_protected).id}"
+                        @query = "select * from users where id = #{decrypt(users(:adam_protected).id)}"
                         @email = users(:adam_protected).email
                         post "/reset", { :password => @password, :token => "#{Digest::MD5.hexdigest(users(:adam_protected).email)}-#{users(:adam_protected).token}" }.to_json 
                         @res = JSON.parse(last_response.body)
-                        @query = "select * from users where id = #{users(:adam_protected).id}"
+                        @query = "select * from users where id = #{decrypt(users(:adam_protected).id)}"
                     end
                     it "should set protected to false" do
                         expect(@mysql_client.query("select * from users where email = '#{users(:adam_protected).email}'").first["protected"]).to eq(0)
@@ -333,7 +332,7 @@ describe "API" do
             context "with token older than 24 hours / invalid" do
                 before(:each) do
                     @token = users(:adam).token
-                    @query = "select * from users where id = #{users(:adam).id}"
+                    @query = "select * from users where id = #{decrypt(users(:adam).id)}"
                     @email_hash = Digest::MD5.hexdigest(users(:adam).email)
                     post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json 
                     @res = JSON.parse(last_response.body)
@@ -343,7 +342,7 @@ describe "API" do
             context "with invalid password" do
                 before(:each) do
                     @token = users(:adam).token
-                    @query = "select * from users where id = #{users(:adam).id}"
+                    @query = "select * from users where id = #{decrypt(users(:adam).id)}"
                     @email_hash = Digest::MD5.hexdigest(users(:adam).email)
                     @password = 123
                     post "/reset", { :password => @password, :token => "#{@email_hash}-#{@token}" }.to_json
@@ -376,7 +375,7 @@ describe "API" do
 
                 post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             end
             it_behaves_like "session_response" 
             it_behaves_like "new_session"
@@ -396,7 +395,7 @@ describe "API" do
 
                 post "/session/github", {:grant_type => "github", :auth_code => @code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
@@ -434,7 +433,7 @@ describe "API" do
                 }.to_json, object_class: OpenStruct) }
                 post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
@@ -461,7 +460,7 @@ describe "API" do
                 }.to_json, object_class: OpenStruct) }
                 post "/session/linkedin", {:auth_code => code }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@access_token}"}
                 @res = JSON.parse(last_response.body)
-                @query = "select * from users where id = #{users(:adam_confirmed).id}"
+                @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             end
             it_behaves_like "session_response"
             it_behaves_like "new_session"
@@ -474,7 +473,7 @@ describe "API" do
                 end
                 context "user_profiles" do
                     it "should include user_id" do
-                        expect(@user_profiles["user_id"]).to eq users(:adam_confirmed).id
+                        expect(@user_profiles["user_id"]).to eq decrypt(users(:adam_confirmed).id).to_i
                     end
                     it "should include headline" do
                         expect(@user_profiles["headline"]).to eq @headline
@@ -542,11 +541,11 @@ describe "API" do
     describe "POST /session" do
         fixtures :users, :user_teams, :seats
         before(:each) do
-            @query = "select * from users where id = #{users(:adam_confirmed).id}"
+            @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
             @original_jwt = @mysql_client.query(@query).first["jwt"]
             post "/session?grant_type=refresh_token&refresh_token=#{users(:adam_confirmed).refresh}"
             @res = JSON.parse(last_response.body)
-            @query = "select * from users where id = #{users(:adam_confirmed).id}"            
+            @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"            
         end
 
         it_behaves_like "session_response"

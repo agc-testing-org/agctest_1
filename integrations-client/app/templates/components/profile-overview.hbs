@@ -6,7 +6,7 @@
             {{else}}
             <h1 class="name text-capitalize"><i class="fa fa-fw fa-2x fa-user-secret" aria-hidden="true"></i></h1>
             {{/if}}
-            <h3 class="description">{{user-profile-descriptor user_profile=user}}</h3>
+            <h3 class="description">{{user-profile-descriptor user_profile=user multiple_lines=true}}</h3>
             <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
             {{#if me}}
 

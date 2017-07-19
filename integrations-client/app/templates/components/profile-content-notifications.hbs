@@ -7,7 +7,7 @@
                 <div class="list-group-item rounded highlight-{{notification.read}}">                    
                     {{#if (eq notification.diff "comment")}}
                         <p class="line">
-                            {{#if notification.user_profile.title}}{{#link-to "profile" notification.user_profile.id}}A {{user-profile-descriptor user_profile=notification.user_profile class="d-inline"}}{{/link-to}}{{else}}{{#link-to "profile" notification.user_profile.id}}Someone{{/link-to}}{{/if}} commented on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+                            {{#if notification.user_profile.title}}{{#link-to "profile" notification.user_profile.id}}A {{user-profile-descriptor user_profile=notification.user_profile class="d-inline"}}{{/link-to}}{{else}}{{#link-to "profile" notification.user_id}}Someone{{/link-to}}{{/if}} commented on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
                         </p>
                         <p class="line quotation">
                             <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
@@ -16,13 +16,13 @@
 
                     {{#if (eq notification.diff "vote")}}
                         <p class="line">
-                            {{#if notification.user_profile.title}}{{#link-to "profile" notification.user_profile.id}}A {{user-profile-descriptor user_profile=notification.user_profile class="d-inline"}}{{/link-to}}{{else}}{{#link-to "profile" notification.user_profile.id}}Someone{{/link-to}}{{/if}} voted on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+                            {{#if notification.user_profile.title}}{{#link-to "profile" notification.user_profile.id}}A {{user-profile-descriptor user_profile=notification.user_profile class="d-inline"}}{{/link-to}}{{else}}{{#link-to "profile" notification.user_id}}Someone{{/link-to}}{{/if}} voted on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
                         </p>
                     {{/if}}
                    
                     {{#if (eq notification.diff "new")}}
                         <p class="line">
-                            {{#if notification.user_profile.title}}{{#link-to "profile" notification.user_profile.id}}A {{user-profile-descriptor user_profile=notification.user_profile class="d-inline"}}{{/link-to}}{{else}}{{#link-to "profile" notification.user_profile.id}}Someone{{/link-to}}{{/if}} created a new sprint ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) for {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
+                            {{#if notification.user_profile.title}}{{#link-to "profile" notification.user_profile.id}}A {{user-profile-descriptor user_profile=notification.user_profile class="d-inline"}}{{/link-to}}{{else}}{{#link-to "profile" notification.user_id}}Someone{{/link-to}}{{/if}} created a new sprint ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) for {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
                         </p>
                     {{/if}}
 
@@ -49,13 +49,31 @@
             {{application-paging-same-page page=params.page last=notifications.length count=notifications.meta.count class="text-right"}}
             {{else}}
                 <div class="list-group-item rounded highlight-false">
-                    <h3 class="line">Welcome to Wired7!</h3>
-                    <p class="line">We designed our platform to make it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached.  Use the platform to learn, grow, or get noticed.</p>  
+                    <h3 class="line">Welcome to Wired7 {{sessionAccount.account.first_name}}!</h3>
+                    <p class="line">Our platform makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached.  {{#if sessionAccount.account.owner}}Use it to evaluate candidates up front, before you invest time in the interview.{{else}} Use it to learn, grow, or get noticed.{{/if}}</p>  
                     <p class="line">Here's how it works:</p>
-                    <li class="line">Your profile is public but <span class="text-warning"><strong>anonymous</strong></span>.  It displays your name and other non-specific data that you add but hides your name when viewed by other users.</li>
-                    <li class="line">We use the information you add to your profile to notify you of <span class="text-warning"><strong>sprint</strong></span> events you might be interested in.</li>
-                    <li class="line">A <span class="text-warning"><strong>sprint</strong></span> is an idea for a specific project that moves through the phases of the software development lifecycle.  You and others can propose solutions to any phase of a sprint and give feedback.</li> 
-                    <li class="line">As you propose solutions to sprints, the feedback that you receive from other users will populate on your profile.  We tag all feedback with <span class="text-warning"><strong>anonymous</strong></span> high-level information about users to provide a basic idea of the <span class="text-warning"><strong>professional experience of the reviewer</strong></span>.</li>
+                    {{#if sessionAccount.account.owner}}
+                        <li class="line">Candidate profiles are public but <span class="text-warning"><strong>anonymous</strong></span>.  They display non-specific data when viewed by other users.</li>
+                        <li class="line">We use profile information to invite candidates to relevant <span class="text-warning"><strong>sprint</strong></span> events.</li>
+                    {{else}}
+                        <li class="line">Your profile is public but <span class="text-warning"><strong>anonymous</strong></span>.  It displays your name for you but only non-specific data for everyone else.</li>
+                        <li class="line">We use profile information to notify you of <span class="text-warning"><strong>sprint</strong></span> events you might be interested in.</li>
+                    {{/if}}
+
+                    <li class="line">A <span class="text-warning"><strong>sprint</strong></span> is an idea for a specific project that moves through the phases of the <a target="https://en.wikipedia.org/wiki/Software_development_process" href="https://en.wikipedia.org/wiki/Systems_development_life_cycle">software development lifecycle</a>.  {{#if sessionAccount.account.owner}}Candidates{{else}}You and others{{/if}} can propose solutions and give feedback to any phase of a sprint.</li> 
+                     <li class="line">
+                    {{#if sessionAccount.account.owner}}
+                        Candidate proposals and feedback will populate on user profiles. Use this to assess your candidate in different ways. What do others think of proposals?  How well does the candidate respond to feedback?
+                    {{else}}
+                        As you propose solutions to sprints, the feedback that you receive from others will populate on your profile.  
+                    {{/if}} 
+                    We tag all feedback with <span class="text-warning"><strong>anonymous</strong></span> high-level information about users to provide a basic idea of the <span class="text-warning"><strong>professional experience of the reviewer</strong></span>.
+                    </li>
+                    {{#if sessionAccount.account.owner}}
+                        <p class="line">Invite candidates through your organization's team to get started.  If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.</p>
+                    {{else}}
+                        <p class="line">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started.</p>
+                    {{/if}}
                     <p class="line"></p>
                 </div>
             {{/if}}

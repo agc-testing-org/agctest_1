@@ -16,7 +16,7 @@ describe "/user-teams" do
         end
         it "should return sender_id" do
             @team_invite_result.each_with_index do |r,i|
-                expect(@res[i]["sender_id"]).to eq(r["sender_id"])
+                expect(decrypt(@res[i]["sender_id"]).to_i).to eq(r["sender_id"])
             end
         end
         it "should return seat_id" do
@@ -67,10 +67,10 @@ describe "/user-teams" do
                         expect(@single_res["accepted"]).to be false
                     end 
                     it "should create a new user" do
-                        expect(@mysql_client.query("select * from users where id = #{@single_res["user_id"]}").count).to eq 1
+                        expect(@mysql_client.query("select * from users where id = #{decrypt(@single_res["user_id"]).to_i}").count).to eq 1
                     end
                     it "should return user_id" do
-                        expect(@single_res["user_id"]).to eq(@team_invite_result.first["user_id"]) 
+                        expect(decrypt(@single_res["user_id"]).to_i).to eq(@team_invite_result.first["user_id"]) 
                     end
                     it "should store token" do
                         expect(@team_invite_result.first["token"]).to_not be nil
@@ -103,7 +103,7 @@ describe "/user-teams" do
             context "talent not member" do
                 fixtures :user_teams
                 before(:each) do
-                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{decrypt(@user).to_i}")
                     post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
                 it_behaves_like "not_found"
@@ -180,7 +180,7 @@ describe "/user-teams" do
             context "talent not member" do
                 fixtures :user_teams
                 before(:each) do
-                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{@user}")
+                    @mysql_client.query("update user_teams set seat_id = #{seats(:priority).id} where user_id = #{decrypt(@user).to_i}")
                     get "/user-teams?team_id=#{@team}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
                 it_behaves_like "not_found"
@@ -193,4 +193,138 @@ describe "/user-teams" do
             it_behaves_like "not_found"
         end
     end
+
+    shared_examples_for "team-aggregates" do
+        it "should return user_id as id" do
+            expect(@result.count).to be > 0
+            @result.each_with_index do |r,i|
+                expect(decrypt(@res[i]["id"]).to_i).to eq r["id"]
+            end
+        end
+        it "should return count" do
+            @result.each_with_index do |r,i|
+                expect(@res[i]["count"]).to eq r["count"]
+            end
+        end
+    end
+
+    describe "GET /:id/team-comments" do
+        fixtures :teams, :user_teams, :sprint_timelines, :contributors, :sprint_states, :sprints, :sprint_states, :projects, :comments
+        context "valid team_id" do
+            before(:each) do
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-comments?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.diff = 'comment') LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+            end
+            it_behaves_like "team-aggregates"
+        end
+        context "not member" do
+            fixtures :seats
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:sponsored).id} where id = #{user_teams(:adam_confirmed_adam_admin_team).id}")
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-comments?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end
+            it_behaves_like "not_found"
+        end
+    end
+
+    describe "GET /:id/team-votes" do
+        fixtures :teams, :user_teams, :sprint_timelines, :contributors, :sprint_states, :sprints, :sprint_states, :projects, :votes
+        context "valid team_id" do
+            before(:each) do
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-votes?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.diff = 'vote') LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+            end
+            it_behaves_like "team-aggregates"
+        end
+        context "not member" do
+            fixtures :seats 
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:sponsored).id} where id = #{user_teams(:adam_confirmed_adam_admin_team).id}")
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-votes?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end 
+            it_behaves_like "not_found"
+        end 
+    end
+
+    describe "GET /:id/team-contributors" do
+        fixtures :teams, :user_teams, :sprint_timelines, :contributors, :sprint_states, :sprints, :sprint_states, :projects
+        context "valid team_id" do
+            before(:each) do                    
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-contributors?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)                               
+                @result = @mysql_client.query("SELECT count(distinct(contributors.id)) as count, users.id as id FROM `contributors` RIGHT JOIN users ON (contributors.user_id = users.id) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+            end                                                                                                 
+            it_behaves_like "team-aggregates"               
+        end    
+        context "not member" do
+            fixtures :seats 
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:sponsored).id} where id = #{user_teams(:adam_confirmed_adam_admin_team).id}")
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-contributors?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end 
+            it_behaves_like "not_found"
+        end 
+    end 
+
+    describe "GET /:id/team-comments-received" do
+        fixtures :teams, :user_teams, :sprint_timelines, :contributors, :sprint_states, :sprints, :sprint_states, :projects, :comments
+        context "valid team_id" do
+            before(:each) do
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-comments-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'comment') RIGHT JOIN users ON (users.id = contributors.user_id) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+            end
+            it_behaves_like "team-aggregates"
+        end
+        context "not member" do
+            fixtures :seats 
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:sponsored).id} where id = #{user_teams(:adam_confirmed_adam_admin_team).id}")
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-comments-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end 
+            it_behaves_like "not_found"
+        end 
+    end
+
+    describe "GET /:id/team-votes-received" do
+        fixtures :teams, :user_teams, :sprint_timelines, :contributors, :sprint_states, :sprints, :sprint_states, :projects, :votes
+        context "valid team_id" do
+            before(:each) do                    
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-votes-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)                               
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'vote') RIGHT JOIN users ON users.id = contributors.user_id LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+            end                                                                                                 
+            it_behaves_like "team-aggregates"               
+        end                                                         
+        context "not member" do
+            fixtures :seats 
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:sponsored).id} where id = #{user_teams(:adam_confirmed_adam_admin_team).id}")
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-votes-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end 
+            it_behaves_like "not_found"
+        end 
+    end
+
+    describe "GET /:id/team-contributors-received" do
+        fixtures :teams, :user_teams, :sprint_timelines, :contributors, :sprint_states, :sprints, :sprint_states, :projects
+        context "valid team_id" do
+            before(:each) do                    
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-contributors-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)                               
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND sprint_timelines.diff = 'winner') RIGHT JOIN users ON (users.id = contributors.user_id) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'winner' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+            end                                                                                                 
+            it_behaves_like "team-aggregates"               
+        end        
+        context "not member" do
+            fixtures :seats 
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:sponsored).id} where id = #{user_teams(:adam_confirmed_adam_admin_team).id}")
+                get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-contributors-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end 
+            it_behaves_like "not_found"
+        end 
+    end   
 end

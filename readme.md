@@ -18,6 +18,7 @@
     
     ### INTEGRATIONS ENV VARS
     export INTEGRATIONS_HOST="https://localhost:3000" #https://wired7.com
+    export INTEGRATIONS_ID_CIPHER="12345678"
     export INTEGRATIONS_S3_BUCKET="app.wired7.com"
     export INTEGRATIONS_GITHUB_CLIENT_ID=""
     export INTEGRATIONS_GITHUB_CLIENT_SECRET=""

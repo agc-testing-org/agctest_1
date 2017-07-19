@@ -23,6 +23,7 @@ export default Component.extend({
             }
         },
         accept(){
+            var _this = this;
             var password = this.get("password");
             var passwordb = this.get("passwordb");
             var firstName = this.get("firstName");

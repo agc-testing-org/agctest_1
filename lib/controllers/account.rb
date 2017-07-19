@@ -218,7 +218,7 @@ class Account
     def get_profile user
         if user.user_profile && user.user_profile.user_position
             return {
-                :id => user.id,
+                :id => user.user_profile.user_id,
                 :location => user.user_profile.location_name,
                 :title => user.user_profile.user_position.title,
                 :industry => user.user_profile.user_position.industry,
@@ -263,28 +263,26 @@ class Account
         end
     end
 
-    def create_email user 
-        return mail user.email, "Wired7 Registration", "#{user.first_name},<br><br>Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{user.first_name},\n\nThanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.\n\n\n- Adam Cockell\nWired7 Founder"
+    def create_email email, first_name 
+        return mail email, "Wired7 Registration", "#{first_name},<br><br>Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{first_name},\n\nThanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.\n\n\n- Adam Cockell\nWired7 Founder"
     end
 
     def request_token email
         user = User.find_by(email: email)
         if user 
             user[:token] = SecureRandom.hex
-
-            name = user.first_name
-            if name 
-                name = name
-            else
-                name = "Hi"
-            end
-
             user.save
-
-            return mail user.email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(user[:email])}-#{user[:token]}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+            return user
         else
-            return false
+            return nil
         end
+    end
+
+    def mail_token name, email, token
+        if !name
+            name = "Hi"
+        end
+        return mail email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
     end
 
     def get_reset_token token

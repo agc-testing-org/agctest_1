@@ -1,5 +1,5 @@
 class Activity
-
+    include Obfuscate
     def initialize
 
     end
@@ -111,12 +111,19 @@ class Activity
         return users.as_json.uniq{ |u| u.values_at(:user_id) }
     end
 
+    def user_notifications_decrypted users
+        users.each_with_index do |u,i|
+            users[i]["user_id"] = decrypt u["user_id"]
+        end
+        return users
+    end
+
     def process_notification id
 
         users = (user_notifications_for_contributor id) + (user_notifications_for_owner id) + (user_notifications_for_contributors_with_winner id) + (user_notifications_by_comments id) + (user_notifications_by_votes id) + (user_notifications_by_roles id) 
         #+ (notification.user_notifications_by_skillsets id) #TODO - this should be an additional filter for by roles
 
-        users = user_notifications_distinct users 
+        users = (user_notifications_decrypted (user_notifications_distinct users))
 
         store_user_notifications_count id, users.length, "processing"
 

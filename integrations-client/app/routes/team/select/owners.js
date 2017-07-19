@@ -10,15 +10,15 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
 
-        var ownerSeatId = this.store.peekAll("seat").findBy("name","owner").get("id");
+        var ownerSeat = this.store.peekAll("seat").findBy("name","owner");
 
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
             user_teams: this.store.query('user-team', {
                 team_id: this.paramsFor("team.select").id,
-                seat_id: ownerSeatId
+                seat_id: ownerSeat.get("id")
             }),
-            default_seat_id: ownerSeatId
+            default_seat: ownerSeat
         });
     },
 });

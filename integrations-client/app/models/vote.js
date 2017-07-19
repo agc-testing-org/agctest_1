@@ -9,6 +9,6 @@ export default DS.Model.extend({
     contributor_id: attr('number'),
     sprint_state_id: attr('number'),
     sprint_state: DS.belongsTo('sprint-state'),
-    user_id: attr('number'),
+    user_id: attr('string'),
     previous: attr('number')
 });
