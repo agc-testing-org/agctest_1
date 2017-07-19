@@ -698,30 +698,6 @@ describe ".Account" do
         end
     end
 
-    context "#is_owner" do
-        fixtures :users, :teams, :user_teams, :seats
-        context "is owner on any team" do
-            before(:each) do
-                @user_id = decrypt(user_teams(:adam_confirmed).user_id).to_i
-                @res = @account.is_owner? @user_id
-            end
-            it "should return true" do
-                expect(@res).to eq(true)
-            end
-        end
-        context "not an owner" do
-            before(:each) do
-                @user_id = decrypt(user_teams(:adam_invited_expired).user_id).to_i
-                @mysql_client.query("update user_teams set accepted = true where id = #{user_teams(:adam_invited_expired).id}")
-                @res = @account.is_owner? @user_id
-            end
-            it "should return false" do
-                expect(@res).to be false 
-            end
-        end
-
-    end
-
     context "#get_user_connections" do
         fixtures :users
         context "connections" do
@@ -812,5 +788,16 @@ describe ".Account" do
             end
         end
     end 
+
+    context "get_seat_permissions" do
+        fixtures :users, :seats, :user_teams
+        before(:each) do
+            @user_id = decrypt(user_teams(:adam_original_invite).user_id)
+            @res = @account.get_seat_permissions @user_id
+        end
+        it "should return top seat" do
+            expect(@res).to eq(user_teams(:adam_original_invite).seat_id)
+        end
+    end
 
 end
