@@ -37,3 +37,14 @@ sprint_1_state_1_winner:
   sprint_state: sprint_1_state_1
   diff: "winner"
   created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1_state_1_comment_2:
+  user: adam_admin
+  project: demo
+  sprint: sprint_1
+  comment: adam_admin_1
+  sprint_state: sprint_1_state_1
+  contributor: adam_confirmed_1
+  state_id: 1
+  diff: "comment" 
+  created_at: <%= 5.day.ago.to_s(:db) %>
