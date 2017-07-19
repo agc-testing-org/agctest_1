@@ -988,7 +988,7 @@ class Integrations < Sinatra::Base
         requests = feedback.sprint_timeline_comments_created
         requests || (return_error "unable to retrieve comments")
         team = Organization.new
-        team_requests = team.get_aggregate_counts requests, params
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params
         return team_requests.to_json
     end
 
@@ -1003,7 +1003,7 @@ class Integrations < Sinatra::Base
         requests = feedback.sprint_timeline_votes_cast
         requests || (return_error "unable to retrieve votes")
         team = Organization.new
-        team_requests = team.get_aggregate_counts requests, params
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params
         return team_requests.to_json
     end 
 
@@ -1018,7 +1018,7 @@ class Integrations < Sinatra::Base
         requests = feedback.sprint_timeline_contributions
         requests || (return_error "unable to retrieve contributions")
         team = Organization.new
-        team_requests = team.get_aggregate_counts requests, params
+        team_requests = team.get_contributor_aggregate_counts requests, params
         return team_requests.to_json
     end 
 
@@ -1033,7 +1033,7 @@ class Integrations < Sinatra::Base
         requests = feedback.sprint_timeline_comments_received
         requests || (return_error "unable to retrieve comments received")
         team = Organization.new
-        team_requests = team.get_aggregate_counts requests, params
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params
         return team_requests.to_json
     end
 
@@ -1048,7 +1048,7 @@ class Integrations < Sinatra::Base
         requests = feedback.sprint_timeline_votes_received
         requests || (return_error "unable to retrieve votes received")
         team = Organization.new
-        team_requests = team.get_aggregate_counts requests, params                          
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params                          
         return team_requests.to_json                                                                
     end                                                                                                 
 
@@ -1063,7 +1063,7 @@ class Integrations < Sinatra::Base
         requests = feedback.sprint_timeline_contributions_winner
         requests || (return_error "unable to retrieve winning contributions")
         team = Organization.new                                                     
-        team_requests = team.get_aggregate_counts requests, params                          
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params                          
         return team_requests.to_json                                                                
     end  
 
