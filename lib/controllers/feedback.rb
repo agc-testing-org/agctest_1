@@ -75,7 +75,7 @@ class Feedback
 
     def sprint_timeline_comments_received
         begin
-            return SprintTimeline.joins("INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id) INNER JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)")
+            return User.joins("LEFT JOIN contributors ON users.id = contributors.user_id LEFT JOIN sprint_timelines ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL")
         rescue => e
             puts e
             return nil

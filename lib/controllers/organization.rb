@@ -46,13 +46,7 @@ class Organization
         params_helper = ParamsHelper.new
         params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
         params = params_helper.assign_param_to_model params, "team_id", "user_teams"
-        #result.except(:order,:limit,:offset,:select,:group).group("sprint_timelines.user_id").count("distinct(sprint_timelines.id)").each do |r|
-        #    puts r.inspect
-        #end
- #       return User.joins(:user_teams).where(params).select("0 as count, users.id").group("users.id")
-        puts "HERE"
         return result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(sprint_timelines.id)) as count","users.id").group("users.id")
-
     end 
 
     def create_team name, user_id, plan_id
