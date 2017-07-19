@@ -46,7 +46,7 @@ class Organization
         params_helper = ParamsHelper.new
         params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
         params = params_helper.assign_param_to_model params, "team_id", "user_teams"
-        return result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(sprint_timelines.id)) as count","users.id").group("users.id")
+        return result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(sprint_timelines.id)) as count","users.id as id").group("users.id")
     end 
 
     def create_team name, user_id, plan_id

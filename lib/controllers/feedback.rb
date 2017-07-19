@@ -65,8 +65,9 @@ class Feedback
         params = params_helper.drop_key params, "page"
         params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
         params = params_helper.assign_param_to_model params, "role_id", "user_roles"
+         params = params_helper.assign_param_to_model params, "user_id", "sprint_timelines"
         begin
-            return sprint_timeline_comments_created.joins("INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1)").where(params).select("sprint_timelines.*").group("sprint_timelines.id").order('sprint_timelines.created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            return sprint_timeline_comments_created.includes(:sprint_timelines).joins("INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1)").where(params).select("sprint_timelines.*").group("sprint_timelines.id").order('sprint_timelines.created_at DESC').limit(@per_page).offset((page-1)*@per_page)
         rescue => e
             puts e
             return nil
@@ -75,7 +76,7 @@ class Feedback
 
     def sprint_timeline_comments_received
         begin
-            return User.joins("LEFT JOIN contributors ON users.id = contributors.user_id LEFT JOIN sprint_timelines ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'comment') LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL")
+            return User.joins("LEFT JOIN contributors ON (users.id = contributors.user_id) LEFT JOIN sprint_timelines ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'comment') LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL")
         rescue => e
             puts e
             return nil
@@ -90,7 +91,7 @@ class Feedback
         params = params_helper.assign_param_to_model params, "role_id", "user_roles"
         params = params_helper.assign_param_to_model params, "user_id", "contributors"
         begin      
-            return sprint_timeline_comments_received.joins("INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1)").where(params).select("sprint_timelines.*").group("sprint_timelines.id").order('sprint_timelines.created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            return sprint_timeline_comments_received.includes(:sprint_timelines).joins("INNER JOIN sprint_states ON sprint_states.id = comments.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1)").where(params).select("sprint_timelines.*").group("sprint_timelines.id").order('sprint_timelines.created_at DESC').limit(@per_page).offset((page-1)*@per_page)
         rescue => e
             puts e
             return nil
@@ -112,6 +113,7 @@ class Feedback
         params = params_helper.drop_key params, "page"
         params = params_helper.assign_param_to_model params, "skillset_id", "user_skillsets"
         params = params_helper.assign_param_to_model params, "role_id", "user_roles"
+        params = params_helper.assign_param_to_model params, "user_id", "sprint_timelines"
         begin      
             return sprint_timeline_votes_cast.joins("INNER JOIN sprint_states ON sprint_states.id = votes.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1)").where(params).select("sprint_timelines.*").group("sprint_timelines.id").order('sprint_timelines.created_at DESC').limit(@per_page).offset((page-1)*@per_page)
         rescue => e
