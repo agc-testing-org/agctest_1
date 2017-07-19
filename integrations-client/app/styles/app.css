@@ -27,7 +27,9 @@ body {
     background: -moz-linear-gradient(bottom right, #ededed, #fff); /* For Firefox 3.6 to 15 */
     background: linear-gradient(to bottom right, #ededed, #fff); /* Standard syntax */
 }
-
+strong{
+    font-weight: 600;
+}
 .rounded{
     -webkit-border-radius: 3px !important;
     -moz-border-radius: 3px !important;

@@ -55,7 +55,7 @@
             {{/each}}
             {{/if}}
 
-            {{#if (or sessionAccount.account.admin sessionAccount.account.owner)}}
+            {{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}
                 {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                     <div class="icon hidden-sm-down">
                         <i class="fa fa-fw fa-2x fa-user-plus"></i>

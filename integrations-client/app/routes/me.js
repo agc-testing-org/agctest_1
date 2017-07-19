@@ -12,6 +12,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     model: function(params) { 
 
         var states = this.store.findAll('state');
+        var seats = this.store.findAll('seat');
 
         this.store.adapterFor('me').set('namespace', 'users');
         var user = this.store.queryRecord('me',{});
@@ -27,6 +28,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         return Ember.RSVP.hash({
             teams: this.store.findAll('team'),
             skillsets: skillsets,
+            seats: seats,
             notifications: notifications,
             roles: roles,
             user: user,

@@ -50,28 +50,30 @@
             {{else}}
                 <div class="list-group-item rounded highlight-false">
                     <h3 class="line">Welcome to Wired7 {{sessionAccount.account.first_name}}!</h3>
-                    <p class="line">Our platform makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached.  {{#if sessionAccount.account.owner}}Use it to evaluate candidates up front, before you invest time in the interview.{{else}} Use it to learn, grow, or get noticed.{{/if}}</p>  
+                    <p class="line">Our platform makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached.  {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Use it to evaluate candidates up front, before you invest time in the interview process.{{else}} Use it to learn, grow, or get noticed.{{/if}}</p>  
                     <p class="line">Here's how it works:</p>
-                    {{#if sessionAccount.account.owner}}
-                        <li class="line">Candidate profiles are public but <span class="text-warning"><strong>anonymous</strong></span>.  They display non-specific data when viewed by other users.</li>
-                        <li class="line">We use profile information to invite candidates to relevant <span class="text-warning"><strong>sprint</strong></span> events.</li>
+                    <li class="line">A <strong>sprint</strong> is a task, feature, or bug fix for a project that starts as an idea and moves through standard <a target="https://en.wikipedia.org/wiki/Software_development_process" href="https://en.wikipedia.org/wiki/Systems_development_life_cycle">phases of software development</a>.</li>
+                    {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}} 
+                        <li class="line">We use profile information to invite candidates to relevant <strong>sprint</strong> events.</li>
                     {{else}}
-                        <li class="line">Your profile is public but <span class="text-warning"><strong>anonymous</strong></span>.  It displays your name for you but only non-specific data for everyone else.</li>
-                        <li class="line">We use profile information to notify you of <span class="text-warning"><strong>sprint</strong></span> events you might be interested in.</li>
+                        <li class="line">We use profile information to <strong>notify you of sprint events</strong> you might be interested in.</li>
                     {{/if}}
-
-                    <li class="line">A <span class="text-warning"><strong>sprint</strong></span> is an idea for a specific project that moves through the phases of the <a target="https://en.wikipedia.org/wiki/Software_development_process" href="https://en.wikipedia.org/wiki/Systems_development_life_cycle">software development lifecycle</a>.  {{#if sessionAccount.account.owner}}Candidates{{else}}You and others{{/if}} can propose solutions and give feedback to any phase of a sprint.</li> 
-                     <li class="line">
-                    {{#if sessionAccount.account.owner}}
-                        Candidate proposals and feedback will populate on user profiles. Use this to assess your candidate in different ways. What do others think of proposals?  How well does the candidate respond to feedback?
-                    {{else}}
-                        As you propose solutions to sprints, the feedback that you receive from others will populate on your profile.  
-                    {{/if}} 
-                    We tag all feedback with <span class="text-warning"><strong>anonymous</strong></span> high-level information about users to provide a basic idea of the <span class="text-warning"><strong>professional experience of the reviewer</strong></span>.
+                   
+                   <li class="line">{{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Candidates{{else}}You and others{{/if}} can contribute to sprint phases through solution proposals and feedback.</li>
+                                        
+                    <li class="line">
+                        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+                            We display this data on user profiles. Here are a couple ways you could use it: <ul class="mb-0"><li>See what different development team stakeholders are saying</li><li>See how well the candidate responds to feedback</li></ul>
+                        {{else}}
+                            As you participate in sprints, the feedback that you receive from others will display on your profile.  All feedback is tagged with <strong>anonymous</strong> high-level information about the <strong>professional experience of the reviewer</strong>.
+                        {{/if}}
                     </li>
-                    {{#if sessionAccount.account.owner}}
-                        <p class="line">Invite candidates through your organization's team to get started.  If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.</p>
+
+                    {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}} 
+                        <li class="line">Candidate profiles are public but <strong>anonymous</strong>.  They display non-specific data when viewed by other users.</li>
+                        <p class="line">Invite candidates through your organization's team to get started.  {{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</p>
                     {{else}}
+                        <li class="line">Your profile is also <strong>anonymous</strong>.  It displays your name for you but non-specific data for everyone else.</li>
                         <p class="line">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started.</p>
                     {{/if}}
                     <p class="line"></p>
