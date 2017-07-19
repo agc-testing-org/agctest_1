@@ -57,3 +57,23 @@ adam_protected:
   updated_at: <%= 2.hour.ago.to_s(:db) %>
   created_at: <%= 5.hour.ago.to_s(:db) %>
 
+adam_admin_adam_admin_team:
+  sender: adam_admin
+  seat: sponsored
+  team: adam_admin_team
+  user: adam_admin
+  accepted: true
+
+adam_confirmed_adam_admin_team:
+  sender: adam_admin
+  seat: member
+  team: adam_admin_team
+  user: adam_confirmed
+  accepted: true
+
+adam_adam_admin_team:
+  sender: adam_admin
+  seat: sponsored
+  team: adam_admin_team
+  user: adam
+  accepted: true

@@ -17,5 +17,11 @@ export default DS.Model.extend({
     registered: attr('boolean'),
     name: attr('string'),
     created_at: attr('date'),
-    updated_at: attr('date')
+    updated_at: attr('date'),
+    team_comments: DS.belongsTo('team-comment'),
+    team_votes: DS.belongsTo('team-vote'),
+    team_contributors: DS.belongsTo('team-contributor'),
+    team_comments_received: DS.belongsTo('team-comments-received'),
+    team_votes_received: DS.belongsTo('team-votes-received'),
+    team_contributors_received: DS.belongsTo('team-contributors-received')
 });

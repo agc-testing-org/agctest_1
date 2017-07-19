@@ -432,6 +432,7 @@ describe "/contributors" do
             end
             context "no winner" do
                 before(:each) do
+                    @mysql_client.query("update sprint_states set contributor_id = null where id = #{@sprint_state_id}")
                     post "/contributors/#{@contributor_id}/merge", {:project_id => @project, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 end
                 it_behaves_like "error", "a contribution has not been selected"
