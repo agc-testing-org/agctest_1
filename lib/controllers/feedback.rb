@@ -97,9 +97,9 @@ class Feedback
         end
     end
 
-    def sprint_timelines_votes_cast
+    def sprint_timeline_votes_cast
         begin
-            return SprintTimeline.joins("INNER JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)")
+            return User.joins("LEFT JOIN sprint_timelines ON users.id = sprint_timelines.user_id LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)").where("sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL")
         rescue => e
             puts e
             return nil
@@ -122,7 +122,7 @@ class Feedback
 
     def sprint_timeline_votes_received
         begin
-            return SprintTimeline.joins("INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id) INNER JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)")
+            return User.joins("LEFT JOIN contributors ON users.id = contributors.user_id LEFT JOIN sprint_timelines ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id) LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)").where("sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL")
         rescue => e
             puts e
             return nil

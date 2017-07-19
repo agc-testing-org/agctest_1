@@ -17,21 +17,21 @@ export default Ember.Route.extend({
         var user_teams_comments = this.store.query('team-comment', {
             seat_id: memberSeatId
         });
-        /*
         var user_teams_votes = this.store.query('team-vote', {
             seat_id: memberSeatId
         });
+        /*
         var user_teams_contributors = this.store.query('team-contributor', {
             seat_id: memberSeatId
         });
         */
-        var user_teams_comments_recieved = this.store.query('team-comments-received', {
+        var user_teams_comments_received = this.store.query('team-comments-received', {
+            seat_id: memberSeatId
+        });
+        var user_teams_votes_received = this.store.query('team-votes-received', {
             seat_id: memberSeatId
         });
         /*
-        var user_teams_votes = this.store.query('team-votes-received', {
-            seat_id: memberSeatId
-        });                                 
         var user_teams_contributors = this.store.query('team-contributors-received', {
             seat_id: memberSeatId
         }); 
@@ -42,6 +42,8 @@ export default Ember.Route.extend({
             team: this.modelFor("team.select").team,
             user_teams_comments: user_teams_comments,
             user_teams_comments_received: user_teams_comments_received,
+            user_teams_votes: user_teams_votes,
+            user_teams_votes_received: user_teams_votes_received,
             user_teams: this.store.query('user-team', {
                 team_id: this.paramsFor("team.select").id,
                 seat_id: memberSeatId

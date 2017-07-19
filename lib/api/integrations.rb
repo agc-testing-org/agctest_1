@@ -1000,7 +1000,7 @@ class Integrations < Sinatra::Base
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
         feedback = Feedback.new
         filter = {}
-        requests = feedback.user_votes_cast_by_skillset_and_roles filter
+        requests = feedback.sprint_timeline_votes_cast
         requests || (return_error "unable to retrieve votes")
         team = Organization.new
         team_requests = team.get_aggregate_counts requests, params
@@ -1045,7 +1045,7 @@ class Integrations < Sinatra::Base
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
         feedback = Feedback.new
         filter = {}
-        requests = feedback.user_votes_received_by_skillset_and_roles filter
+        requests = feedback.sprint_timeline_votes_received
         requests || (return_error "unable to retrieve votes received")
         team = Organization.new
         team_requests = team.get_aggregate_counts requests, params                          
