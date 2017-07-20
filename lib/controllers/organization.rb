@@ -113,7 +113,7 @@ class Organization
         account = Account.new
         begin
             response = []
-            notifications = SprintTimeline.joins("inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = ? and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (1, 2) AND sprint_timelines.diff IN('vote','comment','winner') and contributors.user_id != sprint_timelines.user_id", team_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            notifications = SprintTimeline.joins("inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id INNER JOIN seats on user_teams.seat_id = seats.id").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = ? and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and seats.name in ('sponsored', 'priority') AND sprint_timelines.diff IN('vote','comment','winner') and contributors.user_id != sprint_timelines.user_id", team_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
             notifications.each_with_index do |notification,i|
                 response[i] = notification.as_json
                 response[i][:talent_id] = notification.contributor.user.id
