@@ -41,26 +41,24 @@
     {{#if (eq params.section "profile")}}
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of relevant <strong>sprint</strong> phases</h3>
-            <h3 class="description mt-5">We also display contributions and feedback on user profiles</h3>
+            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
         {{else}}
             <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in</h3>
-             <h3 class="description mt-5">As you participate in sprints, the feedback that you receive from others will display on your profile</h3>
         {{/if}}
             
-        <h3 class="description mt-5">All sprint feedback is <strong>anonymously tagged</strong> with the <strong>professional experience of the reviewer</strong>, as shown in the following comment</h3>
+        <h3 class="description mt-5">Sprint feedback is displayed on {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}candidate profiles{{else}}your profile{{/if}}, <strong>anonymously tagged</strong> with the <strong>professional experience of the reviewer</strong>, as shown in the following comment</h3>
 
-        <h3 class="about mt-3">
-            <span class="line quotation">
-                <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around authentication in the rspec tests for this proposal<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
-            </span>
-             - from a Director of Engineering in Computer and Network Security (<i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco Bay Area)
+        <h3 class="description mt-3 p-4">
+            <div class="line quotation about mb-1">
+                <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around authentication in the rspec tests for this proposal.  I would not be comfortable with this going live.<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+            </div>
+             - Director of Engineering in Computer and Network Security (<i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco Bay Area)
         </h3>
 
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-        <h3 class="description">Use the qualified feedback from different development team stakeholders to determine whether a candidate would be a good fit for a role.</h3>
-        <h3 class="description mt-5">Invite candidates through your organization's team to get started.  {{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</h3> 
+        <h3 class="description">Use the qualified feedback from different development team stakeholders to determine whether a candidate would be a good fit for a role</h3>
+        <h3 class="description mt-5">Invite candidates through your organization's team to get started{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}. If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</h3> 
         {{else}}
         <h3 class="description mt-5">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
         {{/if}}

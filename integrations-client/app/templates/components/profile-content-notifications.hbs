@@ -49,33 +49,15 @@
             {{application-paging-same-page page=params.page last=notifications.length count=notifications.meta.count class="text-right"}}
             {{else}}
                 <div class="list-group-item rounded highlight-false">
-                    <h3 class="line">Welcome to Wired7 {{sessionAccount.account.first_name}}!</h3>
-                    <p class="line">Our platform makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached.  {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Use it to evaluate candidates up front, before you invest time in the interview process.{{else}} Use it to learn, grow, or get noticed.{{/if}}</p>  
-                    <p class="line">Here's how it works:</p>
-                    <li class="line">A <strong>sprint</strong> is a task, feature, or bug fix for a project that starts as an idea and moves through standard <a target="https://en.wikipedia.org/wiki/Software_development_process" href="https://en.wikipedia.org/wiki/Systems_development_life_cycle">phases of software development</a>.</li>
+                    <h3 class="line">Welcome to Wired7 {{sessionAccount.account.first_name}}</h3>
+                    <p class="line">Wired7 makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached.  {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Use it to evaluate candidates up front, before you invest time in the interview process.{{else}} Use it to learn, grow, or get noticed.{{/if}}</p>  
+                
                     {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}} 
-                        <li class="line">We use profile information to invite candidates to relevant <strong>sprint</strong> phases.</li>
+                        <p class="line">Invite candidates through your organization's team to get started{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}. If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</p>
                     {{else}}
-                        <li class="line">We use profile information to <strong>notify you of sprint phases</strong> you might be interested in.</li>
+                        <p class="line">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</p>
                     {{/if}}
-                   
-                   <li class="line">{{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Candidates{{else}}You and others{{/if}} can contribute to sprint phases through solution proposals and feedback.</li>
-                                        
-                    <li class="line">
-                        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-                            We display this data on user profiles. Here are a couple ways you could use it: <ul class="mb-0"><li>See what different development team stakeholders are saying</li><li>See how well the candidate responds to feedback</li></ul>
-                        {{else}}
-                            As you participate in sprints, the feedback that you receive from others will display on your profile.  All feedback is tagged with <strong>anonymous</strong> high-level information about the <strong>professional experience of the reviewer</strong>.
-                        {{/if}}
-                    </li>
-
-                    {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}} 
-                        <li class="line">Candidate profiles are public but <strong>anonymous</strong>.  They display non-specific data when viewed by other users.</li>
-                        <p class="line">Invite candidates through your organization's team to get started.  {{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</p>
-                    {{else}}
-                        <li class="line">Your profile is also <strong>anonymous</strong>.  It displays your name for you but non-specific data for everyone else.</li>
-                        <p class="line">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started.</p>
-                    {{/if}}
+                    <p class="line mt-3">Feel free to return to the {{#link-to "me.welcome"}}Wired7 Overview{{/link-to}} for more information</p>
                     <p class="line"></p>
                 </div>
             {{/if}}
