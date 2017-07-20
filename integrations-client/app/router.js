@@ -44,6 +44,7 @@ Router.map(function() {
         this.route('contributions-selected');
     });
     this.route('me', function() { // private profile (logged in)
+        this.route('welcome');
         this.route('notifications');
         this.route('overview');
         this.route('connections');

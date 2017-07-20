@@ -1,0 +1,24 @@
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview text-center">
+            {{#unless params.section}}
+            <div class="feedback_graphic_hold hidden-sm-down">
+                <div class="feedback_graphic"></div>
+            </div>
+            {{/unless}}
+            {{#if (eq params.section "sprint")}}
+                <h1 class="name text-capitalize">Wired7 Sprint</h1>
+                <h3 class="description">A task, feature, or bug fix for a project</h3>
+            {{/if}}
+
+            {{#if (eq params.section "profile")}}
+                <h1 class="name text-capitalize">Your Profile</h1>
+                {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+                    <h3 class="description">Candidate profiles are public but <strong>anonymous</strong></h3>
+                {{else}}
+                    <h3 class="description">Your profile is public but <strong>anonymous</strong></h3>
+                {{/if}}
+            {{/if}}
+        </div>
+    </div>
+</div>
