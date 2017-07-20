@@ -64,10 +64,15 @@
     <h4 class="about section mb-3">
         Proposed Contributions
     </h4>
-        <div class="list-group rounded text-left">
+
+        <div class="mb-4">
         {{#each last-contributor-state.contributors as |contributor index|}}
-            <div class="list-group-item rounded active">
-            <h4 class="mb-0">
+
+            <h3 class="description section text-capitalize underline mb-2 mt-1">
+                Proposal {{plus 1 index}}
+            </h3>
+
+            <div class="about section mb-1">
                 {{#if (eq contributor.id last-contributor-state.contributor_id)}}
                     {{stacked-icon value="fa-trophy" icon="fa-certificate" size="1" class="d-inline"}}
                     {{#if last-contributor-state.merged}}
@@ -76,13 +81,14 @@
                         <span class="badge badge-default rounded mr-1">NOT MERGED</span>
                     {{/if}}
                 {{/if}}
+
                 <i class="fa fa-tag fa-fw mr-0" aria-hidden="true"></i> 
-                Branch {{last-contributor-state.id}}_{{contributor.id}} 
-                 (<a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">
+                    Branch {{last-contributor-state.id}}_{{contributor.id}} 
+                    (<a target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">
                     <i class="fa fa-window-restore" aria-hidden="true"></i> View on Github
-                </a>)
-            </h4>
+                    </a>)
             </div>
+
             {{develop-issue-comments comments=contributor.comments}}
             {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
         {{/each}}

@@ -417,12 +417,17 @@ class Account
         end
     end
 
-    def is_owner? user_id
+    def get_seat_permissions user_id
         begin 
-            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id, :accepted => true).count > 0)
+            res = UserTeam.where(:user_id => user_id, :accepted => true).order(:seat_id => "ASC").take
+            if res
+                return res.seat_id
+            else
+                return nil
+            end
         rescue => e
             puts e
-            return false
+            return nil 
         end
     end
 

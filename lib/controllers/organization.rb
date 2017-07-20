@@ -22,6 +22,12 @@ class Organization
                     row["user_first_name"] = user.user.first_name
                     row["user_last_name"] = user.user.last_name
                     row["user_profile"] = account.get_profile user.user
+                    row["team_comments"] = user.user.id
+                    row["team_votes"] = user.user.id
+                    row["team_contributors"] = user.user.id
+                    row["team_comments_received"] = user.user.id
+                    row["team_votes_received"] = user.user.id
+                    row["team_contributors_received"] = user.user.id
                 else
                     row.delete("user_id")
                 end
@@ -34,6 +40,28 @@ class Organization
         rescue => e
             puts e
         end
+    end
+
+    def get_sprint_timeline_aggregate_counts result, params
+        params_helper = ParamsHelper.new
+        params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
+        params = params_helper.assign_param_to_model params, "team_id", "user_teams"
+        response = []
+        result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(sprint_timelines.id)) as count","users.id as user_id").group("users.id").each_with_index do |s,i|
+            response[i] = {:id => s.user_id, :count => s.count}
+        end
+        return response
+    end
+
+    def get_contributor_aggregate_counts result, params
+        params_helper = ParamsHelper.new
+        params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
+        params = params_helper.assign_param_to_model params, "team_id", "user_teams"
+        response = []
+        result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(contributors.id)) as count","users.id as user_id").group("users.id").each_with_index do |s,i|
+            response[i] = {:id => s.user_id, :count => s.count}
+        end 
+        return response
     end
 
     def create_team name, user_id, plan_id

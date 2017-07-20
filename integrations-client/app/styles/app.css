@@ -27,7 +27,9 @@ body {
     background: -moz-linear-gradient(bottom right, #ededed, #fff); /* For Firefox 3.6 to 15 */
     background: linear-gradient(to bottom right, #ededed, #fff); /* Standard syntax */
 }
-
+strong{
+    font-weight: 600;
+}
 .rounded{
     -webkit-border-radius: 3px !important;
     -moz-border-radius: 3px !important;
@@ -40,6 +42,10 @@ body {
 }
 .shadow{
     box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+.underline{
+    border-bottom:5px solid #ededed !important;
+    padding-bottom:4px;
 }
 h1{
     font-size:42px;
@@ -374,6 +380,24 @@ button{
     padding:10px;
     font-weight:300;
 }
+.welcome .feedback_graphic_hold{
+    position:absolute;
+    width:100%;
+    height:100%;
+    right:0px;
+    top:0px;
+    z-index:0;
+}
+.welcome .feedback_graphic{
+    background: url('welcome_feedback.png') no-repeat center center;
+    top:0px;
+    left:0px;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index:0;
+    background-size:50%;
+}
 .fullscreen {
     position:fixed;
     top:0px; 
@@ -444,7 +468,7 @@ button{
 }
 .register-form button{
     margin-top:10px;
- 
+
     font-size:20px;
 }
 .register-form .btn-group label{
@@ -777,7 +801,19 @@ button{
 .main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name, .main .slide.hidden-md-up .about{
     text-align:left !important;   
 }
-.main .overview .score{
+.list-group-item .score{
+    padding:4px;
+    margin-bottom:4px;
+    border-bottom:2px solid #f9f9f9;
+}
+.list-group-item .score .total{
+    font-weight: 500;
+    font-size: 24px;
+}
+.list-group-item .score .title{
+    font-weight:300;
+}
+.main .overview .score, .welcome .score{
     margin-bottom:10px;
     padding:10px;
     border-bottom:5px solid #f9f9f9; 
@@ -785,7 +821,10 @@ button{
 .main .overview .score .title {
 
 }
-.main .overview .score .total {
+.welcome .score .title{
+    font-size:14px;
+}
+.main .overview .score .total, .welcome .score {
     font-weight: 500;
     font-size: 40px;
 }

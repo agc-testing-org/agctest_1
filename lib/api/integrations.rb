@@ -177,7 +177,7 @@ class Integrations < Sinatra::Base
         end
     end
 
-    def session_tokens user, owner, initial 
+    def session_tokens user, seat_id, initial 
 
         account = Account.new
         user_secret = SecureRandom.hex(32) #session secret, not password
@@ -205,7 +205,7 @@ class Integrations < Sinatra::Base
             update_fields[:github_username] = @session_hash["github_username"]
         end
 
-        session_hash = {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :owner => owner, :github_username => github_username, :github_token => github_token}.to_json
+        session_hash = {:key => user_secret, :id => user[:id], :first_name => user[:first_name], :last_name => user[:last_name], :admin => user[:admin], :seat_id => seat_id, :github_username => github_username, :github_token => github_token}.to_json
 
         if user[:jwt] && (account.get_key "session", user[:jwt]) # session refresh does not require Bearer
             account.save_token "session", user[:jwt], session_hash, 30 #expire old token in 30s 
@@ -326,9 +326,9 @@ class Integrations < Sinatra::Base
         user_params = {:id => decrypt(team["user_id"])}
         user = account.get user_params
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
-        owner = ((account.is_owner? user[:id]) || user[:admin])
+        seat_id = account.get_seat_permissions user[:id]
         status 200
-        return (session_tokens user, owner, true).to_json
+        return (session_tokens user, seat_id, true).to_json
     end
 
     reset_post = lambda do
@@ -341,9 +341,9 @@ class Integrations < Sinatra::Base
         user = account.get_reset_token fields[:token]
         user || (return_error "this token has expired")
         (account.confirm_user user, fields[:password], user.first_name, request.ip) || (return_error "unable to reset your password at this time")
-        owner = ((account.is_owner? user[:id]) || user[:admin])
+        seat_id = account.get_seat_permissions user[:id] 
         status 200
-        return (session_tokens user, owner, true).to_json
+        return (session_tokens user, seat_id, true).to_json
     end
 
     login_post = lambda do
@@ -353,9 +353,9 @@ class Integrations < Sinatra::Base
         account = Account.new
         user = account.sign_in fields[:email], fields[:password], request.ip
         user || (return_error "email or password incorrect")
-        owner = ((account.is_owner? user[:id]) || user[:admin]) 
+        seat_id = account.get_seat_permissions user[:id] 
         status 200
-        return (session_tokens user, owner, true).to_json
+        return (session_tokens user, seat_id, true).to_json
     end
 
     session_provider_linkedin_post = lambda do
@@ -374,7 +374,7 @@ class Integrations < Sinatra::Base
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
         (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
-        response = (session_tokens user, @session_hash["owner"], false) 
+        response = (session_tokens user, @session_hash["seat_id"], false) 
         response[:success] = !profile_id.nil?
         status 200
         return response.to_json
@@ -395,7 +395,7 @@ class Integrations < Sinatra::Base
         @session_hash["github_username"] = github.login || nil
         provider_token = account.create_token @session_hash["id"], @key, access_token 
         @session_hash["github_token"] = provider_token
-        response = (session_tokens user, @session_hash["owner"], false)
+        response = (session_tokens user, @session_hash["seat_id"], false)
         response[:success] = !@session_hash["github_username"].nil?
         status 200
         return response.to_json
@@ -408,9 +408,9 @@ class Integrations < Sinatra::Base
         filters = {:refresh => params[:refresh_token]}
         user = account.get filters
         user || return_unauthorized 
-        owner = ((account.is_owner? user[:id]) || user[:admin])
+        seat_id = account.get_seat_permissions user[:id] 
         status 200
-        return (session_tokens user, owner, false).to_json
+        return (session_tokens user, seat_id, false).to_json
     end
 
     session_delete = lambda do
@@ -426,7 +426,7 @@ class Integrations < Sinatra::Base
     session_get = lambda do
         protected!
         status 200
-        return {:id => encrypt(@session_hash["id"]), :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :owner => @session_hash["owner"], :github => !@session_hash["github_token"].nil?, :github_username => @session_hash["github_username"]}.to_json
+        return {:id => encrypt(@session_hash["id"]), :first_name => @session_hash["first_name"], :last_name => @session_hash["last_name"], :admin => @session_hash["admin"], :seat_id => @session_hash["seat_id"], :github => !@session_hash["github_token"].nil?, :github_username => @session_hash["github_username"]}.to_json
     end
 
     users_get_by_id = lambda do
@@ -661,7 +661,7 @@ class Integrations < Sinatra::Base
 
     teams_post = lambda do
         protected!
-        (@session_hash["owner"] || @session_hash["admin"]) || return_unauthorized_admin
+        ((@session_hash["seat_id"] == Seat.find_by(:name => "owner").id) || @session_hash["admin"]) || return_unauthorized_admin
         fields = get_json
         check_required_field fields[:name], "name"
         check_required_field fields[:plan_id], "plan_id"
@@ -987,6 +987,96 @@ class Integrations < Sinatra::Base
         return (account.update_user_connections @session_hash["id"], decrypt(fields[:user_id]), fields[:read], fields[:confirmed]).to_json
     end
 
+    user_teams_get_comments = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.sprint_timeline_comments_created
+        requests || (return_error "unable to retrieve comments")
+        team = Organization.new
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params
+        return team_requests.to_json
+    end
+
+    user_teams_get_votes = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.sprint_timeline_votes_cast
+        requests || (return_error "unable to retrieve votes")
+        team = Organization.new
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params
+        return team_requests.to_json
+    end 
+
+    user_teams_get_contributors = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.sprint_timeline_contributions
+        requests || (return_error "unable to retrieve contributions")
+        team = Organization.new
+        team_requests = team.get_contributor_aggregate_counts requests, params
+        return team_requests.to_json
+    end 
+
+    user_teams_get_comments_received = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.sprint_timeline_comments_received
+        requests || (return_error "unable to retrieve comments received")
+        team = Organization.new
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params
+        return team_requests.to_json
+    end
+
+    user_teams_get_votes_received = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new
+        filter = {}
+        requests = feedback.sprint_timeline_votes_received
+        requests || (return_error "unable to retrieve votes received")
+        team = Organization.new
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params                          
+        return team_requests.to_json                                                                
+    end                                                                                                 
+
+    user_teams_get_contributors_received = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        feedback = Feedback.new                     
+        filter = {}                                         
+        requests = feedback.sprint_timeline_contributions_winner
+        requests || (return_error "unable to retrieve winning contributions")
+        team = Organization.new                                                     
+        team_requests = team.get_sprint_timeline_aggregate_counts requests, params                          
+        return team_requests.to_json                                                                
+    end  
+
     user_teams_patch = lambda do
         protected!
         fields = get_json
@@ -1269,6 +1359,13 @@ class Integrations < Sinatra::Base
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
     get "/user-teams", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get
+    get "/user-teams/:team_id/team-comments", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_comments
+    get "/user-teams/:team_id/team-votes", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_votes
+    get "/user-teams/:team_id/team-contributors", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_contributors
+
+    get "/user-teams/:team_id/team-comments-received", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_comments_received
+    get "/user-teams/:team_id/team-votes-received", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_votes_received
+    get "/user-teams/:team_id/team-contributors-received", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_contributors_received
 
     error RequiredParamMissing do
         [400, env['sinatra.error'].message]

@@ -1,5 +1,6 @@
 require 'spec_helper'
 describe "API" do
+    fixtures :user_teams
     shared_examples_for "session_response" do
         it "should return access token" do
             expect(@mysql_client.query(@query).first["jwt"]).to eq(@res["access_token"])
@@ -36,8 +37,8 @@ describe "API" do
         it "should save github_username in redis" do
             expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["github_username"]).to eq(@mysql_client.query(@query).first["github_username"])
         end
-        it "should save owner in redis" do
-            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["owner"]).to_not be nil
+        it "should save seat in redis" do
+            expect(JSON.parse(@redis.get("session:#{@res["access_token"]}"))["seat_id"]).to_not be nil
         end
     end
 

@@ -47,15 +47,32 @@ adam_confirmed_b_team:
   token: "ABCDE"
   updated_at: <%= 1.hour.ago.to_s(:db) %>
   created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: priority 
 
 adam_protected:
   sender: adam_confirmed
   user: adam_protected
   team: ateam
-  accepted: false
+  accepted: true 
   token: "ABCDEF"
   updated_at: <%= 2.hour.ago.to_s(:db) %>
   created_at: <%= 5.hour.ago.to_s(:db) %>
+  seat: sponsored
+
+adam_admin_adam_admin_team:
+  sender: adam_admin
+  seat: sponsored
+  team: adam_admin_team
+  user: adam_admin
+  accepted: true
+
+adam_confirmed_adam_admin_team:
+  sender: adam_admin
+  seat: member
+  team: adam_admin_team
+  user: adam_confirmed
+  accepted: true
+
 
 adam_confirmed_priority:
   sender: adam_admin
@@ -67,6 +84,10 @@ adam_confirmed_priority:
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: priority
 
-
-
+adam_adam_admin_team:
+  sender: adam_admin
+  seat: sponsored
+  team: adam_admin_team
+  user: adam
+  accepted: true
 
