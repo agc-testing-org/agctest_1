@@ -32,7 +32,7 @@ describe ".Account" do
             end
         end
     end
-    context "linkedin_profile" do
+    context "#linkedin_profile" do
         before(:each) do 
             @headline = "headline"
             @location = {:country => {:code => "US"}, :name => "San Francisco Bay"}
@@ -61,6 +61,33 @@ describe ".Account" do
             end
             it "should return positions" do
                 expect(@pull.positions).to eq @positions
+            end
+        end
+    end
+    context "#get_profile" do
+        fixtures :users
+        context "exist" do
+            fixtures :user_profiles, :user_positions
+            before(:each) do
+                @user = users(:adam_confirmed)
+                @res = @account.get_profile @user
+            end
+            context "return" do
+                it "id" do
+                    expect(@res[:id]).to eq @user.id
+                end
+                it "location" do
+                    expect(@res[:location]).to eq @user.user_profile.location_name
+                end
+                it "title" do
+                     expect(@res[:title]).to eq @user.user_profile.user_position.title
+                end
+                it "industry" do
+                    expect(@res[:industry]).to eq @user.user_profile.user_position.industry
+                end
+                it "size" do
+                    expect(@res[:size]).to eq @user.user_profile.user_position.size
+                end
             end
         end
     end

@@ -373,7 +373,7 @@ class Integrations < Sinatra::Base
         pulled = account.pull_linkedin_profile linkedin
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
+        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_position profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
         response = (session_tokens user, @session_hash["seat_id"], false) 
         response[:success] = !profile_id.nil?
         status 200
