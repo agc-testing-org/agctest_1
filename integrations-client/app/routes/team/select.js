@@ -20,9 +20,4 @@ export default Ember.Route.extend({
             seats: this.store.findAll('seat')
         });
     },
-    afterModel(model,transition) {
-        if(model.team.get("show")){
-            this.transitionTo('team.select.notifications');
-        }
-    }
 });
