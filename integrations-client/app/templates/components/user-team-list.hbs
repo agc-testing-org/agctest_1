@@ -15,13 +15,13 @@
                 <span class="badge badge-info uppercase rounded">Accepted</span>
             {{/if}}
             {{#if user.user_first_name}}
-                {{#link-to "profile" user.user_id}}{{user.user_first_name}} {{user.user_last_name}}{{/link-to}} {{#if user.user_email}}({{user.user_email}}){{/if}} {{#if user.user_profile}}-{{/if}} {{user-profile-descriptor user_profile=user.user_profile class="d-inline"}}
+                {{#link-to "profile" user.user_profile.id}}{{user.user_first_name}} {{user.user_last_name}}{{/link-to}} {{#if user.user_profile.title}} - {{user-profile-descriptor user_profile=user.user_profile class="d-inline"}}{{/if}}
             {{else}}
                 {{user.user_email}}
             {{/if}}
 
             </h4>
-            {{#unless (eq default_seat.name "member")}}
+            {{#unless (or (eq default_seat.name "member") (eq default_seat.name "owner"))}}
             {{#if (or user.team_comments (or user.team_votes (or user.team_contributors (or user.team_comments_received (or user.team_votes_received (or user.team_contributors_received))))))}}
             <h4 class="row">
                 <div class="col-md-4 col-sm-4 col-4">
@@ -45,6 +45,19 @@
             </h4>
             {{/if}}
             {{/unless}}
-            <small class="line text-muted">Invited by {{#link-to "profile" user.sender_id}}{{user.sender_first_name}}{{/link-to}} {{moment-from-now user.created_at}}{{#if user.accepted}}, accepted {{moment-from-now user.updated_at}}{{/if}}</small>
+            <small class="line text-muted">
+            Invited by {{#link-to "profile" user.sender_id}}{{user.sender_first_name}}{{/link-to}} {{moment-from-now user.created_at}}
+            
+            {{#if user.accepted}}
+            
+            , accepted {{moment-from-now user.updated_at}}
+
+                {{#if user.user_email}}
+                    ({{user.user_email}})
+                {{/if}}
+            
+            {{/if}}
+            
+            </small>
         </div>
     {{/each}}

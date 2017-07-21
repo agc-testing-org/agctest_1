@@ -1,0 +1,44 @@
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+    <div class="overview">
+
+    {{#unless params.section}}
+    <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
+    <h3 class="about">Wired7 makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached</h3>  
+    <h3 class="about">
+        Use Wired7 
+        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+             to evaluate candidates up front, before you invest time in the interview process
+        {{else}} 
+             to learn, grow, or get noticed
+        {{/if}}
+    </h3>
+    <h3 class="description mt-5">We'd love for you to take a moment and go through a quick overview of Wired7</h3> 
+
+    {{#link-to "me.welcome" (query-params section="sprint")}}Continue{{/link-to}}
+
+    {{/unless}}
+
+    {{#if (eq params.section "sprint")}}       
+        <h3 class="description mb-3">A sprint is a task, feature, or bug fix for a project that starts as an idea and transitions through relevant software development phases until completion</h3>
+    
+        <h3 class="about mb-5">{{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Candidates{{else}}You and others{{/if}} can contribute to sprint phases through solution proposals and feedback</h3>
+
+        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
+        {{else}}
+            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in</h3>
+        {{/if}}
+
+        {{#link-to "me.welcome" (query-params section="")}}Back{{/link-to}}
+        {{#link-to "me.welcome" (query-params section="profile")}}Continue{{/link-to}}
+    {{/if}}
+
+    {{#if (eq params.section "profile")}}
+        <div class="feedback_graphic_hold hidden-sm-down">
+            <div class="comment_graphic"></div>
+        </div>
+    {{/if}}
+    </div>
+    </div>
+</div>

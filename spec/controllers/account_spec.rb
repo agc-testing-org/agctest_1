@@ -32,7 +32,7 @@ describe ".Account" do
             end
         end
     end
-    context "linkedin_profile" do
+    context "#linkedin_profile" do
         before(:each) do 
             @headline = "headline"
             @location = {:country => {:code => "US"}, :name => "San Francisco Bay"}
@@ -61,6 +61,33 @@ describe ".Account" do
             end
             it "should return positions" do
                 expect(@pull.positions).to eq @positions
+            end
+        end
+    end
+    context "#get_profile" do
+        fixtures :users
+        context "exist" do
+            fixtures :user_profiles, :user_positions
+            before(:each) do
+                @user = users(:adam_confirmed)
+                @res = @account.get_profile @user
+            end
+            context "return" do
+                it "id" do
+                    expect(@res[:id]).to eq @user.id
+                end
+                it "location" do
+                    expect(@res[:location]).to eq @user.user_profile.location_name
+                end
+                it "title" do
+                     expect(@res[:title]).to eq @user.user_profile.user_position.title
+                end
+                it "industry" do
+                    expect(@res[:industry]).to eq @user.user_profile.user_position.industry
+                end
+                it "size" do
+                    expect(@res[:size]).to eq @user.user_profile.user_position.size
+                end
             end
         end
     end
@@ -698,30 +725,6 @@ describe ".Account" do
         end
     end
 
-    context "#is_owner" do
-        fixtures :users, :teams, :user_teams, :seats
-        context "is owner on any team" do
-            before(:each) do
-                @user_id = decrypt(user_teams(:adam_confirmed).user_id).to_i
-                @res = @account.is_owner? @user_id
-            end
-            it "should return true" do
-                expect(@res).to eq(true)
-            end
-        end
-        context "not an owner" do
-            before(:each) do
-                @user_id = decrypt(user_teams(:adam_invited_expired).user_id).to_i
-                @mysql_client.query("update user_teams set accepted = true where id = #{user_teams(:adam_invited_expired).id}")
-                @res = @account.is_owner? @user_id
-            end
-            it "should return false" do
-                expect(@res).to be false 
-            end
-        end
-
-    end
-
     context "#get_user_connections" do
         fixtures :users
         context "connections" do
@@ -812,5 +815,16 @@ describe ".Account" do
             end
         end
     end 
+
+    context "get_seat_permissions" do
+        fixtures :users, :seats, :user_teams
+        before(:each) do
+            @user_id = decrypt(user_teams(:adam_original_invite).user_id)
+            @res = @account.get_seat_permissions @user_id
+        end
+        it "should return top seat" do
+            expect(@res).to eq(user_teams(:adam_original_invite).seat_id)
+        end
+    end
 
 end

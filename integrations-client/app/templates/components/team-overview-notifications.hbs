@@ -1,0 +1,17 @@
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+        <div class="overview text-center">
+            <h1 class="name text-capitalize">Notifications</h1>
+            <h3 class="about">Team notifications keep you up to date on feedback that talent on your team gets</h3>
+            <div class="row">
+                <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4"> 
+                    {{#if (eq notifications.meta.count 0)}}
+                        {{sprint-state-overview-score total=0 title="Team notifications"}}
+                    {{else}}
+                        {{sprint-state-overview-score total=notifications.meta.count title="Team notifications"}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

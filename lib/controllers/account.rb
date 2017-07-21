@@ -24,29 +24,35 @@ class Account
 
     def post_linkedin_profile user_id, profile
         begin
-            return UserProfile.create({
-                user_id: user_id,
+            record = UserProfile.find_or_initialize_by({
+                user_id: user_id
+            })
+            record.update_attributes!({
                 headline: profile.headline,
                 location_country_code: profile.location.country.code,
                 location_name: profile.location.name
-            }).id
+            })
+            return record.id
         rescue => e
             puts e
             return nil
         end
     end
 
-    def post_linkedin_profile_positions profile_id, profile_position
+    def post_linkedin_profile_position profile_id, profile_position
         begin
-            return UserPosition.create({
-                user_profile_id: profile_id,
+            position = UserPosition.find_or_initialize_by({
+                user_profile_id: profile_id
+            })
+            position.update_attributes!({
                 title: profile_position.title,
                 size: profile_position.company["size"], # size symbol retrieves the obj length
                 start_year: (profile_position.start_date.year if profile_position.start_date),
                 end_year: (profile_position.end_date.year if profile_position.end_date),
                 company: profile_position.company.name,
                 industry: profile_position.company.industry
-            }).id
+            })
+            return position.id
         rescue => e
             puts e
             return nil
@@ -218,15 +224,18 @@ class Account
     def get_profile user
         if user.user_profile && user.user_profile.user_position
             return {
-                :id => user.user_profile.user_id,
+                :id => user.id,
                 :location => user.user_profile.location_name,
                 :title => user.user_profile.user_position.title,
                 :industry => user.user_profile.user_position.industry,
                 :size => user.user_profile.user_position.size,
-                :created_at => user.user_profile.created_at
+                :created_at => user.created_at
             }
         else
-            return nil
+            return {
+                :id => user.id,
+                :created_at => user.created_at
+            }
         end
     end
 
@@ -417,12 +426,17 @@ class Account
         end
     end
 
-    def is_owner? user_id
+    def get_seat_permissions user_id
         begin 
-            return (UserTeam.where(:user_id => user_id, :seat_id => Seat.find_by(:name => "owner").id, :accepted => true).count > 0)
+            res = UserTeam.where(:user_id => user_id, :accepted => true).order(:seat_id => "ASC").take
+            if res
+                return res.seat_id
+            else
+                return nil
+            end
         rescue => e
             puts e
-            return false
+            return nil 
         end
     end
 
@@ -454,7 +468,12 @@ class Account
 
     def get_user_connections query
         begin    
-            return UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").order('user_connections.created_at DESC').as_json
+            contacts = []
+            UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").order('user_connections.created_at DESC').each_with_index do |c,i|
+                contacts[i] = c.as_json
+                contacts[i][:user_profile] = get_profile c.user 
+            end
+            return contacts
         rescue => e
             puts e
             return nil
@@ -486,7 +505,12 @@ class Account
 
     def get_user_connections_requested user_id # people that request are automatically added as contacts
         begin
-            return UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').as_json
+            contacts = []
+            UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+                contacts[i] = c.as_json
+                contacts[i][:user_profile] = get_profile c.user
+            end
+            return contacts
         rescue => e
             puts e
             return nil
@@ -494,8 +518,13 @@ class Account
     end
 
     def get_user_connections_accepted user_id
-        begin      
-            return UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').as_json
+        begin
+            contacts = []
+            UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+                contacts[i] = c.as_json
+                contacts[i][:user_profile] = get_profile c.contact
+            end
+            return contacts
         rescue => e
             puts e
             return nil

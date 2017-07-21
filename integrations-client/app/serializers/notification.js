@@ -14,6 +14,7 @@ export default DS.RESTSerializer.extend(DS.EmbeddedRecordsMixin, {
         sprint_state: { embedded: 'always' },
         next_sprint_state: { embedded: 'always' },
         user_profile: { embedded: 'always' },
+        talent_profile: { embedded: 'always' },
         sprint: { embedded: 'always' },
         project: { embedded: 'always' },
         comment: { embedded: 'always' },
