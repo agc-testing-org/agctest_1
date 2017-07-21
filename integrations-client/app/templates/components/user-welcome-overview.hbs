@@ -7,18 +7,18 @@
             </div>
             {{/unless}}
             {{#if (eq params.section "sprint")}}
-                <h1 class="name text-capitalize">Wired7 Sprint</h1>
-                <h3 class="description">A task, feature, or bug fix for a project</h3>
+                <div class="feedback_graphic_hold hidden-sm-down">
+                    <div class="sprint_graphic"></div>
+                </div>
             {{/if}}
 
             {{#if (eq params.section "profile")}}
-                {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-                    <h1 class="name text-capitalize">Candidate Profiles</h1>
-                    <h3 class="description">Candidate profiles are public but <strong>anonymous</strong></h3>
-                {{else}}
-                    <h1 class="name text-capitalize">Your Profile</h1>
-                    <h3 class="description">Your profile is public but <strong>anonymous</strong></h3>
-                {{/if}}
+                <h3 class="description mt-3 p-4 feedback text-left">
+                    <div class="line quotation about mb-1">
+                        <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around authentication in the spec tests for this proposal that should not be ignored.<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                    </div>
+                    <div class="tag d-inline">- Director of Engineering in Network Security, <i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco</div>
+                </h3>
             {{/if}}
         </div>
     </div>
