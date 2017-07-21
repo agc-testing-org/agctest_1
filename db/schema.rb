@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170713162940) do
+ActiveRecord::Schema.define(version: 20170721202428) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -306,6 +306,8 @@ ActiveRecord::Schema.define(version: 20170713162940) do
   add_foreign_key "sprints", "users"
   add_foreign_key "teams", "plans"
   add_foreign_key "teams", "users"
+  add_foreign_key "user_connections", "users"
+  add_foreign_key "user_connections", "users", column: "contact_id"
   add_foreign_key "user_notifications", "sprint_timelines"
   add_foreign_key "user_notifications", "users"
   add_foreign_key "user_positions", "user_profiles"

@@ -928,9 +928,10 @@ class Integrations < Sinatra::Base
     connections_request_post = lambda do
         protected!
         check_required_field params[:id], "id"
+        id = decrypt(params[:id]) || return_not_found
         account = Account.new
         status 201
-        return (account.create_connection_request @session_hash["id"], params[:id]).to_json
+        return (account.create_connection_request @session_hash["id"], id).to_json
     end
 
     connections_requests_get = lambda do
