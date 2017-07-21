@@ -35,26 +35,9 @@
     {{/if}}
 
     {{#if (eq params.section "profile")}}
-
-        <h3 class="description mt-5">Sprint feedback is displayed on {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}candidate profiles{{else}}your profile{{/if}}, tagged with the <strong>professional experience</strong> of the reviewer</h3>
-
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            <h3 class="description">Candidate profiles are public but <strong>anonymous</strong></h3>
-            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
-        {{else}}
-             <h3 class="description">Your profile is public but <strong>anonymous</strong></h3>
-            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in</h3>
-        {{/if}}
-
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-        <h3 class="description">Use the qualified feedback from different development team stakeholders to determine whether a candidate would be a good fit for a role</h3>
-        <h3 class="description mt-5">Invite candidates through your organization's team to get started{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}. If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</h3> 
-        {{else}}
-        <h3 class="description mt-5">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
-        {{/if}}
-        
-        {{#link-to "me.welcome" (query-params section="sprint")}}Back{{/link-to}}
-        {{#link-to "me.overview"}}Exit{{/link-to}}
+        <div class="feedback_graphic_hold hidden-sm-down">
+            <div class="comment_graphic"></div>
+        </div>
     {{/if}}
     </div>
     </div>
