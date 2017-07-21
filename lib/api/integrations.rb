@@ -685,9 +685,7 @@ class Integrations < Sinatra::Base
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
 
         accepted = account.get_team_connections_accepted params[:id]
-        requested = account.get_team_connections_requested params[:id]
-        temp = accepted + requested
-        response = temp.uniq { |h| h["id"] }
+        response = accepted.uniq { |h| h["id"] }
         status 200
         return response.to_json
     end
@@ -1368,7 +1366,7 @@ class Integrations < Sinatra::Base
     post "/teams", &teams_post
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
-    get "/teams/:id/connections", allows: [:id], needs: [:id], &team_connections_get
+    get "/teams/:id/connections", needs: [:id], &team_connections_get
     get "/team-invites", &team_invites_get
     get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get
 
