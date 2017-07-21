@@ -9,6 +9,7 @@ export default DS.Model.extend({
     updated_at: attr('date'),
     contact_id: attr('string'),
     user_id: attr('string'),
+    user_profile: DS.belongsTo('user-profile'),
     read: DS.attr('boolean'),
 	confirmed: DS.attr('number')
 });

@@ -11,5 +11,5 @@ class UserConnection < ActiveRecord::Base
     end
 
     belongs_to :user
-    belongs_to :contact
+    belongs_to :contact, :class_name => "User"
 end

@@ -1,24 +1,33 @@
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
-        <div class="overview text-center">
+        <div class="overview text-left">
             {{#unless params.section}}
             <div class="feedback_graphic_hold hidden-sm-down">
                 <div class="feedback_graphic"></div>
             </div>
             {{/unless}}
             {{#if (eq params.section "sprint")}}
-                <h1 class="name text-capitalize">Wired7 Sprint</h1>
-                <h3 class="description">A task, feature, or bug fix for a project</h3>
+                <div class="feedback_graphic_hold hidden-sm-down">
+                    <div class="sprint_graphic"></div>
+                </div>
             {{/if}}
 
             {{#if (eq params.section "profile")}}
+                <h3 class="description">Sprint feedback is displayed on {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}} public but <strong>anonymous</strong> candidate profiles{{else}}your public but <strong>anonymous</strong> profile{{/if}}, qualified with the <strong>professional experience</strong> of the reviewer</h3>
+
                 {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-                    <h1 class="name text-capitalize">Candidate Profiles</h1>
-                    <h3 class="description">Candidate profiles are public but <strong>anonymous</strong></h3>
-                {{else}}
-                    <h1 class="name text-capitalize">Your Profile</h1>
-                    <h3 class="description">Your profile is public but <strong>anonymous</strong></h3>
+                    <h3 class="about mt-3">Use this this to assess candidates without commitment</h3>
                 {{/if}}
+
+                {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+                    <h3 class="description mt-5">Invite candidates through your organization's team to get started</h3>
+                    <h3 class="about mt-3">{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}If you're first in your organization, {{#link-to "team.new"}}create a team{{/link-to}}{{/if}}</h3> 
+                {{else}}
+                    <h3 class="description mt-5">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
+                {{/if}}
+                
+                {{#link-to "me.welcome" (query-params section="sprint")}}Back{{/link-to}}
+                {{#link-to "me.overview"}}Exit{{/link-to}}
             {{/if}}
         </div>
     </div>

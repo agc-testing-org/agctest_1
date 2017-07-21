@@ -373,7 +373,7 @@ class Integrations < Sinatra::Base
         pulled = account.pull_linkedin_profile linkedin
         #pulled || (return_error "could not pull profile")
         profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_positions profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
+        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_position profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
         response = (session_tokens user, @session_hash["seat_id"], false) 
         response[:success] = !profile_id.nil?
         status 200
@@ -649,6 +649,16 @@ class Integrations < Sinatra::Base
         return team_response.to_json
     end
 
+    teams_notifications_get = lambda do
+        protected!
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        status 200
+        org = Organization.new
+        return (org.get_team_notifications params).to_json
+    end
+
     teams_post = lambda do
         protected!
         ((@session_hash["seat_id"] == Seat.find_by(:name => "owner").id) || @session_hash["admin"]) || return_unauthorized_admin
@@ -884,7 +894,7 @@ class Integrations < Sinatra::Base
         end
 
         ContributorJoinWorker.perform_async @session, @session_hash["github_token"], created, username
-        
+
         status 201
         return {:id => created, :preparing => 1}.to_json
     end
@@ -1344,6 +1354,7 @@ class Integrations < Sinatra::Base
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
+    get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post

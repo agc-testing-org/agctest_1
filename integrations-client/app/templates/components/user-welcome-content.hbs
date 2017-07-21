@@ -1,4 +1,7 @@
-<div class="full">
+<div class="vertical-align-hold">
+    <div class="vertical-align-cell">
+    <div class="overview">
+
     {{#unless params.section}}
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
     <h3 class="about">Wired7 makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached</h3>  
@@ -16,54 +19,26 @@
 
     {{/unless}}
 
-    {{#if (eq params.section "sprint")}}        
-        <h3 class="description">
-             A sprint on Wired7 starts as an idea and moves through the following relevant software development phases until completion
-        </h3>
-      
-        <div class="row mb-4">
-        {{#each states as |state|}}
-            <div class="col-md-4 col-sm-4 col-4">
-                <div class="score underline text-center text-capitalize">
-                    <div class="total"><i class="fa fa-fw fa-1x {{state.fa_icon}} d-inline"></i></div>
-                    <div class="title">{{state.name}}</div>
-                </div>
-            </div>
-        {{/each}}
-        </div>
-       
-
-        <h3 class="about">{{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Candidates{{else}}You and others{{/if}} can contribute to sprint phases through solution proposals and feedback</h3>
-        {{#link-to "me.welcome" (query-params section="")}}Back{{/link-to}}
-        {{#link-to "me.welcome" (query-params section="profile")}}Continue{{/link-to}}
-    {{/if}}
-
-    {{#if (eq params.section "profile")}}
+    {{#if (eq params.section "sprint")}}       
+        <h3 class="description mb-3">A sprint is a task, feature, or bug fix for a project that starts as an idea and transitions through relevant software development phases until completion</h3>
+    
+        <h3 class="about mb-5">{{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Candidates{{else}}You and others{{/if}} can contribute to sprint phases through solution proposals and feedback</h3>
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
             <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
         {{else}}
             <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in</h3>
         {{/if}}
-            
-        <h3 class="description mt-5">Sprint feedback is displayed on {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}candidate profiles{{else}}your profile{{/if}}, <strong>anonymously tagged</strong> with the <strong>professional experience of the reviewer</strong>, as shown in the following comment</h3>
 
-        <h3 class="description mt-3 p-4">
-            <div class="line quotation about mb-1">
-                <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around authentication in the rspec tests for this proposal.  I would not be comfortable with this going live.<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
-            </div>
-             - Director of Engineering in Computer and Network Security (<i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco Bay Area)
-        </h3>
-
-
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-        <h3 class="description">Use the qualified feedback from different development team stakeholders to determine whether a candidate would be a good fit for a role</h3>
-        <h3 class="description mt-5">Invite candidates through your organization's team to get started{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}. If you're the first user in your organization, {{#link-to "team.new"}}create a team{{/link-to}}.{{/if}}</h3> 
-        {{else}}
-        <h3 class="description mt-5">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
-        {{/if}}
-        
-        {{#link-to "me.welcome" (query-params section="sprint")}}Back{{/link-to}}
-        {{#link-to "me.overview"}}Exit{{/link-to}}
+        {{#link-to "me.welcome" (query-params section="")}}Back{{/link-to}}
+        {{#link-to "me.welcome" (query-params section="profile")}}Continue{{/link-to}}
     {{/if}}
+
+    {{#if (eq params.section "profile")}}
+        <div class="feedback_graphic_hold hidden-sm-down">
+            <div class="comment_graphic"></div>
+        </div>
+    {{/if}}
+    </div>
+    </div>
 </div>

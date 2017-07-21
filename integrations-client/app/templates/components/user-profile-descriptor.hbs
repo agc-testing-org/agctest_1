@@ -1,3 +1,6 @@
 {{#if user_profile.title}} 
-    {{user_profile.title}} {{#if user_profile.industry}}in {{user_profile.industry}}{{/if}} {{#if user_profile.location}}{{#if multiple_lines}}<br>{{/if}}(<i class="fa fa-map-marker" aria-hidden="true"></i> {{user_profile.location}}{{/if}})
+    {{#if with_a}}a {{/if}} {{user_profile.title}} {{#if user_profile.industry}}in {{user_profile.industry}}{{/if}}{{#if user_profile.location}}{{#if multiple_lines}}<br>{{else}}, {{/if}}<i class="fa fa-map-marker" aria-hidden="true"></i> {{user_profile.location}}{{/if}}
+{{else}}
+    someone
 {{/if}}
+

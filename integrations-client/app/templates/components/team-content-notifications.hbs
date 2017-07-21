@@ -1,0 +1,67 @@
+<div class="full">
+    <div class="list-group rounded text-left">
+        {{#if notifications}}
+        <h4 class="about section">Team Notifications</h4>
+        {{#each notifications as |notification|}}
+        <div class="list-group-item rounded highlight-{{notification.read}}">
+            {{#if (or (eq notification.diff "vote") (eq notification.diff "comment"))}}
+            <p class="line">
+
+                {{#link-to "profile" notification.talent_profile.id}}{{notification.talent_first_name}} {{#if notification.talent_profile.title}}({{user-profile-descriptor user_profile=notification.talent_profile class="d-inline"}}){{/if}}{{/link-to}}
+
+                received a {{notification.diff}} from
+                
+                {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+
+                on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-"
+                notification.project.org "-" notification.project.name) (concat notification.sprint.id "-"
+                notification.sprint.title) (concat notification.next_sprint_state.id "-"
+                notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}}
+                phase{{/link-to}}
+                
+                of {{#link-to "develop.project.sprint" (concat notification.project.id "-"
+                notification.project.org "-" notification.project.name) (concat notification.sprint.id "-"
+                notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+            </p>
+            {{#if notification.comment.text}}
+            <p class="line quotation">
+                <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment.text}} <i
+                    class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+            </p>
+            {{/if}}
+            {{/if}}
+
+            {{#if (eq notification.diff "winner")}}
+            <p class="line">
+                {{#link-to "profile" notification.talent_profile.id}}{{notification.talent_first_name}} {{#if notification.talent_profile.title}}({{user-profile-descriptor user_profile=notification.talent_profile class="d-inline"}}){{/if}}{{/link-to}} 
+                proposed a winning solution for
+                the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-"
+                notification.project.org "-" notification.project.name) (concat notification.sprint.id "-"
+                notification.sprint.title) (concat notification.next_sprint_state.id "-"
+                notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}}
+                phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-"
+                notification.project.org "-" notification.project.name) (concat notification.sprint.id "-"
+                notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+            </p>
+            {{/if}}
+
+            <small class="line text-muted">
+                {{moment-from-now notification.created_at}}
+            </small>
+        </div>
+        {{/each}}
+        {{application-paging-same-page page=params.page last=notifications.length count=notifications.meta.count
+        class="text-right"}}
+        {{else}}
+        <div class="vertical-align-hold">
+            <div class="vertical-align-cell">
+                <div class="overview">
+                    <div class="text-center">
+                        <h3>No team notifications</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{/if}}
+    </div>
+</div>

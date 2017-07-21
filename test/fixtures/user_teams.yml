@@ -73,9 +73,21 @@ adam_confirmed_adam_admin_team:
   user: adam_confirmed
   accepted: true
 
+
+adam_confirmed_priority:
+  sender: adam_admin
+  user: adam_confirmed
+  team: ateam
+  accepted: true
+  token: "ABCDEFGH"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: priority
+
 adam_adam_admin_team:
   sender: adam_admin
   seat: sponsored
   team: adam_admin_team
   user: adam
   accepted: true
+
