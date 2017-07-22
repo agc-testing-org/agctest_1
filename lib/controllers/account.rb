@@ -566,4 +566,24 @@ class Account
             return nil
         end
     end
+
+    def get_user_notifications_settings user_id, query
+        begin            
+            return Notification.joins("LEFT JOIN user_notification_settings ON user_notification_settings.notification_id = notifications.id AND user_notification_settings.user_id = #{user_id.to_i} OR user_notification_settings.user_id is null").where(query).select("notifications.id","notifications.name","user_notification_settings.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_notifications_settings user_id, notification_id, active
+        begin
+            ss = UserNotificationSetting.find_or_initialize_by(:user_id => user_id, :notification_id => notification_id)
+            ss.update_attributes!(:active => active)
+            return {:id => ss.notification_id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 end

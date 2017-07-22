@@ -59,6 +59,7 @@ require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/role_state.rb' 
 require_relative '../models/notification.rb'
+require_relative '../models/user_notification_setting.rb'
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 require_relative '../workers/contributor_join_worker.rb'
@@ -1178,6 +1179,34 @@ class Integrations < Sinatra::Base
         return {:data => notification, :meta => {}}.to_json
     end
 
+    get_user_notifications_settings = lambda do
+        protected!
+        account = Account.new
+        status 200
+        return (account.get_user_notifications_settings @session_hash["id"], nil).to_json
+    end
+
+    get_user_notifications_settings_by_id = lambda do
+        protected!
+        check_required_field params[:notification_id], "notification_id"
+        account = Account.new
+        query = {:id => params[:notification_id]}
+        status 200
+        return (account.get_user_notifications_settings @session_hash["id"], query)[0].to_json
+    end
+
+    user_notifications_settings_patch = lambda do
+        protected!
+        check_required_field params[:notification_id], "notification_id"
+        fields = get_json
+        check_required_field !fields[:active].nil?, "active"  
+        account = Account.new
+        response = (account.update_user_notifications_settings @session_hash["id"], params[:notification_id], fields[:active])
+        response || (return_error "unable to update notification_settings")
+        status 200
+        return response.to_json
+    end
+
     get_user_comments_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         params["user_id"] = decrypt(params["user_id"])
@@ -1289,6 +1318,9 @@ class Integrations < Sinatra::Base
     get "/users/me/notifications", allows: [:page], &get_user_notifications
     patch "/users/me/notifications/:id", &user_notifications_read
     get "/users/me/notifications/:id", &get_user_notifications_by_id
+    get "/users/me/notifications-settings", &get_user_notifications_settings
+    patch "/users/me/notifications-settings/:notification_id", &user_notifications_settings_patch
+    get "/users/me/notifications-settings/:notification_id", &get_user_notifications_settings_by_id
 
     get "/users/me/connections", &connections_get 
     get "/users/me/requests", &connections_requests_get
