@@ -1163,21 +1163,19 @@ class Integrations < Sinatra::Base
         response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
         response || return_not_found
         status 200
-        return response.to_json
+        return {:data => response, :meta => {}}.to_json
     end
 
     user_notifications_read = lambda do
         protected!
         check_required_field params[:id], "id"
-        fields = get_json
-        check_required_field fields[:read], "read"
         account = Account.new
         notification = account.get_user_notifications_by_id @session_hash["id"], params[:id]
         response || return_not_found
-        notification.read = fields[:read] 
+        notification.read = true 
         notification.save
         status 200
-        return notification.to_json
+        return {:data => notification, :meta => {}}.to_json
     end
 
     get_user_comments_created_by_skillset_and_roles = lambda do

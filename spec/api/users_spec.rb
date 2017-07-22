@@ -575,7 +575,7 @@ describe "/users" do
         context "signed in" do
             before(:each) do
                 get "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]
+                @res = [JSON.parse(last_response.body)["data"]]
                 @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
             end
             it_behaves_like "user_notifications"
@@ -589,12 +589,12 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /me/notifications/:id" do
+    describe "PATCH /me/notifications/:id", :focus => true do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do
             before(:each) do                
-                patch "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {:read => true}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]                         
+                patch "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)["data"]]                         
                 @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
             end
             it_behaves_like "user_notifications"                                                            
