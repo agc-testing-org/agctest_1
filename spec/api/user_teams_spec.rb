@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/user-teams" do
 
-    fixtures :users, :seats
+    fixtures :users, :seats, :notifications
     before(:all) do
         @CREATE_TOKENS=true
     end
@@ -214,7 +214,7 @@ describe "/user-teams" do
             before(:each) do
                 get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-comments?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.diff = 'comment') LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.notification_id=#{notifications(:comment).id}) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.notification_id=#{notifications(:comment).id} OR sprint_timelines.notification_id IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
             end
             it_behaves_like "team-aggregates"
         end
@@ -234,7 +234,7 @@ describe "/user-teams" do
             before(:each) do
                 get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-votes?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.diff = 'vote') LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.notification_id=#{notifications(:vote).id}) LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.notification_id=#{notifications(:vote).id} OR sprint_timelines.notification_id IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
             end
             it_behaves_like "team-aggregates"
         end
@@ -274,7 +274,7 @@ describe "/user-teams" do
             before(:each) do
                 get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-comments-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'comment') RIGHT JOIN users ON (users.id = contributors.user_id) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.notification_id=#{notifications(:comment).id}) RIGHT JOIN users ON (users.id = contributors.user_id) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.notification_id=#{notifications(:comment).id} OR sprint_timelines.notification_id IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
             end
             it_behaves_like "team-aggregates"
         end
@@ -294,7 +294,7 @@ describe "/user-teams" do
             before(:each) do                    
                 get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-votes-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)                               
-                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'vote') RIGHT JOIN users ON users.id = contributors.user_id LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.notification_id=#{notifications(:vote).id}) RIGHT JOIN users ON users.id = contributors.user_id LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.notification_id=#{notifications(:vote).id} OR sprint_timelines.notification_id IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
             end                                                                                                 
             it_behaves_like "team-aggregates"               
         end                                                         
@@ -314,7 +314,7 @@ describe "/user-teams" do
             before(:each) do                    
                 get "/user-teams/#{user_teams(:adam_admin_adam_admin_team).team_id}/team-contributors-received?seat_id=#{user_teams(:adam_admin_adam_admin_team).seat_id}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)                               
-                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND sprint_timelines.diff = 'winner') RIGHT JOIN users ON (users.id = contributors.user_id) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.diff = 'winner' OR sprint_timelines.diff IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
+                @result = @mysql_client.query("SELECT count(distinct(sprint_timelines.id)) as count, users.id as id FROM `sprint_timelines` LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND sprint_timelines.notification_id=#{notifications(:winner).id}) RIGHT JOIN users ON (users.id = contributors.user_id) INNER JOIN user_teams ON user_teams.user_id = users.id WHERE (sprint_timelines.notification_id=#{notifications(:winner).id} OR sprint_timelines.notification_id IS NULL) AND `user_teams`.`seat_id` = #{user_teams(:adam_admin_adam_admin_team).seat_id} AND `user_teams`.`team_id` = #{user_teams(:adam_admin_adam_admin_team).team_id} GROUP BY users.id")
             end                                                                                                 
             it_behaves_like "team-aggregates"               
         end        

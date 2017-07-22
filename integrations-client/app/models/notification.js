@@ -3,7 +3,8 @@ import DS from 'ember-data';
 const { attr, Model } = DS;
 
 export default DS.Model.extend({
-    diff: attr('string'),
+    notification_id: attr('number'),
+    notification: attr(),
     sprint: DS.belongsTo('sprint'),
     project: DS.belongsTo('project'),
     comment: DS.belongsTo('comment'),
