@@ -4,12 +4,12 @@
         <h4 class="about section">Team Notifications</h4>
         {{#each notifications as |notification|}}
         <div class="list-group-item rounded highlight-{{notification.read}}">
-            {{#if (or (eq notification.diff "vote") (eq notification.diff "comment"))}}
+            {{#if (or (eq notification.notification.name "vote") (eq notification.notification.name "comment"))}}
             <p class="line">
 
                 {{#link-to "profile" notification.talent_profile.id}}{{notification.talent_first_name}} {{#if notification.talent_profile.title}}({{user-profile-descriptor user_profile=notification.talent_profile class="d-inline"}}){{/if}}{{/link-to}}
 
-                received a {{notification.diff}} from
+                received a {{notification.notification.name}} from
                 
                 {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
 
@@ -31,7 +31,7 @@
             {{/if}}
             {{/if}}
 
-            {{#if (eq notification.diff "winner")}}
+            {{#if (eq notification.notification.name "winner")}}
             <p class="line">
                 {{#link-to "profile" notification.talent_profile.id}}{{notification.talent_first_name}} {{#if notification.talent_profile.title}}({{user-profile-descriptor user_profile=notification.talent_profile class="d-inline"}}){{/if}}{{/link-to}} 
                 proposed a winning solution for

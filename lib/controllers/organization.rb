@@ -156,6 +156,7 @@ class Organization
                 response[i][:next_sprint_state] = notification.next_sprint_state
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
+                response[i][:notification] = notification.notification
             end
 
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}

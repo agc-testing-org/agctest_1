@@ -519,7 +519,12 @@ describe "/users" do
             @notification_results.each_with_index do |n,i|
                 expect(n["id"]).to eq(@res[i]["id"])
             end 
-        end 
+        end
+        it "should return notification" do
+            @notification_results.each_with_index do |n,i|
+                expect(n["name"]).to eq(@res[i]["notification"]["name"])
+            end
+        end
     end
 
     describe "GET /me/notifications" do
@@ -528,7 +533,7 @@ describe "/users" do
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i}"
+                base_query = "select sprint_timelines.*,notifications.name from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i} inner join notifications ON notifications.id = sprint_timelines.notification_id"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end
