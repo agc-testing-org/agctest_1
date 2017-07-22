@@ -245,4 +245,53 @@ describe "/teams" do
             it_behaves_like "team_notifications"
         end
     end
+
+    shared_examples_for "team_connections" do
+        it "should return id" do
+            @connections_results.each_with_index do |n,i|
+                expect(n["id"]).to eq(@res[i]["id"])
+            end 
+        end 
+        it "should return first_name" do
+            @connections_results.each_with_index do |n,i|
+                expect(n["first_name"]).to eq(@res[i]["first_name"])
+            end 
+        end 
+        it "should return email" do
+            @connections_results.each_with_index do |n,i|
+                expect(n["email"]).to eq(@res[i]["email"])
+            end 
+        end 
+    end
+
+    describe "GET /teams/:id/connections" do
+        fixtures :user_connections, :teams, :user_teams
+        before(:each) do
+            @ateam = teams(:ateam).id
+            @bteam = teams(:bteam).id
+        end
+        context "signed in" do 
+            before(:each) do
+                get "/teams/#{@ateam}/connections", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                base_query = "SELECT users.id, users.first_name, users.email FROM users INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id WHERE (user_teams.team_id = #{teams(:ateam).id} and user_connections.confirmed = 2 and user_teams.seat_id in (#{seats(:sponsored).id}, #{seats(:priority).id}))"
+                @connections_results = @mysql_client.query("#{base_query}")
+            end 
+            it_behaves_like "team_connections"
+            it_behaves_like "ok"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/teams/#{@ateam}/connections"
+            end
+            it_behaves_like "unauthorized"
+        end
+        context "not member" do
+            before(:each) do
+                get "/teams/#{@bteam}/connections", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it_behaves_like "not_found"
+        end    
+    end
 end

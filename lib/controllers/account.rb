@@ -533,7 +533,7 @@ class Account
 
     def get_team_connections_accepted team_id
         begin   
-            return User.joins("INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ? and user_connections.confirmed=2 and user_teams.seat_id = 4", team_id).select("users.id, users.first_name, users.email").as_json
+            return User.joins("INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id").where("user_teams.team_id = ? and user_connections.confirmed = 2 and user_teams.seat_id in (4, 5)", team_id).select("users.id, users.first_name, users.email").as_json
         rescue => e
             puts e
             return nil
