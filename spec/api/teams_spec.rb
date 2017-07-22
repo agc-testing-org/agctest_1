@@ -205,7 +205,7 @@ describe "/teams" do
     end
 
     describe "GET /teams/:id/notifications" do
-        fixtures :sprint_timelines, :user_notifications, :teams, :user_teams, :contributors
+        fixtures :sprint_timelines, :user_notifications, :teams, :user_teams, :contributors, :notifications
         before(:each) do
             @team = teams(:ateam).id
         end
@@ -213,7 +213,7 @@ describe "/teams" do
             before(:each) do
                 get "/teams/#{@team}/notifications", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "SELECT sprint_timelines.*, user_notifications.id, user_notifications.read FROM sprint_timelines inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id WHERE (sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = #{teams(:ateam).id} and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (#{seats(:sponsored).id}, #{seats(:priority).id}) AND sprint_timelines.diff IN('vote','comment','winner') and contributors.user_id != sprint_timelines.user_id)"
+                base_query = "SELECT sprint_timelines.*, user_notifications.id, user_notifications.read FROM sprint_timelines inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id WHERE (sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = #{teams(:ateam).id} and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (#{seats(:sponsored).id}, #{seats(:priority).id}) AND sprint_timelines.notification_id IN(#{notifications(:vote).id},#{notifications(:comment).id},#{notifications(:winner).id}) and contributors.user_id != sprint_timelines.user_id)"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end
@@ -234,7 +234,7 @@ describe "/teams" do
                 @page = 2
                 get "/teams/#{@team}/notifications", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "SELECT sprint_timelines.*, user_notifications.id, user_notifications.read FROM sprint_timelines inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id WHERE (sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = #{teams(:ateam).id} and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (#{seats(:sponsored).id}, #{seats(:priority).id}) AND sprint_timelines.diff IN('vote','comment','winner') and contributors.user_id != sprint_timelines.user_id)"
+                base_query = "SELECT sprint_timelines.*, user_notifications.id, user_notifications.read FROM sprint_timelines inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id WHERE (sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = #{teams(:ateam).id} and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.seat_id in (#{seats(:sponsored).id}, #{seats(:priority).id}) AND sprint_timelines.notification_id IN(#{notifications(:vote).id},#{notifications(:comment).id},#{notifications(:winner).id}) and contributors.user_id != sprint_timelines.user_id)"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page} offset #{(@page - 1) * @per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end

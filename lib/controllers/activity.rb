@@ -4,7 +4,7 @@ class Activity
 
     end
 
-    #TODO - who should get the new diff type?
+    #TODO - who should get the new notification_id type?
     def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
@@ -16,9 +16,9 @@ class Activity
     end
 
     def user_notifications_by_roles sprint_timeline_id
-        # all users that subscribe to a role that corresponds to a sprint state/phase change (transition diff)
+        # all users that subscribe to a role that corresponds to a sprint state/phase change (transition notification_id)
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :diff => "transition").joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id","sprint_timelines.id as sprint_timeline_id")
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "transition"}).id).joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id","sprint_timelines.id as sprint_timeline_id")
         rescue => e
             puts e
             return []
@@ -28,7 +28,7 @@ class Activity
     def user_notifications_for_contributor sprint_timeline_id
         # vote or comment for user that owns contribution
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON sprint_timelines.contributor_id = contributors.id AND sprint_timelines.diff IN('vote','comment')").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id as user_id", "sprint_timelines.id as sprint_timeline_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON sprint_timelines.contributor_id = contributors.id AND sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).select(:id).map(&:id).join(",")})").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id as user_id", "sprint_timelines.id as sprint_timeline_id")
         rescue => e
             puts e
             return []
@@ -58,7 +58,7 @@ class Activity
     def user_notifications_for_contributors_with_winner sprint_timeline_id
         # all users that contributed to a sprint state that now has a winner
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :diff => "winner").joins("INNER join contributors ON contributors.sprint_state_id = sprint_timelines.sprint_state_id").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id", "sprint_timelines.id as sprint_timeline_id")
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "winner"}).id).joins("INNER join contributors ON contributors.sprint_state_id = sprint_timelines.sprint_state_id").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id", "sprint_timelines.id as sprint_timeline_id")
         rescue => e
             puts e
             return []
@@ -69,7 +69,7 @@ class Activity
         # all comment and vote notifications not written by owner
         # TODO rethink ownership (anyone can create a sprint...) - also need a way to let the project owner know what's going on
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.diff IN('comment','vote')").select("sprints.user_id", "sprint_timelines.id as sprint_timeline_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).select(:id).map(&:id).join(",")})").select("sprints.user_id", "sprint_timelines.id as sprint_timeline_id")
         rescue => e
             puts e
             return []

@@ -52,7 +52,8 @@ class Feedback
 
     def sprint_timeline_comments_created
         begin
-            return SprintTimeline.joins("RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.diff = 'comment') LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL")
+            comment_id = Notification.find_by({:name => "comment"}).id
+            return SprintTimeline.joins("RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.notification_id = #{comment_id}) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.notification_id = #{comment_id} OR sprint_timelines.notification_id IS NULL")
         rescue => e
             puts e
             return nil
@@ -76,7 +77,8 @@ class Feedback
 
     def sprint_timeline_comments_received
         begin
-            return SprintTimeline.joins("LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'comment') RIGHT JOIN users ON (users.id = contributors.user_id) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.diff = 'comment' OR sprint_timelines.diff IS NULL")
+            comment_id = Notification.find_by({:name => "comment"}).id
+            return SprintTimeline.joins("LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.notification_id = #{comment_id}) RIGHT JOIN users ON (users.id = contributors.user_id) LEFT JOIN comments ON (sprint_timelines.comment_id = comments.id and sprint_timelines.comment_id IS NOT NULL)").where("sprint_timelines.notification_id = #{comment_id} OR sprint_timelines.notification_id IS NULL")
         rescue => e
             puts e
             return nil
@@ -100,7 +102,8 @@ class Feedback
 
     def sprint_timeline_votes_cast
         begin
-            return SprintTimeline.joins("RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.diff = 'vote') LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)").where("sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL")
+            vote_id = Notification.find_by({:name => "vote"}).id
+            return SprintTimeline.joins("RIGHT JOIN users ON (users.id = sprint_timelines.user_id AND sprint_timelines.notification_id = #{vote_id}) LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)").where("sprint_timelines.notification_id = #{vote_id} OR sprint_timelines.notification_id IS NULL")
         rescue => e
             puts e
             return nil
@@ -124,7 +127,8 @@ class Feedback
 
     def sprint_timeline_votes_received
         begin
-            return SprintTimeline.joins("LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.diff = 'vote') RIGHT JOIN users ON users.id = contributors.user_id LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)").where("sprint_timelines.diff = 'vote' OR sprint_timelines.diff IS NULL")
+            vote_id = Notification.find_by({:name => "vote"}).id
+            return SprintTimeline.joins("LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND contributors.user_id != sprint_timelines.user_id AND sprint_timelines.notification_id = #{vote_id}) RIGHT JOIN users ON users.id = contributors.user_id LEFT JOIN votes ON (sprint_timelines.vote_id = votes.id and sprint_timelines.vote_id IS NOT NULL)").where("sprint_timelines.notification_id = #{vote_id} OR sprint_timelines.notification_id IS NULL")
         rescue => e
             puts e
             return nil
@@ -172,7 +176,8 @@ class Feedback
 
     def sprint_timeline_contributions_winner
         begin
-            return SprintTimeline.joins("LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND sprint_timelines.diff = 'winner') RIGHT JOIN users ON (users.id = contributors.user_id)").where("sprint_timelines.diff = 'winner' OR sprint_timelines.diff IS NULL")
+            winner_id = Notification.find_by({:name => "winner"}).id
+            return SprintTimeline.joins("LEFT JOIN contributors ON (sprint_timelines.contributor_id = contributors.id AND sprint_timelines.notification_id = #{winner_id}) RIGHT JOIN users ON (users.id = contributors.user_id)").where("sprint_timelines.notification_id = #{winner_id} OR sprint_timelines.notification_id IS NULL")
         rescue => e
             puts e
             return nil

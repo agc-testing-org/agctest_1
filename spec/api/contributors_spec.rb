@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/contributors" do
 
-    fixtures :users, :seats
+    fixtures :users, :seats, :notifications
 
     before(:all) do
         @CREATE_TOKENS=true
@@ -225,8 +225,8 @@ describe "/contributors" do
                 it "should record comment id" do
                     expect(@sprint_timeline["comment_id"]).to eq(@res["id"])
                 end
-                it "should set diff = comment" do
-                    expect(@sprint_timeline["diff"]).to eq("comment")
+                it "should set notification_id = comment" do
+                    expect(@sprint_timeline["notification_id"]).to eq(notifications(:comment).id)
                 end
                 it_behaves_like "sprint_timelines_for_feedback_actions"
             end
@@ -282,8 +282,8 @@ describe "/contributors" do
             it "should record vote id" do
                 expect(@sprint_timeline["vote_id"]).to eq(@res["id"])
             end 
-            it "should set diff = vote" do
-                expect(@sprint_timeline["diff"]).to eq("vote")
+            it "should set notification_id = vote" do
+                expect(@sprint_timeline["notification_id"]).to eq(notifications(:vote).id)
             end  
             it_behaves_like "sprint_timelines_for_feedback_actions"
         end
@@ -363,8 +363,8 @@ describe "/contributors" do
                     end
                 end
                 context "sprint_timelines" do
-                    it "should set diff = winner" do
-                        expect(@sprint_timeline["diff"]).to eq("winner")
+                    it "should set notification_id = winner" do
+                        expect(@sprint_timeline["notification_id"]).to eq(notifications(:winner).id)
                     end  
                     it_behaves_like "sprint_timelines_for_feedback_actions"
                 end

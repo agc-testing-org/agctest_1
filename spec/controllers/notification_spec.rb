@@ -1,6 +1,8 @@
 require_relative '../spec_helper'
 
 describe ".Activity" do
+    fixtures :notifications
+
     before(:each) do
         @activity = Activity.new
     end

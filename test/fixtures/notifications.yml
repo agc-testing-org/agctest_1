@@ -1,0 +1,14 @@
+new:
+  name: "new"
+
+transition:
+  name: "transition"
+
+comment:
+  name: "comment"
+
+vote:
+  name: "vote"
+
+winner:
+  name: "winner"
