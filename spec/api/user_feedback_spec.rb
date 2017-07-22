@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/user-feedback" do
 
-    fixtures :users, :seats
+    fixtures :users, :seats, :notifications
 
     before(:all) do
         @CREATE_TOKENS=true
@@ -475,7 +475,7 @@ describe "/user-feedback" do
                     before(:each) do
                         get "/users/#{@user_id}/aggregate-contributors-received", {:skillset_id => @skillset_id}.to_json
                         @feedback = JSON.parse(last_response.body)
-                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.diff='winner') INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id LEFT JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) WHERE user_skillsets.skillset_id = #{@skillset_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
+                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.notification_id=#{notifications(:winner).id}) INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id LEFT JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) WHERE user_skillsets.skillset_id = #{@skillset_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
                         @feedback_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                         @feedback_count = @mysql_client.query(base_query).count
                     end
@@ -486,7 +486,7 @@ describe "/user-feedback" do
                     before(:each) do
                         get "/users/#{@user_id}/aggregate-contributors-received", {:role_id => @role_id}.to_json
                         @feedback = JSON.parse(last_response.body)
-                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.diff='winner') INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE user_roles.role_id = #{@role_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
+                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.notification_id=#{notifications(:winner).id}) INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE user_roles.role_id = #{@role_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
                         @feedback_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                         @feedback_count = @mysql_client.query(base_query).count
                     end
@@ -497,7 +497,7 @@ describe "/user-feedback" do
                     before(:each) do
                         get "/users/#{@user_id}/aggregate-contributors-received", {:skillset_id => @skillset_id, :role_id => @role_id}.to_json
                         @feedback = JSON.parse(last_response.body)
-                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.diff='winner') INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
+                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.notification_id=#{notifications(:winner).id}) INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
                         @feedback_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                         @feedback_count = @mysql_client.query(base_query).count
                     end
@@ -509,7 +509,7 @@ describe "/user-feedback" do
                         @page = 2
                         get "/users/#{@user_id}/aggregate-contributors-received", {:skillset_id => @skillset_id, :role_id => @role_id, :page => @page}.to_json
                         @feedback = JSON.parse(last_response.body)
-                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.diff='winner') INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
+                        base_query = "SELECT sprint_timelines.* FROM sprint_timelines INNER JOIN contributors ON (sprint_timelines.contributor_id = contributors.id and sprint_timelines.notification_id=#{notifications(:winner).id}) INNER JOIN sprint_states ON sprint_states.id = contributors.sprint_state_id INNER JOIN role_states ON sprint_states.state_id = role_states.state_id LEFT JOIN sprint_skillsets ON sprint_skillsets.sprint_id = sprint_states.sprint_id LEFT JOIN user_skillsets ON (user_skillsets.skillset_id = sprint_skillsets.skillset_id AND user_skillsets.active = 1) LEFT JOIN user_roles ON (user_roles.role_id = role_states.role_id AND user_roles.active = 1) WHERE user_skillsets.skillset_id = #{@skillset_id} AND user_roles.role_id = #{@role_id} AND contributors.user_id = #{decrypt(@user_id).to_i} GROUP BY sprint_timelines.id"
                         @feedback_results = @mysql_client.query("#{base_query} limit #{@per_page} offset #{(@page - 1) * @per_page}")
                         @feedback_count = @mysql_client.query(base_query).count
                     end

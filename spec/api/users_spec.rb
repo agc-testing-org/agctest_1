@@ -519,16 +519,23 @@ describe "/users" do
             @notification_results.each_with_index do |n,i|
                 expect(n["id"]).to eq(@res[i]["id"])
             end 
-        end 
+        end
+    end
+    shared_examples_for "user_notifications_timeline" do
+        it "should return notification" do
+            @notification_results.each_with_index do |n,i|
+                expect(n["name"]).to eq(@res[i]["notification"]["name"])
+            end
+        end
     end
 
     describe "GET /me/notifications" do
-        fixtures :sprint_timelines, :user_notifications
+        fixtures :sprint_timelines, :user_notifications, :notifications
         context "signed in" do 
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i}"
+                base_query = "select sprint_timelines.*, user_notifications.id, notifications.name from sprint_timelines inner join notifications ON notifications.id = sprint_timelines.notification_id join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i} ORDER BY created_at DESC"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end
@@ -536,6 +543,7 @@ describe "/users" do
                 expect(JSON.parse(last_response.body)["meta"]["count"]).to eq @notification_count
             end 
             it_behaves_like "user_notifications"
+            it_behaves_like "user_notifications_timeline"
             it_behaves_like "ok"
         end
         context "not signed in" do
@@ -549,7 +557,7 @@ describe "/users" do
                 @page = 2
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)["data"]
-                base_query = "select * from sprint_timelines join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i}"
+                base_query = "select sprint_timelines.*, user_notifications.id, notifications.name from sprint_timelines inner join notifications ON notifications.id = sprint_timelines.notification_id join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id AND user_notifications.user_id = #{decrypt(@user).to_i} ORDER BY created_at DESC"
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page} offset #{(@page - 1) * @per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end
@@ -558,6 +566,7 @@ describe "/users" do
             end
             it_behaves_like "ok"
             it_behaves_like "user_notifications"
+            it_behaves_like "user_notifications_timeline"
         end
     end
 
@@ -566,7 +575,7 @@ describe "/users" do
         context "signed in" do
             before(:each) do
                 get "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]
+                @res = [JSON.parse(last_response.body)["data"]]
                 @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
             end
             it_behaves_like "user_notifications"
@@ -580,12 +589,12 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /me/notifications/:id" do
+    describe "PATCH /me/notifications/:id", :focus => true do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do
             before(:each) do                
-                patch "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {:read => true}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]                         
+                patch "/users/me/notifications/#{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)["data"]]                         
                 @notification_results = @mysql_client.query("select * from user_notifications where user_notifications.id = #{user_notifications(:sprint_1_state_1_winner_for_adam_confirmed).id}")
             end
             it_behaves_like "user_notifications"                                                            

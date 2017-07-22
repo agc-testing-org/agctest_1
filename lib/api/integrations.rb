@@ -58,7 +58,7 @@ require_relative '../models/user_position.rb'
 require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/role_state.rb' 
-
+require_relative '../models/notification.rb'
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 require_relative '../workers/contributor_join_worker.rb'
@@ -735,7 +735,7 @@ class Integrations < Sinatra::Base
         state = State.find_by(:name => "idea").id
         sprint_state = issue.create_sprint_state sprint.id, state, nil
         sprint_state || (return_error "unable to create sprint")
-        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :diff => "new"}
+        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "new"}).id}
         (issue.log_event log_params) || (return_error "unable to create sprint")
         status 201
         return sprint.to_json
@@ -758,7 +758,7 @@ class Integrations < Sinatra::Base
         sha || (return_error "unable to retrieve sha")
         sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
         sprint_state || (return_error "unable to create sprint state")
-        log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :diff => "transition"} 
+        log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "transition"}).id}
         (issue.log_event log_params) ||  (return_error "unable to create sprint state")
         status 201
         return sprint_state.to_json
@@ -777,7 +777,7 @@ class Integrations < Sinatra::Base
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-        log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "comment"}        
+        log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment"}).id}
         (issue.log_event log_params) || (return_error "an error has occurred")
         status 201
         return comment.to_json
@@ -794,7 +794,7 @@ class Integrations < Sinatra::Base
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-        log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :diff => "vote"}
+        log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "vote"}).id}
         (issue.log_event log_params) || (return_error "an error has occurred")
         status 201
         return vote.to_json
@@ -816,7 +816,7 @@ class Integrations < Sinatra::Base
         sprint_state.update_attributes!(parameters) rescue (return_error "unable to set winner") 
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-        log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id => sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :project_id => sprint_state.sprint.project.id, :contributor_id => params[:id], :diff => "winner" }
+        log_params = {:sprint_id => sprint_state.sprint_id, :sprint_state_id => sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :project_id => sprint_state.sprint.project.id, :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "winner"}).id}
         (sprint_state && (issue.log_event log_params)) || (return_error "an error has occurred")
         status 201
         return sprint_state.to_json 
@@ -941,9 +941,10 @@ class Integrations < Sinatra::Base
     connections_request_post = lambda do
         protected!
         check_required_field params[:id], "id"
+        id = decrypt(params[:id]) || return_not_found
         account = Account.new
         status 201
-        return (account.create_connection_request @session_hash["id"], params[:id]).to_json
+        return (account.create_connection_request @session_hash["id"], id).to_json
     end
 
     connections_requests_get = lambda do
@@ -1175,21 +1176,19 @@ class Integrations < Sinatra::Base
         response = (account.get_user_notifications_by_id @session_hash["id"], params[:id])
         response || return_not_found
         status 200
-        return response.to_json
+        return {:data => response, :meta => {}}.to_json
     end
 
     user_notifications_read = lambda do
         protected!
         check_required_field params[:id], "id"
-        fields = get_json
-        check_required_field fields[:read], "read"
         account = Account.new
         notification = account.get_user_notifications_by_id @session_hash["id"], params[:id]
         response || return_not_found
-        notification.read = fields[:read] 
+        notification.read = true 
         notification.save
         status 200
-        return notification.to_json
+        return {:data => notification, :meta => {}}.to_json
     end
 
     get_user_comments_created_by_skillset_and_roles = lambda do
