@@ -26,6 +26,7 @@
 
 
             <div class="text-center">
+                {{#if session.isAuthenticated}}
                 {{#unless last-state.active_contribution_id}}
                 <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
                 {{/unless}}
@@ -44,6 +45,9 @@
                 <button class="btn btn-secondary rounded" {{action "join" project.id last-state.id }}>Join</button>
                 {{/if}}
                 {{/unless}}
+                {{else}}
+                    <h3>{{#link-to "login"}}Sign in{{/link-to}} to propose a solution</h3>
+                {{/if}}
             </div>
 
             {{/if}}
@@ -90,7 +94,13 @@
             </div>
 
             {{develop-issue-comments comments=contributor.comments}}
-            {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+            {{#if session.isAuthenticated}}
+                {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+            {{else}}
+                <div class="about text-center section mb-1">
+                    {{#link-to "login"}}Sign in {{/link-to}} to join the conversation 
+                </div>
+            {{/if}}
         {{/each}}
         </div>
 </div>
