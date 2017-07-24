@@ -57,6 +57,7 @@ class Repo
         end
         if project
             fetched = refresh nil, nil, project.org, project.name, project.org, project.name, ENV['INTEGRATIONS_GITHUB_ORG'], "#{project.name}_#{project.id}", "master", "master", "master", true
+            project.preparing = false
             if fetched
                 project.prepared = true
                 project.commit = fetched[:sha]

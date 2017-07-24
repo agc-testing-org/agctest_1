@@ -66,11 +66,11 @@ describe "/projects" do
             @name = "NEWPROJECT"
             %x( mv test/#{@org}/DEMO.git test/#{@org}/#{@name}.git )
             Octokit::Client.any_instance.stub(:login) { @username }
-            Octokit::Client.any_instance.stub(:create_repository) { %x(mkdir "test/#{ENV['INTEGRATIONS_GITHUB_ADMIN_USER']}"; mkdir "test/#{ENV['INTEGRATIONS_GITHUB_ADMIN_USER']}/#{@name}_1"; cd "test/#{ENV['INTEGRATIONS_GITHUB_ADMIN_USER']}/#{@name}_1"; git init --bare;)}
+            Octokit::Client.any_instance.stub(:create_repo) { %x( mkdir "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{@name}_1"; cd "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{@name}_1"; git init --bare;)}
             body = {
                 :name=>"1",
                 :commit=>{
-                    :sha=>sprint_states(:sprint_1_state_1).sha
+                    :sha=>"18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8"
                 }
             }
 
@@ -97,7 +97,7 @@ describe "/projects" do
                     post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                     @project_results = @mysql_client.query("select * from projects")
                     @projects = [JSON.parse(last_response.body)]
-                    @git = %x(cd "test/#{ENV['INTEGRATIONS_GITHUB_ADMIN_USER']}/#{@name}_1"; git branch)
+                    @git = %x(cd "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{@name}_1"; git branch)
                 end
                 it "response should match params" do
                     expect(@projects[0]["name"]).to eq(@name)
@@ -108,13 +108,13 @@ describe "/projects" do
                     expect(@git).to include("master")
                 end
                 it "should set prepared = 1" do
-                    expect(@sql["prepared"]).to eq 1
+                    expect(@project_results.first["prepared"]).to eq 1
                 end
                 it "should set preparing = 0" do
-                    expect(@sql["preparing"]).to eq 0
+                    expect(@project_results.first["preparing"]).to eq 0
                 end
                 it "should set commit_success = 1" do
-                    expect(@sql["commit_success"]).to eq 1
+                    expect(@project_results.first["commit_success"]).to eq 1
                 end
             end
 
