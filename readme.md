@@ -145,7 +145,7 @@ eb deploy
 
 Shell 2:
  
-    source ~/.bashrc_wired7_production (includes RACK_ENV, Github/Linkedin client IDs, host)
+    source ~/.bashrc_wired7_production (includes RACK_ENV, Github/Linkedin client IDs, host, ORG)
     ember deploy production
     ember deploy:list production
     ember deploy:activate production --revision #####
