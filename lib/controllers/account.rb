@@ -586,4 +586,32 @@ class Account
             return nil
         end
     end
+
+    def create_notification_email id 
+        begin
+            notifications =  UserNotification.where(:id => id).joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN users on user_notifications.user_id = users.id").select("user_notifications.user_id, user_notifications.id, user_notifications.sprint_timeline_id")
+            notifications.each_with_index do |notification,i| 
+                first_name = notification.user.first_name
+                email = notification.user.email
+                project_id = notification.sprint_timeline.project.id
+                project_name = notification.sprint_timeline.project.name
+                sprint_id = notification.sprint_timeline.sprint.id
+                sprint_name = notification.sprint_timeline.sprint.title
+                state_id = notification.sprint_timeline.next_sprint_state.id
+
+                if notification.sprint_timeline.notification_id == 1
+                    content = "new"
+                elsif notification.sprint_timeline.notification_id == 2
+                    content = "transition"
+                elsif notification.sprint_timeline.notification_id == 3
+                    content = "comment"
+                elsif notification.sprint_timeline.diff == 4
+                    content = "vote"
+                else 
+                    content = "winner"
+                end
+                return mail email, "Wired7 Notification", "#{first_name}, <br><br>New #{content}<br><br>If you'd like to check, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/develop/#{project_id}-#{project_name}/sprint/#{sprint_id}-#{sprint_name}/state/#{state_id}'>View update</a>.<br><br><br>- The Wired7 ATeam", "#{first_name},\n\nNew #{content}\n\nIf you'd like to check, please click the following link:\n\n<a href='#{ENV['INTEGRATIONS_HOST']}/develop/#{project_id}-#{project_name}/sprint/#{sprint_id}-#{sprint_name}/state/#{state_id}'>View update</a>.\n\n- The Wired7 ATeam"
+            end
+        end
+    end
 end
