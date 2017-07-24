@@ -100,7 +100,8 @@ class Issue
             project = Project.create({
                 org: org,
                 name: name,
-                user_id: user_id
+                user_id: user_id,
+                preparing: true
             })
             return project
         rescue => e

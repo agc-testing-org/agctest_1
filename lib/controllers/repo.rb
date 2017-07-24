@@ -48,13 +48,35 @@ class Repo
         end
     end
 
+    def copy id
+        begin
+            project = Project.find_by(:id => id)
+        rescue => e
+            puts e
+            project = nil
+        end
+        if project
+            fetched = refresh nil, nil, project.org, project.name, project.org, project.name, ENV['INTEGRATIONS_GITHUB_ORG'], "#{project.name}_#{project.id}", "master", "master", "master", true
+            if fetched
+                project.prepared = true
+                project.commit = fetched[:sha]
+                project.commit_remote = fetched[:sha_remote]
+                project.commit_success = fetched[:success]
+                return project.save
+            else
+                project.prepared = false
+                return (project.save && project.prepared)
+            end
+        end
+    end
+
     def sync contributor_id, username
 
         issue = Issue.new 
         params = {:id => contributor_id}
         contributor = get_contributor params
 
-        fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], contributor.sprint_state.sprint.project.org, contributor.sprint_state.sprint.project.name, contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
+        fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
         if fetched
             contributor.prepared = true
@@ -74,7 +96,7 @@ class Repo
         contributor = get_contributor params
         sprint_state = contributor.sprint_state
 
-        refreshed_sprint_state = refresh session, github_token, contributor_id, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, contributor.repo, "master", sprint_state.sha, sprint_state.id, false
+        refreshed_sprint_state = refresh session, github_token, contributor_id, sprint_state.id, ENV['INTEGRATIONS_GITHUB_ORG'], "#{sprint_state.sprint.project.name}_#{sprint_state.sprint.project.id}", username, contributor.repo, "master", sprint_state.sha, sprint_state.id, false
         refreshed_master = refresh session, github_token, contributor_id, sprint_state.id, sprint_state.sprint.project.org, sprint_state.sprint.project.name, username, contributor.repo, "master", sprint_state.sha, "master", false
 
         if sprint_state.state.name == "requirements design" && !contributor.prepared # only need to create doc if first time contributing
@@ -101,6 +123,7 @@ class Repo
             if (clear_clone sprint_state_id, contributor_id)
                 r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
                 original_hash = log_head r
+                
                 if session
                     account = Account.new
                     github_secret = account.unlock_github_token session, github_token
@@ -120,7 +143,7 @@ class Repo
                     checkout r, sha
                     add_branch r, branch_to_push
                     if anonymous
-                        anonymize sprint_state_id, contributor_id
+                        anonymize sprint_state_id, contributor_id, branch_to_push
                     end
                     push_remote r, sprint_state_id, branch_to_push 
                     remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
@@ -140,9 +163,9 @@ class Repo
 
     end
 
-    def anonymize sprint_state_id, contributor_id
+    def anonymize sprint_state_id, contributor_id, branch_to_push
         directory = "repositories/#{sprint_state_id}_#{contributor_id}"
-        return %x(cd #{directory}; git checkout #{sprint_state_id}; cd ../..; cp lib/scripts/anonymize #{directory}; cd #{directory}; ./anonymize; ).include? "rewritten"
+        return %x(cd #{directory}; git checkout #{branch_to_push}; cd ../..; cp lib/scripts/anonymize #{directory}; cd #{directory}; ./anonymize; ).include? "rewritten"
     end
 
     def clear_clone sprint_state_id, contributor_id
