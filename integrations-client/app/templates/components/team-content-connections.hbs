@@ -5,7 +5,11 @@
         {{#each connections as |connection|}}
         <div class="list-group-item rounded highlight-{{notification.read}}">
             <h4 class="line text-capitalize">
-                {{#link-to "profile" connection.id}}{{connection.first_name}} {{/link-to}}
+                {{#if (eq connection.contact_id sessionAccount.account.id)}}
+                {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}}
+                {{else}}
+                {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}}
+                {{/if}}
             </h4>
             <p class="line"><span class="text-muted">E:</span> {{connection.email}}</p>
         </div>
