@@ -88,9 +88,9 @@ class Organization
         end
     end
 
-    def invite_member team_id, sender_id, user_id, user_email, seat_id
+    def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32), seat_id: seat_id})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id})
         rescue => e
             puts e
             return nil

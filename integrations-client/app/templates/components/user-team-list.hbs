@@ -57,7 +57,9 @@
                 {{/if}}
             
             {{/if}}
-            
+            {{#unless (or (eq default_seat.name "member") (eq default_seat.name "owner"))}}
+                {{user-team-share default_seat=free_agent_seat team=team profile_id=user.user_profile.id class="d-inline" refresh="refresh"}}
+            {{/unless}}
             </small>
         </div>
     {{/each}}

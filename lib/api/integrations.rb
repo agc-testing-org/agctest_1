@@ -1131,7 +1131,7 @@ class Integrations < Sinatra::Base
         query = {:email => fields[:user_email]}
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
-        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], fields[:profile_id]
         invitation || (return_error "invite error")
         invitation.id || (return_error "this email address has an existing invitation")
         UserInviteWorker.perform_async invitation.token
