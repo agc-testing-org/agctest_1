@@ -11,7 +11,8 @@
                 {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}}
                 {{/if}}
             </h4>
-            <p class="line"><span class="text-muted">E:</span> {{connection.email}}</p>
+            <p class="line"><span class="text-muted"><strong>E:</strong></span> {{connection.email}}</p>
+            <small class="line text-muted">{{moment-from-now connection.created_at}}</small>
         </div>
         {{/each}}
     </div>
