@@ -140,9 +140,9 @@ class Activity
         return (users.length == saved)
     end
 
-    def user_notifications_that_need_to_be_mailed 
+    def user_notifications_that_need_to_be_mailed id
         begin
-            return UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id").where("user_notification_settings.active = 1 and user_notification_settings.notification_id = sprint_timelines.notification_id and user_notifications.read = 0 and user_notifications.created_at >= NOW() - INTERVAL 10 DAY").select("user_notifications.id")
+            return UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id").where("user_notification_settings.active = 1 and user_notification_settings.notification_id = sprint_timelines.notification_id and user_notifications.read = 0 and notifications.name in ('comment', 'vote', 'winner') and sprint_timelines.id = ?", id).select("user_notifications.user_id")
         rescue => e
             puts e
             return nil

@@ -1,5 +1,5 @@
 class Account
-
+    include Obfuscate
     def initialize
         @per_page = 10
     end
@@ -587,9 +587,11 @@ class Account
         end
     end
 
-    def create_notification_email id 
+    def create_notification_email id, user_id
+    user = decrypt user_id
+    puts user
         begin
-            notifications =  UserNotification.where(:id => id).joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN users on user_notifications.user_id = users.id").select("user_notifications.user_id, user_notifications.id, user_notifications.sprint_timeline_id")
+            notifications =  UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN users on user_notifications.user_id = users.id").where("user_notifications.sprint_timeline_id = #{id} and user_notifications.user_id = #{user}").select("user_notifications.user_id, user_notifications.id, user_notifications.sprint_timeline_id")
             notifications.each_with_index do |notification,i| 
                 first_name = notification.user.first_name
                 email = notification.user.email
@@ -599,11 +601,7 @@ class Account
                 sprint_name = notification.sprint_timeline.sprint.title
                 state_id = notification.sprint_timeline.next_sprint_state.id
 
-                if notification.sprint_timeline.notification_id == 1
-                    content = "new"
-                elsif notification.sprint_timeline.notification_id == 2
-                    content = "transition"
-                elsif notification.sprint_timeline.notification_id == 3
+                if notification.sprint_timeline.notification_id == 3
                     content = "comment"
                 elsif notification.sprint_timeline.diff == 4
                     content = "vote"
