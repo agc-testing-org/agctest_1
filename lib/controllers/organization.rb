@@ -31,6 +31,13 @@ class Organization
                 else
                     row.delete("user_id")
                 end
+                if user.profile
+                    row["share_profile"] = account.get_profile user.profile
+                    row["share_first_name"] = user.profile.first_name
+                    row["share_last_name"] = user.profile.last_name
+                else
+                    row["share_profile"] = {:id => 0}
+                end
                 row["sender_first_name"] = user.sender.first_name
                 row["sender_last_name"] = user.sender.last_name
                 row.delete("token")

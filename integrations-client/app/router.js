@@ -32,6 +32,7 @@ Router.map(function() {
             this.route('talent');
             this.route('owners');
             this.route('notifications');
+            this.route('shares');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile

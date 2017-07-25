@@ -17,7 +17,7 @@ export default Ember.Route.extend({
             defaultSeatId = defaultSeat.get("id");
         }
 
-        var freeAgentSeat = this.store.peekAll("seat").findBy("name","free agent");
+        var shareSeat = this.store.peekAll("seat").findBy("name","share");
 
         this.store.adapterFor('team-comment').set('namespace', 'user-teams/' + this.paramsFor("team.select").id);
         var user_teams_comments = this.store.query('team-comment', {
@@ -54,7 +54,7 @@ export default Ember.Route.extend({
                 seat_id: defaultSeatId
             }),
             default_seat: defaultSeat,
-            free_agent_seat: freeAgentSeat
+            share_seat: shareSeat
         });
     },
 });

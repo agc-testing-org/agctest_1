@@ -1131,7 +1131,8 @@ class Integrations < Sinatra::Base
         query = {:email => fields[:user_email]}
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
-        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], fields[:profile_id]
+        (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id
         invitation || (return_error "invite error")
         invitation.id || (return_error "this email address has an existing invitation")
         UserInviteWorker.perform_async invitation.token
@@ -1365,7 +1366,7 @@ class Integrations < Sinatra::Base
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
-    get "/user-teams", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get
+    get "/user-teams", allows: [:team_id,:seat_id,:profile_id], needs: [:team_id], &user_teams_get
     get "/user-teams/:team_id/team-comments", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_comments
     get "/user-teams/:team_id/team-votes", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_votes
     get "/user-teams/:team_id/team-contributors", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_contributors

@@ -6,7 +6,7 @@ export default Ember.Component.extend({
     errorMessage: null,
     selectedSeat: null,
     actions: {
-        invite(teamId){
+        invite(teamId, profileId){
             var _this = this;
             var email = this.get('email');
              _this.set("errorMessage",null);   
@@ -18,7 +18,8 @@ export default Ember.Component.extend({
                 var invitation = this.get('store').createRecord('user-team', {
                     team_id: teamId,
                     user_email: email,
-                    seat_id: selectedSeat
+                    seat_id: selectedSeat,
+                    profile_id: profileId
                 });
                 invitation.save().then(function(){
                     _this.set("email","");
