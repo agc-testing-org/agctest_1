@@ -67,6 +67,8 @@ require_relative '../workers/contributor_sync_worker.rb'
 require_relative '../workers/user_invite_worker.rb'
 require_relative '../workers/user_password_reset_worker.rb'
 require_relative '../workers/user_register_worker.rb'
+require_relative '../workers/user_notification_get_worker.rb'
+require_relative '../workers/user_notification_mail_worker.rb'
 
 # Throttling
 require_relative 'rack'
