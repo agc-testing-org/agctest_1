@@ -85,6 +85,7 @@ describe "/contributors" do
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_1).id
                 @project = projects(:demo).id
+                %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
                 post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors ORDER BY ID DESC").first
@@ -96,6 +97,7 @@ describe "/contributors" do
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1_state_2).id
                 @project = projects(:demo).id
+                %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
                 %x( mkdir "test/#{@username}/#{@mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}").first["repo"]}"; cd "test/#{@username}/#{@mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}").first["repo"]}"; git init --bare)
                 post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
@@ -165,7 +167,7 @@ describe "/contributors" do
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
-
+                %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
                 patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)

@@ -29,7 +29,7 @@
             <div class="row">
 
                 {{#if mergedStates}}
-                    <a class="btn btn-secondary rounded col-sm-12 col-md-8 mt-2 offset-md-2" target="_blank" href="https://github.com/{{project.org}}/{{project.name}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
+                    <a class="btn btn-secondary rounded col-sm-12 col-md-8 mt-2 offset-md-2" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
                 {{/if}}
 
                 {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="mt-2 col-sm-12 col-md-8 offset-md-2 pl-0 pr-0"}}
