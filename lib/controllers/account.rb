@@ -589,7 +589,6 @@ class Account
 
     def create_notification_email id, user_id
     user = decrypt user_id
-    puts user
         begin
             notifications =  UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN users on user_notifications.user_id = users.id").where("user_notifications.sprint_timeline_id = #{id} and user_notifications.user_id = #{user}").select("user_notifications.user_id, user_notifications.id, user_notifications.sprint_timeline_id")
             notifications.each_with_index do |notification,i| 
