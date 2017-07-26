@@ -183,4 +183,24 @@ describe ".Activity" do
             end
         end
     end
+
+    context "#user_notifications_that_need_to_be_mailed" do
+        fixtures :users, :sprint_timelines, :user_notifications, :user_notification_settings, :notifications
+        before(:each) do
+            @sprint_timeline_id = sprint_timelines(:sprint_1_state_1_winner).id 
+            @notification_results = @mysql_client.query("SELECT user_notifications.user_id, user_notifications.sprint_timeline_id FROM user_notifications INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id WHERE (user_notification_settings.active = 1 and user_notification_settings.notification_id = sprint_timelines.notification_id and user_notifications.read = 0 and notifications.name in ('comment', 'vote', 'winner') and sprint_timelines.id = #{@sprint_timeline_id})").first
+            @res = @activity.user_notifications_that_need_to_be_mailed @sprint_timeline_id
+            @res.each do |n|
+                @user = n[:user_id]
+            end
+        end                                                   
+        context "user_notifications" do
+            it "should return owner" do
+                expect(@notification_results["user_id"]).to eq(@user)
+            end
+            it "should return sprint_timeline_id" do
+                expect(@notification_results["sprint_timeline_id"]).to eq @sprint_timeline_id
+            end
+        end
+    end
 end

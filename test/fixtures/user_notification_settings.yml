@@ -1,3 +1,8 @@
 user_1_notification_setting_1:
   notification: new
   user: adam
+
+user_2_notification_setting_1:
+  notification: winner
+  user: adam_confirmed
+  active: 1
