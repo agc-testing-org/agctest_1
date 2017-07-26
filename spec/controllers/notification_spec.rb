@@ -11,12 +11,6 @@ describe ".Activity" do
         it "should return a result" do
             expect(@res.length).to be > 0
         end
-        it "should return sprint_timeline_id" do
-            @res.each_with_index do |result|
-                expect(result["sprint_timeline_id"]).to_not be nil
-                expect(result["sprint_timeline_id"]).to eq @sprint_timeline_id
-            end
-        end
         it "should return user_id" do
             expect(@notification_results.count).to be > 0
             @notification_results.each_with_index do |result,i|
@@ -85,7 +79,7 @@ describe ".Activity" do
         it_behaves_like "user_notifications"
     end
 
-    context "#user_notifications_by_roles", :focus => true do
+    context "#user_notifications_by_roles" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
         before(:each) do
             @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
@@ -170,17 +164,41 @@ describe ".Activity" do
         end
     end
 
-    context "#user_notifications_distinct" do
+    context "#get_decrypted_user_ids" do
         fixtures :users
         before(:each) do
-            object = User.where(:id => decrypt(users(:adam_confirmed).id).to_i).select("id as user_id")
-            @array = object + object
-            @res = @activity.user_notifications_distinct @array
+            @users = User.all.select("id as user_id")
+            @user_ids = [User.first[:id]]
+            @res = @activity.get_decrypted_user_ids @users, @user_ids
         end
-        context "array" do
-            it "should contain a single record" do
-                expect(@res.length).to eq 1
+        it "should return distinct ids" do
+            sql = @mysql_client.query("select id from users")
+            ids = []
+            sql.each_with_index do |s,i|
+                ids[i] = s["id"]
             end
+            expect(@res.sort).to eq(ids.sort)
+        end
+    end
+    
+    context "#rebuild_users" do
+        before(:each) do
+            @user_ids = [1,3,9]
+            @sprint_timeline_id = 28
+            @res = @activity.rebuild_users @user_ids, @sprint_timeline_id 
+        end
+        it "should return a result" do
+            expect(@res.length).to eq @user_ids.length
+        end
+        it "should return user_id key" do
+            @res.each_with_index do |r,i|
+                expect(@res[i][:user_id]).to eq(@user_ids[i])
+            end
+        end
+        it "should return sprint_timeline_id key" do
+            @res.each_with_index do |r,i|
+                expect(@res[i][:sprint_timeline_id]).to eq(@sprint_timeline_id)
+            end 
         end
     end
 

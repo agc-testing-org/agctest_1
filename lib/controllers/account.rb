@@ -591,23 +591,33 @@ class Account
         begin
             notifications =  UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN users on user_notifications.user_id = users.id").where("user_notifications.sprint_timeline_id = #{id} and user_notifications.user_id = #{user_id}").select("user_notifications.user_id, user_notifications.id, user_notifications.sprint_timeline_id")
             notifications.each_with_index do |notification,i| 
-                first_name = notification.user.first_name
-                email = notification.user.email
-                project_id = notification.sprint_timeline.project.id
-                project_name = notification.sprint_timeline.project.name
-                sprint_id = notification.sprint_timeline.sprint.id
-                sprint_name = notification.sprint_timeline.sprint.title
-                state_id = notification.sprint_timeline.next_sprint_state.id
+                
+                user_profile = get_profile notification.sprint_timeline.user
+                profile = "someone"
+                if user_profile[:title]
+                    
+                    industry = ""
+                    if user_profile[:industry]
+                        industry = " in #{user_profile[:industry]}"
+                    end
 
-                if notification.sprint_timeline.notification_id == 3
-                    content = "comment"
-                elsif notification.sprint_timeline.diff == 4
-                    content = "vote"
-                else 
-                    content = "winner"
+                    location = ""
+                    if user_profile[:location]
+                        location = " (#{user_profile[:location]})"
+                    end
+
+                    profile = "a #{user_profile[:title]}#{industry}#{location}"
                 end
-                return mail email, "Wired7 Notification", "#{first_name}, <br><br>New #{content}<br><br>If you'd like to check, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/develop/#{project_id}-#{project_name}/sprint/#{sprint_id}-#{sprint_name}/state/#{state_id}'>View update</a>.<br><br><br>- The Wired7 ATeam", "#{first_name},\n\nNew #{content}\n\nIf you'd like to check, please click the following link:\n\n<a href='#{ENV['INTEGRATIONS_HOST']}/develop/#{project_id}-#{project_name}/sprint/#{sprint_id}-#{sprint_name}/state/#{state_id}'>View update</a>.\n\n- The Wired7 ATeam"
+
+                if notification.sprint_timeline.notification.name == "comment" #|| notification.sprint_timeline.notification.name == "vote"
+                    return mail notification.user.email, "New Wired7 #{notification.sprint_timeline.notification.name.capitalize}", "#{notification.user.first_name},<br><br>There's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}</i> sprint <i>#{notification.sprint_timeline.sprint.title}</i><br><br>\"#{notification.sprint_timeline.comment.text}\"<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.next_sprint_state.id}-#{notification.sprint_timeline.next_sprint_state.state.name}'>View Feedback</a><br><br><br>- The Wired7 ATeam", "#{notification.user.first_name},\n\nThere's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name} sprint #{notification.sprint_timeline.sprint.title}\n\n\"#{notification.sprint_timeline.comment.text}\"\n\n#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.next_sprint_state.id}-#{notification.sprint_timeline.next_sprint_state.state.name}\n\n\n- The Wired7 ATeam" 
+                elsif notification.sprint_timeline.notification.name == "transition"
+                    return mail notification.user.email, "Wired7 #{notification.sprint_timeline.state.name} transition", "#{notification.user.first_name},<br><br>We've just started the #{notification.sprint_timeline.state.name} phase of the <i>#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}</i> sprint <i>#{notification.sprint_timeline.sprint.title}</i><br><br>#{notification.sprint_timeline.state.instruction}<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.state.name}'>Get Involved</a><br><br><br>- The Wired7 ATeam", "#{notification.user.first_name},\n\nWe've just started the #{notification.sprint_timeline.state.name} phase of the #{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name} sprint #{notification.sprint_timeline.sprint.title}\n\n#{notification.sprint_timeline.state.instruction}\n\n#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.state.name}\n\n\n- The Wired7 ATeam"
+                end
             end
+        rescue => e
+            puts e
+            return nil
         end
     end
 end

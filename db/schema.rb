@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170721211446) do
+ActiveRecord::Schema.define(version: 20170723210236) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -67,6 +67,11 @@ ActiveRecord::Schema.define(version: 20170721211446) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "prepared"
+    t.boolean "preparing"
+    t.string "commit"
+    t.string "commit_remote"
+    t.boolean "commit_success"
   end
 
   create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -182,6 +187,16 @@ ActiveRecord::Schema.define(version: 20170721211446) do
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"
     t.index ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true
     t.index ["user_id"], name: "index_user_connections_on_user_id"
+  end
+
+  create_table "user_notification_settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "notification_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "active", default: true, null: false
+    t.index ["notification_id"], name: "index_user_notification_settings_on_notification_id"
+    t.index ["user_id"], name: "index_user_notification_settings_on_user_id"
   end
 
   create_table "user_notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
