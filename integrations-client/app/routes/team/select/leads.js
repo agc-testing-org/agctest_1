@@ -11,14 +11,9 @@ export default Ember.Route.extend({
     model: function(params) {
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
+            shares: this.store.query('share', {
+                team_id: this.paramsFor("team.select").id,
+            }),
         });
     },
-    afterModel(model,transition) {
-        if(model.team.get("show")){
-            this.transitionTo('team.select.notifications');
-        }
-        else if(model.team.get("shares")){
-            this.transitionTo('team.select.leads');
-        }
-    }
 });

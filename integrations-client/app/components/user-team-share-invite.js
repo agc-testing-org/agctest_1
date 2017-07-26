@@ -2,7 +2,8 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     session: Ember.inject.service('session'),
-    store: Ember.inject.service(),
+    routes: Ember.inject.service('route-injection'),
+    store: Ember.inject.service(''),
     errorMessage: null,
     selectedSeat: null,
     actions: {
@@ -24,6 +25,9 @@ export default Ember.Component.extend({
                 invitation.save().then(function(){
                     _this.set("email","");
                     _this.sendAction("refresh");
+                    if(profileId){
+                        _this.get("routes").redirectWithId("team.select.shares",teamId);
+                    }
                 }, function(xhr, status, error) {
                     var response = xhr.errors[0].detail;
                     _this.set("errorMessage",response);

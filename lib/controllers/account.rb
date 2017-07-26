@@ -370,8 +370,14 @@ class Account
         end
     end
 
-    def mail_invite invite
-        return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+    def mail_invite token
+        invite = (get_invitation token).take
+        on_team = get_seat invite[:user_id], invite.team_id
+        if invite.profile_id && on_team # profile share
+            return mail invite.user_email, "New Lead on Wired7 from #{invite.team.name}", "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile: <br><br><a href='#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}'>#{invite.profile.first_name} on Wired7</a><br><br><br>- The Wired7 ATeam", "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile:\n#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}\n\n\n- The Wired7 ATeam"
+        else # genuine invitation
+            return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+        end
     end
 
     def refresh_team_invite token

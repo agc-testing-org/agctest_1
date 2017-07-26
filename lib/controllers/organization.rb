@@ -12,10 +12,32 @@ class Organization
         end
     end
 
-    def get_users params
+    def get_shares user_id, params
+        account = Account.new
+        shares = []
         begin
-            account = Account.new
-            users = []
+            UserTeam.where(:user_id => user_id).where(params).order(:id => :desc).each do |user|
+                row = user.as_json
+                if user.accepted #only show accepted shares for attribution
+                    row["share_profile"] = account.get_profile user.profile
+                    row["share_first_name"] = user.profile.first_name
+                    row["sender_first_name"] = user.sender.first_name
+                    row["sender_last_name"] = user.sender.last_name
+                    row["team"] = user.team
+                end
+                row.delete("token")
+                shares[shares.length] = row 
+            end
+            return shares
+        rescue => e
+            puts e
+        end
+    end
+
+    def get_users params
+        account = Account.new
+        users = []
+        begin
             UserTeam.where(params).order(:id => :desc).each do |user|
                 row = user.as_json
                 if user.accepted
@@ -107,15 +129,6 @@ class Organization
     def invite_expired? invitation
         begin
             return invitation.where("updated_at >= now() - INTERVAL 1 DAY").take
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def get_member_invite token
-        begin
-            return UserTeam.where(:token => token)
         rescue => e
             puts e
             return nil
