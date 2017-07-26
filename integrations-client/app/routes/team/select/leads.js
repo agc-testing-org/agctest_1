@@ -9,11 +9,16 @@ export default Ember.Route.extend({
     },
     store: Ember.inject.service(),
     model: function(params) {
+
+        this.store.adapterFor('share').set('namespace', 'teams/'+this.paramsFor("team.select").id);
+        var shares = this.store.query('share', {
+            team_id: this.paramsFor("team.select").id,
+        });
+        this.store.adapterFor('share').set('namespace', '');
+
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
-            shares: this.store.query('share', {
-                team_id: this.paramsFor("team.select").id,
-            }),
+            shares: shares
         });
     },
 });
