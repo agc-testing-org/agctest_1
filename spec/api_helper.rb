@@ -42,6 +42,7 @@ def prepare_repo
     if @uri && @uri_master && @username
         FileUtils.rm_rf('repositories/')
         %x( mkdir "test/#{@username}")
+        %x( mkdir "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}")
         %x( rm -rf #{@uri})
         %x( cp -rf test/git-repo #{@uri_master}; mv #{@uri_master}/git #{@uri_master}/.git)
         %x( cp -rf test/git-repo #{@uri}; mv #{@uri}/git #{@uri}/.git)
@@ -53,6 +54,8 @@ def destroy_repo
         %x( rm -rf #{@uri}) 
         %x( rm -rf #{@uri_master})
         %x( rm -rf "test/#{@username}")
+        %x( rm -rf "test/#{ENV['INTEGRATIONS_GITHUB_ADMIN_USER']}")
+        %x( rm -rf "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}")
         %x( rm -rf repositories/*)
     end
 end

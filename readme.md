@@ -25,6 +25,7 @@
     export INTEGRATIONS_GITHUB_URL="https://github.com"
     export INTEGRATIONS_GITHUB_ADMIN_USER="agc-testing" #wired7-ateam
     export INTEGRATIONS_GITHUB_ADMIN_SECRET=""
+    export INTEGRATIONS_GITHUB_ORG="my-org" #wired7-projects
     export INTEGRATIONS_LINKEDIN_CLIENT_ID=""
     export INTEGRATIONS_LINKEDIN_CLIENT_SECRET=""
     export INTEGRATIONS_MYSQL_USERNAME="root"
@@ -144,7 +145,7 @@ eb deploy
 
 Shell 2:
  
-    source ~/.bashrc_wired7_production (includes RACK_ENV, Github/Linkedin client IDs, host)
+    source ~/.bashrc_wired7_production (includes RACK_ENV, Github/Linkedin client IDs, host, ORG)
     ember deploy production
     ember deploy:list production
     ember deploy:activate production --revision #####

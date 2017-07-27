@@ -236,7 +236,7 @@ describe ".Repo" do
             @branch = "master"    
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
             @repo.add_branch @repository, @sprint_state_id
-            @res = @repo.anonymize @sprint_state_id, @contributor_id
+            @res = @repo.anonymize @sprint_state_id, @contributor_id, @sprint_state_id
         end
         it "should return true" do
             expect(@res).to be true

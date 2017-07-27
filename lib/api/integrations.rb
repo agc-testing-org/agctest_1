@@ -69,6 +69,7 @@ require_relative '../workers/user_password_reset_worker.rb'
 require_relative '../workers/user_register_worker.rb'
 require_relative '../workers/user_notification_get_worker.rb'
 require_relative '../workers/user_notification_mail_worker.rb'
+require_relative '../workers/user_create_project_worker.rb'
 
 # Throttling
 require_relative 'rack'
@@ -613,7 +614,14 @@ class Integrations < Sinatra::Base
         check_required_field fields[:org], "name"
         issue = Issue.new
         project = issue.create_project @session_hash["id"], fields[:org], fields[:name]
-        project || (return_error "unable to create project")
+        
+        repo = Repo.new
+        github = (repo.github_client ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET'])
+        github || (return_error "unable to authenticate github")
+        github.create_repo("#{project.name}_#{project.id}", {:organization => ENV['INTEGRATIONS_GITHUB_ORG']}) || (return_error "unable to create project")
+
+        UserCreateProjectWorker.perform_async project.id
+
         status 201
         return project.to_json
     end
@@ -745,7 +753,7 @@ class Integrations < Sinatra::Base
         repo = Repo.new
         github = (repo.github_client github_authorization)
         sprint || (return_error "unable to connect to github")
-        sha = github.branch("#{sprint.project.org}/#{sprint.project.name}","master").commit.sha
+        sha = github.branch("#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{sprint.project.name}_#{sprint.project.id}","master").commit.sha
         sha || (return_error "unable to retrieve sha")
         sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
         sprint_state || (return_error "unable to create sprint state")
@@ -802,7 +810,7 @@ class Integrations < Sinatra::Base
         repo = Repo.new
         github = (repo.github_client github_authorization)
         github || (return_error "unable to authenticate github")
-        (pr = github.create_pull_request("#{sprint_state.sprint.project.org}/#{sprint_state.sprint.project.name}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})) rescue (return_error "unable to create pull request") # could exist already
+        (pr = github.create_pull_request("#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{sprint_state.sprint.project.name}_#{sprint_state.sprint.project.id}", "master", "#{fields[:sprint_state_id].to_i}_#{params[:id].to_i}", "Wired7 #{fields[:sprint_state_id].to_i}_#{params[:id].to_i} to master", body = nil, options = {})) rescue (return_error "unable to create pull request") # could exist already
         parameters = {arbiter_id: @session_hash["id"], contributor_id: params[:id], pull_request: pr.number}
         sprint_state.update_attributes!(parameters) rescue (return_error "unable to set winner") 
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
@@ -825,7 +833,7 @@ class Integrations < Sinatra::Base
         repo = Repo.new
         github = (repo.github_client github_authorization)
         github || (return_error "unable to authenticate github")
-        pr = github.merge_pull_request("#{winner.sprint.project.org}/#{winner.sprint.project.name}", winner.pull_request, commit_message = "Wired7 #{winner.id}_#{winner.contributor_id} to master", options = {})
+        pr = github.merge_pull_request("#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{winner.sprint.project.name}_#{winner.sprint.project.id}", winner.pull_request, commit_message = "Wired7 #{winner.id}_#{winner.contributor_id} to master", options = {})
         pr || (return_error "unable to find pull request")
         winner.merged = true
         winner.save
