@@ -259,11 +259,12 @@ class Account
         end
     end
 
-    def record_login id, ip
+    def record_login id, ip, user_agent
         begin
             login = Login.create({
                 user_id: id,
-                ip: ip
+                ip: ip,
+                user_agent: user_agent
             })
             return login.id
         rescue => e

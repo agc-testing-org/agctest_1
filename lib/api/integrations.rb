@@ -224,7 +224,7 @@ class Integrations < Sinatra::Base
                 :expires_in => expiration,
                 :refresh_token => user_refresh
             }
-            initial && (account.record_login user[:id], request.ip)
+            initial && (account.record_login user[:id], request.ip,  request.user_agent)
             status 200
             return response
         end

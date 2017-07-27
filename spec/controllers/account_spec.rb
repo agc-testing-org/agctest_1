@@ -439,9 +439,12 @@ describe ".Account" do
         end
     end
     context "#record_login" do
+        before(:each) do
+            @user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36" 
+        end
         context "no users foreign key" do
             before(:each) do
-                @res = @account.record_login 22, "123.56"
+                @res = @account.record_login 22, "123.56", @user_agent
             end
             it "should return nil" do
                 expect(@res).to be nil
@@ -453,7 +456,7 @@ describe ".Account" do
                 @ip = "192.168.1.1"
                 @id = decrypt(users(:adam).id).to_i
                 @provider = 1
-                @res = @account.record_login @id, @ip
+                @res = @account.record_login @id, @ip, @user_agent
                 @record = @mysql_client.query("select * from logins where user_id = #{@id}").first
             end
             context "response" do
