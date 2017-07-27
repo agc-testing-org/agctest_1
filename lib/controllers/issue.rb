@@ -8,8 +8,8 @@ class Issue
         begin
             sprint = Sprint.create({
                 user_id: user_id,
-                title: title,
-                description: description,
+                title: title.strip,
+                description: description.strip,
                 project_id: project_id
             })
             return sprint
@@ -48,9 +48,8 @@ class Issue
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
-                text: text
+                text: text.strip
             })
-
             return comment
         rescue => e
             puts e
@@ -98,8 +97,8 @@ class Issue
     def create_project user_id, org, name
         begin
             project = Project.create({
-                org: org,
-                name: name,
+                org: org.strip,
+                name: name.strip,
                 user_id: user_id,
                 preparing: true
             })

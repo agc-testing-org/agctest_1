@@ -80,7 +80,7 @@ set :database, {
     password: ENV['INTEGRATIONS_MYSQL_PASSWORD'],
     host: ENV['INTEGRATIONS_MYSQL_HOST'],
     database: "integrations_#{ENV['RACK_ENV']}",
-    pool: 50
+    pool: ENV['INTEGRATIONS_MYSQL_POOL']
 }  
 
 Sidekiq.configure_server do |config|

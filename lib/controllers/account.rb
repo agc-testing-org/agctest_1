@@ -179,9 +179,9 @@ class Account
     def create email, first_name, last_name, ip
         begin
             user = User.create({
-                email: email.downcase,
-                first_name: first_name,
-                last_name: last_name,
+                email: email.downcase.strip,
+                first_name: first_name.strip,
+                last_name: (last_name.strip if last_name),
                 ip: ip
             })
             return user
@@ -308,7 +308,7 @@ class Account
 
     def confirm_user user, password, first_name, ip
         if user
-            user[:first_name] = first_name
+            user[:first_name] = first_name.strip
             user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
             user[:protected] = false
