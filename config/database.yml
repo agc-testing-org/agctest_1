@@ -1,0 +1,16 @@
+default: &default
+  adapter: "mysql2"
+  username: <%= ENV['INTEGRATIONS_MYSQL_USERNAME'] %>
+  password: <%= ENV['INTEGRATIONS_MYSQL_PASSWORD'] %>
+  host:  <%= ENV['INTEGRATIONS_MYSQL_HOST'] %>
+  database: <%= "integrations_#{ENV['RACK_ENV']}" %>
+  pool: <%= ENV['INTEGRATIONS_MYSQL_POOL'] %>
+
+test: 
+  <<: *default
+
+development:
+  <<: *default
+
+production:
+  <<: *default

@@ -95,7 +95,7 @@ class Organization
 
     def create_team name, user_id, plan_id
         begin
-            return Team.create({ name: name, user_id: user_id, plan_id: plan_id }).as_json
+            return Team.create({ name: name.strip, user_id: user_id, plan_id: plan_id }).as_json
         rescue => e
             puts e
             return nil
@@ -119,7 +119,7 @@ class Organization
 
     def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id})
         rescue => e
             puts e
             return nil

@@ -1,5 +1,5 @@
 class Account
-
+    include Obfuscate
     def initialize
         @per_page = 10
     end
@@ -179,9 +179,9 @@ class Account
     def create email, first_name, last_name, ip
         begin
             user = User.create({
-                email: email.downcase,
-                first_name: first_name,
-                last_name: last_name,
+                email: email.downcase.strip,
+                first_name: (first_name.strip if first_name),
+                last_name: (last_name.strip if last_name),
                 ip: ip
             })
             return user
@@ -259,11 +259,12 @@ class Account
         end
     end
 
-    def record_login id, ip
+    def record_login id, ip, user_agent
         begin
             login = Login.create({
                 user_id: id,
-                ip: ip
+                ip: ip,
+                user_agent: user_agent
             })
             return login.id
         rescue => e
@@ -273,7 +274,8 @@ class Account
     end
 
     def create_email email, first_name 
-        return mail email, "Wired7 Registration", "#{first_name},<br><br>Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{first_name},\n\nThanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.\n\n\n- Adam Cockell\nWired7 Founder"
+        body = "Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible."
+        return mail email, "Wired7 Registration", "#{first_name},<br><br>#{body}<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{first_name},\n\n#{body}\n\n\n- Adam Cockell\nWired7 Founder"
     end
 
     def request_token email
@@ -291,7 +293,8 @@ class Account
         if !name
             name = "Hi"
         end
-        return mail email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+        link = "#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}"
+        return mail email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
     end
 
     def get_reset_token token
@@ -306,7 +309,7 @@ class Account
 
     def confirm_user user, password, first_name, ip
         if user
-            user[:first_name] = first_name
+            user[:first_name] = first_name.strip
             user[:password] = BCrypt::Password.create(password)
             user[:token] = nil
             user[:protected] = false
@@ -370,13 +373,15 @@ class Account
         end
     end
 
-    def mail_invite token
+    def mail_invite invite
         invite = (get_invitation token).take
         on_team = get_seat invite[:user_id], invite.team_id
         if invite.profile_id && on_team # profile share
-            return mail invite.user_email, "New Lead on Wired7 from #{invite.team.name}", "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile: <br><br><a href='#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}'>#{invite.profile.first_name} on Wired7</a><br><br><br>- The Wired7 ATeam", "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile:\n#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}\n\n\n- The Wired7 ATeam"
-        else # genuine invitation
-            return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+            link = "#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}"
+            return mail invite.user_email, "New Lead on Wired7 from #{invite.team.name}", "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam", "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile:\n\n#{link}\n\n\n- The Wired7 ATeam"
+        else
+            link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
+            return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
         end
     end
 
@@ -570,6 +575,78 @@ class Account
         rescue => e
             puts e
             return nil
+        end
+    end
+
+    def get_user_notifications_settings user_id, query
+        begin            
+            return Notification.joins("LEFT JOIN user_notification_settings ON user_notification_settings.notification_id = notifications.id AND user_notification_settings.user_id = #{user_id.to_i} OR user_notification_settings.user_id is null").where(query).select("notifications.id","notifications.name","user_notification_settings.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_user_notifications_settings user_id, notification_id, active
+        begin
+            ss = UserNotificationSetting.find_or_initialize_by(:user_id => user_id, :notification_id => notification_id)
+            ss.update_attributes!(:active => active)
+            return {:id => ss.notification_id}
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def user_profile_descriptor user_profile
+        profile = "someone"
+        if user_profile[:title]
+
+            industry = ""
+            if user_profile[:industry]
+                industry = " in #{user_profile[:industry]}"
+            end
+
+            location = ""
+            if user_profile[:location]
+                location = " (#{user_profile[:location]})"
+            end
+
+            profile = "a #{user_profile[:title]}#{industry}#{location}"
+        end
+        return profile
+    end
+
+    def create_notification_email id, user_id
+        begin
+            notifications =  UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN users on user_notifications.user_id = users.id").where("user_notifications.sprint_timeline_id = #{id} and user_notifications.user_id = #{user_id}").select("user_notifications.user_id, user_notifications.id, user_notifications.sprint_timeline_id")
+            notifications.each_with_index do |notification,i| 
+
+                user_profile = get_profile notification.sprint_timeline.user
+                profile = user_profile_descriptor user_profile
+
+                project = "#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}"
+                sprint = "#{notification.sprint_timeline.sprint.title}"
+                signature = "- The Wired7 ATeam"
+
+                if notification.sprint_timeline.notification.name == "comment" #|| notification.sprint_timeline.notification.name == "vote"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.next_sprint_state.id}-#{notification.sprint_timeline.next_sprint_state.state.name}"
+                    return mail notification.user.email, "New Wired7 #{notification.sprint_timeline.notification.name.capitalize}", "#{notification.user.first_name},<br><br>There's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>\"#{notification.sprint_timeline.comment.text}\"<br><br>Use the following link to reply:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nThere's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint}\n\n\"#{notification.sprint_timeline.comment.text}\"\n\nUse the following link to reply:\n\n#{link}\n\n\n#{signature}" 
+                elsif notification.sprint_timeline.notification.name == "transition"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.state.name}"
+                    return mail notification.user.email, "Wired7 #{notification.sprint_timeline.state.name} transition", "#{notification.user.first_name},<br><br>We've just started the #{notification.sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>#{notification.sprint_timeline.state.instruction}<br><br>Use the following link to join in:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nWe've just started the #{notification.sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\n#{notification.sprint_timeline.state.instruction}\n\nUse the following link to join in:\n\n#{link}\n\n\n#{signature}"
+                elsif notification.sprint_timeline.notification.name == "winner"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.next_sprint_state.id}-#{notification.sprint_timeline.next_sprint_state.state.name}"
+                    if notification.sprint_timeline.contributor.user.id == notification.user.id
+                        return mail notification.user.email, "Your Wired7 Proposal Won!", "#{notification.user.first_name},<br><br>Congratulations!  Your proposal for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i> has been selected for merge!  Use the following link to check out the other proposals:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nCongratulations!  Your proposal for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint} has been selected for merge!  Use the following link to check out the other proposals:\n\n#{link}\n\n\n#{signature}"
+                    else
+                        return mail notification.user.email, "Wired7 Proposal Selected", "#{notification.user.first_name},<br><br>A winning proposal has been selected for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i>.  Use the following link to check out all of the proposals:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nA winning proposal has been selected for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint}.  Use the following link to check out all of the proposals:\n\n#{link}\n\n\n#{signature}"
+                    end
+                end
+            end
+        rescue => e
+            puts e
+            return false 
         end
     end
 end

@@ -11,12 +11,6 @@ describe ".Activity" do
         it "should return a result" do
             expect(@res.length).to be > 0
         end
-        it "should return sprint_timeline_id" do
-            @res.each_with_index do |result|
-                expect(result["sprint_timeline_id"]).to_not be nil
-                expect(result["sprint_timeline_id"]).to eq @sprint_timeline_id
-            end
-        end
         it "should return user_id" do
             expect(@notification_results.count).to be > 0
             @notification_results.each_with_index do |result,i|
@@ -85,7 +79,7 @@ describe ".Activity" do
         it_behaves_like "user_notifications"
     end
 
-    context "#user_notifications_by_roles", :focus => true do
+    context "#user_notifications_by_roles" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
         before(:each) do
             @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
@@ -170,16 +164,60 @@ describe ".Activity" do
         end
     end
 
-    context "#user_notifications_distinct" do
+    context "#get_decrypted_user_ids" do
         fixtures :users
         before(:each) do
-            object = User.where(:id => decrypt(users(:adam_confirmed).id).to_i).select("id as user_id")
-            @array = object + object
-            @res = @activity.user_notifications_distinct @array
+            @users = User.all.select("id as user_id")
+            @user_ids = [User.first[:id]]
+            @res = @activity.get_decrypted_user_ids @users, @user_ids
         end
-        context "array" do
-            it "should contain a single record" do
-                expect(@res.length).to eq 1
+        it "should return distinct ids" do
+            sql = @mysql_client.query("select id from users")
+            ids = []
+            sql.each_with_index do |s,i|
+                ids[i] = s["id"]
+            end
+            expect(@res.sort).to eq(ids.sort)
+        end
+    end
+    
+    context "#rebuild_users" do
+        before(:each) do
+            @user_ids = [1,3,9]
+            @sprint_timeline_id = 28
+            @res = @activity.rebuild_users @user_ids, @sprint_timeline_id 
+        end
+        it "should return a result" do
+            expect(@res.length).to eq @user_ids.length
+        end
+        it "should return user_id key" do
+            @res.each_with_index do |r,i|
+                expect(@res[i][:user_id]).to eq(@user_ids[i])
+            end
+        end
+        it "should return sprint_timeline_id key" do
+            @res.each_with_index do |r,i|
+                expect(@res[i][:sprint_timeline_id]).to eq(@sprint_timeline_id)
+            end 
+        end
+    end
+
+    context "#user_notifications_that_need_to_be_mailed" do
+        fixtures :users, :sprint_timelines, :user_notifications, :user_notification_settings, :notifications
+        before(:each) do
+            @sprint_timeline_id = sprint_timelines(:sprint_1_state_1_winner).id 
+            @notification_results = @mysql_client.query("SELECT user_notifications.user_id, user_notifications.sprint_timeline_id FROM user_notifications INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id WHERE (user_notification_settings.active = 1 and user_notification_settings.notification_id = sprint_timelines.notification_id and user_notifications.read = 0 and notifications.name in ('comment', 'transition', 'winner') and sprint_timelines.id = #{@sprint_timeline_id})").first
+            @res = @activity.user_notifications_that_need_to_be_mailed @sprint_timeline_id
+            @res.each do |n|
+                @user = n[:user_id]
+            end
+        end                                                   
+        context "user_notifications" do
+            it "should return owner" do
+                expect(@notification_results["user_id"]).to eq(@user)
+            end
+            it "should return sprint_timeline_id" do
+                expect(@notification_results["sprint_timeline_id"]).to eq @sprint_timeline_id
             end
         end
     end

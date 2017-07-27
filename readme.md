@@ -31,6 +31,7 @@
     export INTEGRATIONS_MYSQL_USERNAME="root"
     export INTEGRATIONS_MYSQL_PASSWORD="123456"
     export INTEGRATIONS_MYSQL_HOST="localhost"
+    export INTEGRATIONS_MYSQL_POOL=50 #web 5, workers 50
     export INTEGRATIONS_REDIS_HOST="127.0.0.1"
     export INTEGRATIONS_REDIS_PORT="6379"
     export INTEGRATIONS_REDIS_DB=1
@@ -108,7 +109,7 @@ Shell 3 (project root)
     bundle install
     export RACK_ENV=development
     source ~/.bashrc
-    bundle exec sidekiq -e $RACK_ENV -c 10 -r ./lib/api/integrations.rb 
+    bundle exec sidekiq -c5 -e $RACK_ENV -r ./lib/api/integrations.rb 
 
 Shell 3
 
