@@ -180,7 +180,7 @@ class Account
         begin
             user = User.create({
                 email: email.downcase.strip,
-                first_name: first_name.strip,
+                first_name: (first_name.strip if first_name),
                 last_name: (last_name.strip if last_name),
                 ip: ip
             })
