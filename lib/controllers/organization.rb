@@ -16,15 +16,14 @@ class Organization
         account = Account.new
         shares = []
         begin
-            UserTeam.where(:user_id => user_id).where(params).order(:id => :desc).each do |user|
+            UserTeam.where(:user_id => user_id).where(params).where(:accepted => true).order(:id => :desc).each do |user|
                 row = user.as_json
-                if user.accepted #only show accepted shares for attribution
-                    row["share_profile"] = account.get_profile user.profile
-                    row["share_first_name"] = user.profile.first_name
-                    row["sender_first_name"] = user.sender.first_name
-                    row["sender_last_name"] = user.sender.last_name
-                    row["team"] = user.team
-                end
+                row["share_profile"] = account.get_profile user.profile
+                row["share_first_name"] = user.profile.first_name
+                row["sender_first_name"] = user.sender.first_name
+                row["sender_last_name"] = user.sender.last_name
+                row["team"] = user.team
+
                 row.delete("token")
                 shares[shares.length] = row 
             end
@@ -119,7 +118,7 @@ class Organization
 
     def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id})
         rescue => e
             puts e
             return nil

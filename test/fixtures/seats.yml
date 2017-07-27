@@ -12,3 +12,6 @@ sponsored:
 
 priority:
   name: "priority"
+
+share:
+  name: "share"

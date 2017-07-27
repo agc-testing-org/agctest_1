@@ -373,7 +373,7 @@ class Account
         end
     end
 
-    def mail_invite invite
+    def mail_invite token
         invite = (get_invitation token).take
         on_team = get_seat invite[:user_id], invite.team_id
         if invite.profile_id && on_team # profile share

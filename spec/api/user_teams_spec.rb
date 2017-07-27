@@ -84,6 +84,33 @@ describe "/user-teams" do
                         it_behaves_like "error", "this email address has an existing invitation"
                     end
                 end
+                context "share profile" do
+                    before(:each) do
+                        post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat, :profile_id => users(:adam).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        @res = [JSON.parse(last_response.body)]
+                        @single_res = @res[0]
+                        @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}'")
+                    end
+                    it "should save profile_id" do
+                         expect(@team_invite_result.first["profile_id"]).to eq decrypt(users(:adam).id).to_i
+                    end
+                    it_behaves_like "invites_teams"
+                    context "multiple unique shares" do
+                        before(:each) do
+                            post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat, :profile_id => users(:adam_admin).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                            @res = [JSON.parse(last_response.body)]
+                            @single_res = @res[0]
+                            @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND profile_id = #{decrypt(users(:adam_admin).id)}")
+                        end
+                        it_behaves_like "invites_teams"
+                    end
+                    context "same share" do
+                        before(:each) do
+                            post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat, :profile_id => users(:adam).id  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        end
+                        it_behaves_like "error", "this email address has an existing invitation"
+                    end
+                end
                 context "unauthorized seat id" do
                     before(:each) do
                         post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => seats(:owner).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}

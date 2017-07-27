@@ -1163,7 +1163,7 @@ class Integrations < Sinatra::Base
         check_required_field fields[:token], "token"
         account = Account.new
         invite = account.get_invitation fields[:token]
-        (invite = invite.take) || (halt 200, {:id => 0, :valid => false}.to_json)
+        (invite = invite.first) || (halt 200, {:id => 0, :valid => false}.to_json)
         invite.accepted = true
         invite.token = nil
         return {:id => invite.id, :valid => invite.save}.to_json
