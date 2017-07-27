@@ -1,10 +1,11 @@
 require 'sinatra'
 require 'mysql2'
+require 'sinatra/base'
 require 'sinatra/activerecord'
 require 'activerecord-import'
+require 'activerecord-import/base'
 require 'sinatra/strong-params'
 require 'json'
-require 'sinatra/base'
 require 'redis'
 require 'jwt'
 require 'net/http'
@@ -74,15 +75,6 @@ require_relative '../workers/user_create_project_worker.rb'
 # Throttling
 require_relative 'rack'
 
-set :database, {
-    adapter: "mysql2",  
-    username: ENV['INTEGRATIONS_MYSQL_USERNAME'],
-    password: ENV['INTEGRATIONS_MYSQL_PASSWORD'],
-    host: ENV['INTEGRATIONS_MYSQL_HOST'],
-    database: "integrations_#{ENV['RACK_ENV']}",
-    pool: ENV['INTEGRATIONS_MYSQL_POOL']
-}  
-
 Sidekiq.configure_server do |config|
     config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
 end
@@ -95,6 +87,7 @@ class Integrations < Sinatra::Base
 
     include Obfuscate
 
+    set :database_file, "#{Dir.pwd}/config/database.yml"
     set :public_folder, File.expand_path('integrations-client/dist')
 
     if settings.production?
