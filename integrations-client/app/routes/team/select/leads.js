@@ -9,16 +9,16 @@ export default Ember.Route.extend({
     },
     store: Ember.inject.service(),
     model: function(params) {
+
+        this.store.adapterFor('share').set('namespace', 'teams/'+this.paramsFor("team.select").id);
+        var shares = this.store.query('share', {
+            team_id: this.paramsFor("team.select").id,
+        });
+        this.store.adapterFor('share').set('namespace', '');
+
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
+            shares: shares
         });
     },
-    afterModel(model,transition) {
-        if(model.team.get("show")){
-            this.transitionTo('team.select.notifications');
-        }
-        else if(model.team.get("shares")){
-            this.transitionTo('team.select.leads');
-        }
-    }
 });

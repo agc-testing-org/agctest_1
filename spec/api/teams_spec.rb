@@ -169,7 +169,7 @@ describe "/teams" do
             end
             it_behaves_like "teams"
             it "should return a list of all seats" do
-                expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:owner).id},{:id => seats(:sponsored).id},{:id => seats(:priority).id},{:id => seats(:member).id},{:id => seats(:free_agent).id}].to_json)
+                expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:owner).id},{:id => seats(:sponsored).id},{:id => seats(:priority).id},{:id => seats(:share).id},{:id => seats(:member).id},{:id => seats(:free_agent).id}].to_json)
             end
             it "should return show true" do
                 expect(@teams[0]["show"]).to be true
@@ -186,6 +186,22 @@ describe "/teams" do
             it_behaves_like "teams"
             it "should return show false" do
                 expect(@teams[0]["show"]).to be false
+            end
+        end
+        context "share seat" do
+            fixtures :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set seat_id = #{seats(:share).id} where user_id = #{decrypt(@user).to_i}")
+                get "/teams/#{@team}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @team_results = @mysql_client.query("select teams.* from teams where teams.id = #{@team}")
+                @teams = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "teams"
+            it "should return show false" do
+                expect(@teams[0]["show"]).to be false
+            end
+            it "should return shares true" do
+                expect(@teams[0]["shares"]).to be true
             end
         end
         context "not member" do
@@ -248,6 +264,71 @@ describe "/teams" do
             end
             it_behaves_like "ok"
             it_behaves_like "team_notifications"
+        end
+    end
+
+    describe "GET /:id/shares" do
+        fixtures :teams, :user_teams
+        context "shares" do
+            before(:each) do
+                get "/teams/#{user_teams(:adam_confirmed_share_cteam).team.id}/shares", {:team_id => user_teams(:adam_confirmed_share_cteam).team.id}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @result = @mysql_client.query("select user_teams.*,sender.first_name as sender_first_name,share.first_name as share_first_name from user_teams INNER JOIN users sender ON (user_teams.sender_id = sender.id) INNER JOIN users share ON (user_teams.profile_id = share.id) where accepted = 1 AND user_teams.user_id = #{decrypt(user_teams(:adam_confirmed_share_cteam).user.id)}")
+                @res = JSON.parse(last_response.body)
+            end
+            context "response" do
+                it "should return id" do
+                    @result.each_with_index do |r,i| 
+                        expect(@res[i]["id"]).to eq(r["id"])
+                    end
+                end
+                it "should return user_id" do
+                    @result.each_with_index do |r,i| 
+                        expect(decrypt(@res[i]["user_id"]).to_i).to eq(r["user_id"])
+                    end  
+                end
+                it "should return sender_id" do
+                    @result.each_with_index do |r,i| 
+                        expect(decrypt(@res[i]["sender_id"]).to_i).to eq(r["sender_id"])
+                    end  
+                end
+                it "should not return user_email" do
+                    @result.each_with_index do |r,i| 
+                        expect(@res[i]["id"]).to eq(r["id"])
+                    end  
+                end
+                it "should return accepted" do
+                    @result.each_with_index do |r,i| 
+                        expect(@res[i]["accepted"]).to be true
+                    end  
+                end
+                it "should return profile_id" do
+                    @result.each_with_index do |r,i| 
+                        expect(decrypt(@res[i]["profile_id"]).to_i).to eq(r["profile_id"])
+                    end  
+                end
+                it "should return share_first_name" do
+                    @result.each_with_index do |r,i| 
+                        expect(@res[i]["share_first_name"]).to eq(r["share_first_name"])
+                    end  
+                end
+                it "should return sender_first_name" do
+                    @result.each_with_index do |r,i| 
+                        expect(@res[i]["sender_first_name"]).to eq(r["sender_first_name"])
+                    end  
+                end
+                it "should return team" do
+                    @result.each_with_index do |r,i|
+                        expect(@res[i]["team"]["id"]).to eq(user_teams(:adam_confirmed_share_cteam).team.id)
+                    end  
+                end
+            end
+        end
+        context "no share seat" do
+            fixtures :teams
+            before(:each) do
+                get "/teams/#{teams(:ateam).id}/shares", {:team_id => teams(:ateam).id}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end
+            it_behaves_like "not_found"
         end
     end
 end

@@ -14,8 +14,10 @@ export default Ember.Route.extend({
         var defaultSeatId = null;
         if(this.modelFor("team.select").team.get("default_seat_id")){
             defaultSeat = this.modelFor("team.select").team.get("default_seat_id");
-            defaultSeatId = defaultSeat.get("id")
+            defaultSeatId = defaultSeat.get("id");
         }
+
+        var shareSeat = this.store.peekAll("seat").findBy("name","share");
 
         this.store.adapterFor('team-comment').set('namespace', 'user-teams/' + this.paramsFor("team.select").id);
         var user_teams_comments = this.store.query('team-comment', {
@@ -51,7 +53,8 @@ export default Ember.Route.extend({
                 team_id: this.paramsFor("team.select").id,
                 seat_id: defaultSeatId
             }),
-            default_seat: defaultSeat
+            default_seat: defaultSeat,
+            share_seat: shareSeat
         });
     },
 });
