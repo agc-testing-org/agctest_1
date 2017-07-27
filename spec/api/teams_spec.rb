@@ -154,7 +154,7 @@ describe "/teams" do
                 expect(@teams[0]["default_seat_id"]).to eq(teams(:ateam).plan.seat.id)
             end
             it "should return a list of permitted seats (to invite others)" do
-                expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:priority).id},{:id => seats(:member).id}].to_json)
+                expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:priority).id},{:id => seats(:share).id},{:id => seats(:member).id}].to_json)
             end
             it "should return show true" do
                 expect(@teams[0]["show"]).to be true

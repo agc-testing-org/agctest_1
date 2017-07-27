@@ -86,13 +86,14 @@ describe "/user-teams" do
                 end
                 context "share profile" do
                     before(:each) do
+                        @seat = seats(:share).id 
                         post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat, :profile_id => users(:adam).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                         @res = [JSON.parse(last_response.body)]
                         @single_res = @res[0]
-                        @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}'")
+                        @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND seat_id = #{@seat}")
                     end
-                    it "should save profile_id" do
-                         expect(@team_invite_result.first["profile_id"]).to eq decrypt(users(:adam).id).to_i
+                    it "should save profile_id", :focus => true do
+                        expect(@team_invite_result.first["profile_id"]).to eq decrypt(users(:adam).id).to_i
                     end
                     it_behaves_like "invites_teams"
                     context "multiple unique shares" do
@@ -109,6 +110,15 @@ describe "/user-teams" do
                             post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat, :profile_id => users(:adam).id  }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                         end
                         it_behaves_like "error", "this email address has an existing invitation"
+                    end
+                    context "invite to team after share" do
+                        before(:each) do
+                            post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => seats(:member).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                            @res = [JSON.parse(last_response.body)]
+                            @single_res = @res[0]
+                            @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND profile_id = #{decrypt(users(:adam_admin).id)}")
+                        end
+                        it_behaves_like "invites_teams"
                     end
                 end
                 context "unauthorized seat id" do

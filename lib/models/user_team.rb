@@ -12,8 +12,10 @@ class UserTeam < ActiveRecord::Base
     def profile_id
         encrypt self[:profile_id]
     end
-    validates_uniqueness_of :user_email, scope: :team_id, conditions: -> { where.not(profile_id: nil) }
-    validates_uniqueness_of :user_email, scope: [:team_id, :profile_id], conditions: -> { where(profile_id: nil) }
+    
+    validates_uniqueness_of :user_email, scope: :team_id, unless: Proc.new { |invite| invite.profile_id } #conditions: -> { where(profile_id: nil) }
+    validates_uniqueness_of :user_email, scope: [:team_id, :profile_id], if: Proc.new { |invite| invite.profile_id }
+
     belongs_to :team
     belongs_to :sender, :class_name => "User"
     belongs_to :profile, :class_name => "User"

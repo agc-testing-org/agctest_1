@@ -139,7 +139,7 @@ class Organization
         if is_admin
             return Seat.all.select(:id)
         else
-            return Seat.where(:name => "member").or(Seat.where(:id => team.plan.seat.id)).select(:id)
+            return Seat.where(:name => "member").or(Seat.where(:id => team.plan.seat.id)).or(Seat.where(:name => "share")).select(:id)
         end
     end
 
