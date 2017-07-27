@@ -37,7 +37,7 @@
 
                     {{#if (eq notification.notification.name "winner")}}
                         <p class="line">
-                            A contribution from the {{notification.next_sprint_state.state_id.name}} phase of {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} was selected for merge into {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
+                            A winning proposal for the {{notification.next_sprint_state.state_id.name}} phase of {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} was selected for merge into {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
                         </p>
                     {{/if}}
 

@@ -49,8 +49,6 @@ class Repo
     end
 
     def sync contributor_id, username
-
-        issue = Issue.new 
         params = {:id => contributor_id}
         contributor = get_contributor params
 
@@ -69,7 +67,6 @@ class Repo
     end
 
     def join session, github_token, contributor_id, username
-        issue = Issue.new 
         params = {:id => contributor_id}
         contributor = get_contributor params
         sprint_state = contributor.sprint_state

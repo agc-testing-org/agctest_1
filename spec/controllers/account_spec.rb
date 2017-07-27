@@ -91,6 +91,47 @@ describe ".Account" do
             end
         end
     end
+    context "#user_profile_descriptor", :focus => true do
+        fixtures :users
+        context "with profile" do
+            fixtures :user_profiles, :user_positions
+            context "everything" do
+                before(:each) do
+                    @res = @account.user_profile_descriptor (@account.get_profile user_positions(:adam_confirmed).user_profile.user)
+                end
+                it "should return profile of user" do
+                    expect(@res).to eq "a #{user_positions(:adam_confirmed).title} in #{user_positions(:adam_confirmed).industry} (#{user_positions(:adam_confirmed).user_profile.location_name})"
+                end
+            end
+            context "no industry" do
+                before(:each) do
+                    @mysql_client.query("update user_positions set industry = NULL")
+                    @res = @account.user_profile_descriptor (@account.get_profile user_positions(:adam_confirmed).user_profile.user)
+                end
+                it "should return profile of user" do
+                    expect(@res).to eq "a #{user_positions(:adam_confirmed).title} (#{user_positions(:adam_confirmed).user_profile.location_name})"
+                end
+            end
+            context "no location" do
+                before(:each) do
+                    @mysql_client.query("update user_profiles set location_name = NULL")
+                    @res = @account.user_profile_descriptor (@account.get_profile user_positions(:adam_confirmed).user_profile.user)
+                end                                                     
+                it "should return profile of user" do
+                    expect(@res).to eq "a #{user_positions(:adam_confirmed).title} in #{user_positions(:adam_confirmed).industry}"
+                end                                                                     
+            end
+        end
+        context "no profile" do
+            before(:each) do
+                @res = @account.user_profile_descriptor (@account.get_profile users(:adam))
+            end
+            it "should return 'someone'" do
+                expect(@res).to eq "someone"
+            end
+
+        end
+    end
     context "#github_code_for_token" do
         before(:each) do
             @code = "123"
