@@ -94,6 +94,7 @@ adam_confirmed_share_cteam:
   sender: adam_admin
   user: adam_confirmed
   team: cteam
+  user_email: "adam+share_cteam@wired7.com"
   accepted: true
   updated_at: <%= 2.hour.ago.to_s(:db) %>
   created_at: <%= 5.hour.ago.to_s(:db) %>

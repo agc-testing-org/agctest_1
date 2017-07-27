@@ -272,7 +272,7 @@ describe "/teams" do
         context "shares" do
             before(:each) do
                 get "/teams/#{user_teams(:adam_confirmed_share_cteam).team.id}/shares", {:team_id => user_teams(:adam_confirmed_share_cteam).team.id}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @result = @mysql_client.query("select user_teams.*,sender.first_name as sender_first_name,share.first_name as share_first_name from user_teams INNER JOIN users sender ON (user_teams.sender_id = sender.id) INNER JOIN users share ON (user_teams.profile_id = share.id) where user_teams.user_id = #{decrypt(user_teams(:adam_confirmed_share_cteam).user.id)}")
+                @result = @mysql_client.query("select user_teams.*,sender.first_name as sender_first_name,share.first_name as share_first_name from user_teams INNER JOIN users sender ON (user_teams.sender_id = sender.id) INNER JOIN users share ON (user_teams.profile_id = share.id) where accepted = 1 AND user_teams.user_id = #{decrypt(user_teams(:adam_confirmed_share_cteam).user.id)}")
                 @res = JSON.parse(last_response.body)
             end
             context "response" do
