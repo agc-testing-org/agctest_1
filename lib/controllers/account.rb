@@ -273,7 +273,8 @@ class Account
     end
 
     def create_email email, first_name 
-        return mail email, "Wired7 Registration", "#{first_name},<br><br>Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{first_name},\n\nThanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible.\n\n\n- Adam Cockell\nWired7 Founder"
+        body = "Thanks for signing up!  At the moment access to the service is invitation-based so that we can work more closely with users to build a great platform.  We appreciate your interest and patience, and will invite you as soon as possible."
+        return mail email, "Wired7 Registration", "#{first_name},<br><br>#{body}<br><br><br>- Adam Cockell<br>Wired7 Founder", "#{first_name},\n\n#{body}\n\n\n- Adam Cockell\nWired7 Founder"
     end
 
     def request_token email
@@ -291,7 +292,8 @@ class Account
         if !name
             name = "Hi"
         end
-        return mail email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}'>Password Reset</a>.<br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}.\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
+        link = "#{ENV['INTEGRATIONS_HOST']}/token/#{Digest::MD5.hexdigest(email)}-#{token}"
+        return mail email, "Wired7 Password Reset", "#{name},<br><br>We recently received a reset password request for your account.<br><br>If you'd like to continue, please click the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br>If you did not make the request, no need to take further action.<br><br><br>- The Wired7 ATeam", "#{name},\n\nWe recently received a reset password request for your account.\n\nIf you'd like to continue, please click the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\nIf you did not make the request, no need to take further action.\n\n\n- The Wired7 ATeam"
     end
 
     def get_reset_token token
@@ -371,7 +373,8 @@ class Account
     end
 
     def mail_invite invite
-        return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}'>Join #{invite.team.name}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+        link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
+        return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
     end
 
     def refresh_team_invite token
