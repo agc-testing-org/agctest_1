@@ -369,15 +369,15 @@ class Integrations < Sinatra::Base
         filters = {:id => @session_hash["id"]}
         user = account.get filters
         user || return_unauthorized 
-        access_token = account.linkedin_code_for_token(fields[:auth_code])
+        fields[:auth_code] && (access_token = account.linkedin_code_for_token(fields[:auth_code]))
         #ALWAYS RETURN session tokens, even if conditions below fail
         #access_token || (return_error "invalid code")
-        linkedin = (account.linkedin_client access_token)
+        access_token && (linkedin = (account.linkedin_client access_token)) || (linkedin = nil)
         #linkedin || (return_error "invalid access token")
-        pulled = account.pull_linkedin_profile linkedin
+        linkedin && (pulled = account.pull_linkedin_profile linkedin)
         #pulled || (return_error "could not pull profile")
-        profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_position profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
+        linkedin && pulled && (profile_id = account.post_linkedin_profile @session_hash["id"], pulled)
+        (linkedin && profile_id && pulled && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_position profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
         response = (session_tokens user, @session_hash["seat_id"], false) 
         response[:success] = !profile_id.nil?
         status 200

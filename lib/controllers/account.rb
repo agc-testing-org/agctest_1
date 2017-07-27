@@ -615,8 +615,8 @@ class Account
             notifications.each_with_index do |notification,i| 
 
                 user_profile = get_profile notification.sprint_timeline.user
-                
                 profile = user_profile_descriptor user_profile
+
                 project = "#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}"
                 sprint = "#{notification.sprint_timeline.sprint.title}"
                 signature = "- The Wired7 ATeam"

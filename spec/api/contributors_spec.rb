@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/contributors" do
 
-    fixtures :users, :seats, :notifications
+    fixtures :users, :seats, :states, :notifications
 
     before(:all) do
         @CREATE_TOKENS=true
