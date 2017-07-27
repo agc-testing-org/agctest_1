@@ -610,4 +610,132 @@ describe "/users" do
             it_behaves_like "unauthorized"                                          
         end                                                     
     end
+
+    shared_examples_for "user_notifications_settings" do
+        context "all" do
+            it "should return all notifications" do
+                expect(@res.length).to eq(Notification.count)
+                Notification.all.each_with_index do |notification,i|
+                    expect(@res[i]["name"]).to eq(notification.name)
+                end
+            end
+        end
+    end
+
+    shared_examples_for "user_notifications_settings_by_id" do
+        context "user notifications settings" do
+            it "should include active" do
+                @res.each do |notification| 
+                    if UserNotificationSetting.count > 0
+                        if notification["id"] == user_notification_settings(:user_1_notification_setting_1).id
+                            expect(notification["active"]).to eq(user_notification_settings(:user_1_notification_setting_1).active)
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    describe "GET /me/notifications-settings" do
+        fixtures :notifications
+        before(:each) do
+            @user_id = users(:adam).id
+        end
+        context "no user_notification_settings" do
+            before(:each) do
+                get "/users/me/notifications-settings", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it_behaves_like "user_notifications_settings"
+            it_behaves_like "user_notifications_settings_by_id"
+        end
+        context "user notifications settings" do
+            fixtures :user_notification_settings
+            before(:each) do
+                get "/users/me/notifications-settings", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end 
+            it_behaves_like "user_notifications_settings"
+            it_behaves_like "user_notifications_settings_by_id"
+        end
+    end
+
+    describe "GET /me/notifications-settings/:notification_id" do
+        fixtures :notifications
+        before(:each) do
+            @user_id = users(:adam).id
+            @notification_id = notifications(:new).id
+        end
+        context "no user_notification_settings" do
+            before(:each) do
+                get "/users/me/notifications-settings/#{@notification_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
+                @res = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "user_notifications_settings_by_id"
+        end
+        context "user_notification_settings" do
+            fixtures :user_notification_settings
+            before(:each) do
+                get "/users/me/notifications-settings/#{@notification_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
+                @res = [JSON.parse(last_response.body)]
+            end
+            it_behaves_like "user_notifications_settings_by_id"
+        end
+        context "signed out" do
+            before(:each) do
+                get "/users/me/notifications-settings/2"
+            end
+            it_behaves_like "unauthorized"
+        end
+    end
+
+    shared_examples_for "user_notifications_settings_update" do
+        context "response" do
+            it "should return notification_id as id" do
+                expect(@res["id"]).to eq(@notification_id)
+            end
+        end
+        context "user_notification_settings" do
+            it "should include most recent active" do
+                expect(@mysql["active"]).to eq(@active ? 1 : 0)
+            end
+        end
+    end
+
+    describe "PATCH /me/notifications-settings" do
+        fixtures :notifications
+        before(:each) do
+            @user_id = users(:adam_confirmed).id
+            @notification_id = notifications(:new).id 
+        end
+        context "owner" do
+            context "notification exists" do
+                before(:each) do
+                    @active = false
+                    patch "/users/me/notifications-settings/#{@notification_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from user_notification_settings").first
+                end
+                it_behaves_like "user_notifications_settings_update"
+                it_behaves_like "ok"
+            end 
+            context "notification does not exist" do
+                before(:each) do
+                    @active = true
+                    patch "/users/me/notifications-settings/#{@notification_id}", {:active => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @mysql = @mysql_client.query("select * from user_notification_settings").first
+                end
+                it_behaves_like "user_notifications_settings_update"
+                it_behaves_like "ok"
+            end
+        end
+        context "lost 'active' key" do
+            before(:each) do
+                @active = false
+                patch "/users/me/notifications-settings/#{@notification_id}", {:activ => @active}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end
+            it_behaves_like "error", "missing active field"
+        end
+    end 
 end

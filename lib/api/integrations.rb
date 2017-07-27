@@ -59,6 +59,7 @@ require_relative '../models/user_notification.rb'
 require_relative '../models/user_connection.rb'
 require_relative '../models/role_state.rb' 
 require_relative '../models/notification.rb'
+require_relative '../models/user_notification_setting.rb'
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 require_relative '../workers/contributor_join_worker.rb'
@@ -66,6 +67,8 @@ require_relative '../workers/contributor_sync_worker.rb'
 require_relative '../workers/user_invite_worker.rb'
 require_relative '../workers/user_password_reset_worker.rb'
 require_relative '../workers/user_register_worker.rb'
+require_relative '../workers/user_notification_get_worker.rb'
+require_relative '../workers/user_notification_mail_worker.rb'
 require_relative '../workers/user_create_project_worker.rb'
 
 # Throttling
@@ -76,7 +79,8 @@ set :database, {
     username: ENV['INTEGRATIONS_MYSQL_USERNAME'],
     password: ENV['INTEGRATIONS_MYSQL_PASSWORD'],
     host: ENV['INTEGRATIONS_MYSQL_HOST'],
-    database: "integrations_#{ENV['RACK_ENV']}"
+    database: "integrations_#{ENV['RACK_ENV']}",
+    pool: 50
 }  
 
 Sidekiq.configure_server do |config|
@@ -366,15 +370,15 @@ class Integrations < Sinatra::Base
         filters = {:id => @session_hash["id"]}
         user = account.get filters
         user || return_unauthorized 
-        access_token = account.linkedin_code_for_token(fields[:auth_code])
+        fields[:auth_code] && (access_token = account.linkedin_code_for_token(fields[:auth_code]))
         #ALWAYS RETURN session tokens, even if conditions below fail
         #access_token || (return_error "invalid code")
-        linkedin = (account.linkedin_client access_token)
+        access_token && (linkedin = (account.linkedin_client access_token)) || (linkedin = nil)
         #linkedin || (return_error "invalid access token")
-        pulled = account.pull_linkedin_profile linkedin
+        linkedin && (pulled = account.pull_linkedin_profile linkedin)
         #pulled || (return_error "could not pull profile")
-        profile_id = account.post_linkedin_profile @session_hash["id"], pulled
-        (profile_id && pulled  && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_position profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
+        linkedin && pulled && (profile_id = account.post_linkedin_profile @session_hash["id"], pulled)
+        (linkedin && profile_id && pulled && pulled.positions && pulled.positions.all && (pulled.positions.all.length > 0) && (account.post_linkedin_profile_position profile_id, pulled.positions.all[0])) #|| (return_error "could not save profile")
         response = (session_tokens user, @session_hash["seat_id"], false) 
         response[:success] = !profile_id.nil?
         status 200
@@ -1186,6 +1190,34 @@ class Integrations < Sinatra::Base
         return {:data => notification, :meta => {}}.to_json
     end
 
+    get_user_notifications_settings = lambda do
+        protected!
+        account = Account.new
+        status 200
+        return (account.get_user_notifications_settings @session_hash["id"], nil).to_json
+    end
+
+    get_user_notifications_settings_by_id = lambda do
+        protected!
+        check_required_field params[:notification_id], "notification_id"
+        account = Account.new
+        query = {:id => params[:notification_id]}
+        status 200
+        return (account.get_user_notifications_settings @session_hash["id"], query)[0].to_json
+    end
+
+    user_notifications_settings_patch = lambda do
+        protected!
+        check_required_field params[:notification_id], "notification_id"
+        fields = get_json
+        check_required_field !fields[:active].nil?, "active"  
+        account = Account.new
+        response = (account.update_user_notifications_settings @session_hash["id"], params[:notification_id], fields[:active])
+        response || (return_error "unable to update notification_settings")
+        status 200
+        return response.to_json
+    end
+
     get_user_comments_created_by_skillset_and_roles = lambda do
         feedback = Feedback.new
         params["user_id"] = decrypt(params["user_id"])
@@ -1297,6 +1329,9 @@ class Integrations < Sinatra::Base
     get "/users/me/notifications", allows: [:page], &get_user_notifications
     patch "/users/me/notifications/:id", &user_notifications_read
     get "/users/me/notifications/:id", &get_user_notifications_by_id
+    get "/users/me/notifications-settings", &get_user_notifications_settings
+    patch "/users/me/notifications-settings/:notification_id", &user_notifications_settings_patch
+    get "/users/me/notifications-settings/:notification_id", &get_user_notifications_settings_by_id
 
     get "/users/me/connections", &connections_get 
     get "/users/me/requests", &connections_requests_get

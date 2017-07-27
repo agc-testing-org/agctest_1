@@ -108,7 +108,7 @@ Shell 3 (project root)
     bundle install
     export RACK_ENV=development
     source ~/.bashrc
-    bundle exec sidekiq -e $RACK_ENV -c 10 -r ./lib/api/integrations.rb 
+    bundle exec sidekiq -c5 -e $RACK_ENV -r ./lib/api/integrations.rb 
 
 Shell 3
 
