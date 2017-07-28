@@ -10,6 +10,7 @@ export default Ember.Route.extend({
     store: Ember.inject.service(),
     model: function(params) {
 
+        this.store.unloadAll('connection');
         this.store.adapterFor('connection').set('namespace', 'teams/'+this.paramsFor("team.select").id);
         var connections = this.store.findAll('connection');
         this.store.adapterFor('connection').set('namespace', '');
