@@ -619,6 +619,16 @@ describe "/users" do
                     expect(@res[i]["name"]).to eq(notification.name)
                 end
             end
+            it "should return description" do
+                Notification.all.each_with_index do |notification,i|
+                    expect(@res[i]["description"]).to eq(notification.description)
+                end
+            end
+            it "should not return nil active" do
+                Notification.all.each_with_index do |notification,i|
+                    expect(@res[i]["active"]).to_not be nil
+                end
+            end
         end
     end
 

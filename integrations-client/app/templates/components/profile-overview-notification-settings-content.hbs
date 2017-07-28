@@ -1,0 +1,10 @@
+<div class="full">
+    {{#each notifications-settings as |setting|}}
+        <h3 class="description section text-capitalize mb-0 mt-3">{{setting.name}}</h3>
+        <div class="about section"><span class="badge badge-default rounded mr-1">{{#if setting.active}}ON{{else}}OFF{{/if}}</span> {{setting.description}}</div>
+        {{#if setting.updated_at}}
+            <small class="text-muted"><strong>Changed</strong> {{setting.updated_at}}</small>
+        {{/if}}
+    {{/each}}
+    <div class="about mt-5">*<strong>new</strong> and <strong>vote</strong> notifications are currently disabled</div>
+</div>

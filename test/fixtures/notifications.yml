@@ -1,14 +1,19 @@
 new:
   name: "new"
+  description: "its new"
 
 transition:
   name: "transition"
+  description: "it changed!"
 
 comment:
   name: "comment"
+  description: "who said that"
 
 vote:
   name: "vote"
+  description: "why thank you"
 
 winner:
   name: "winner"
+  description: "i hate bragging but"
