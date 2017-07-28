@@ -1,3 +1,14 @@
+{{#if (eq type "notifications-setting")}}
+{{#each items as |item|}}
+{{#if (or (or (eq item.name "comment") (eq item.name "winner"))(eq item.name "transition")) }} 
+    {{#if item.active}}
+        <span {{action "updateItem" type user.id item.id false}} class="badge badge-default rounded selected cursor-pointer {{type}}">{{item.name}}</span>
+    {{else}}
+        <span {{action "updateItem" type user.id item.id true}} class="badge badge-default rounded unselected cursor-pointer {{type}}">{{item.name}}</span>
+    {{/if}}
+    {{/if}}
+{{/each}}
+{{else}}
 {{#each items as |item|}}
     {{#if item.active}}
         <span {{action "updateItem" type user.id item.id false}} class="badge badge-default rounded selected cursor-pointer {{type}}">{{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} {{item.name}}</span>
@@ -5,3 +16,4 @@
         <span {{action "updateItem" type user.id item.id true}} class="badge badge-default rounded unselected cursor-pointer {{type}}">{{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} {{item.name}}</span>
     {{/if}}
 {{/each}}
+{{/if}}
