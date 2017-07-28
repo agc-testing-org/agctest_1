@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170723210236) do
+ActiveRecord::Schema.define(version: 20170728152618) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -43,7 +43,7 @@ ActiveRecord::Schema.define(version: 20170723210236) do
     t.integer "user_id", null: false
     t.string "ip", null: false
     t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "user_agent"
     t.index ["ip"], name: "index_logins_on_ip"
     t.index ["user_id"], name: "index_logins_on_user"
   end
@@ -51,6 +51,7 @@ ActiveRecord::Schema.define(version: 20170723210236) do
   create_table "notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
+    t.string "description", null: false
   end
 
   create_table "plans", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -263,6 +264,7 @@ ActiveRecord::Schema.define(version: 20170723210236) do
     t.datetime "updated_at", null: false
     t.integer "seat_id"
     t.integer "period"
+    t.integer "profile_id"
     t.index ["sender_id"], name: "index_user_teams_on_sender_id"
     t.index ["team_id"], name: "index_user_teams_on_team_id"
     t.index ["token"], name: "index_user_teams_on_token", unique: true

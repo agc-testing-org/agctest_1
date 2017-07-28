@@ -24,13 +24,6 @@
                 Notifications
             {{/link-to}}
 
-            {{#link-to "me.notifications-settings" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-wrench"></i>
-                </div>
-                Settings
-            {{/link-to}}
-
             {{#link-to "me.overview" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-sort-amount-desc"></i>
@@ -79,6 +72,13 @@
                     Create Project
                 {{/link-to}}
             {{/if}}
+
+            {{#link-to "me.settings" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-wrench"></i>
+                </div>
+                Settings
+            {{/link-to}}
 
         {{else}}
             {{#unless (eq user.id sessionAccount.account.id)}}
