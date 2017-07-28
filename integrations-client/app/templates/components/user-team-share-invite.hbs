@@ -9,8 +9,7 @@
         {{else}}
             {{input type="hidden" value=default_seat.id}}
         {{/if}}
-
-        {{#if (greater-than team.seats.length 2)}}
+        {{#if sessionAccount.account.admin}}
             <div class="dropdown d-inline">
                 <button class="btn btn-secondary dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Seat Types

@@ -2,6 +2,7 @@ import Ember from 'ember';
 
 export default Ember.Component.extend({
     session: Ember.inject.service('session'),
+    sessionAccount: Ember.inject.service('session-account'),
     routes: Ember.inject.service('route-injection'),
     store: Ember.inject.service(''),
     errorMessage: null,
