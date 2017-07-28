@@ -1,8 +1,13 @@
 import Ember from 'ember';
+import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
-export default Ember.Route.extend({
+export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     model: function(params) {     
+
+        var store = this.get('store');
+        store.adapterFor('clear').set('namespace', ''); //clear namespaces
+
         var states = this.store.findAll('state');
         var user = this.store.find('user',params.id);
         this.store.adapterFor('skillset').set('namespace', 'users/'+params.id);
@@ -27,6 +32,6 @@ export default Ember.Route.extend({
         });
     },
     afterModel(model,transition) {
-//        this.transitionTo('profile.overview',model.user.id);
+        //        this.transitionTo('profile.overview',model.user.id);
     }
 });

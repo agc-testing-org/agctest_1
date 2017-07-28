@@ -17,6 +17,8 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         }
     },
     model: function(params) { 
+        var store = this.get('store');
+        store.adapterFor('clear').set('namespace', ''); //clear namespaces
 
         var states = this.store.findAll('state');
         var seats = this.store.findAll('seat');

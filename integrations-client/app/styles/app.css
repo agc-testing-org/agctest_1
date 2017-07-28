@@ -432,7 +432,7 @@ button{
     height: 100%;       
     position: absolute;     
     z-index:0;                  
-    background-size:80%;            
+    background-size:90%;            
 }
 .fullscreen {
     position:fixed;

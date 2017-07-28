@@ -7,6 +7,7 @@ export default DS.Model.extend({
     seats: DS.hasMany('seat'),
     user: attr(),
     show: attr('boolean'),
+    shares: attr('boolean'),
     user_id: attr('string'),
     plan_id: attr('number'),
     plan: DS.belongsTo('plan'),

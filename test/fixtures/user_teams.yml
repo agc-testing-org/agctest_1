@@ -73,7 +73,6 @@ adam_confirmed_adam_admin_team:
   user: adam_confirmed
   accepted: true
 
-
 adam_confirmed_priority:
   sender: adam_admin
   user: adam_confirmed
@@ -90,4 +89,26 @@ adam_adam_admin_team:
   team: adam_admin_team
   user: adam
   accepted: true
+
+adam_confirmed_share_cteam:
+  sender: adam_admin
+  user: adam_confirmed
+  team: cteam
+  user_email: "adam+share_cteam@wired7.com"
+  accepted: true
+  updated_at: <%= 2.hour.ago.to_s(:db) %>
+  created_at: <%= 5.hour.ago.to_s(:db) %>
+  seat: share
+  profile: adam_admin
+
+adam_confirmed_share_2_cteam:
+  sender: adam_admin
+  user: adam_confirmed
+  team: cteam
+  user_email: "adam+share_2_cteam@wired7.com"
+  token: "ABCPROFILESHARE"
+  updated_at: <%= 2.hour.ago.to_s(:db) %>
+  created_at: <%= 5.hour.ago.to_s(:db) %>
+  seat: share
+  profile: adam
 

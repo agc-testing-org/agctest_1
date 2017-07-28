@@ -12,10 +12,31 @@ class Organization
         end
     end
 
-    def get_users params
+    def get_shares user_id, params
+        account = Account.new
+        shares = []
         begin
-            account = Account.new
-            users = []
+            UserTeam.where(:user_id => user_id).where(params).where(:accepted => true).order(:id => :desc).each do |user|
+                row = user.as_json
+                row["share_profile"] = account.get_profile user.profile
+                row["share_first_name"] = user.profile.first_name
+                row["sender_first_name"] = user.sender.first_name
+                row["sender_last_name"] = user.sender.last_name
+                row["team"] = user.team
+
+                row.delete("token")
+                shares[shares.length] = row 
+            end
+            return shares
+        rescue => e
+            puts e
+        end
+    end
+
+    def get_users params
+        account = Account.new
+        users = []
+        begin
             UserTeam.where(params).order(:id => :desc).each do |user|
                 row = user.as_json
                 if user.accepted
@@ -30,6 +51,13 @@ class Organization
                     row["team_contributors_received"] = user.user.id
                 else
                     row.delete("user_id")
+                end
+                if user.profile
+                    row["share_profile"] = account.get_profile user.profile
+                    row["share_first_name"] = user.profile.first_name
+                    row["share_last_name"] = user.profile.last_name
+                else
+                    row["share_profile"] = {:id => 0}
                 end
                 row["sender_first_name"] = user.sender.first_name
                 row["sender_last_name"] = user.sender.last_name
@@ -66,7 +94,7 @@ class Organization
 
     def create_team name, user_id, plan_id
         begin
-            return Team.create({ name: name, user_id: user_id, plan_id: plan_id }).as_json
+            return Team.create({ name: name.strip, user_id: user_id, plan_id: plan_id }).as_json
         rescue => e
             puts e
             return nil
@@ -88,9 +116,9 @@ class Organization
         end
     end
 
-    def invite_member team_id, sender_id, user_id, user_email, seat_id
+    def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: user_email, token: SecureRandom.hex(32), seat_id: seat_id})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id})
         rescue => e
             puts e
             return nil
@@ -106,21 +134,12 @@ class Organization
         end
     end
 
-    def get_member_invite token
-        begin
-            return UserTeam.where(:token => token)
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def allowed_seat_types team, is_admin
 
         if is_admin
             return Seat.all.select(:id)
         else
-            return Seat.where(:name => "member").or(Seat.where(:id => team.plan.seat.id)).select(:id)
+            return Seat.where(:name => "member").or(Seat.where(:id => team.plan.seat.id)).or(Seat.where(:name => "share")).select(:id)
         end
     end
 

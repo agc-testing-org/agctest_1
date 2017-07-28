@@ -1,0 +1,28 @@
+<form {{action 'invite' team.id profile_id on="submit"}} class="mt-1">
+    <div class="form-group">
+        {{application-error error=errorMessage}}
+        <label>Email Address</label>
+        {{input type="text" value=email placeholder="name@example.com" class="form-control input-lg rounded"}}
+      
+        {{#if member}}
+            {{input type="hidden" value=default_seat.id}}
+        {{else}}
+            {{input type="hidden" value=default_seat.id}}
+        {{/if}}
+        {{#if sessionAccount.account.admin}}
+            <div class="dropdown d-inline">
+                <button class="btn btn-secondary dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Seat Types
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {{#each team.seats as |seat|}}
+                        <a class="dropdown-item" {{action "selectSeat" seat.id}}>{{seat.name}}</a>
+                    {{/each}}
+                </div>
+            </div>
+        {{/if}}
+
+        <button type="submit" class="btn btn-secondary rounded d-inline">{{#if profile_id}}Share{{else}}Invite{{/if}}</button>
+
+    </div>
+</form>

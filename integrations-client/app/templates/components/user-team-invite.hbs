@@ -9,32 +9,5 @@
     <h3 class="text-capitalize">Invite {{default_seat.name}}</h3>
 {{/if}}
 
-<form {{action 'invite' team.id on="submit"}} class="mt-1">
-    <div class="form-group">
-        {{application-error error=errorMessage}}
-        <label>Email Address</label>
-        {{input type="text" value=email placeholder="name@example.com" class="form-control input-lg rounded"}}
-      
-        {{#if member}}
-            {{input type="hidden" value=default_seat.id}}
-        {{else}}
-            {{input type="hidden" value=default_seat.id}}
-        {{/if}}
+{{user-team-share-invite default_seat=default_seat team=team refresh="refresh"}}
 
-        {{#if (greater-than team.seats.length 2)}}
-            <div class="dropdown d-inline">
-                <button class="btn btn-secondary dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Seat Types
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    {{#each team.seats as |seat|}}
-                        <a class="dropdown-item" {{action "selectSeat" seat.id}}>{{seat.name}}</a>
-                    {{/each}}
-                </div>
-            </div>
-        {{/if}}
-
-        <button type="submit" class="btn btn-secondary rounded d-inline">Invite</button>
-
-    </div>
-</form>

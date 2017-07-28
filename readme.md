@@ -31,6 +31,7 @@
     export INTEGRATIONS_MYSQL_USERNAME="root"
     export INTEGRATIONS_MYSQL_PASSWORD="123456"
     export INTEGRATIONS_MYSQL_HOST="localhost"
+    export INTEGRATIONS_MYSQL_POOL=50 #web 5, workers 50
     export INTEGRATIONS_REDIS_HOST="127.0.0.1"
     export INTEGRATIONS_REDIS_PORT="6379"
     export INTEGRATIONS_REDIS_DB=1
@@ -40,6 +41,7 @@
     export INTEGRATIONS_SIDEKIQ_HOST=true
     export INTEGRATIONS_SIDEKIQ_USERNAME="adam"
     export INTEGRATIONS_SIDEKIQ_PASSWORD="123456"
+    export INTEGRATIONS_SIDEKIQ_CONCURRENCY=5 #20 for production
     export INTEGRATIONS_INITIAL_USER_EMAIL="adamwired7+admin@gmail.com" #this is to allow us to sign in once we first deploy
 
     if [ "$RACK_ENV" == "test" ]; then
@@ -108,7 +110,7 @@ Shell 3 (project root)
     bundle install
     export RACK_ENV=development
     source ~/.bashrc
-    bundle exec sidekiq -e $RACK_ENV -c 10 -r ./lib/api/integrations.rb 
+    bundle exec sidekiq -c5 -e $RACK_ENV -r ./lib/api/integrations.rb 
 
 Shell 3
 

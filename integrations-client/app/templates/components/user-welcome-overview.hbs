@@ -23,7 +23,15 @@
                     <h3 class="description mt-5">Invite candidates through your organization's team to get started</h3>
                     <h3 class="about mt-3">{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}If you're first in your organization, {{#link-to "team.new"}}create a team{{/link-to}}{{/if}}</h3> 
                 {{else}}
-                    <h3 class="description mt-5">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
+                    {{#if (eq sessionAccount.account.seat_id.name "share")}}
+                        {{#each teams as |team index|}}
+                            {{#if (eq index 0)}}
+                                <h3 class="description mt-5">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team has generated for you to get started</h3>
+                            {{/if}}
+                        {{/each}}
+                    {{else}}
+                        <h3 class="description mt-5">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
+                    {{/if}}
                 {{/if}}
                 
                 {{#link-to "me.welcome" (query-params section="sprint")}}Back{{/link-to}}

@@ -33,6 +33,8 @@ Router.map(function() {
             this.route('owners');
             this.route('notifications');
             this.route('connections');
+            this.route('shares');
+            this.route('leads');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile
@@ -44,6 +46,7 @@ Router.map(function() {
         this.route('comments-received');
         this.route('votes-received');
         this.route('contributions-selected');
+        this.route('token', {path: '/:token'});
     });
     this.route('me', function() { // private profile (logged in)
         this.route('welcome');

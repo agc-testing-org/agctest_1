@@ -17,5 +17,8 @@ export default Ember.Route.extend({
         if(model.team.get("show")){
             this.transitionTo('team.select.notifications');
         }
+        else if(model.team.get("shares")){
+            this.transitionTo('team.select.leads');
+        }
     }
 });
