@@ -23,3 +23,8 @@ adam_admin_team:
   user: adam_admin
   name: "ADAMSTEAM"
   plan: recruiter
+
+cteam:
+  user: adam_admin
+  name: "CTEAM"
+  plan: manager

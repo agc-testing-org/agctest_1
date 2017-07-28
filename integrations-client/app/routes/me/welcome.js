@@ -17,7 +17,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     model: function(params) { 
         return Ember.RSVP.hash({
             params: params,
-            teams: this.store.findAll('team'),
+            teams: this.modelFor("me").teams,
             skillsets: this.modelFor("me").skillsets,
             seats: this.modelFor("me").seats,
             notifications: this.modelFor("me").notifications,

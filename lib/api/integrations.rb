@@ -1,10 +1,11 @@
 require 'sinatra'
 require 'mysql2'
+require 'sinatra/base'
 require 'sinatra/activerecord'
 require 'activerecord-import'
+require 'activerecord-import/base'
 require 'sinatra/strong-params'
 require 'json'
-require 'sinatra/base'
 require 'redis'
 require 'jwt'
 require 'net/http'
@@ -74,15 +75,6 @@ require_relative '../workers/user_create_project_worker.rb'
 # Throttling
 require_relative 'rack'
 
-set :database, {
-    adapter: "mysql2",  
-    username: ENV['INTEGRATIONS_MYSQL_USERNAME'],
-    password: ENV['INTEGRATIONS_MYSQL_PASSWORD'],
-    host: ENV['INTEGRATIONS_MYSQL_HOST'],
-    database: "integrations_#{ENV['RACK_ENV']}",
-    pool: 50
-}  
-
 Sidekiq.configure_server do |config|
     config.redis = { url: "redis://#{ENV['INTEGRATIONS_REDIS_HOST']}:#{ENV['INTEGRATIONS_REDIS_PORT']}/#{ENV['INTEGRATIONS_REDIS_DB']}" }
 end
@@ -95,6 +87,7 @@ class Integrations < Sinatra::Base
 
     include Obfuscate
 
+    set :database_file, "#{Dir.pwd}/config/database.yml"
     set :public_folder, File.expand_path('integrations-client/dist')
 
     if settings.production?
@@ -224,7 +217,7 @@ class Integrations < Sinatra::Base
                 :expires_in => expiration,
                 :refresh_token => user_refresh
             }
-            initial && (account.record_login user[:id], request.ip)
+            initial && (account.record_login user[:id], request.ip,  request.user_agent)
             status 200
             return response
         end
@@ -652,6 +645,7 @@ class Integrations < Sinatra::Base
             :id => team.user.id
         }
         team_response["show"] = ((seat && (seat == "member")) || @session_hash["admin"])
+        team_response["shares"] = (seat && (seat == "share"))
         team_response["seats"] = allowed_seats
         if team.plan
             team_response["plan"] = team.plan
@@ -1135,7 +1129,8 @@ class Integrations < Sinatra::Base
         query = {:email => fields[:user_email]}
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
-        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id]
+        (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id
         invitation || (return_error "invite error")
         invitation.id || (return_error "this email address has an existing invitation")
         UserInviteWorker.perform_async invitation.token
@@ -1147,9 +1142,10 @@ class Integrations < Sinatra::Base
 
     team_invites_get = lambda do
         check_required_field params[:token], "token"
-        team = Organization.new
-        invite = team.get_member_invite params[:token]
+        account = Account.new
+        invite = account.get_invitation params[:token]
         (invite && invite.first) || (halt 200, {:id => 0, :valid => false}.to_json)
+        team = Organization.new
         (team.invite_expired? invite) || (halt 200, {:id => invite.first.id, expired: true, valid: true}.to_json)
         status 200
         return {
@@ -1160,6 +1156,29 @@ class Integrations < Sinatra::Base
             name: invite.first.team.name
         }.to_json
     end
+
+    shares_post = lambda do
+        protected!
+        fields = get_json
+        check_required_field fields[:token], "token"
+        account = Account.new
+        invite = account.get_invitation fields[:token]
+        (invite = invite.first) || (halt 200, {:id => 0, :valid => false}.to_json)
+        invite.accepted = true
+        invite.token = nil
+        return {:id => invite.id, :valid => invite.save}.to_json
+    end
+
+    teams_shares_get = lambda do
+        protected!
+        check_required_field params["team_id"], "team_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "share")) || @session_hash["admin"]) || return_not_found
+        org = Organization.new
+        status 200                  
+        return (org.get_shares @session_hash["id"], params).to_json
+    end  
 
     get_user_notifications = lambda do
         protected!
@@ -1396,10 +1415,15 @@ class Integrations < Sinatra::Base
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
+
     get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get
+    get "/teams/:id/shares", allows: [:team_id], needs: [:team_id], &teams_shares_get
+
+    post "/shares", &shares_post
 
     post "/user-teams/token", &user_teams_patch
     post "/user-teams", &user_teams_post
+
     get "/user-teams", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get
     get "/user-teams/:team_id/team-comments", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_comments
     get "/user-teams/:team_id/team-votes", allows: [:team_id,:seat_id], needs: [:team_id], &user_teams_get_votes

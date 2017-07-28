@@ -1,5 +1,5 @@
 <ul class="nav nav-pills flex-column timeline">
-
+    <li class="logo"></li>
     <div class="menu">
         {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <i class="fa fa-fw fa-user"></i>My Profile
@@ -25,9 +25,16 @@
 
         {{#link-to "team.select.talent" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-share-alt"></i>
+                <i class="fa fa-fw fa-2x fa-cogs"></i>
             </div>
             Talent
+        {{/link-to}}
+
+        {{#link-to "team.select.shares" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-share-alt"></i>
+            </div>
+            Shares 
         {{/link-to}}
 
         {{#if sessionAccount.account.admin}}
@@ -41,6 +48,16 @@
 
 
     {{/if}}
+    
+    {{#if team.shares}}
+        {{#link-to "team.select.leads" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-share-alt"></i>
+            </div>
+            Leads
+        {{/link-to}}
+    {{/if}}
+
     {{/if}}
 
     {{user-logout}}
