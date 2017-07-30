@@ -691,9 +691,26 @@ class Integrations < Sinatra::Base
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
 
         accepted = account.get_team_connections_accepted params[:id]
-        response = accepted.uniq { |h| h["id"] }
+        puts "ACCEPTED"
+        puts accepted
+        requested = account.get_team_connections_requested params[:id]
+        puts "REQUESTED"
+        puts requested
+        response = accepted + requested
         status 200
         return response.to_json
+    end
+
+    team_connections_patch = lambda do
+        protected!
+        fields = get_json
+        check_required_field fields[:contact_id], "contact_id"
+        check_required_field fields[:user_id], "user_id"
+        check_required_field fields[:read], "read"
+        check_required_field fields[:confirmed], "confirmed"
+        account = Account.new
+        status 200
+        return (account.update_user_connections decrypt(fields[:contact_id]), decrypt(fields[:user_id]), fields[:read], fields[:confirmed]).to_json
     end
 
     sprints_get = lambda do
@@ -1428,6 +1445,7 @@ class Integrations < Sinatra::Base
     get "/teams", &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/teams/:id/connections", needs: [:id], &team_connections_get
+    patch "/teams/:id/connections/:connection_id", &team_connections_patch
     get "/team-invites", &team_invites_get
 
     get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get

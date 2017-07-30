@@ -11,5 +11,9 @@ export default DS.Model.extend({
     user_id: attr('string'),
     user_profile: DS.belongsTo('user-profile'),
     read: DS.attr('boolean'),
-	confirmed: DS.attr('number')
+	confirmed: DS.attr('number'),
+	team_id: DS.attr('number'),
+	seat_id: DS.attr('number'),
+	is_talent: DS.attr('boolean'),
+    contact_first_name: DS.attr('string')
 });

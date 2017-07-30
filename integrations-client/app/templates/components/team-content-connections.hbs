@@ -1,19 +1,31 @@
 {{#if connections}}
 <div class="full">
-    <h4 class="about section">Team Contacts</h4>
+    <h4 class="about section">Team Contacts and Contact Requests</h4>
     <div class="list-group rounded text-left">
         {{#each connections as |connection|}}
+        {{#if (eq connection.is_talent true) }}
         <div class="list-group-item rounded highlight-{{notification.read}}">
             <h4 class="line text-capitalize">
-                {{#if (eq connection.contact_id sessionAccount.account.id)}}
-                {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}}
-                {{else}}
-                {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}}
-                {{/if}}
+                {{#link-to "profile" connection.contact_id}}{{connection.first_name}}{{/link-to}}
+                {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}
             </h4>
             <p class="line"><span class="text-muted"><strong>E:</strong></span> {{connection.email}}</p>
             <small class="line text-muted">{{moment-from-now connection.created_at}}</small>
         </div>
+        {{/if}}
+        {{#unless connection.is_talent}}
+        <div class="list-group-item rounded">
+            <p class="line">
+                {{#if (eq connection.read false)}}
+                {{team-connection-read request=connection class="d-inline"}}
+                <span class="text-capitalize">{{#link-to "profile" connection.user_id}}{{connection.first_name}}{{/link-to}}</span>
+                is interested in contacting talent <span class="text-capitalize">{{#link-to "profile" connection.contact_id}}{{connection.contact_first_name}}{{/link-to}}</span> from your team. Would you like to share talent's contact information?
+                {{else}}
+                {{team-connection-confirm request=connection class="d-inline"}}
+                {{/if}}
+            </p>
+        </div>
+        {{/unless}}
         {{/each}}
     </div>
 </div>
