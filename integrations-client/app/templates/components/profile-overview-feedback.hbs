@@ -18,7 +18,7 @@
                 {{/if}}
                 of {{#link-to "develop.project.sprint" (concat item.project.id "-" item.project.org "-" item.project.name) (concat item.sprint.id "-" item.sprint.title)}}{{item.sprint.title}}{{/link-to}}
         {{moment-from-now item.created_at}}
-        {{#if item.user_id}}from {{#link-to "profile" item.user_id}}{{#if item.user_profile}}a {{user-profile-descriptor user_profile=item.user_profile class="d-inline"}}{{else}}Someone{{/if}}{{/link-to}}{{/if}}
+        {{#if item.user_id}}from {{#link-to "profile" item.user_id}}{{user-profile-descriptor user_profile=item.user_profile with_a=true class="d-inline"}}{{/link-to}}{{/if}}
             </p>
         </div>
     {{/each}}

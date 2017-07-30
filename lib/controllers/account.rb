@@ -626,7 +626,7 @@ class Account
 
     def get_user_notifications_settings user_id, query
         begin            
-            return Notification.joins("LEFT JOIN user_notification_settings ON user_notification_settings.notification_id = notifications.id AND user_notification_settings.user_id = #{user_id.to_i} OR user_notification_settings.user_id is null").where(query).select("notifications.id","notifications.name","user_notification_settings.active").as_json
+            return Notification.joins("LEFT JOIN user_notification_settings ON user_notification_settings.notification_id = notifications.id AND user_notification_settings.user_id = #{user_id.to_i} OR user_notification_settings.user_id is null").where(query).select("notifications.*","IFNull(user_notification_settings.active,1) as active,user_notification_settings.updated_at").as_json
         rescue => e
             puts e
             return nil
@@ -688,6 +688,9 @@ class Account
                     else
                         return mail notification.user.email, "Wired7 Proposal Selected", "#{notification.user.first_name},<br><br>A winning proposal has been selected for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i>.  Use the following link to check out all of the proposals:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nA winning proposal has been selected for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint}.  Use the following link to check out all of the proposals:\n\n#{link}\n\n\n#{signature}"
                     end
+                elsif notification.sprint_timeline.notification.name == "new"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}"
+                    return mail notification.user.email, "New Wired7 Sprint", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
                 end
             end
         rescue => e

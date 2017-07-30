@@ -61,6 +61,9 @@ Router.map(function() {
         this.route('comments-received');
         this.route('votes-received');
         this.route('contributions-selected');
+        this.route('settings', function(){
+            this.route('notifications');
+        });
     });
 
     this.route("limit");
