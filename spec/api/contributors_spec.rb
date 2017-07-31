@@ -108,7 +108,7 @@ describe "/contributors" do
             end
             it_behaves_like "contributors_post"
         end
-        context "different sprint, same project", :focus => true do
+        context "different sprint, same project" do
             fixtures :sprint_states, :states, :projects, :contributors
             before(:each) do
                 @sprint_state_id = sprint_states(:sprint_1b_state_1).id

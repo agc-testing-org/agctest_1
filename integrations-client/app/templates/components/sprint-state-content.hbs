@@ -1,14 +1,17 @@
-{{#if (eq selected-state.state_id.name "idea")}}
+{{#if (or (eq selected-state.state_id.name "idea") (eq selected-state.state_id.name "closed"))}}
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview">
             <div class="text-center">
-                <h3>Nothing to do here yet!</h3>
+                {{#if (eq selected-state.state_id.name "closed")}}
+                    <h3>All done here!</h3>
+                {{else}}
+                    <h3>Nothing to do here yet!</h3>
+                {{/if}}
             </div>
         </div>
     </div>
 </div>
-
 {{else}}
 
 {{#if selected-state.state_id.contributors}}
