@@ -885,7 +885,7 @@ class Integrations < Sinatra::Base
         username = github.login
         username || (return_error "unable to fetch github username")
 
-        query = {"sprint_states.sprint_id" => sprint_state.sprint_id, :user_id => @session_hash["id"] } #check for sprint, not sprint state
+        query = {"sprints.project_id" => sprint_state.sprint.project_id, :user_id => @session_hash["id"] } #check for project, not sprint state
         contributor = repo.get_contributor query
         (contributor && (name = contributor.repo)) || (name = repo.name)
 
