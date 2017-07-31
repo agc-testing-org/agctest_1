@@ -19,6 +19,12 @@ sprint_1_no_contributors:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 
+sprint_1b_state_1:
+  sprint: sprint_1b
+  state: development
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
 sprint_1b_idea:
   sprint: sprint_1b
   state: idea

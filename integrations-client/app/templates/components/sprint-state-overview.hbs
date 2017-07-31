@@ -7,7 +7,7 @@
             <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
             {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets"}}
             <div class="row mb-3">
-                {{#unless (eq showing-state.state_id.name "idea")}}
+                {{#unless (or (eq showing-state.state_id.name "idea") (eq showing-state.state_id.name "closed"))}}
                 {{#if contributors}}
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
                     {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}

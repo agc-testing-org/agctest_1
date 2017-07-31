@@ -25,7 +25,7 @@ class Repo
 
     def get_contributor query
         begin
-            return Contributor.joins(:sprint_state).where(query).last
+            return Contributor.joins(:sprint_state).joins("INNER JOIN sprints ON sprints.id = sprint_states.sprint_id").where(query).last
         rescue => e
             puts e
             return nil
