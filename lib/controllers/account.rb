@@ -15,7 +15,7 @@ class Account
 
     def pull_linkedin_profile client
         begin
-            return client.profile(fields: ["headline", "location","summary","positions"])
+            return client.profile(fields: ["id", "public-profile-url", "headline", "location", "summary", "positions"])
         rescue => e
             puts e
             return nil
@@ -24,10 +24,14 @@ class Account
 
     def post_linkedin_profile user_id, profile
         begin
+            url = profile.public_profile_url.split("/")
+            username = url.last
             record = UserProfile.find_or_initialize_by({
                 user_id: user_id
             })
             record.update_attributes!({
+                l_id: profile.id,
+                username: username, 
                 headline: profile.headline,
                 location_country_code: profile.location.country.code,
                 location_name: profile.location.name
