@@ -26,9 +26,15 @@
 
     {{#if (eq params.section "sprint")}}
         <h3 class="description mb-3">Wired7 and select companies host <strong>projects</strong> open to all users</h3>
-        <h3 class="description mb-3">Anyone can create a project task or feature -- known as a <strong>sprint</strong></h3>
-        <h3 class="description mb-3">Companies can associate a sprint with the expectations set in a job listing to <strong>reproduce a working scenario</strong></h3>
-        <h3 class="description mb-3">A sprint starts as an idea and <strong>cycles</strong> through relevant requirements, design, and development phases until it is complete</h3>
+        <h3 class="description mb-3">Anyone can propose a project task or feature -- known as a <strong>sprint</strong></h3>
+        <h3 class="description mb-3">Sprints start as ideas and transition through <strong>requirements, design, and development</strong> phases until complete</h3>
+        <h3 class="about mb-3">Companies can associate a sprint with the expectations set in a job listing to reproduce a <strong>real-world work scenario</strong></h3>
+        <h3 class="about mt-3">
+            {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "welcome" (query-params section="team")}}Continue{{/link-to}}
+        </h3>
+    {{/if}}
+
+    {{#if (eq params.section "team")}}  
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
             <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
@@ -36,17 +42,18 @@
             <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in contributing to</h3> 
         {{/if}}
 
-        <h3 class="description mt-3 mb-3">As in a <strong>team-based work environment</strong>, we ask users with relevant experience to review proposals and provide feedback</h3>
+        <h3 class="description mt-3 mb-3">As in a <strong>team-based work environment</strong>, we ask other stakeholders to review proposals and provide feedback</h3>
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            {{#if (eq sessionAccount.account.seat_id.name "member")}}                        
+            {{#if (eq sessionAccount.account.seat_id.name "member")}}               
                 {{#each teams as |team index|}}                                                                     
                     {{#if (eq index 0)}}    
                         <h3 class="description">Invite candidates through your organization's team {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} to get started</h3>
                     {{/if}}
                 {{/each}}
+            {{else}}
+                <h3 class="about mt-3">{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}{{#link-to "team.new"}}create a team{{/link-to}}{{/if}} to get started</h3> 
             {{/if}}
-            <h3 class="about mt-3">{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}{{#link-to "team.new"}}create a team{{/link-to}}{{/if}} to get started</h3> 
         {{else}}
             {{#if (eq sessionAccount.account.seat_id.name "share")}}
                 {{#each teams as |team index|}}
@@ -55,12 +62,12 @@
                     {{/if}}
                 {{/each}}
             {{else}}
-                <h3 class="description">{{#link-to "me.overview"}}Complete your profile{{/link-to}} to get started</h3>
+                <h3 class="description">Check out {{#link-to "me.overview"}}your profile{{/link-to}} to get started</h3>
             {{/if}}
         {{/if}}
 
         <h3 class="description">
-            {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}}
+            {{#link-to "welcome" (query-params section="sprint")}}Back{{/link-to}} | {{#link-to "me.overview"}}Exit{{/link-to}}
         </h3>
     {{/if}}
     </div>

@@ -19,11 +19,19 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         this.store.adapterFor('me').set('namespace', 'users');
         var user = this.store.queryRecord('me',{});
         this.store.adapterFor('me').set('namespace', '');
+        
+        this.store.adapterFor('skillset').set('namespace', 'users/me');
+        var skillsets = this.store.findAll('skillset');
+        var roles = this.store.findAll('role');
+        this.store.adapterFor('skillset').set('namespace', '');
 
         return Ember.RSVP.hash({
             params: params,
             user: user,
             teams: this.store.findAll('team'), 
+            skillsets: skillsets,
+            roles: roles,
+            seats: this.store.findAll('seat'),
             /*
                skillsets: this.modelFor("me").skillsets,
                seats: this.modelFor("me").seats,
