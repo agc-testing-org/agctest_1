@@ -450,10 +450,15 @@ describe "API" do
                 @location = {:country => {:code => "US"}, :name => "San Francisco Bay"}
                 @summary = "summary"
                 @positions = {:all => [{:title => "Engineer", :company => {:name => "COMPANY", :size => "120-500", :industry => "Software"}, :start_date => {:year => 2000}, :end_date => {:year => 2006}}]}
+                @id = "1234567AA8"
+                @username = "evanmorikawa"
+                @url = "http://www.linkedin.com/in/#{@username}"
                 LinkedIn::OAuth2.any_instance.stub(:get_access_token) { JSON.parse({
                     :token => access_token
                 }.to_json, object_class: OpenStruct) }
                 LinkedIn::API.any_instance.stub(:profile) { JSON.parse({
+                    :id => @id,
+                    :public_profile_url => @url,
                     :headline => @headline,
                     :location => @location,
                     :summary => @summary,
@@ -484,6 +489,12 @@ describe "API" do
                     end
                     it "should include location_name" do
                         expect(@user_profiles["location_name"]).to eq @location[:name]
+                    end
+                    it "should include l_id" do
+                        expect(@user_profiles["l_id"]).to eq @id
+                    end
+                    it "should include url" do
+                        expect(@user_profiles["username"]).to eq @username
                     end
                 end
             end

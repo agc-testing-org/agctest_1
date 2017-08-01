@@ -4,40 +4,94 @@
 
     {{#unless params.section}}
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
-    <h3 class="about">Wired7 makes it easy for development team stakeholders to contribute to projects and receive legitimate feedback on their work with no strings attached</h3>  
-    <h3 class="about">
+    <h3 class="description mb-3">Wired7 is an <strong>open</strong> platform that allows companies to connect with job seekers through <strong>project development</strong></h3>  
+    <h3 class="description">
         Use Wired7 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-             to evaluate candidates up front, before you invest time in the interview process
+             to <strong>benchmark and compare</strong> software team hires <strong>before you invest</strong> time in the interview process
         {{else}} 
-             to learn, grow, or get noticed
+             to build your <strong>portfolio</strong> and skills while <strong>actively or passively</strong> looking for jobs
         {{/if}}
     </h3>
-    <h3 class="description mt-5">We'd love for you to take a moment and go through a quick overview of Wired7</h3> 
-
-    {{#link-to "me.welcome" (query-params section="sprint")}}Continue{{/link-to}}
-
+    <h3 class="about mt-3">Please take a moment to go through a quick overview.  
+    {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
+    </h3>
     {{/unless}}
 
-    {{#if (eq params.section "sprint")}}       
-        <h3 class="description mb-3">A sprint is a task, feature, or bug fix for a project that starts as an idea and transitions through relevant software development phases until completion</h3>
-    
-        <h3 class="about mb-5">{{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}Candidates{{else}}You and others{{/if}} can contribute to sprint phases through solution proposals and feedback</h3>
+    {{#if (eq params.section "connect")}}
+        <h4 class="about section">My Notifications</h4>
+        <div class="list-group rounded text-left">
+            <div class="list-group-item rounded highlight-{{notification.read}}">
+                <p class="line"> 
+                    <strong>A Lead Developer in Telecommunications, <i class="fa fa-map-marker" aria-hidden="true"></i> New York, NY</strong> commented on the <strong>Requirements Review</strong> phase of <strong>implement /users/:id/jobs endpoint</strong>
+                </p>
+                <p class="line quotation">
+                    <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>Changing the LEFT JOIN to INNER JOIN in the user search should make the query more efficient (and ultimately yield faster search responses)<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                </p>
+                <small class="line text-muted">
+                    7 minutes ago 
+                </small>
 
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
-        {{else}}
-            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in</h3>
-        {{/if}}
-
-        {{#link-to "me.welcome" (query-params section="")}}Back{{/link-to}}
-        {{#link-to "me.welcome" (query-params section="profile")}}Continue{{/link-to}}
+            </div>
+            <div class="list-group-item rounded highlight-{{notification.read}}">
+                <p class="line">
+                    <strong>A Senior Quality Engineer in Financial Services, <i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco Bay Area</strong> commented on the <strong>Requirements Review</strong> phase of <strong>implement /users/:id/jobs endpoint</strong>
+                </p>
+                <p class="line quotation">
+                    <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around access control in the spec tests for this proposal that should not be ignored. I would make sure those are covered before moving forward.<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                </p>  
+                <small class="line text-muted">
+                    32 minutes ago 
+                </small>
+            </div>
+        </div>
     {{/if}}
 
-    {{#if (eq params.section "profile")}}
-        <div class="feedback_graphic_hold hidden-sm-down">
-            <div class="comment_graphic"></div>
-        </div>
+    {{#if (eq params.section "sprint")}}
+        <h3 class="description mb-3">Projects on Wired7 are <strong>open to all users</strong></h3>
+        <h3 class="description mb-3">Anyone can propose a project feature or task known as a <strong>sprint</strong></h3>
+        <h3 class="description mb-3">Sprints start as ideas and transition through <strong>requirements, design, and development</strong> phases until complete</h3>
+        <h3 class="description mb-3"><strong>Companies</strong> can attach <strong>job listings</strong> to sprints that require skills and experience parallel to an open job listing</h3>
+        <h3 class="about mt-3">
+            {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "welcome" (query-params section="team")}}Continue{{/link-to}}
+        </h3>
+    {{/if}}
+
+    {{#if (eq params.section "team")}}  
+
+        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>opportunities on relevant sprint phases</strong></h3>
+        {{else}}
+            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of opportunities on sprint phases</strong> you might be interested in</h3> 
+        {{/if}}
+
+        <h3 class="description mt-3 mb-3">Like most <strong>team-based work environments</strong>, we ask other stakeholders to review proposals and provide feedback</h3>
+
+        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+            {{#if (eq sessionAccount.account.seat_id.name "member")}}               
+                {{#each teams as |team index|}}                                                                     
+                    {{#if (eq index 0)}}    
+                        <h3 class="description">Invite candidates through your organization's team {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} to get started</h3>
+                    {{/if}}
+                {{/each}}
+            {{else}}
+                <h3 class="about mt-3">{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}{{#link-to "team.new"}}create a team{{/link-to}}{{/if}} to get started</h3> 
+            {{/if}}
+        {{else}}
+            {{#if (eq sessionAccount.account.seat_id.name "share")}}
+                {{#each teams as |team index|}}
+                    {{#if (eq index 0)}}
+                        <h3 class="description">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team has generated for you to get started</h3>
+                    {{/if}}
+                {{/each}}
+            {{else}}
+                <h3 class="description">Check out {{#link-to "me.overview"}}your profile{{/link-to}} to get started</h3>
+            {{/if}}
+        {{/if}}
+
+        <h3 class="description">
+            {{#link-to "welcome" (query-params section="sprint")}}Back{{/link-to}} | {{#link-to "me.overview"}}Exit{{/link-to}}
+        </h3>
     {{/if}}
     </div>
     </div>
