@@ -1,7 +1,0 @@
-adam_confirmed:
-  user: adam_confirmed
-  headline: "Entrepreneur"
-  location_country_code: "US"
-  location_name: "San Francisco Bay"
-  updated_at: <%= 2.day.ago.to_s(:db) %>
-  created_at: <%= 5.day.ago.to_s(:db) %>
