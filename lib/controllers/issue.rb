@@ -57,19 +57,26 @@ class Issue
         end
     end
 
-    def vote user_id, contributor_id, sprint_state_id
+    def vote user_id, contributor_id, sprint_state_id, comment_id
         begin
-            vote = Vote.find_or_initialize_by({ # get or create vote by sprint state for specific user
+            vote = Vote.find_by({ # get or create vote by sprint state for specific user
                 user_id: user_id,
-                sprint_state_id: sprint_state_id
+                sprint_state_id: sprint_state_id,
+                contributor_id: contributor_id,
+                comment_id: comment_id
             })
 
             new_record = false
-            previous_record = vote.contributor_id
 
-            if previous_record != contributor_id.to_i # if vote is new or different (let the frontend know votes will change with new_record)
-                vote.update_attributes!(:contributor_id => contributor_id)
-                new_record = true
+            if vote == nil # if vote is new or different (let the frontend know votes will change with new_record)
+                previous_record = nil
+                vote = Vote.create({
+                    user_id: user_id,
+                    sprint_state_id: sprint_state_id,
+                    contributor_id: contributor_id,
+                    comment_id: comment_id
+            })
+            new_record = true
             end
 
             record = vote.as_json
@@ -82,7 +89,7 @@ class Issue
             return nil
         end
     end
-
+    
     def log_event params 
         begin
             sprint_event = SprintTimeline.create(params)

@@ -781,13 +781,17 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:sprint_state_id], "sprint_state_id"
         issue = Issue.new
-        vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id]
+        vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id], params[:comment_id]
         vote || (return_error "unable to save vote")
         vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-        log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "vote"}).id}
+        if params[:comment_id] == nil
+            log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "vote"}).id}
+        else
+            log_params = {:vote_id => vote["id"], :comment_id => vote["comment_id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment vote"}).id}
+        end
         (issue.log_event log_params) || (return_error "an error has occurred")
         status 201
         return vote.to_json
