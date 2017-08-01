@@ -4,7 +4,7 @@
 
     {{#unless params.section}}
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
-    <h3 class="description mb-3">Wired7 is an <strong>open</strong> platform that allows companies to connect with job seekers through <strong>real project development</strong></h3>  
+    <h3 class="description mb-3">Wired7 is an <strong>open</strong> platform that allows companies to connect with job seekers through <strong>project development</strong></h3>  
     <h3 class="description">
         Use Wired7 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
@@ -19,16 +19,39 @@
     {{/unless}}
 
     {{#if (eq params.section "connect")}}
-        <div class="feedback_graphic_hold hidden-sm-down">
-            <div class="comment_graphic"></div>
+        <h4 class="about section">My Notifications</h4>
+        <div class="list-group rounded text-left">
+            <div class="list-group-item rounded highlight-{{notification.read}}">
+                <p class="line"> 
+                    <strong>A Lead Developer in Telecommunications, <i class="fa fa-map-marker" aria-hidden="true"></i> New York, NY</strong> commented on the <strong>Requirements Review</strong> phase of <strong>implement /users/:id/jobs endpoint</strong>
+                </p>
+                <p class="line quotation">
+                    <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>Changing the LEFT JOIN to INNER JOIN in the user search should make the query more efficient (and ultimately yield faster search responses)<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                </p>
+                <small class="line text-muted">
+                    7 minutes ago 
+                </small>
+
+            </div>
+            <div class="list-group-item rounded highlight-{{notification.read}}">
+                <p class="line">
+                    <strong>A Senior Quality Engineer in Financial Services, <i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco Bay Area</strong> commented on the <strong>Requirements Review</strong> phase of <strong>implement /users/:id/jobs endpoint</strong>
+                </p>
+                <p class="line quotation">
+                    <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around access control in the spec tests for this proposal that should not be ignored. I would make sure those are covered before moving forward.<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                </p>  
+                <small class="line text-muted">
+                    32 minutes ago 
+                </small>
+            </div>
         </div>
     {{/if}}
 
     {{#if (eq params.section "sprint")}}
-        <h3 class="description mb-3">Wired7 and select companies host <strong>projects</strong> open to all users</h3>
-        <h3 class="description mb-3">Anyone can propose a project task or feature -- known as a <strong>sprint</strong></h3>
+        <h3 class="description mb-3">Projects on Wired7 are <strong>open to all users</strong></h3>
+        <h3 class="description mb-3">Anyone can propose a project feature or task known as a <strong>sprint</strong></h3>
         <h3 class="description mb-3">Sprints start as ideas and transition through <strong>requirements, design, and development</strong> phases until complete</h3>
-        <h3 class="about mb-3">Companies can associate a sprint with the expectations set in a job listing to reproduce a <strong>real-world work scenario</strong></h3>
+        <h3 class="description mb-3"><strong>Companies</strong> can attach <strong>job listings</strong> to sprints that require skills and experience parallel to an open job listing</h3>
         <h3 class="about mt-3">
             {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "welcome" (query-params section="team")}}Continue{{/link-to}}
         </h3>
@@ -37,12 +60,12 @@
     {{#if (eq params.section "team")}}  
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>relevant sprint phases</strong></h3>
+            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>opportunities on relevant sprint phases</strong></h3>
         {{else}}
-            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of sprint phases</strong> you might be interested in contributing to</h3> 
+            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of opportunities on sprint phases</strong> you might be interested in</h3> 
         {{/if}}
 
-        <h3 class="description mt-3 mb-3">As in a <strong>team-based work environment</strong>, we ask other stakeholders to review proposals and provide feedback</h3>
+        <h3 class="description mt-3 mb-3">Like most <strong>team-based work environments</strong>, we ask other stakeholders to review proposals and provide feedback</h3>
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
             {{#if (eq sessionAccount.account.seat_id.name "member")}}               

@@ -13,7 +13,7 @@
                 <h3 class="description text-center">{{user-login-oauth provider="linkedin" refresh="refresh" lg=true}}</h3>
                 {{else}}
                 <h2 class="name text-center mb-5">{{user-profile-descriptor user_profile=user multiple_lines=true}}</h2>
-                <h3 class="description">Looks good! That's what other users will know about you.  
+                <h3 class="description">Looks good! That's what other users will know about you. All other identifying information is kept <strong>private</strong>. 
                 {{#link-to "welcome" (query-params section="sprint")}}Continue{{/link-to}}
                 </h3>
                 {{/unless}}
@@ -27,9 +27,9 @@
 
             {{#if (eq params.section "team")}}
             <div class="text-center">
-                <div class="about section text-capitalize">Your Roles</div>
+                <h3 class="about section text-capitalize">Your Roles</h3>
                 {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
-                <div class="about section text-capitalize">Your Skillsets</div>
+                <h3 class="about section text-capitalize">Your Skillsets</h3>
                 {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
             </div>
             {{/if}}
