@@ -408,7 +408,7 @@ class Integrations < Sinatra::Base
         account = Account.new
         filters = {:refresh => params[:refresh_token]}
         user = account.get filters
-        user || return_unauthorized 
+        user || return_unauthorized
         seat_id = account.get_seat_permissions user[:id] 
         ((@session = user.jwt) && authorized?) #get session if exists to preserve github token
         status 200

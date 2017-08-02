@@ -1,4 +1,6 @@
 require 'spec_helper'
+require 'api_helper'
+
 describe "API" do
     fixtures :user_teams
     shared_examples_for "session_response" do
@@ -552,12 +554,17 @@ describe "API" do
 
     describe "POST /session" do
         fixtures :users, :user_teams, :seats
+        before(:all) do
+            @CREATE_TOKENS=true
+        end
         before(:each) do
-            @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
-            @original_jwt = @mysql_client.query(@query).first["jwt"]
-            post "/session?grant_type=refresh_token&refresh_token=#{users(:adam_confirmed).refresh}"
+            @account = Account.new
+            @original_github_token = JSON.parse(@redis.get("session:#{@non_admin_w7_token}"))["github_token"]
+            @original_github_key = @account.unlock_github_token @non_admin_w7_token, @original_github_token
+            @refresh = @mysql_client.query("select * from users where id = #{decrypt(users(:adam_confirmed).id)}").first["refresh"]
+            post "/session?grant_type=refresh_token&refresh_token=#{@refresh}"
             @res = JSON.parse(last_response.body)
-            @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"            
+            @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
         end
 
         it_behaves_like "session_response"
@@ -565,7 +572,11 @@ describe "API" do
         it_behaves_like "ok"
 
         it "should add a TTL to the previous token" do
-            expect(@redis.ttl("session:#{@original_jwt}")).to be < 31
+            expect(@redis.ttl("session:#{@non_admin_w7_token}")).to be < 31
         end
+        it "should preserve github token" do
+            final = @account.unlock_github_token @res["access_token"], (JSON.parse(@redis.get("session:#{@res["access_token"]}"))["github_token"])
+            expect(final).to eq @original_github_key
+        end 
     end
 end
