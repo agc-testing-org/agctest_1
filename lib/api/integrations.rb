@@ -393,7 +393,7 @@ class Integrations < Sinatra::Base
         repo = Repo.new
         github = (repo.github_client access_token)
         #github || (return_error "invalid access token")
-        @session_hash["github_username"] = github.login || nil
+        (github && (@session_hash["github_username"] = github.login)) || (@session_hash["github_username"] = nil)
         provider_token = account.create_token @session_hash["id"], @key, access_token 
         @session_hash["github_token"] = provider_token
         response = (session_tokens user, @session_hash["seat_id"], false)

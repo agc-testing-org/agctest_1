@@ -8,7 +8,7 @@ class Repo
     def github_client access_code
         begin
             client = Octokit::Client.new(:access_token => access_code)
-            if client.user
+            if client.login
                 return client
             else
                 return nil
