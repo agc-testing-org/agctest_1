@@ -410,6 +410,7 @@ class Integrations < Sinatra::Base
         user = account.get filters
         user || return_unauthorized 
         seat_id = account.get_seat_permissions user[:id] 
+        ((@session = user.jwt) && authorized?) #get session if exists to preserve github token
         status 200
         return (session_tokens user, seat_id, false).to_json
     end
@@ -915,10 +916,12 @@ class Integrations < Sinatra::Base
         query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
         contributor = repo.get_contributor query
         contributor || return_not_found
+        github = (repo.github_client github_authorization)
+        github || (return_error "unable to authenticate github")
         contributor.preparing = true
         contributor.prepared = 0
         contributor.save
-        ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
+        ContributorSyncWorker.perform_async @session, @session_hash["github_token"], contributor[:id], @session_hash["github_username"]
         status 200
         return contributor.to_json 
     end

@@ -7,7 +7,12 @@ class Repo
 
     def github_client access_code
         begin
-            return Octokit::Client.new(:access_token => access_code)
+            client = Octokit::Client.new(:access_token => access_code)
+            if client.user
+                return client
+            else
+                return nil
+            end
         rescue => e
             puts e
             return nil
@@ -71,11 +76,11 @@ class Repo
         end
     end
 
-    def sync contributor_id, username
+    def sync session, github_token, contributor_id, username
         params = {:id => contributor_id}
         contributor = get_contributor params
 
-        fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
+        fetched = refresh session, github_token, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
         if fetched
             contributor.prepared = true
@@ -104,7 +109,7 @@ class Repo
             (github.create_contents("#{username}/#{contributor.repo}",
                                     "requirements/Requirements-Document-for-Wired7-Sprint-v#{sprint_state.sprint_id}.md",
                                         "adding placeholder for requirements",
-                                        "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}", #space required between markdown header and first letter
+                                        "# #{sprint_state.sprint.title}\n\n### Description\n#{sprint_state.sprint.description}\n\n### Specifications\n", #space required between markdown header and first letter
                                         :branch => sprint_state.id.to_s)) 
         end
 
