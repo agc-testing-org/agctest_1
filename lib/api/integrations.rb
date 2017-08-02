@@ -703,6 +703,41 @@ class Integrations < Sinatra::Base
         return team.to_json
     end
 
+    jobs_get = lambda do
+        issue = Issue.new
+        jobs = issue.get_jobs params
+        status 200
+        return jobs.to_json
+    end
+
+    jobs_get_by_id = lambda do
+        issue = Issue.new
+        job = issue.get_jobs params
+        (job && job[0]) || return_not_found
+        status 200
+        return job[0].to_json
+    end
+
+    jobs_post = lambda do
+        protected!
+        fields = get_json
+        check_required_field fields[:team_id], "team_id"
+        check_required_field fields[:link], "link"
+        check_required_field fields[:title], "title"
+
+        title_length = fields[:title].to_s.length
+        (title_length < 101 && title_length > 4) || (return_error "title must be 5-100 characters")
+
+        issue = Issue.new
+        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:title], fields[:link]
+        job || (return_error "unable to create job listing")
+    
+        log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}
+        (issue.log_event log_params) || (return_error "unable to create sprint")
+        status 201
+        return job.to_json
+    end 
+
     sprints_get = lambda do
         issue = Issue.new
         sprints = issue.get_sprints params
@@ -1433,6 +1468,12 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/votes", &contributors_post_votes
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
+
+
+    get "/jobs", &jobs_get
+    post "/jobs", &jobs_post
+    get "/jobs/:id", &jobs_get_by_id
+    #patch "/jobs/:id", &jobs_patch_by_id
 
     post "/teams", &teams_post
     get "/teams", &teams_get

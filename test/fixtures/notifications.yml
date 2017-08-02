@@ -17,3 +17,7 @@ vote:
 winner:
   name: "winner"
   description: "i hate bragging but"
+
+job:
+  name: "job"
+  description: "gotta get paid"
