@@ -94,11 +94,12 @@ class Issue
         end
     end
 
-    def create_project user_id, org, name
+    def create_project user_id, org, name, description
         begin
             project = Project.create({
                 org: org.strip,
                 name: name.strip,
+                description: (description.strip if description),
                 user_id: user_id,
                 preparing: true
             })
@@ -111,7 +112,7 @@ class Issue
 
     def get_projects query
         begin
-            return Project.where(query).as_json
+            return Project.where(query)
         rescue => e
             puts e
             return nil

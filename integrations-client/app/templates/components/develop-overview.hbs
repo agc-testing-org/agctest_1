@@ -3,6 +3,8 @@
     <div class="vertical-align-cell">
         <div class="overview text-center">
             <h2 class="name text-capitalize">{{model.project.org}} / {{model.project.name}}</h2>
+            <div class="description">{{model.project.description}}</div>
+            {{develop-overview-caption project=model.project}}
             <div class="about text-capitalize">{{model.state.description}}</div>
             <div class="row">
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">

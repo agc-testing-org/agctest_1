@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170801025838) do
+ActiveRecord::Schema.define(version: 20170802160647) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -73,6 +73,8 @@ ActiveRecord::Schema.define(version: 20170801025838) do
     t.string "commit"
     t.string "commit_remote"
     t.boolean "commit_success"
+    t.string "description"
+    t.text "caption"
   end
 
   create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

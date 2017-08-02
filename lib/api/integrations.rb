@@ -578,7 +578,8 @@ class Integrations < Sinatra::Base
                 repositories[repositories.length] = {
                     :id => repo.id,
                     :name => repo.name,         
-                    :owner => repo.owner.login 
+                    :owner => repo.owner.login,
+                    :description => repo.description
                 } 
             end
         rescue => e
@@ -593,6 +594,21 @@ class Integrations < Sinatra::Base
         projects = issue.get_projects nil
         status 200
         return projects.to_json
+    end
+
+    projects_patch_by_id = lambda do
+        protected!
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:caption], "caption"
+        caption_length = fields[:caption].to_s.length
+        (caption_length < 501 && caption_length > 4) || (return_error "caption must be 5-500 characters")
+        issue = Issue.new
+        project = issue.get_projects params
+        (project && project.first) || return_not_found 
+        project.first.caption = fields[:caption]
+        project.first.save
+        return project.first.to_json
     end
 
     projects_get_by_id = lambda do
@@ -610,8 +626,8 @@ class Integrations < Sinatra::Base
         check_required_field fields[:org], "org"
         check_required_field fields[:org], "name"
         issue = Issue.new
-        project = issue.create_project @session_hash["id"], fields[:org], fields[:name]
-        
+        project = issue.create_project @session_hash["id"], fields[:org], fields[:name], fields[:description]
+
         repo = Repo.new
         github = (repo.github_client ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET'])
         github || (return_error "unable to authenticate github")
@@ -1399,6 +1415,7 @@ class Integrations < Sinatra::Base
     post "/projects", &projects_post
     get "/projects", &projects_get
     get "/projects/:id", allows: [:id], needs: [:id], &projects_get_by_id
+    patch "/projects/:id", allows: [:id], needs: [:id], &projects_patch_by_id
 
     #    post "/projects/:project_id/refresh", &refresh_post #TODO - later
     post "/contributors", &contributors_post

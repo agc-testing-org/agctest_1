@@ -923,6 +923,9 @@ button{
     font-weight:300;
     font-size: 14px;
 }
+.form-control.form-control-gray{
+    border: 1px solid #f9f9f9 !important; 
+}
 textarea.form-control{
 
 }
