@@ -23,6 +23,7 @@ require 'aws-sdk'
 
 #Helpers
 require_relative '../helpers/obfuscate.rb'
+require_relative '../helpers/slack.rb'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -321,10 +322,12 @@ class Integrations < Sinatra::Base
         (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
-        user_params = {:id => decrypt(team["user_id"])}
+        user_params = {:id => invitation.first[:user_id]}
         user = account.get user_params
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
         seat_id = account.get_seat_permissions user[:id]
+        slack = Slack.new
+        slack.post_accepted invitation.first
         status 200
         return (session_tokens user, seat_id, true).to_json
     end
