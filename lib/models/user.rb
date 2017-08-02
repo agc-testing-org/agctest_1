@@ -19,6 +19,7 @@ class User < ActiveRecord::Base
     has_many :user_notifications
     has_many :user_connections
     has_many :projects
+    has_many :jobs
 
     #    attr_accessor :public_id
     #    def attributes

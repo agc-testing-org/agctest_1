@@ -144,7 +144,7 @@ ActiveRecord::Schema.define(version: 20170802191523) do
     t.integer "sprint_id"
     t.integer "state_id"
     t.datetime "created_at", null: false
-    t.integer "project_id", null: false
+    t.integer "project_id"
     t.integer "user_id", null: false
     t.integer "comment_id"
     t.integer "sprint_state_id"

@@ -1,0 +1,16 @@
+<h3>Create a Job Listing</h3>
+<div class="about section">Post open positions to Wired7.  Users will propose ideas for feature development that meet the responsibilities of the listing.  If you like an idea, we'll start a sprint based on the idea.</div>
+
+<form {{action 'create' team.id on="submit"}} class="mt-1">
+    <div class="form-group">
+        {{application-error error=errorMessage}}
+        <label>Title</label>
+        {{input type="text" value=title placeholder="Lead Backend Engineer" class="form-control input-lg rounded"}}
+        
+        <label>Link</label>
+        {{input type="text" value=link placeholder="https://example.com/job-listing" class="form-control input-lg rounded"}}
+
+        <button type="submit" class="btn btn-secondary rounded d-inline">Create</button>
+    </div>
+</form>
+

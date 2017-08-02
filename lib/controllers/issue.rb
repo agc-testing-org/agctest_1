@@ -94,16 +94,38 @@ class Issue
         end
     end
 
+    def create_job user_id, team_id, title, link
+        begin
+            return Job.create({
+                user_id: user_id,
+                team_id: team_id,
+                title: (title.strip if title),
+                link: link
+            })
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def create_project user_id, org, name, description
         begin
-            project = Project.create({
+            return Project.create({
                 org: org.strip,
                 name: name.strip,
                 description: (description.strip if description),
                 user_id: user_id,
                 preparing: true
             })
-            return project
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_jobs query
+        begin
+            return Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id").select("jobs.*,users.first_name")
         rescue => e
             puts e
             return nil

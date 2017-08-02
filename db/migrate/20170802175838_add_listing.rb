@@ -18,6 +18,7 @@ class AddListing < ActiveRecord::Migration[5.1]
         add_column :sprints, :job_id, :integer, :null => true
         add_foreign_key :sprints, :jobs
 
+        change_column :sprint_timelines, :project_id, :integer, :null => true
         change_column :sprint_timelines, :sprint_id, :integer, :null => true
         add_column :sprint_timelines, :job_id, :integer, :null => true
         add_foreign_key :sprint_timelines, :jobs

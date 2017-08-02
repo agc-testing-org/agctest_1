@@ -34,6 +34,7 @@ Router.map(function() {
             this.route('notifications');
             this.route('shares');
             this.route('leads');
+            this.route('jobs');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile

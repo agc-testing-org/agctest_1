@@ -62,6 +62,8 @@ require_relative '../models/user_connection.rb'
 require_relative '../models/role_state.rb' 
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification_setting.rb'
+require_relative '../models/job.rb'
+
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 require_relative '../workers/contributor_join_worker.rb'
@@ -733,7 +735,7 @@ class Integrations < Sinatra::Base
         job || (return_error "unable to create job listing")
     
         log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}
-        (issue.log_event log_params) || (return_error "unable to create sprint")
+        (issue.log_event log_params) || (return_error "unable to create job")
         status 201
         return job.to_json
     end 
