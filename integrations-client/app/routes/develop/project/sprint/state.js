@@ -25,6 +25,7 @@ export default Ember.Route.extend({
         this._super(controller, model);
         var all_states = model.sprint_states.toArray();
         controller.set("last_state",all_states[all_states.length - 1]);
+        controller.set("second_to_last_state",all_states[all_states.length - 2]);
 
         var last_contributor_state = {};
         var splitUrl = this.paramsFor("develop.project.sprint.state").state_id.split("-");
@@ -33,8 +34,8 @@ export default Ember.Route.extend({
                 if(i > 0){                                  
                     last_contributor_state = all_states[i - 1];                                                                
                 }                                                                                   
-            }                                                           
+            }
         }
-        controller.set("last_contributor_state",last_contributor_state); 
+        controller.set("last_contributor_state",last_contributor_state); //prior to current state, not literal last
     }
 });

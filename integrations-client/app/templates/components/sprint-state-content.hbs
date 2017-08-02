@@ -18,48 +18,42 @@
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview">
+            {{#if (or (eq selected-state.id last-state.id) (and (and selected-state.active_contribution_id (eq last-state.pull_request null)) (eq selected-state.id second-to-last-state.id) ))}}
+                {{#if (eq last-state.state_id.name "closed")}}
+                    <div class="text-center">
+                        <h3>This sprint has been completed</h3>
+                    </div>
+                {{else}}
+                    <div class="text-center">
+                        {{#if session.isAuthenticated}}
+                            {{#unless selected-state.active_contribution_id}}
+                                <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
+                            {{/unless}}
+                            <h3>{{selected-state.state.instruction}}</h3>
 
-            {{#if (eq selected-state.id last-state.id)}}
-
-            {{#if (eq last-state.state_id.name "closed")}}
-            <div class="text-center">
-                <h3>This sprint has been completed</h3>
-            </div>
+                            {{#unless sessionAccount.account.github}}
+                                {{user-login-oauth text=" to participate" provider="github"}}
+                            {{else}}
+                                {{#if selected-state.active_contribution_id}}
+                                    {{#each selected-state.contributors as |contributor|}}
+                                        {{#if (eq contributor.id selected-state.active_contribution_id)}}
+                                            {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint}}
+                                        {{/if}}
+                                    {{/each}}
+                                {{else}}
+                                    <button class="btn btn-secondary rounded" {{action "join" project.id selected-state.id }}>Join</button>
+                                {{/if}}
+                            {{/unless}}
+                        {{else}}
+                            <h3>{{#link-to "login"}}Sign in{{/link-to}} to propose a solution</h3>
+                        {{/if}}
+                    </div>
+                {{/if}}
+            
             {{else}}
-
-
-            <div class="text-center">
-                {{#if session.isAuthenticated}}
-                {{#unless last-state.active_contribution_id}}
-                <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
-                {{/unless}}
-                <h3>{{selected-state.state.instruction}}</h3>
-
-                {{#unless sessionAccount.account.github}}
-                {{user-login-oauth text=" to participate" provider="github"}}
-                {{else}}
-                {{#if last-state.active_contribution_id}}
-                {{#each last-state.contributors as |contributor|}}
-                {{#if (eq contributor.id last-state.active_contribution_id)}}
-                {{develop-contribute contributor=contributor sprint_state=last-state project=project sprint=sprint}}
-                {{/if}}
-                {{/each}}
-                {{else}}
-                <button class="btn btn-secondary rounded" {{action "join" project.id last-state.id }}>Join</button>
-                {{/if}}
-                {{/unless}}
-                {{else}}
-                    <h3>{{#link-to "login"}}Sign in{{/link-to}} to propose a solution</h3>
-                {{/if}}
-            </div>
-
-            {{/if}}
-            {{else}}
-
-            <div class="text-center">
-                <h3>This sprint state is no longer open</h3>
-            </div>
-
+                <div class="text-center">
+                    <h3>This sprint state is no longer open</h3>
+                </div>
             {{/if}}
         </div>
     </div>
@@ -112,7 +106,7 @@
     <div class="vertical-align-cell">
         <div class="overview">
             <div class="text-center">
-                <h3>No one has contributed.</h3>
+                <h3>No proposals submitted</h3>
             </div>
         </div>
     </div>

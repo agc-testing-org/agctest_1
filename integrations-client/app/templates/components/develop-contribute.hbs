@@ -3,9 +3,15 @@
         <h4>{{#if contributor.preparing}}{{application-loading size=1 class="d-inline"}}{{/if}} How to Contribute</h4>
         <button class="btn btn-secondary btn-sm rounded" {{action "submit" project.id contributor.id }}>Synchronize</button>
     </div>
+    {{#unless open}}
+        {{application-error error="This phase is closed but you can improve your submission until a proposal is selected" class="mt-2"}}
+    {{/unless}}
     <div class="list-group-item rounded">
         <h4 class="line"><span class="badge badge-default rounded mr-1">Option 1</span> Command Line Access</h4>
-        <p class="line">git clone -b {{sprint_state.id}} git@github.com:{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>  
+        <p class="line">git clone -b {{sprint_state.id}} git@github.com:{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>
+        <small class="line text-muted">Use this option if you have not cloned the repository</small>
+        <p class="line">git fetch origin {{sprint_state.id}}; git checkout {{sprint_state.id}}</p>
+        <small class="line text-muted">Use this option if you have previously cloned the repository</small>
     </div>
     <div class="list-group-item rounded">
         <h4 class="line"><span class="badge badge-default rounded mr-1">Option 2</span> Github User Interface Access</h4>
