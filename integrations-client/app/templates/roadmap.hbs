@@ -1,9 +1,10 @@
 {{title "Roadmap"}}
 
 <div class="container-fluid pl-0 pr-0">
+    {{#link-to "me.overview" class="exit"}}Close {{stacked-icon value="fa-times" icon="fa-circle" size="1" class="d-inline"}}{{/link-to}}
     <main class="col-sm-12 col-md-12 offset-sm-0">
         <div class="row main">
-            {{roadmap-list jobs=model.jobs class="row"}}
+            {{roadmap-list jobs=model.jobs projects=model.projects class="row"}}
         </div>
     </main>
 </div>

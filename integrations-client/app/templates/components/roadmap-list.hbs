@@ -1,10 +1,11 @@
 <div class="col-sm-12 col-md-12 text-center mt-3">
-    <h1>Roadmap</h1>
-    <h3 class="about section">Propose an idea for a feature that commands the attention of a hiring manager</h3>
+    <h1><i class="fa fa-map-o" aria-hidden="true"></i> Roadmap</h1>
+    <h3 class="about section">Propose an idea for a project that commands the attention of a hiring manager</h3>
 </div>
 
 <div class="col-sm-12 col-md-3">
     <div class="list-group-item rounded mb-0 mt-3">
+        <h3><i class="fa fa-fw fa-cogs" aria-hidden="true"></i> How it Works</h3>
         <h4 class="line">
             Based on a job listing, pitch a creative new feature, bug fix, or task for a Wired7 project that <strong>uses all of the skills required</strong> by the position
         </h4>
@@ -12,7 +13,7 @@
             Companies select the best pitch for a job listing and <strong>prioritize the idea</strong> for requirements design, design, and development
         </h4>
         <h4 class="line">
-            Once a company moves forward with an idea, propose solutions and review other proposals to <strong>demonstrate that you're the best</strong> person for the job
+            Once a company moves forward with an idea, propose solutions and review the work of others to <strong>demonstrate that you're the best</strong> person for the job
         </h4>
     </div>
 </div>
@@ -40,7 +41,7 @@
         <div class="inner">
             <div class="line">
                 <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
-                    {{develop-timeline-create project_id=model.project.id class=""}}
+                    {{develop-timeline-create projects=projects class=""}}
                 </div>
             </div>
         </div>

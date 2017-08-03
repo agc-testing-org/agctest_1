@@ -11,6 +11,10 @@ export default Ember.Component.extend({
         this._super(...arguments);
     },
     actions: {
+        selectProject(project_id,project){
+            this.set("project_id",project_id);
+            this.set("project",project);
+        },
         showCreate(){
             if(this.get("displayCreate")){
                 this.set("displayCreate",false);

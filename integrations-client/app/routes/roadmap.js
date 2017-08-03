@@ -10,6 +10,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     model: function(params) {
         return Ember.RSVP.hash({
+            projects: this.store.findAll('project'),
             jobs: this.store.query('job',{
             },{reload: true}),
         });

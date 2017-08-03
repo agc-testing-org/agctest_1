@@ -97,6 +97,16 @@ li {
 .fa-stack-2x{
     color: orange;
 }
+.exit{
+    position:fixed;
+    right:5px;
+    top:5px;
+    color: #292b2c !important;
+    z-index:101;
+}
+.exit .fa-stack-2x{
+    color:#292b2c;
+}
 label{
     margin-bottom:2px;
     font-weight:400;
@@ -167,6 +177,12 @@ label{
 .dropdown-menu{
     width:100%;
 }
+.dropdown-item .title, .dropdown-item .description{
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .card{
     border: 1px solid #ededed;
 }

@@ -13,10 +13,6 @@
             </div>
             <div class="row ml-3 mr-3 mb-3 mt-0"> 
                 <a class="btn btn-secondary mt-5 rounded col-sm-12 col-md-8 offset-md-2" target="_blank" href="https://github.com/{{org}}/{{model.project.name}}_{{model.project.id}}/tree/master">View on Github</a>
-                {{#if session.isAuthenticated}}
-                    <a class="btn btn-secondary btn-block rounded" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create Sprint Idea{{/if}}</a>
-                    <div class="text-left mt-3">
-                            {{#if displayCreate}}
                                 <div class="card-deck">
                                     <div class="card rounded">
                                         <div class="card-block">
@@ -27,11 +23,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            {{/if}}
-                    </div>
-                {{else}}
-                    <h4 class="about">{{#link-to "login"}}Sign in{{/link-to}} to create a new sprint idea</h4>
-                {{/if}}
             </div>
         </div>
     </div>
