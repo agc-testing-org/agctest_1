@@ -1,37 +1,24 @@
 {{#if session.isAuthenticated}}
-    <a class="btn btn-secondary btn-block rounded" {{action "showCreate"}}>{{#if displayCreate}}Cancel{{else}}Create Sprint Idea{{/if}}</a>
-    <div class="text-left mt-3">
-        {{#if displayCreate}}
-
-        <div class="card-deck">
-        <div class="card rounded">
-            <div class="card-block">
-
-                {{#if errorMessage}}
-                    <div class="alert alert-warning rounded text-center">{{errorMessage}}</div>
-                {{/if}}
-                
-                <div class="form-group">
-                    <label>Title</label>
-                    {{input value=title placeholder="title of idea" class="form-control input-lg rounded"}}
-                </div>
-
-                <div class="form-group">
-                    <label>Description</label>
-                    {{textarea rows=5 value=description placeholder="explain the idea in more detail" class="form-control input-lg rounded"}}
-                </div>
-                
-                <button {{action "createSprint" project_id}} type="submit" class="btn btn-secondary btn-sm btn-block rounded">Create Idea</button>
-
-            </div>
-            <div class="card-footer text-center">
-                An idea can be a bug, improvement, task, or feature
-            </div>
-        </div>
-        </div>
-
+    {{#if displayCreate}}
+        {{#if errorMessage}}
+            <div class="alert alert-warning rounded text-center">{{errorMessage}}</div>
         {{/if}}
-    </div>
+
+        <div class="form-group">
+            <label>Title</label>
+            {{input value=title placeholder="title of idea" class="form-control input-lg rounded"}}
+        </div>
+
+        <div class="form-group">
+            <label>Description</label>
+            {{textarea rows=2 value=description placeholder="explain the idea in more detail" class="form-control input-lg rounded"}}
+        </div>
+
+        <button {{action "createSprint" project_id}} type="submit" class="btn btn-secondary btn-sm rounded">Create</button>
+        <button {{action "showCreate"}} type="submit" class="btn btn-secondary btn-sm rounded">Cancel</button>
+    {{else}}
+        <a class="line" {{action "showCreate"}}>Pitch your own idea</a>
+    {{/if}}
 {{else}}
-    <h4 class="about">{{#link-to "login"}}Sign in{{/link-to}} to create a new sprint idea</h4>
+    {{#link-to "login"}}Sign in{{/link-to}} to pitch your own idea
 {{/if}}

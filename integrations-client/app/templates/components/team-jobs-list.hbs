@@ -4,10 +4,10 @@
 {{#each jobs as |job|}}
     <div class="list-group-item rounded"> 
         <h4 class="line">
-            {{job.title}}
+            {{job.title}} ({{job.link}})
         </h4>
         <small class="line text-muted">
-            Created by {{#link-to "profile" job.user_id}}{{job.first_name}}{{/link-to}} {{moment-from-now job.created_at}}    
+            Created by {{#link-to "profile" job.user_id}}{{job.user_first_name}}{{/link-to}} {{moment-from-now job.created_at}}    
         </small>
     </div>
 {{/each}}

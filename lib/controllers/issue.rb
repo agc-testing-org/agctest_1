@@ -125,7 +125,12 @@ class Issue
 
     def get_jobs query
         begin
-            return Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id").select("jobs.*,users.first_name")
+            jobs = []
+            Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id").select("jobs.*,users.first_name as user_first_name,teams.name as team_name").each_with_index do |j,i|
+                jobs[i] = j.as_json
+                jobs[i][:sprints] = j.sprints.as_json
+            end
+            return jobs
         rescue => e
             puts e
             return nil

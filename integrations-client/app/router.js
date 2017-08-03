@@ -25,6 +25,7 @@ Router.map(function() {
             }); 
         });
     });
+    this.route('roadmap');
     this.route('team', function(){
         this.route('new');
         this.route('select', {path: '/:id'}, function(){

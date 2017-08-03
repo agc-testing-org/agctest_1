@@ -1,0 +1,34 @@
+<div class="col-sm-12 col-md-12">
+    <h3>Roadmap</h3>
+    <div class="about section">Get your foot in the door with Wired7 for these positions</div>
+</div>
+{{#each jobs as |job|}}
+    <div class="col-sm-12 col-md-3">
+        <div class="list-group-item rounded mb-0 mt-3">
+            <h4 class="line">
+                <strong class="text-capitalize">{{job.team_name}}</strong> is looking for a <a href=job.link target="_blank">{{job.title}}</a>
+            </h4>
+            <small class="line text-muted">
+                Posted {{moment-from-now job.created_at}}
+            </small>
+        </div>
+        <div class="line connected">
+        {{#each job.sprints as |sprint|}}
+            <div class="inner">
+                <div class="line">
+                    <div class="icon">{{stacked-icon value="fa-lightbulb-o" icon="fa-circle" size="1" class="d-inline"}}</div>
+                    {{#link-to "develop.project.sprint" sprint.project_id sprint.id}}{{sprint.title}}{{/link-to}}
+                </div>
+                <div class="line">{{sprint.description}}</div>
+                <small class="line text-muted">Proposed {{moment-from-now sprint.created_at}}</small>
+            </div>
+        {{/each}}
+        <div class="inner">
+            <div class="line">
+                <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
+                    {{develop-timeline-create project_id=model.project.id class=""}}
+                </div>
+            </div>
+        </div>
+    </div>
+{{/each}}
