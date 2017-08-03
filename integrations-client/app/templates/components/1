@@ -15,11 +15,9 @@
         </div>
 
         {{#if projects}}
-        <div class="form-group">
-        <label>Project</label>
         <div class="dropdown btn-block rounded mb-3">
             <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <strong>{{#if project}}{{project.org}}/{{project.name}}{{else}}Select a Project{{/if}}</strong>
+                {{#if project}}{{project.org}}/{{project.name}}{{else}}Project List{{/if}}
             </div>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 {{#each projects as |project|}}
@@ -27,10 +25,9 @@
                 {{/each}}
             </div>
         </div>
-        </div>
         {{/if}}
     
-        <button {{action "createSprint" project_id for_job}} type="submit" class="btn btn-secondary btn-sm rounded">Create</button>
+        <button {{action "createSprint" project_id}} type="submit" class="btn btn-secondary btn-sm rounded">Create</button>
         <button {{action "showCreate"}} type="submit" class="btn btn-secondary btn-sm rounded">Cancel</button>
     {{else}}
         <a class="line" {{action "showCreate"}}>Pitch your own idea</a>

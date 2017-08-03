@@ -17,6 +17,7 @@ Router.map(function() {
         this.route('resend');
     });
     this.route('develop', function() {
+        this.route('roadmap');
         this.route('new');
         this.route('project', {path: '/:project_id'}, function() {
             this.route('state', {path: '/state/:id'});
@@ -25,7 +26,6 @@ Router.map(function() {
             }); 
         });
     });
-    this.route('roadmap');
     this.route('team', function(){
         this.route('new');
         this.route('select', {path: '/:id'}, function(){

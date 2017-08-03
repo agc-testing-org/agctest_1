@@ -9,10 +9,14 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     },
     store: Ember.inject.service(),
     model: function(params) {
+ 
+        var memberSeat = this.store.peekAll("seat").findBy("name","member");
         return Ember.RSVP.hash({
             projects: this.store.findAll('project'),
-            jobs: this.store.query('job',{
-            },{reload: true}),
+            teams: this.store.query('team',{
+                seat_id: memberSeat.get("id")
+            }),
+            jobs: this.store.query('job',{},{reload: true}),
         });
     },
 });

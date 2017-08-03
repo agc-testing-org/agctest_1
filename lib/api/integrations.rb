@@ -24,6 +24,7 @@ require 'aws-sdk'
 #Helpers
 require_relative '../helpers/obfuscate.rb'
 require_relative '../helpers/slack.rb'
+require_relative '../helpers/params_helper.rb'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -32,7 +33,6 @@ require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
 require_relative '../controllers/feedback.rb'
-require_relative '../controllers/params_helper.rb'
 
 # Models
 require_relative '../models/user.rb'
@@ -645,7 +645,7 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         status 200
-        return (account.get_teams @session_hash["id"]).to_json
+        return (account.get_teams @session_hash["id"], params).to_json
     end
 
     teams_get_by_id = lambda do
@@ -715,9 +715,27 @@ class Integrations < Sinatra::Base
     jobs_get_by_id = lambda do
         issue = Issue.new
         job = issue.get_jobs params
-        (job && job[0]) || return_not_found
+        (job && job.first) || return_not_found
         status 200
-        return job[0].to_json
+        return job.first.to_json
+    end
+
+    jobs_patch_by_id = lambda do
+        protected!
+        fields = get_json
+        check_required_field fields[:sprint_id], "team_id"
+        check_required_field fields[:sprint_id], "sprint_id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params["team_id"]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
+        issue = Issue.new
+        query = {:id => params[:id]}
+        job = issue.get_jobs query
+        (job && job.first) || return_not_found
+        job.first.sprint_id = fields[:sprint_id]
+        saved = job.save
+        saved || (return_error "unable to select idea")
+        return job.first.to_json
     end
 
     jobs_post = lambda do
@@ -733,7 +751,7 @@ class Integrations < Sinatra::Base
         issue = Issue.new
         job = issue.create_job @session_hash["id"], fields[:team_id], fields[:title], fields[:link]
         job || (return_error "unable to create job listing")
-    
+
         log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}
         (issue.log_event log_params) || (return_error "unable to create job")
         status 201
@@ -788,6 +806,8 @@ class Integrations < Sinatra::Base
         log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "new"}).id}
         (issue.log_event log_params) || (return_error "unable to create sprint")
         status 201
+        sprint_json = sprint.as_json
+        sprint_json[:project] = sprint.project_id
         return sprint.to_json
     end
 
@@ -1475,10 +1495,10 @@ class Integrations < Sinatra::Base
     get "/jobs", &jobs_get
     post "/jobs", &jobs_post
     get "/jobs/:id", &jobs_get_by_id
-    #patch "/jobs/:id", &jobs_patch_by_id
+    patch "/jobs/:id", &jobs_patch_by_id
 
     post "/teams", &teams_post
-    get "/teams", &teams_get
+    get "/teams", allows: [:seat_id], &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
 

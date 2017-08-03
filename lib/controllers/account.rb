@@ -1,5 +1,6 @@
 class Account
     include Obfuscate
+    include ParamsHelper
     def initialize
         @per_page = 10
     end
@@ -365,12 +366,13 @@ class Account
         end
     end
 
-    def get_teams user_id
+    def get_teams user_id, params
+        params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
             return Team.joins(:user_teams).where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
-            })
+            }).where(params)
         rescue => e
             puts e
             return nil
@@ -548,8 +550,8 @@ class Account
 
     def get_user_notifications user_id, params
         page = (params["page"].to_i if params["page"].to_i > 0) || 1
-        params_helper = ParamsHelper.new
-        params = params_helper.drop_key params, "page"
+
+        params = drop_key params, "page"
         begin     
             response = []
             notifications = SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)

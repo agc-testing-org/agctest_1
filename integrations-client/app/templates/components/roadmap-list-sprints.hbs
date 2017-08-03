@@ -1,12 +1,20 @@
 {{#each sprints as |sprint index|}}
     {{#if (greater-than count index)}}
     <div class="inner">
+        {{application-error error=errorMessage}}
         <div class="line">
             <div class="icon">{{stacked-icon value="fa-lightbulb-o" icon="fa-circle" size="1" class="d-inline"}}</div>
             {{#link-to "develop.project.sprint" sprint.project_id sprint.id}}{{sprint.title}}{{/link-to}}
         </div>
         <div class="line">{{sprint.description}}</div>
-        <small class="line text-muted">Proposed {{moment-from-now sprint.created_at}}</small>
+        <small class="line text-muted">Proposed {{moment-from-now sprint.created_at}} for {{#link-to "develop.project" (concat sprint.project.id "-" sprint.project.org "-" sprint.project.name) class="text-uppercase"}}{{sprint.project.org}} / {{sprint.project.name}}{{/link-to}}</small>
+        
+        {{#if on_team}}
+        <div class="line">
+            <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded mt-2" {{action "select" job.team_id job.id sprint.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Approve</button>
+        </div>
+        {{/if}}
+
     </div>
     {{/if}}
 {{/each}}

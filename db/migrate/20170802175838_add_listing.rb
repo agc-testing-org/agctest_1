@@ -3,6 +3,7 @@ class AddListing < ActiveRecord::Migration[5.1]
         create_table "jobs", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
             t.integer "user_id", null: false
             t.integer "team_id", null: false
+            t.integer "sprint_id", null: true
             t.text "link", null: false
             t.text "title", null: false
             t.boolean "open", default: true
@@ -14,6 +15,7 @@ class AddListing < ActiveRecord::Migration[5.1]
         end
         add_foreign_key :jobs, :users
         add_foreign_key :jobs, :teams
+        add_foreign_key :jobs, :sprints
 
         add_column :sprints, :job_id, :integer, :null => true
         add_foreign_key :sprints, :jobs

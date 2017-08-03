@@ -42,12 +42,14 @@ ActiveRecord::Schema.define(version: 20170802191523) do
   create_table "jobs", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
     t.integer "team_id", null: false
+    t.integer "sprint_id"
     t.text "link", null: false
     t.text "title", null: false
     t.boolean "open", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["open"], name: "index_jobs_on_open"
+    t.index ["sprint_id"], name: "fk_rails_babd5df9aa"
     t.index ["team_id"], name: "index_jobs_on_team_id"
     t.index ["user_id"], name: "index_jobs_on_user_id"
   end
@@ -329,6 +331,7 @@ ActiveRecord::Schema.define(version: 20170802191523) do
   add_foreign_key "comments", "users"
   add_foreign_key "contributors", "sprint_states"
   add_foreign_key "contributors", "users"
+  add_foreign_key "jobs", "sprints"
   add_foreign_key "jobs", "teams"
   add_foreign_key "jobs", "users"
   add_foreign_key "logins", "users"

@@ -6,14 +6,13 @@ class Issue
 
     def create user_id, title, description, project_id, job_id
         begin
-            sprint = Sprint.create({
+            return Sprint.create({
                 user_id: user_id,
                 title: title.strip,
                 description: description.strip,
                 project_id: project_id,
                 job_id: job_id
             })
-            return sprint
         rescue => e
             puts e
             return nil
@@ -31,12 +30,11 @@ class Issue
 
     def create_sprint_state sprint_id, state_id, sha
         begin
-            sprint_state = SprintState.create({
+            return SprintState.create({
                 sprint_id: sprint_id,
                 state_id: state_id,
                 sha: sha
             })
-            return sprint_state 
         rescue => e
             puts e
             return nil
@@ -45,13 +43,12 @@ class Issue
 
     def create_comment user_id, contributor_id, sprint_state_id, text
         begin
-            comment = Comment.create({
+            return Comment.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
                 text: text.strip
             })
-            return comment
         rescue => e
             puts e
             return nil
@@ -130,6 +127,9 @@ class Issue
             Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id").select("jobs.*,users.first_name as user_first_name,teams.name as team_name").each_with_index do |j,i|
                 jobs[i] = j.as_json
                 jobs[i][:sprints] = j.sprints.as_json
+                jobs[i][:sprints].each_with_index do |s,c|
+                    jobs[i][:sprints][c][:project] =  s["project_id"]
+                end
             end
             return jobs
         rescue => e

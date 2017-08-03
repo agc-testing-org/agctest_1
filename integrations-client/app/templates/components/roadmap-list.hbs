@@ -7,7 +7,7 @@
     <div class="list-group-item rounded mb-0 mt-3">
         <h3><i class="fa fa-fw fa-cogs" aria-hidden="true"></i> How it Works</h3>
         <h4 class="line">
-            Based on a job listing, pitch a creative new feature, bug fix, or task for a Wired7 project that <strong>uses all of the skills required</strong> by the position
+            Pitch a creative new feature, bug fix, or task for a Wired7 project that <strong>uses all of the skills required</strong> by a job listing
         </h4>
         <h4 class="line">
             Companies select the best pitch for a job listing and <strong>prioritize the idea</strong> for requirements design, design, and development
@@ -28,11 +28,11 @@
             </small>
         </div>
         <div class="line connected">
-            {{roadmap-list-sprints sprints=job.sprints}}
+            {{roadmap-list-sprints sprints=job.sprints teams=teams job=job}}
             <div class="inner">
                 <div class="line">
                     <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
-                    {{develop-timeline-create projects=projects job_id=job.id refresh="refresh" class=""}}
+                    {{develop-timeline-create projects=projects job_id=job.id for_job=true refresh="refresh" class=""}}
                 </div>
             </div>
         </div>
