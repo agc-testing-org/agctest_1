@@ -9,6 +9,7 @@ export default DS.Model.extend({
     state_id: attr('number'),
     project: DS.belongsTo('project'),
     project_id: attr('number'),
+    job_id: attr('number'),
     sprint_states: DS.hasMany('sprint_state'),
     deadline: attr('date'),
     sha: attr('string'),

@@ -4,13 +4,14 @@ class Issue
 
     end 
 
-    def create user_id, title, description, project_id
+    def create user_id, title, description, project_id, job_id
         begin
             sprint = Sprint.create({
                 user_id: user_id,
                 title: title.strip,
                 description: description.strip,
-                project_id: project_id
+                project_id: project_id,
+                job_id: job_id
             })
             return sprint
         rescue => e

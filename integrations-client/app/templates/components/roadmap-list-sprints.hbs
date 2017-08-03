@@ -1,0 +1,22 @@
+{{#each sprints as |sprint index|}}
+    {{#if (greater-than count index)}}
+    <div class="inner">
+        <div class="line">
+            <div class="icon">{{stacked-icon value="fa-lightbulb-o" icon="fa-circle" size="1" class="d-inline"}}</div>
+            {{#link-to "develop.project.sprint" sprint.project_id sprint.id}}{{sprint.title}}{{/link-to}}
+        </div>
+        <div class="line">{{sprint.description}}</div>
+        <small class="line text-muted">Proposed {{moment-from-now sprint.created_at}}</small>
+    </div>
+    {{/if}}
+{{/each}}
+
+<small class="inner">
+    {{#if showingAll}}
+        <a {{action "showAll" false}}>Show Less</a>
+    {{else}}
+        {{#if (greater-than sprints.length count)}}
+            <a {{action "showAll" true}}>Show More Ideas ( {{sprints.length}} Total )</a>
+        {{/if}}
+    {{/if}}
+</small>

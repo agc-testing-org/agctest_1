@@ -779,7 +779,7 @@ class Integrations < Sinatra::Base
         (description_length < 501 && description_length > 4) || (return_error "description must be 5-500 characters")
 
         issue = Issue.new
-        sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
+        sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id], fields[:job_id]
         sprint || (return_error "unable to create sprint for this project")
 
         state = State.find_by(:name => "idea").id

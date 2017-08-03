@@ -8,6 +8,9 @@ export default Ember.Component.extend({
         this._super(...arguments);   
     },
     actions: {
+        refresh(){
+            this.sendAction("refresh");
+        }
     }
 
 });

@@ -27,15 +27,19 @@ export default Ember.Component.extend({
             var _this = this;
             var title = this.get("title");
             var description = this.get("description");
+            var jobId = this.get("job_id");
             if(title && title.length > 5){
                 if(description && description.length > 5){
                     var store = this.get('store');
                     var sprint = store.createRecord('sprint', {
                         title: title,
                         description: description,
-                        project_id: projectId
+                        project_id: projectId,
+                        job_id: jobId,
                     }).save().then(function(payload) {
-                        _this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
+                        _this.sendAction("refresh");
+                        _this.set("displayCreate",false);
+                        //_this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
                     }, function(xhr, status, error) {
 
                     });
