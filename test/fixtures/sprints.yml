@@ -3,6 +3,7 @@ sprint_1:
   title: "TITLE"
   description: "DESCRIPTION"
   project: demo
+  job: developer
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 

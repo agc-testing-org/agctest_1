@@ -1,9 +1,5 @@
 require 'sinatra/activerecord'
 
-ActiveSupport::Inflector.inflections(:en) do |inflect|
-    inflect.irregular 'job', 'jobs'
-end
-
 class Job < ActiveRecord::Base
     include Obfuscate
 
@@ -12,7 +8,7 @@ class Job < ActiveRecord::Base
     end
 
     has_many :sprints
-    has_one :user
-    has_one :team
+    belongs_to :user
+    belongs_to :team
 
 end

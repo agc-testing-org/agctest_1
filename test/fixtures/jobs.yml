@@ -1,7 +1,7 @@
 developer:
   user: adam_confirmed
   title: "TITLE"
-  url: "wired7.com/developer"
+  link: "wired7.com/developer"
   team: ateam
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
@@ -9,7 +9,7 @@ developer:
 senior_developer:
   user: adam_confirmed
   title: "TITLEB"
-  url: "wired7.com/senior_developer"
+  link: "wired7.com/senior_developer"
   team: ateam
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
@@ -17,7 +17,7 @@ senior_developer:
 product_manager:
   user: adam_confirmed
   title: "TITLE"
-  url: "wired7.com/product_manager"
+  link: "wired7.com/product_manager"
   team: ateam
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
