@@ -1,10 +1,14 @@
 {{title "Roadmap"}}
 
 <div class="container-fluid pl-0 pr-0">
-    {{#link-to "me.overview" class="exit"}}Close {{stacked-icon value="fa-times" icon="fa-circle" size="1" class="d-inline"}}{{/link-to}}
+    {{develop-carousel}}
+    {{#link-to "me.overview" class="exit"}}Home {{stacked-icon value="fa-home" icon="fa-circle" size="1" class="d-inline"}}{{/link-to}}
     <main class="col-sm-12 col-md-12 offset-sm-0">
         <div class="row main">
-            {{roadmap-list jobs=model.jobs projects=model.projects teams=model.teams refresh="refresh" class="row"}}
+            <div class="col-md-12 col-sm-12">
+                {{develop-roadmap-overview}}
+                {{develop-roadmap-content jobs=model.jobs projects=model.projects teams=model.teams refresh="refresh" class="row"}}
+            </div>
         </div>
     </main>
 </div>
