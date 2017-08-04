@@ -42,6 +42,27 @@ describe "/sprints" do
         end
     end
 
+    shared_examples_for "sprint_states" do
+        it "should include sprint_id" do
+            expect(@sprint_state["sprint_id"]).to eq @sprints[0]["id"]
+        end
+        it "should include idea state_id" do
+            expect(@sprint_state["state_id"]).to eq(states(:idea).id)
+        end
+    end
+
+    shared_examples_for "sprint_timelines" do
+        it "should include sprint_id" do
+            expect(@timeline["sprint_id"]).to eq(@sprints[0]["id"])
+        end                                                                     
+        it "should include idea state_id" do            
+            expect(@timeline["state_id"]).to eq(states(:idea).id)               
+        end                                                                                     
+        it "should include sprint_state_id" do                          
+            expect(@timeline["sprint_state_id"]).to eq(1)                                       
+        end   
+    end
+
     shared_examples_for "sprint_skillsets" do 
         context "all" do
             it "should return all skillsets" do
@@ -125,33 +146,36 @@ describe "/sprints" do
             end
         end
         context "valid fields" do
-            before(:each) do
-                post "sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sprint_results = @mysql_client.query("select * from sprints")
-                @sprint_state = @mysql_client.query("select * from sprint_states").first
-                @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_results.first["id"]}").first
-                @sprints = [JSON.parse(last_response.body)]
+            context "without job_id" do
+                before(:each) do
+                    post "sprints", {:title => @title, :description => @description, :project_id => @project_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @sprint_results = @mysql_client.query("select * from sprints")
+                    @sprint_state = @mysql_client.query("select * from sprint_states").first
+                    @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_results.first["id"]}").first
+                    @sprints = [JSON.parse(last_response.body)]
+                end
+                it_behaves_like "sprints"
+                it_behaves_like "created"
+                it_behaves_like "sprint_states"
+                it_behaves_like "sprint_timelines"
             end
-            it_behaves_like "sprints"
-            it_behaves_like "created"
-            context "sprint_states" do
-                it "should include sprint_id" do
-                    expect(@sprint_state["sprint_id"]).to eq @sprints[0]["id"]
+            context "with job_id" do
+                fixtures :jobs
+                before(:each) do
+                    @job_id = jobs(:developer).id
+                    post "sprints", {:title => @title, :description => @description, :project_id => @project_id, :job_id => @job_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @sprint_results = @mysql_client.query("select * from sprints")
+                    @sprint_state = @mysql_client.query("select * from sprint_states").first
+                    @timeline = @mysql_client.query("select * from sprint_timelines where sprint_id = #{@sprint_results.first["id"]}").first
+                    @sprints = [JSON.parse(last_response.body)]
                 end
-                it "should include idea state_id" do
-                    expect(@sprint_state["state_id"]).to eq(states(:idea).id)
+                it "should save job_id" do
+                    expect(@sprints[0]["job_id"]).to eq(@sprint_results.first["job_id"])
                 end
-            end
-            context "sprint_timeline" do
-                it "should include sprint_id" do
-                    expect(@timeline["sprint_id"]).to eq(@sprints[0]["id"])
-                end
-                it "should include idea state_id" do
-                    expect(@timeline["state_id"]).to eq(states(:idea).id)
-                end
-                it "should include sprint_state_id" do
-                    expect(@timeline["sprint_state_id"]).to eq(1)
-                end
+                it_behaves_like "sprints"
+                it_behaves_like "created"
+                it_behaves_like "sprint_states"
+                it_behaves_like "sprint_timelines"
             end
         end
     end
@@ -172,7 +196,6 @@ describe "/sprints" do
                 end
                 context "sprint_states.state_id" do
                     before(:each) do
-                        skip "this has been tested and works but activerecord does not return the queried record from rspec..."
                         state_id = sprint_states(:sprint_1_state_1).state_id
                         project_id = projects(:demo).id
                         get "/sprints?project_id=#{project_id}&sprint_states.state_id=#{state_id}"

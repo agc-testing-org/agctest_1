@@ -129,7 +129,7 @@ describe "/jobs" do
         it_behaves_like "ok"
     end
 
-    describe "PATCH /:id", :focus => true do
+    describe "PATCH /:id" do
         fixtures :teams, :sprints, :jobs
         before(:each) do
             @title = "JOB TITLE"        
