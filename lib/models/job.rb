@@ -6,7 +6,8 @@ class Job < ActiveRecord::Base
     def user_id
         encrypt self[:user_id]
     end
-
+    
+    belongs_to :sprint
     has_many :sprints
     belongs_to :user
     belongs_to :team

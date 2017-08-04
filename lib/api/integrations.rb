@@ -719,23 +719,24 @@ class Integrations < Sinatra::Base
         issue = Issue.new
         jobs = issue.get_jobs params
         (jobs && jobs.first) || return_not_found
-        (job_with_sprints = issue.jobs_with_sprints [jobs.first]) || (return_error "unable to find job")
+        jobs_with_sprints = issue.jobs_with_sprints jobs
+        (jobs_with_sprints && jobs_with_sprints.first) || (return_error "unable to find job")
         status 200
-        return job_with_sprints.to_json
+        return jobs_with_sprints.first.to_json
     end
 
     jobs_patch_by_id = lambda do
         protected!
         fields = get_json
-        check_required_field fields[:sprint_id], "team_id"
+        check_required_field fields[:team_id], "team_id"
         check_required_field fields[:sprint_id], "sprint_id"
         
         account = Account.new
-        seat = account.get_seat @session_hash["id"], params["team_id"]
+        seat = account.get_seat @session_hash["id"], fields[:team_id]
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
         
         issue = Issue.new
-        query = {:id => params[:id]}
+        query = {:id => params[:id], :team_id => fields[:team_id]}
         jobs = issue.get_jobs query
         (jobs && jobs.first) || return_not_found
         saved = jobs.first.update_attributes!(:sprint_id => fields[:sprint_id])

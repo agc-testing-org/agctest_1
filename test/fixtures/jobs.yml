@@ -3,6 +3,7 @@ developer:
   title: "TITLE"
   link: "wired7.com/developer"
   team: ateam
+  sprint: sprint1
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 
@@ -11,6 +12,7 @@ senior_developer:
   title: "TITLEB"
   link: "wired7.com/senior_developer"
   team: ateam
+  sprint: sprint1b
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 

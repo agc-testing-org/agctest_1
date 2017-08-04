@@ -35,6 +35,22 @@ describe "/jobs" do
                 expect(@jobs[i]["team_id"]).to eq(job_result["team_id"])
             end
         end
+        it "should return sprint_id" do
+            @job_results.each_with_index do |job_result,i|
+                expect(@jobs[i]["sprint_id"]).to eq(job_result["sprint_id"])
+                if job_result["sprint_id"] && !@hide_sprints
+                    job_results_sprints = @mysql_client.query("select sprints.*, IF(sprints.id = #{(job_result["sprint_id"] || "NULL")}, 1, 0) as selected from sprints where sprints.job_id = #{job_result["id"]} ORDER BY selected DESC, id DESC")
+                    jobs_sprints = @jobs[i]["sprints"]
+                    expect(job_results_sprints.count).to be > 0
+                    job_results_sprints.each_with_index do |job_result_sprint,i|
+                        expect(jobs_sprints[i]["id"]).to eq(job_result_sprint["id"])
+                    end   
+                    job_results_sprints.each_with_index do |job_result_sprint,i|
+                        expect(jobs_sprints[i]["project"]).to eq(job_result_sprint["project_id"])
+                    end  
+                end
+            end
+        end
     end
 
     describe "POST /" do
@@ -90,7 +106,7 @@ describe "/jobs" do
         end
     end
 
-    describe "GET /", :focus => true do
+    describe "GET /" do
         fixtures :jobs, :teams, :sprints
         before(:each) do
             get "/jobs"
@@ -102,14 +118,50 @@ describe "/jobs" do
     end
 
     describe "GET /:id" do
-        fixtures :jobs, :job_states
+        fixtures :jobs, :teams, :sprints
         before(:each) do
-            job = jobs(:job_1)
-            get "/jobs/#{job.id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            job = jobs(:developer)
+            get "/jobs/#{job.id}"
             @jobs = [JSON.parse(last_response.body)]
-            @job_results = @mysql_client.query("select * from jobs where id = #{job.id}")
+            @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{job.id} ORDER BY id DESC")
         end
         it_behaves_like "jobs"
         it_behaves_like "ok"
+    end
+
+    describe "PATCH /:id", :focus => true do
+        fixtures :teams, :sprints, :jobs
+        before(:each) do
+            @title = "JOB TITLE"        
+            @sprint_id = sprints(:sprint_2).id
+            @team_id = teams(:ateam).id          
+            @job = jobs(:product_manager).id
+            @hide_sprints = true
+        end                                                             
+        context "not on team" do
+            before(:each) do                    
+                patch "jobs/#{@job}", {:team_id => @team_id, :sprint_id => @sprint_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end                                                                 
+            it_behaves_like "unauthorized"                  
+        end                                                         
+        context "on team" do            
+            fixtures :user_teams, :notifications        
+            before(:each) do                                        
+                @team_id = user_teams(:adam_confirmed).team_id        
+                patch "jobs/#{@job}", {:team_id => @team_id, :sprint_id => @sprint_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @jobs = [JSON.parse(last_response.body)]
+                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{@job} ORDER BY id DESC")
+            end
+            it_behaves_like "jobs"
+            it_behaves_like "ok"
+        end
+        context "on a team but not correct team" do
+            fixtures :user_teams, :notifications
+            before(:each) do
+                @team_id = teams(:adam_admin_team).id
+                patch "jobs/#{@job}", {:team_id => @team_id, :sprint_id => @sprint_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            end
+            it_behaves_like "not_found"
+        end
     end
 end
