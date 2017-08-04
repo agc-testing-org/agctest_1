@@ -15,6 +15,13 @@ describe "/sprints" do
                 expect(@sprints[i]["id"]).to eq(sprint_result["id"])
             end
         end
+        if @include_project
+            it "should return project (id)" do
+                @sprint_results.each_with_index do |sprint_result,i|
+                    expect(@sprints[i]["project"]).to eq(sprint_result["project_id"])
+                end                                         
+            end 
+        end
         it "should return user_id" do
             @sprint_results.each_with_index do |sprint_result,i|
                 expect(decrypt(@sprints[i]["user_id"]).to_i).to eq(sprint_result["user_id"])
@@ -183,6 +190,9 @@ describe "/sprints" do
     describe "GET /" do
         fixtures :sprints, :sprint_states
         context "valid params" do
+            before(:each) do
+                @include_project = true
+            end
             context "filter by" do
                 context "project_id" do
                     before(:each) do
