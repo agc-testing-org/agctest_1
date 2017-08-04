@@ -22,6 +22,8 @@ export default Ember.Component.extend({
                         link: link,
                     }).save().then(function(response){
                         _this.set("errorMessage",null); 
+                        _this.set("title",null);
+                        _this.set("link",null);
                         _this.sendAction("refresh");
                     });
                 }
