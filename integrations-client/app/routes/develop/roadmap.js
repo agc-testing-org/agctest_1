@@ -1,7 +1,11 @@
 import Ember from 'ember';
-import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-route-mixin';
 
-export default Ember.Route.extend(AuthenticatedRouteMixin,{
+export default Ember.Route.extend({
+    queryParams: {
+        id: {
+            refreshModel: true
+        }
+    },
     actions: {
         refresh(){
             this.refresh();
@@ -9,14 +13,19 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     },
     store: Ember.inject.service(),
     model: function(params) {
- 
         var memberSeat = this.store.peekAll("seat").findBy("name","member");
+        var authenticated = this.get('session.isAuthenticated');
+        var teams = [];
+        if(authenticated){
+            teams = this.store.query('team',{
+                seat_id: memberSeat.get("id")
+            });
+        }
         return Ember.RSVP.hash({
             projects: this.store.findAll('project'),
-            teams: this.store.query('team',{
-                seat_id: memberSeat.get("id")
-            }),
-            jobs: this.store.query('job',{},{reload: true}),
+            teams: teams,
+            jobs: this.store.query('job',params,{reload: true}),
+            params: params
         });
     },
 });

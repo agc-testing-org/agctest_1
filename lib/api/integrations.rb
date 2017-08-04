@@ -1502,7 +1502,7 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/merge", &contributors_post_merge
 
 
-    get "/jobs", allows: [], &jobs_get
+    get "/jobs", allows: [:id], &jobs_get
     post "/jobs", &jobs_post
     get "/jobs/:id", allows: [:id], &jobs_get_by_id
     patch "/jobs/:id", &jobs_patch_by_id

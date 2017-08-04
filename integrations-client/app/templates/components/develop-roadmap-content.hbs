@@ -1,26 +1,12 @@
 {{#each jobs as |job|}}
-    <div class="col-sm-12 col-md-3">
-        <div class="list-group-item rounded mb-0 mt-3">
-            <h4 class="line">
-                <strong class="text-capitalize">{{job.team_name}}</strong> is looking for a <a href=job.link target="_blank">{{job.title}}</a>
-            </h4>
-            <small class="line text-muted">
-                Posted {{moment-from-now job.created_at}}
-            </small>
+    {{#if params.id}}
+        <small class=" col-sm-12 text-center">{{#link-to "develop.roadmap" (query-params id='undefined')}}show all listings{{/link-to}}</small>
+        <div class="col-sm-12 col-md-8 offset-md-2">
+            {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
         </div>
-        <div class="line connected">
-            {{roadmap-list-sprints sprints=job.sprints teams=teams job=job}}
-            <div class="inner">
-                <div class="line">
-                    {{#if job.sprint_id}}
-                        <div class="icon">{{stacked-icon value="fa-asterisk" icon="fa-circle" size="1" class="d-inline"}}</div>
-                        Contribute to the idea {{job.team_name}} approved
-                    {{else}}
-                        <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
-                        {{develop-timeline-create projects=projects job_id=job.id for_job=true refresh="refresh" class=""}}
-                    {{/if}}
-                </div>
-            </div>
+    {{else}}
+        <div class="col-sm-12 col-md-3">
+            {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
         </div>
-    </div>
+    {{/if}}
 {{/each}}

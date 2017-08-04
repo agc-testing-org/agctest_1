@@ -1,0 +1,24 @@
+<div class="list-group-item rounded mb-0 mt-3">
+    <h4 class="line">
+        <strong class="text-capitalize">{{job.team_name}}</strong> is looking for a <a href=job.link target="_blank">{{job.title}}</a>
+    </h4>
+    <small class="line text-muted">
+        Posted {{moment-from-now job.created_at}}
+    </small>
+</div>
+<div class="line connected">
+    {{roadmap-list-sprints sprints=job.sprints teams=teams job=job}}
+    <div class="inner">
+        <div class="line">
+            {{#if job.sprint_id}}
+                <div class="icon">{{stacked-icon value="fa-asterisk" icon="fa-circle" size="1" class="d-inline"}}</div>
+                Contribute to the idea {{job.team_name}} approved
+            {{else}}
+                <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
+                {{develop-timeline-create projects=projects job_id=job.id for_job=true refresh="refresh" class=""}}
+            {{/if}}
+        </div>
+    </div>
+</div>
+
+

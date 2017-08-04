@@ -108,13 +108,24 @@ describe "/jobs" do
 
     describe "GET /" do
         fixtures :jobs, :teams, :sprints
-        before(:each) do
-            get "/jobs"
-            @jobs = JSON.parse(last_response.body)
-            @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id ORDER BY id DESC")
+        context "no filter" do
+            before(:each) do
+                get "/jobs"
+                @jobs = JSON.parse(last_response.body)
+                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id ORDER BY id DESC")
+            end
+            it_behaves_like "jobs"
+            it_behaves_like "ok"
         end
-        it_behaves_like "jobs"
-        it_behaves_like "ok"
+        context "filter by id" do
+            before(:each) do
+                get "/jobs/#{jobs(:developer).id}"
+                @jobs = JSON.parse(last_response.body)
+                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where id = #{jobs(:developer).id} ORDER BY id DESC")
+            end
+            it_behaves_like "jobs"
+            it_behaves_like "ok"
+        end
     end
 
     describe "GET /:id" do
