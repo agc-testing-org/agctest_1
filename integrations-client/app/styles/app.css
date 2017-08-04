@@ -347,16 +347,13 @@ button{
 .line.connected .inner{
     position:relative;
     padding-top: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 0px;
     padding-left:20px;
 }
 .line.connected .icon{
     position:absolute;
     left:-15px;
     top:10px;
-}
-.line.connected .more{
-    padding-left:20px;
 }
 .input-group-addon{
     background-color:#fff;

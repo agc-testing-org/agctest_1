@@ -708,16 +708,20 @@ class Integrations < Sinatra::Base
     jobs_get = lambda do
         issue = Issue.new
         jobs = issue.get_jobs params
+        jobs || (return_error "unable to find jobs")
+        jobs_with_sprints = issue.jobs_with_sprints jobs
+        jobs_with_sprints || (return_error "unable to find jobs")
         status 200
-        return jobs.to_json
+        return jobs_with_sprints.to_json
     end
 
     jobs_get_by_id = lambda do
         issue = Issue.new
-        job = issue.get_jobs params
-        (job && job.first) || return_not_found
+        jobs = issue.get_jobs params
+        (jobs && jobs.first) || return_not_found
+        (job_with_sprints = issue.jobs_with_sprints [jobs.first]) || (return_error "unable to find job")
         status 200
-        return job.first.to_json
+        return job_with_sprints.to_json
     end
 
     jobs_patch_by_id = lambda do
@@ -730,12 +734,11 @@ class Integrations < Sinatra::Base
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
         issue = Issue.new
         query = {:id => params[:id]}
-        job = issue.get_jobs query
-        (job && job.first) || return_not_found
-        job.first.sprint_id = fields[:sprint_id]
-        saved = job.save
+        jobs = issue.get_jobs query
+        (jobs && jobs.first) || return_not_found
+        saved = jobs.first.update_attributes!(:sprint_id => fields[:sprint_id])
         saved || (return_error "unable to select idea")
-        return job.first.to_json
+        return jobs.first.to_json
     end
 
     jobs_post = lambda do

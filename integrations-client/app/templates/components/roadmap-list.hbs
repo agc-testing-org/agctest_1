@@ -31,8 +31,13 @@
             {{roadmap-list-sprints sprints=job.sprints teams=teams job=job}}
             <div class="inner">
                 <div class="line">
-                    <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
-                    {{develop-timeline-create projects=projects job_id=job.id for_job=true refresh="refresh" class=""}}
+                    {{#if job.sprint_id}}
+                        <div class="icon">{{stacked-icon value="fa-asterisk" icon="fa-circle" size="1" class="d-inline"}}</div>
+                        Contribute to the idea {{job.team_name}} approved
+                    {{else}}
+                        <div class="icon">{{stacked-icon value="fa-question" icon="fa-circle" size="1" class="d-inline"}}</div>
+                        {{develop-timeline-create projects=projects job_id=job.id for_job=true refresh="refresh" class=""}}
+                    {{/if}}
                 </div>
             </div>
         </div>
