@@ -729,9 +729,11 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:sprint_id], "team_id"
         check_required_field fields[:sprint_id], "sprint_id"
+        
         account = Account.new
         seat = account.get_seat @session_hash["id"], params["team_id"]
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
+        
         issue = Issue.new
         query = {:id => params[:id]}
         jobs = issue.get_jobs query
@@ -747,6 +749,10 @@ class Integrations < Sinatra::Base
         check_required_field fields[:team_id], "team_id"
         check_required_field fields[:link], "link"
         check_required_field fields[:title], "title"
+
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], fields[:team_id]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
 
         title_length = fields[:title].to_s.length
         (title_length < 101 && title_length > 4) || (return_error "title must be 5-100 characters")
@@ -1495,9 +1501,9 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/merge", &contributors_post_merge
 
 
-    get "/jobs", &jobs_get
+    get "/jobs", allows: [], &jobs_get
     post "/jobs", &jobs_post
-    get "/jobs/:id", &jobs_get_by_id
+    get "/jobs/:id", allows: [:id], &jobs_get_by_id
     patch "/jobs/:id", &jobs_patch_by_id
 
     post "/teams", &teams_post

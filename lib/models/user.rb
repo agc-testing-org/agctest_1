@@ -21,18 +21,4 @@ class User < ActiveRecord::Base
     has_many :projects
     has_many :jobs
 
-    #    attr_accessor :public_id
-    #    def attributes
-    #        super.merge('public_id' => self.public_id)
-    #    end
-
-    #    def public_id
-    #        decrypt self[:id]
-    #    end
-
-    #    def self.find(id)
-    #        puts id.inspect
-    #        id = decrypt id
-    #        super 
-    #    end
 end

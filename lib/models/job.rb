@@ -1,5 +1,9 @@
 require 'sinatra/activerecord'
 
+ActiveSupport::Inflector.inflections(:en) do |inflect|
+    inflect.irregular 'job', 'jobs'
+end
+
 class Job < ActiveRecord::Base
     include Obfuscate
 
@@ -11,18 +15,4 @@ class Job < ActiveRecord::Base
     has_one :user
     has_one :team
 
-    #    attr_accessor :public_id
-    #    def attributes
-    #        super.merge('public_id' => self.public_id)
-    #    end
-
-    #    def public_id
-    #        decrypt self[:id]
-    #    end
-
-    #    def self.find(id)
-    #        puts id.inspect
-    #        id = decrypt id
-    #        super 
-    #    end
 end
