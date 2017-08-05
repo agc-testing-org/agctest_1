@@ -1,5 +1,9 @@
 {{#unless as_text}}
-    <a {{action 'login' provider}} class="btn btn-secondary rounded btn-sm"><i class="fa fa-{{provider}}" aria-hidden="true"></i> Sign In With {{provider}} {{text}}</a>
+    {{#unless lg}}
+        <a {{action 'login' provider}} class="btn btn-secondary rounded btn-sm"><i class="fa fa-{{provider}}" aria-hidden="true"></i> Sign In With {{provider}} {{text}}</a>
+    {{else}}
+        <a {{action 'login' provider}} class="btn btn-secondary rounded btn"><i class="fa fa-{{provider}}" aria-hidden="true"></i> Sign In With {{provider}} {{text}}</a>
+    {{/unless}}
 {{else}}
     <a href="#" {{action 'login' provider}}> {{text}}</a>
 {{/unless}}

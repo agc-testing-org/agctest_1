@@ -13,7 +13,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         var previousRoutes = this.router.router.currentHandlerInfos;
         var previousRoute = previousRoutes && previousRoutes.pop();
         if(previousRoute && (previousRoute.name === "invitation.index")){
-            this.transitionTo("me.welcome");
+            this.transitionTo("welcome");
         }
     },
     model: function(params) { 

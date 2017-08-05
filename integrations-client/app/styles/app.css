@@ -461,10 +461,16 @@ button{
 .hidden-md-up .vertical-align-hold{
     position: relative;
     overflow: visible;
+    display: block;
+    padding:0px;
 }
 .vertical-align-cell{
     display: table-cell;
     vertical-align: middle;
+}
+.hidden-md-up .vertical-align-cell{
+    display:block;
+    vertical-align:none;
 }
 
 .background{
@@ -806,6 +812,7 @@ button{
 }
 .main .hidden-md-up .overview{
     margin-top:20px;
+    padding:0px;
 }
 .main .still{
     margin-top:0px;
@@ -815,6 +822,8 @@ button{
 }
 .main .still.hidden-md-up{
     margin-top:0px;
+    padding-left:10px;
+    padding-right:10px;
 }
 .main .still.hidden-sm-down{
     min-height: 100%;
@@ -827,6 +836,9 @@ button{
 }
 .main .still .full{
     margin-top:94px;
+}
+.main .still.hidden-md-up .full{
+    margin-top:20px;
 }
 .main .still.relative{
     position:relative;

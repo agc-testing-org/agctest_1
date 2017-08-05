@@ -23,6 +23,7 @@ require 'aws-sdk'
 
 #Helpers
 require_relative '../helpers/obfuscate.rb'
+require_relative '../helpers/slack.rb'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -321,10 +322,12 @@ class Integrations < Sinatra::Base
         (invitation.first && invitation.first.user_id) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
-        user_params = {:id => decrypt(team["user_id"])}
+        user_params = {:id => invitation.first[:user_id]}
         user = account.get user_params
         (account.confirm_user user, fields[:password], fields[:firstName], request.ip) || (return_error "unable to accept this invitation at this time")
         seat_id = account.get_seat_permissions user[:id]
+        slack = Slack.new
+        slack.post_accepted invitation.first
         status 200
         return (session_tokens user, seat_id, true).to_json
     end
@@ -390,7 +393,7 @@ class Integrations < Sinatra::Base
         repo = Repo.new
         github = (repo.github_client access_token)
         #github || (return_error "invalid access token")
-        @session_hash["github_username"] = github.login || nil
+        (github && (@session_hash["github_username"] = github.login)) || (@session_hash["github_username"] = nil)
         provider_token = account.create_token @session_hash["id"], @key, access_token 
         @session_hash["github_token"] = provider_token
         response = (session_tokens user, @session_hash["seat_id"], false)
@@ -405,8 +408,9 @@ class Integrations < Sinatra::Base
         account = Account.new
         filters = {:refresh => params[:refresh_token]}
         user = account.get filters
-        user || return_unauthorized 
+        user || return_unauthorized
         seat_id = account.get_seat_permissions user[:id] 
+        ((@session = user.jwt) && authorized?) #get session if exists to preserve github token
         status 200
         return (session_tokens user, seat_id, false).to_json
     end
@@ -942,10 +946,12 @@ class Integrations < Sinatra::Base
         query = {:id => params[:contributor_id], :user_id => @session_hash["id"] }
         contributor = repo.get_contributor query
         contributor || return_not_found
+        github = (repo.github_client github_authorization)
+        github || (return_error "unable to authenticate github")
         contributor.preparing = true
         contributor.prepared = 0
         contributor.save
-        ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
+        ContributorSyncWorker.perform_async @session, @session_hash["github_token"], contributor[:id], @session_hash["github_username"]
         status 200
         return contributor.to_json 
     end
