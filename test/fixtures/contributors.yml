@@ -1,0 +1,33 @@
+adam_confirmed_1:
+  user: adam_confirmed
+  repo: "git-repo-log"
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  commit: "18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8" #commit after conversion to Wired7.anonymous
+  commit_remote: "b218bd1da7786b8beece26fc2e6b2fa240597969"
+
+adam_admin_1:
+  user: adam_admin
+  repo: "git-repo-log"
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  commit: "18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8"
+  commit_remote: "b218bd1da7786b8beece26fc2e6b2fa240597969"
+
+adam_no_commit:
+  user: adam
+  repo: "git-repo-log"
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+
+adam_sprint_1_state_2:
+  user: adam
+  repo: "git-repo-log"
+  sprint_state: sprint_1_state_2
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  commit: "18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8" #commit after conversion to Wired7.anonymous
+  commit_remote: "b218bd1da7786b8beece26fc2e6b2fa240597969"

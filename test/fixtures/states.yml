@@ -1,0 +1,49 @@
+idea:
+  name: "idea"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+  contributors: true
+
+requirements_design:
+  name: "requirements design"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+requirements_review:
+  name: "requirements review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+visual_design:
+  name: "visual design"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+design_review:
+  name: "design review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+development:
+  name: "development"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+  contributors: true
+
+development-review:
+  name: "development review"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"
+
+closed:
+  name: "closed"
+  fa_icon: "fa fa-cool"
+  description: "this is"
+  instruction: "hello"

@@ -1,0 +1,23 @@
+sprint_1:
+  user: adam_confirmed
+  title: "TITLE"
+  description: "DESCRIPTION"
+  project: demo
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1b:
+  user: adam_confirmed
+  title: "TITLEB"
+  description: "DESCRIPTION"
+  project: demo
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_2:
+  user: adam_confirmed
+  title: "TITLE"
+  description: "DESCRIPTION"
+  project: demob
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

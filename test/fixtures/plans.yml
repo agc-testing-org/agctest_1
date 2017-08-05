@@ -1,0 +1,11 @@
+recruiter:
+  name: "recruiter"
+  title: "external recruiters"
+  description: "your team acts as a proxy for talent it invites"
+  seat: sponsored
+
+manager:
+  name: "manager"
+  title: "hiring managers and internal recruiters"
+  description: "your team has exclusive access to talent that it invites for a specified period of time"
+  seat: priority

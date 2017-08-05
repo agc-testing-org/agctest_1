@@ -1,0 +1,13 @@
+user_1_skillset_1:
+  skillset: skillset_1
+  user: adam
+
+user_2_skillset_1:
+  skillset: skillset_1
+  user: adam_admin
+  active: 1
+
+notification_skillset:
+  skillset_id: skillset_1
+  user: masha_post_connection_request
+  active: 1

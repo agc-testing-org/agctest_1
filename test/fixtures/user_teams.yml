@@ -1,0 +1,114 @@
+adam_original_invite:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: "Wired7"
+  accepted: true
+  token: "ABC00"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: owner
+
+adam_confirmed:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: ateam
+  accepted: true
+  token: "ABC"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: member
+
+adam_confirmed_expired:
+  sender: adam_admin
+  user: adam_confirmed
+  team: ateam
+  accepted: true
+  token: "ABCCC8"
+  updated_at: <%= 25.hour.ago.to_s(:db) %>
+  created_at: <%= 25.hour.ago.to_s(:db) %>
+  seat: member
+
+adam_invited_expired:
+  sender: adam_confirmed
+  user: adam
+  team: ateam
+  accepted: false
+  user_email: "adam+12345@wired7.com"
+  token: "123"
+  updated_at: <%= 25.hours.ago.to_s(:db) %>
+  created_at: <%= 25.hours.ago.to_s(:db) %>
+  seat: member
+
+adam_confirmed_b_team:
+  sender: adam_confirmed
+  user: adam_confirmed
+  team: bteam
+  accepted: false
+  token: "ABCDE"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: priority 
+
+adam_protected:
+  sender: adam_confirmed
+  user: adam_protected
+  team: ateam
+  accepted: true 
+  token: "ABCDEF"
+  updated_at: <%= 2.hour.ago.to_s(:db) %>
+  created_at: <%= 5.hour.ago.to_s(:db) %>
+  seat: sponsored
+
+adam_admin_adam_admin_team:
+  sender: adam_admin
+  seat: sponsored
+  team: adam_admin_team
+  user: adam_admin
+  accepted: true
+
+adam_confirmed_adam_admin_team:
+  sender: adam_admin
+  seat: member
+  team: adam_admin_team
+  user: adam_confirmed
+  accepted: true
+
+adam_confirmed_priority:
+  sender: adam_admin
+  user: adam_confirmed
+  team: ateam
+  accepted: true
+  token: "ABCDEFGH"
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: priority
+
+adam_adam_admin_team:
+  sender: adam_admin
+  seat: sponsored
+  team: adam_admin_team
+  user: adam
+  accepted: true
+
+adam_confirmed_share_cteam:
+  sender: adam_admin
+  user: adam_confirmed
+  team: cteam
+  user_email: "adam+share_cteam@wired7.com"
+  accepted: true
+  updated_at: <%= 2.hour.ago.to_s(:db) %>
+  created_at: <%= 5.hour.ago.to_s(:db) %>
+  seat: share
+  profile: adam_admin
+
+adam_confirmed_share_2_cteam:
+  sender: adam_admin
+  user: adam_confirmed
+  team: cteam
+  user_email: "adam+share_2_cteam@wired7.com"
+  token: "ABCPROFILESHARE"
+  updated_at: <%= 2.hour.ago.to_s(:db) %>
+  created_at: <%= 5.hour.ago.to_s(:db) %>
+  seat: share
+  profile: adam
+

@@ -1,0 +1,17 @@
+owner:
+  name: "owner"
+
+member:
+  name: "member"
+
+free_agent:
+  name: "free agent"
+
+sponsored:
+  name: "sponsored"
+
+priority:
+  name: "priority"
+
+share:
+  name: "share"

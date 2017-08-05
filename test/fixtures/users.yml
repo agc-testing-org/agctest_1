@@ -1,0 +1,70 @@
+adam:
+  first_name: adam
+  email: adam+0@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: ABCD
+
+adam_confirmed:
+  email: adam+confirmed@wired7.com
+  first_name: adam_confirmed
+  confirmed: true 
+  password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
+  token: DEF
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  admin: false
+  github_username: adam_confirmed_github
+  refresh: "RFRSH"
+
+adam_protected:
+  email: adam+protected@wired7.com
+  first_name: adam_protected
+  protected: 1
+  password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
+  token: DDD
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+
+adam_admin:
+  first_name: adam_admin
+  email: adam+admin@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: ABCDE
+  admin: true
+  confirmed: true
+  password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
+
+masha_post_connection_request:
+  first_name: masha
+  email: masha@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: WDX
+
+masha_get_connection_request:
+  first_name: masha2
+  email: masha2@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: XYZ
+
+masha_notifications:
+  first_name: masha3
+  email: masha3@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: ZYX
+
+masha_notifications_skillsets:
+  first_name: masha4
+  email: masha4@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: XZY
+
+
+
+
+

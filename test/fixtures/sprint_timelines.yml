@@ -1,0 +1,67 @@
+sprint_1_transition:
+  user: adam_admin
+  project: demo 
+  sprint: sprint_1
+  sprint_state: sprint_1_state_2
+  next_sprint_state: sprint_1_state_2
+  state: requirements_design
+  notification: transition
+  created_at: <%= 3.day.ago.to_s(:db) %>
+
+sprint_1_state_1_comment:
+  user: adam_admin
+  project: demo
+  sprint: sprint_1
+  comment: adam_admin_1
+  sprint_state: sprint_1_state_1
+  next_sprint_state: sprint_1_state_2
+  contributor: adam_confirmed_1
+  state_id: 1
+  notification: comment
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1_state_1_vote:
+  user: adam_admin
+  project: demo
+  sprint: sprint_1
+  vote: adam_admin_1
+  sprint_state: sprint_1_state_1
+  next_sprint_state: sprint_1_state_2
+  contributor: adam_confirmed_1
+  state_id: 1 
+  notification: vote
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1_state_1_winner:
+  user: adam_confirmed
+  project: demo
+  sprint: sprint_1
+  contributor: adam_confirmed_1
+  sprint_state: sprint_1_state_1
+  next_sprint_state: sprint_1_state_2
+  notification: winner
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+
+sprint_1_state_1_comment_2:
+  user: adam_admin
+  project: demo
+  sprint: sprint_1
+  comment: adam_admin_1
+  sprint_state: sprint_1_state_1
+  next_sprint_state: sprint_1_state_2
+  contributor: adam_confirmed_1
+  state_id: 1
+  notification: comment
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1_state_2_winner:
+  user: adam
+  project: demo
+  sprint: sprint_1
+  contributor: adam_sprint_1_state_2
+  sprint_state: sprint_1_state_2
+  next_sprint_state: sprint_1_no_contributors
+  notification: winner
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
