@@ -59,24 +59,31 @@ class Issue
 
     def vote user_id, contributor_id, sprint_state_id, comment_id
         begin
-            vote = Vote.find_by({ # get or create vote by sprint state for specific user
-                user_id: user_id,
+            if comment_id != nil
+                check = {
+                user_id: user_id, 
+                sprint_state_id: sprint_state_id, 
+                contributor_id: contributor_id, 
+                comment_id: comment_id 
+             };
+            else 
+             check = { 
+                user_id: user_id, 
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
-                comment_id: comment_id
-            })
-
+                comment_id: nil
+                } 
+            end 
+            
+            vote = Vote.find_or_initialize_by(check) 
             new_record = false
 
-            if vote == nil # if vote is new or different (let the frontend know votes will change with new_record)
+            if vote == nil
                 previous_record = nil
-                vote = Vote.create({
-                    user_id: user_id,
-                    sprint_state_id: sprint_state_id,
-                    contributor_id: contributor_id,
-                    comment_id: comment_id
-            })
-            new_record = true
+                vote.update_attributes!
+                new_record = true
+            else
+                previous_record = vote.id
             end
 
             record = vote.as_json
@@ -89,6 +96,45 @@ class Issue
             return nil
         end
     end
+
+    def vote user_id, contributor_id, sprint_state_id, comment_id
+        begin
+            if comment_id != nil
+                check = {
+                user_id: user_id, 
+                sprint_state_id: sprint_state_id, 
+                contributor_id: contributor_id, 
+                comment_id: comment_id 
+             };
+            else 
+             check = { 
+                user_id: user_id, 
+                sprint_state_id: sprint_state_id,
+                contributor_id: contributor_id,
+                comment_id: nil
+                } 
+            end
+            vote = Vote.find_or_initialize_by(check) 
+
+            new_record = false
+            previous_record = vote.id
+
+            if previous_record == nil
+                vote.save
+                new_record = true
+            end
+
+            record = vote.as_json
+            record[:previous] = previous_record
+            record[:created] = new_record #created = false would mean no change to the frontend
+
+            return record
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     
     def log_event params 
         begin
