@@ -59,7 +59,7 @@ class Issue
 
     def vote user_id, contributor_id, sprint_state_id, comment_id
         begin
-            if comment_id != nil
+            if comment_id 
                 check = {
                 user_id: user_id, 
                 sprint_state_id: sprint_state_id, 
