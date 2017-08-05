@@ -73,46 +73,6 @@ class Issue
                 contributor_id: contributor_id,
                 comment_id: nil
                 } 
-            end 
-            
-            vote = Vote.find_or_initialize_by(check) 
-            new_record = false
-
-            if vote == nil
-                previous_record = nil
-                vote.update_attributes!
-                new_record = true
-            else
-                previous_record = vote.id
-            end
-
-            record = vote.as_json
-            record[:previous] = previous_record
-            record[:created] = new_record #created = false would mean no change to the frontend
-
-            return record
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def vote user_id, contributor_id, sprint_state_id, comment_id
-        begin
-            if comment_id != nil
-                check = {
-                user_id: user_id, 
-                sprint_state_id: sprint_state_id, 
-                contributor_id: contributor_id, 
-                comment_id: comment_id 
-             };
-            else 
-             check = { 
-                user_id: user_id, 
-                sprint_state_id: sprint_state_id,
-                contributor_id: contributor_id,
-                comment_id: nil
-                } 
             end
             vote = Vote.find_or_initialize_by(check) 
 
