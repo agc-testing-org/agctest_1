@@ -71,7 +71,7 @@ class Issue
                 user_id: user_id, 
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
-                comment_id: nil
+                comment_id: comment_id
                 } 
             end
             vote = Vote.find_or_initialize_by(check) 

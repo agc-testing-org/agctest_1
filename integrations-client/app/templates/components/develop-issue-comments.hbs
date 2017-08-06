@@ -10,6 +10,11 @@
              by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
             {{/unless}}
         </small>
+        <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "vote" comment.contributor_id comment.sprint_state_id comment.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote  {{#if (eq contributor.votes.comment_id 90)}}
+        {{#if contributor.votes.length}}
+        ({{contributor.votes.length}})
+        {{/if}}
+        {{/if}}</button>
     </div>
 {{/each}}
 </div>
