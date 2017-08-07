@@ -127,6 +127,7 @@ class Issue
             jobs_result = []
             jobs.each_with_index do |j,i|
                 jobs_result[i] = j.as_json
+                jobs_result[i][:role] = j.role_id
                 jobs_result[i][:sprints] = j.sprints.select("sprints.*, IF(sprints.id = #{(j.sprint_id || "NULL")}, 1, 0) as selected").order("selected DESC, id DESC").as_json
                 jobs_result[i][:sprints].each_with_index do |s,c|
                     jobs_result[i][:sprints][c][:project] =  s["project_id"]

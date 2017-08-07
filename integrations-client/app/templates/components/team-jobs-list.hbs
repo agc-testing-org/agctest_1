@@ -4,7 +4,7 @@
 {{#each jobs as |job|}}
     <div class="list-group-item rounded"> 
         <h4 class="line">
-            {{stacked-icon value=job.role_id.fa_icon icon="fa-circle" size="1" class="d-inline"}}
+            {{stacked-icon value=job.role.fa_icon icon="fa-circle" size="1" class="d-inline"}}
             {{#link-to "develop.roadmap" (query-params id=job.id)}}{{job.title}}{{/link-to}} (<a class="text-lowercase" target="_blank" href={{job.link}}>{{job.link}}</a>)
         </h4>
         {{profile-overview-skillsets-roles items=job.roles type="role" namespace="" class="skillsets"}}

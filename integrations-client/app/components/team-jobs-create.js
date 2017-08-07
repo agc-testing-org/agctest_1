@@ -5,31 +5,42 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     routes: Ember.inject.service('route-injection'),
     sessionAccount: Ember.inject.service('session-account'),
-    errorMessage: null, 
+    errorMessage: null,
+    role_id: null,
     init() { 
         this._super(...arguments);   
     },
     actions: {
+        role(role){
+            this.set("role_id",role);
+        },
         create(team_id){
             var title = this.get("title");
             var link = this.get("link");
+            var role_id = this.get("role_id");
             var _this = this;
             if(title && title.length > 4){
                 if(link){
                     if(link.includes("http")){
-                        var job = this.get('store').createRecord('job', {
-                            team_id: team_id,
-                            title: title, 
-                            link: link,
-                        }).save().then(function(response){
-                            _this.set("errorMessage",null); 
-                            _this.set("title",null);
-                            _this.set("link",null);
-                            _this.sendAction("refresh");
-                        });
+                        if(role_id){
+                            var job = this.get('store').createRecord('job', {
+                                team_id: team_id,
+                                title: title,
+                                role_id: role_id,
+                                link: link,
+                            }).save().then(function(response){
+                                _this.set("errorMessage",null); 
+                                _this.set("title",null);
+                                _this.set("link",null);
+                                _this.sendAction("refresh");
+                            });
+                        }
+                        else{
+                            _this.set("errorMessage","Target user is required");
+                        }
                     }
                     else {
-                        _this.set("errorMessage","A full link (http or https is required)");
+                        _this.set("errorMessage","http or https is required");
                     }
                 }
                 else {
