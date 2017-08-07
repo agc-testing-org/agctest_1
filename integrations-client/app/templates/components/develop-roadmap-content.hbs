@@ -1,12 +1,16 @@
-{{#each jobs as |job|}}
-    {{#if params.id}}
-        <small class=" col-sm-12 text-center">{{#link-to "develop.roadmap" (query-params id='undefined')}}show all listings{{/link-to}}</small>
+{{#if params.id}}
+    <small class=" col-sm-12 text-center">{{#link-to "develop.roadmap" (query-params id='undefined')}}show all listings{{/link-to}}</small>
+    {{#each jobs as |job|}}
         <div class="col-sm-12 col-md-8 offset-md-2">
             {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
         </div>
-    {{else}}
-        <div class="col-sm-12 col-md-3">
-            {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
-        </div>
-    {{/if}}
-{{/each}}
+    {{/each}}
+{{else}}
+    <div class="card-columns">
+        {{#each jobs as |job|}}
+            <div class="card">    
+                {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
+            </div>
+        {{/each}}
+    </div>
+{{/if}}
