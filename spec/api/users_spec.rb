@@ -298,10 +298,10 @@ describe "/users" do
     shared_examples_for "user_role_update" do
         context "response" do
             it "should return id" do
-                expect(@res["id"]).to eq(@mysql["id"])
+                expect(@res["id"]).to eq(@mysql["role_id"])
             end
             it "should return role_id as role_id" do
-                expect(@res["role_id"]).to eq(@mysql["role_id"])
+                expect(@res["role_id"]).to eq(@mysql["id"])
             end
         end
         context "user_role" do

@@ -450,7 +450,7 @@ class Integrations < Sinatra::Base
     users_roles_get = lambda do
         account = Account.new
         status 200
-        return (account.get_account_roles decrypt(params[:user_id]), nil).to_json
+        return (account.get_roles decrypt(params[:user_id]), nil).to_json
     end
 
     users_roles_get_by_me = lambda do
@@ -464,7 +464,7 @@ class Integrations < Sinatra::Base
         account = Account.new
         query = {:id => params[:role_id]}
         status 200
-        return (account.get_account_roles @session_hash["id"], query)[0].to_json
+        return (account.get_roles @session_hash["id"], query)[0].to_json
     end
 
     users_roles_patch_by_id = lambda do
@@ -539,9 +539,9 @@ class Integrations < Sinatra::Base
 
     users_skillsets_get = lambda do
         check_required_field params[:user_id], "user_id"
-        issue = Issue.new
+        account = Account.new
         status 200
-        return (issue.get_user_skillsets decrypt(params[:user_id]), nil).to_json
+        return (account.get_skillsets decrypt(params[:user_id]), nil).to_json
     end
 
     users_skillsets_get_by_me = lambda do
@@ -552,10 +552,10 @@ class Integrations < Sinatra::Base
     users_skillsets_get_by_skillset = lambda do
         protected!
         check_required_field params[:skillset_id], "skillset_id"
-        issue = Issue.new
+        account = Account.new
         query = {:id => params[:skillset_id]}
         status 200
-        return (issue.get_user_skillsets @session_hash["id"], query)[0].to_json
+        return (account.get_skillsets @session_hash["id"], query)[0].to_json
     end
 
     users_skillsets_patch = lambda do
@@ -563,8 +563,8 @@ class Integrations < Sinatra::Base
         check_required_field params[:skillset_id], "skillset_id"
         fields = get_json
         check_required_field !fields[:active].nil?, "active"  
-        issue = Issue.new
-        response = (issue.update_user_skillsets @session_hash["id"], params[:skillset_id], fields[:active])
+        account = Account.new
+        response = (account.update_skillset @session_hash["id"], params[:skillset_id], fields[:active])
         response || (return_error "unable to update skillset")
         status 200
         return response.to_json

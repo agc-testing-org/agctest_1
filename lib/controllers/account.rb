@@ -350,16 +350,16 @@ class Account
 
     def update_role user_id, role_id, active
         begin
-            role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
-            role.update_attributes!(:active => active)
-            return role
+            user_role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
+            user_role.update_attributes!(:active => active)
+            return user_role.role
         rescue => e
             puts e
             return nil 
         end
     end
 
-    def get_account_roles user_id, query
+    def get_roles user_id, query
         begin            
             return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active","roles.fa_icon").order(:name).as_json
         rescue => e
@@ -367,6 +367,27 @@ class Account
             return nil
         end
     end
+
+    def get_skillsets user_id, query
+        begin
+            return Skillset.joins("LEFT JOIN user_skillsets ON user_skillsets.skillset_id = skillsets.id AND user_skillsets.user_id = #{user_id.to_i} OR user_skillsets.user_id is null").where(query).select("skillsets.id","skillsets.name","user_skillsets.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_skillset user_id, skillset_id, active
+        begin
+            ss = UserSkillset.find_or_initialize_by(:user_id => user_id, :skillset_id => skillset_id)
+            ss.update_attributes!(:active => active)
+            return ss.skillset
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
 
     def get_teams user_id, params
         params = assign_param_to_model params, "seat_id", "user_teams"
