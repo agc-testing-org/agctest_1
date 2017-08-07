@@ -14,7 +14,7 @@ describe ".Activity" do
         it "should return user_id" do
             expect(@notification_results.count).to be > 0
             @notification_results.each_with_index do |result,i|
-                expect(decrypt(@res[i].user_id).to_i).to eq result["user_id"]
+                expect(@res[i][:user_id]).to eq result["user_id"]
             end
         end
     end
@@ -85,6 +85,16 @@ describe ".Activity" do
             @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
             @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where (user_roles.user_id != #{decrypt(sprint_timelines(:sprint_1_transition).user_id).to_i}) AND user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
             @res = @activity.user_notifications_by_roles @sprint_timeline_id
+        end
+        it_behaves_like "user_notifications"
+    end
+
+    context "#user_notifications_for_job" do
+        fixtures :users, :jobs, :sprint_timelines, :user_roles
+        before(:each) do
+            @sprint_timeline_id = sprint_timelines(:job_developer).id
+            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, user_roles.user_id as user_id from jobs INNER JOIN sprint_timelines ON sprint_timelines.job_id = jobs.id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1 where (user_roles.user_id != #{decrypt(sprint_timelines(:job_developer).user_id).to_i})")
+            @res = @activity.user_notifications_for_job @sprint_timeline_id
         end
         it_behaves_like "user_notifications"
     end
@@ -180,7 +190,7 @@ describe ".Activity" do
             expect(@res.sort).to eq(ids.sort)
         end
     end
-    
+
     context "#rebuild_users" do
         before(:each) do
             @user_ids = [1,3,9]

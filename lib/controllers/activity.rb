@@ -5,7 +5,7 @@ class Activity
     end
 
     #TODO - who should get the new notification_id type?
-    
+
     def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
@@ -25,6 +25,16 @@ class Activity
             return []
         end
     end 
+
+    def user_notifications_for_job sprint_timeline_id
+        # all users that subscribe to a role that corresponsds to a job role
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "job"}).id).joins("INNER JOIN jobs ON jobs.id = sprint_timelines.job_id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end
 
     def user_notifications_for_contributor sprint_timeline_id
         # vote or comment for user that owns contribution
@@ -126,6 +136,7 @@ class Activity
     def process_notification id
 
         user_ids = []
+        user_ids = (get_decrypted_user_ids (user_notifications_for_job id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_contributor id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_owner id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_contributors_with_winner id), user_ids)

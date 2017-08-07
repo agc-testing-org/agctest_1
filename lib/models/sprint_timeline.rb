@@ -16,4 +16,5 @@ class SprintTimeline < ActiveRecord::Base
     belongs_to :vote
     belongs_to :contributor
     belongs_to :notification
+    belongs_to :job
 end
