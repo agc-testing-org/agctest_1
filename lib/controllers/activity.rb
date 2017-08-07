@@ -4,8 +4,6 @@ class Activity
 
     end
 
-    #TODO - who should get the new notification_id type?
-
     def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
@@ -27,9 +25,29 @@ class Activity
     end 
 
     def user_notifications_for_job sprint_timeline_id
-        # all users that subscribe to a role that corresponsds to a job role
+        # all users that subscribe to a role that corresponds to a job role and creator
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "job"}).id).joins("INNER JOIN jobs ON jobs.id = sprint_timelines.job_id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "job"}).id).joins("INNER JOIN jobs ON jobs.id = sprint_timelines.job_id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1").select("user_roles.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end
+
+    def user_notifications_for_job_owner sprint_timeline_id
+        # job owner
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER JOIN jobs ON jobs.id = sprint_timelines.job_id").select("jobs.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end   
+
+    def user_notifications_for_job_contributors sprint_timeline_id
+        #people that propose ideas (sprints) for a job and creator
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "new"}).id).joins("INNER JOIN sprints ON sprints.job_id = sprint_timelines.job_id").select("sprints.user_id")
         rescue => e
             puts e
             return []

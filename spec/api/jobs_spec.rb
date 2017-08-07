@@ -164,7 +164,7 @@ describe "/jobs" do
     end
 
     describe "PATCH /:id" do
-        fixtures :teams, :sprints, :jobs
+        fixtures :teams, :sprints, :jobs, :notifications, :states
         before(:each) do
             @title = "JOB TITLE"        
             @sprint_id = sprints(:sprint_2).id
@@ -179,8 +179,17 @@ describe "/jobs" do
             it_behaves_like "unauthorized"                  
         end                                                         
         context "on team" do            
-            fixtures :user_teams, :notifications        
-            before(:each) do                                        
+            fixtures :user_teams, :sprint_states, :notifications        
+            before(:each) do
+                body = {
+                    :name=>"1",
+                    :commit=>{
+                        :sha=>sprint_states(:sprint_1_state_1).sha
+                    }
+                }
+
+                @body = JSON.parse(body.to_json, object_class: OpenStruct)
+                Octokit::Client.any_instance.stub(:branch => @body)
                 @team_id = user_teams(:adam_confirmed).team_id        
                 patch "jobs/#{@job}", {:team_id => @team_id, :sprint_id => @sprint_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @jobs = [JSON.parse(last_response.body)]
@@ -188,6 +197,9 @@ describe "/jobs" do
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"
+            it "should set sprint_state to requirements design" do
+                expect(@mysql_client.query("select * from sprint_timelines").first["state_id"]).to eq(states(:requirements_design).id)
+            end
         end
         context "on a team but not correct team" do
             fixtures :user_teams, :notifications

@@ -741,6 +741,13 @@ class Integrations < Sinatra::Base
         (jobs && jobs.first) || return_not_found
         saved = jobs.first.update_attributes!(:sprint_id => fields[:sprint_id])
         saved || (return_error "unable to select idea")
+
+        fields[:state] = State.find_by({:name => "requirements design"}).id
+        fields[:sprint] = fields[:sprint_id]
+    
+        sprint_state = sprint_states_post_helper fields
+
+        status 200
         return jobs.first.to_json
     end
 
@@ -824,18 +831,12 @@ class Integrations < Sinatra::Base
         return sprint.to_json
     end
 
-    sprint_states_post = lambda do
-        protected!
-        @session_hash["admin"] || return_unauthorized_admin
-        fields = get_json
-        check_required_field fields[:state], "state"
-        check_required_field fields[:sprint], "sprint"
-
+    def sprint_states_post_helper fields
         issue = Issue.new
         sprint = (issue.get_sprint fields[:sprint])
         sprint || return_not_found
         repo = Repo.new
-        github = (repo.github_client github_authorization)
+        github = (repo.github_client ENV["INTEGRATIONS_GITHUB_ADMIN_SECRET"])
         sprint || (return_error "unable to connect to github")
         sha = github.branch("#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{sprint.project.name}_#{sprint.project.id}","master").commit.sha
         sha || (return_error "unable to retrieve sha")
@@ -843,6 +844,18 @@ class Integrations < Sinatra::Base
         sprint_state || (return_error "unable to create sprint state")
         log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "transition"}).id}
         (issue.log_event log_params) ||  (return_error "unable to create sprint state")
+        return sprint_state
+    end
+
+    sprint_states_post = lambda do
+        protected!
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:state], "state"
+        check_required_field fields[:sprint], "sprint"
+        
+        sprint_state = sprint_states_post_helper fields
+        
         status 201
         return sprint_state.to_json
     end
