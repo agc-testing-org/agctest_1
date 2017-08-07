@@ -6,9 +6,9 @@
         </div>
     {{/each}}
 {{else}}
-    <div class="card-columns">
+    <div id="masonry" class="grid col-md-12" data-masonry='{ "itemSelector": ".grid-item", "percentPosition": true }'>
         {{#each jobs as |job|}}
-            <div class="card">    
+            <div class="grid-item">    
                 {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
             </div>
         {{/each}}

@@ -182,16 +182,11 @@ label{
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.card-columns{
-    max-width:100%;
+.grid-item { 
+    padding:10px;
+    width: 300px; 
 }
-.card-columns .card{
-    background-color:transparent;
-    border:0px;
-    min-width: 300px;
-    padding-left: 10px;
-    padding-right: 10px;
-}
+
 .card{
     border: 1px solid #ededed;
 }

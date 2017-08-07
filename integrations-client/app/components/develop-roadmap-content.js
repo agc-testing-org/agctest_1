@@ -7,6 +7,10 @@ export default Ember.Component.extend({
     init() { 
         this._super(...arguments);   
     },
+    didRender() {
+        this._super(...arguments);
+        this.$('#masonry').masonry({});
+    },
     actions: {
         refresh(){
             this.sendAction("refresh");
