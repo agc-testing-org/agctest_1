@@ -11,5 +11,5 @@ class Job < ActiveRecord::Base
     has_many :sprints
     belongs_to :user
     belongs_to :team
-
+    belongs_to :role
 end

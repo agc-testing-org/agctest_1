@@ -350,7 +350,9 @@ class Account
 
     def update_role user_id, role_id, active
         begin
-            return UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
+            role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
+            role.update_attributes!(:active => active)
+            return role
         rescue => e
             puts e
             return nil 

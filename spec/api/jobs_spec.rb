@@ -3,7 +3,7 @@ require 'api_helper'
 
 describe "/jobs" do
 
-    fixtures :users, :projects, :seats
+    fixtures :users, :projects, :seats, :roles
     before(:all) do
         @CREATE_TOKENS=true
     end 
@@ -35,6 +35,18 @@ describe "/jobs" do
                 expect(@jobs[i]["team_id"]).to eq(job_result["team_id"])
             end
         end
+        it "should return role_id" do
+            @job_results.each_with_index do |job_result,i|
+                expect(@jobs[i]["role_id"]).to eq(job_result["role_id"])
+            end
+        end
+        it "should return role (as id)" do
+            if @include_role
+                @job_results.each_with_index do |job_result,i|
+                    expect(@jobs[i]["role"]).to eq(job_result["role_id"])
+                end
+            end
+        end
         it "should return sprint_id" do
             @job_results.each_with_index do |job_result,i|
                 expect(@jobs[i]["sprint_id"]).to eq(job_result["sprint_id"])
@@ -59,10 +71,11 @@ describe "/jobs" do
             @title = "JOB TITLE"
             @link = "https://wired7.com/12345"
             @team_id = teams(:ateam).id
+            @role_id = roles(:development).id
         end
         context "not on team" do
             before(:each) do
-                post "jobs", {:title => @title, :team_id => @team_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                post "jobs", {:title => @title, :role_id => @role_id, :team_id => @team_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
             it_behaves_like "unauthorized"
         end
@@ -73,7 +86,7 @@ describe "/jobs" do
             end
             context "valid" do
                 before(:each) do
-                    post "jobs", {:title => @title, :team_id => @team_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @job_results = @mysql_client.query("select * from jobs")
                     @jobs = [JSON.parse(last_response.body)]
                     @timeline = @mysql_client.query("select * from sprint_timelines").first
@@ -92,19 +105,19 @@ describe "/jobs" do
             context "invalid" do
                 context "title too short" do
                     before(:each) do
-                        post "jobs", {:title => "a"*4, :team_id => @team_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        post "jobs", {:title => "a"*4, :team_id => @team_id, :role_id => @role_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     end
                     it_behaves_like "error", "title must be 5-100 characters"
                 end
                 context "title too long" do
                     before(:each) do
-                        post "jobs", {:title => "a"*101, :team_id => @team_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        post "jobs", {:title => "a"*101, :team_id => @team_id, :role_id => @role_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     end
                     it_behaves_like "error", "title must be 5-100 characters"
                 end
                 context "invalid link" do
                     before(:each) do
-                        post "jobs", {:title => @title, :team_id => @team_id, :link => "www.wired7.com/12345" }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
+                        post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :link => "www.wired7.com/12345" }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                     end
                     it_behaves_like "error", "a full link (http or https is required)"
                 end
@@ -114,11 +127,14 @@ describe "/jobs" do
 
     describe "GET /" do
         fixtures :jobs, :teams, :sprints
+        before(:each) do
+            @include_role = true
+        end
         context "no filter" do
             before(:each) do
                 get "/jobs"
                 @jobs = JSON.parse(last_response.body)
-                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id ORDER BY id DESC")
+                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id ORDER BY id DESC")
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"
@@ -127,7 +143,7 @@ describe "/jobs" do
             before(:each) do
                 get "/jobs?id=#{jobs(:developer).id}"
                 @jobs = JSON.parse(last_response.body)
-                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{jobs(:developer).id} ORDER BY id DESC")
+                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{jobs(:developer).id} ORDER BY id DESC")
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"
@@ -139,8 +155,9 @@ describe "/jobs" do
         before(:each) do
             job = jobs(:developer)
             get "/jobs/#{job.id}"
+            @include_role = true
             @jobs = [JSON.parse(last_response.body)]
-            @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{job.id} ORDER BY id DESC")
+            @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{job.id} ORDER BY id DESC")
         end
         it_behaves_like "jobs"
         it_behaves_like "ok"

@@ -63,7 +63,6 @@ require_relative '../models/role_state.rb'
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification_setting.rb'
 require_relative '../models/job.rb'
-require_relative '../models/job_role.rb'
 
 # Workers
 require_relative '../workers/user_notification_worker.rb'
