@@ -16,16 +16,21 @@ export default Ember.Component.extend({
             var _this = this;
             if(title && title.length > 4){
                 if(link){
-                    var job = this.get('store').createRecord('job', {
-                        team_id: team_id,
-                        title: title, 
-                        link: link,
-                    }).save().then(function(response){
-                        _this.set("errorMessage",null); 
-                        _this.set("title",null);
-                        _this.set("link",null);
-                        _this.sendAction("refresh");
-                    });
+                    if(link.includes("http")){
+                        var job = this.get('store').createRecord('job', {
+                            team_id: team_id,
+                            title: title, 
+                            link: link,
+                        }).save().then(function(response){
+                            _this.set("errorMessage",null); 
+                            _this.set("title",null);
+                            _this.set("link",null);
+                            _this.sendAction("refresh");
+                        });
+                    }
+                    else {
+                        _this.set("errorMessage","A full link (http or https is required)");
+                    }
                 }
                 else {
                     _this.set("errorMessage","A link to the position is required");

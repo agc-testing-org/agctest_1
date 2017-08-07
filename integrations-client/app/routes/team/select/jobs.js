@@ -11,6 +11,7 @@ export default Ember.Route.extend({
     model: function(params) {
         return Ember.RSVP.hash({
             team: this.modelFor("team.select").team,
+            roles: this.store.findAll('role'),
             jobs: this.store.query('job',{
                 team_id: this.paramsFor("team.select").id
             },{reload: true}),

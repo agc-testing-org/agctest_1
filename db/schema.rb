@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170802191523) do
+ActiveRecord::Schema.define(version: 20170807001022) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(version: 20170802191523) do
     t.boolean "open", default: true
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "role_id", null: false
     t.index ["open"], name: "index_jobs_on_open"
     t.index ["sprint_id"], name: "fk_rails_babd5df9aa"
     t.index ["team_id"], name: "index_jobs_on_team_id"

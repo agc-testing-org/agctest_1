@@ -432,17 +432,6 @@ class Account
         end
     end
 
-    def update_user_role user_id, role_id, active
-        begin
-            user_role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
-            user_role.update_attributes!(:active => active)
-            return {:id => user_role.role_id}
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def get_seat_permissions user_id
         begin 
             res = UserTeam.where(:user_id => user_id, :accepted => true).order(:seat_id => "ASC").first

@@ -63,6 +63,7 @@ require_relative '../models/role_state.rb'
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification_setting.rb'
 require_relative '../models/job.rb'
+require_relative '../models/job_role.rb'
 
 # Workers
 require_relative '../workers/user_notification_worker.rb'
@@ -473,7 +474,7 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field !fields[:active].nil?, "active"
         account = Account.new
-        response = (account.update_user_role @session_hash["id"], params[:role_id], fields[:active])
+        response = (account.update_role @session_hash["id"], params[:role_id], fields[:active])
         response || (return_error "unable not update role")
         status 200
         return response.to_json
@@ -748,6 +749,7 @@ class Integrations < Sinatra::Base
         protected!
         fields = get_json
         check_required_field fields[:team_id], "team_id"
+        check_required_field fields[:role_id], "role_id"
         check_required_field fields[:link], "link"
         check_required_field fields[:title], "title"
 
@@ -758,8 +760,10 @@ class Integrations < Sinatra::Base
         title_length = fields[:title].to_s.length
         (title_length < 101 && title_length > 4) || (return_error "title must be 5-100 characters")
 
+        (fields[:link].to_s.include? "http") || (return_error "a full link (http or https is required)")
+
         issue = Issue.new
-        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:title], fields[:link]
+        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link]
         job || (return_error "unable to create job listing")
 
         log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}

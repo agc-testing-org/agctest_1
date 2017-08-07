@@ -6,6 +6,7 @@ export default DS.Model.extend({
     title: attr('string'),
     link: attr('string'),
     team_id: attr('number'),
+    role_id: DS.belongsTo('role'),
     sprint_id: attr('number'),
     team_name: attr('string'),
     user_first_name: attr('string'),
