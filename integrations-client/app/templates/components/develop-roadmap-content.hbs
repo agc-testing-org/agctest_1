@@ -6,10 +6,11 @@
         </div>
     {{/each}}
 {{else}}
-    <div id="masonry" class="grid col-md-12" data-masonry='{ "itemSelector": ".grid-item", "percentPosition": true }'>
+    <div id="masonry" class="grid col-md-12 col-sm-12 col-12" data-masonry='{ "itemSelector": ".grid-item", "percentPosition": true, columnWidth: ".grid-sizer" }'>
+         <div class="grid-sizer col-md-4 col-sm-6 col-12"></div>
         {{#each jobs as |job|}}
-            <div class="grid-item">    
-                {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
+            <div class="grid-item col-md-4 col-sm-6 col-12"> 
+                {{roadmap-job job=job projects=projects teams=teams refresh="refresh" class="grid-item-content"}}
             </div>
         {{/each}}
     </div>
