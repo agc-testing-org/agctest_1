@@ -5,6 +5,8 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     errorMessage: null,
+    votes_count: Ember.computed.filterBy('contributor.votes','comment_id', null),
+
     actions: {
         comment(contributor_id,sprint_state_id){
             this.set("errorMessage", "");

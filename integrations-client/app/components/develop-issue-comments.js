@@ -8,6 +8,7 @@ export default Ember.Component.extend({
     showingAll: false,
     sortedComments: Ember.computed.sort('comments', 'sortDefinition'),
     sortDefinition: ['created_at:desc'],
+
     actions: {
         showAll(yesNo){
             var number = 3;
@@ -19,9 +20,6 @@ export default Ember.Component.extend({
         },
 
         vote(contributor_id,sprint_state_id,comment_id){
-            console.log(contributor_id)
-            console.log(comment_id)
-            console.log(sprint_state_id)
             this.set("errorMessage", "");
             var _this = this;
             var store = this.get('store');
