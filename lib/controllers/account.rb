@@ -339,15 +339,6 @@ class Account
         end 
     end 
 
-    def get_roles
-        begin 
-            return Role.all.order(:name)
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def update_role user_id, role_id, active
         begin
             user_role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)

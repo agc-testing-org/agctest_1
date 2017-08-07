@@ -300,9 +300,6 @@ describe "/users" do
             it "should return id" do
                 expect(@res["id"]).to eq(@mysql["role_id"])
             end
-            it "should return role_id as role_id" do
-                expect(@res["role_id"]).to eq(@mysql["id"])
-            end
         end
         context "user_role" do
             it "should include most recent active" do
@@ -592,7 +589,7 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /me/notifications/:id", :focus => true do
+    describe "PATCH /me/notifications/:id" do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do
             before(:each) do                

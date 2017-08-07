@@ -482,7 +482,7 @@ class Integrations < Sinatra::Base
     roles_get = lambda do
         account = Account.new
         status 200
-        return account.get_roles.to_json
+        return Role.all.order(:name).to_json rescue (return_error "unable to find roles")
     end
 
     states_get = lambda do
