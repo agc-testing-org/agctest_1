@@ -1,40 +1,42 @@
 <div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state_id.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) }}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
-        <div class="overview text-center">
+
+
+    <div class="overview row text-left">
+        <div class="col-md-6 col-sm-12">
             <h2 class="name text-capitalize">{{sprint.title}}</h2>
             <div class="description">{{sprint.description}}</div>
             <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
-            {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets"}}
-            <div class="row mb-3">
-                {{#unless (or (eq showing-state.state_id.name "idea") (eq showing-state.state_id.name "closed"))}}
-                {{#if contributors}}
-                <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
-                    {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+		    {{#if mergedStates}}
+                <a class="btn btn-secondary rounded col-sm-12 col-md-8 mt-2 offset-md-2" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
+            {{/if}}
+            {{develop-issue-transition refresh="refresh" sprint=sprint states=states}}
+            {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets mt-2"}}
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <div class="vertical-align-hold">
+                <div class="vertical-align-cell">
+                <div class="row">
+                    {{#unless (or (eq showing-state.state_id.name "idea") (eq showing-state.state_id.name "closed"))}}
+                    {{#if contributors}}
+                    <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4 text-center">
+                        {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                    </div>
+                    {{else}}
+                    <div class="col-md-4 col-sm-4 col-4">
+                        {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-4">
+                        {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "comments") title="comments"}}
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-4">
+                        {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
+                    </div>
+                    {{/if}}
+                    {{/unless}}
                 </div>
-                {{else}}
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
                 </div>
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "comments") title="comments"}}
-                </div>
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
-                </div>
-                {{/if}}
-
-                {{/unless}}
-            </div>
-            <div class="row ml-3 mr-3 mb-3 mt-0">
-
-                {{#if mergedStates}}
-                    <a class="btn btn-secondary rounded col-sm-12 col-md-8 mt-2 offset-md-2" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
-                {{/if}}
-
-                {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="mt-2 col-sm-12 col-md-8 offset-md-2 pl-0 pr-0"}}
-
             </div>
         </div>
     </div>
-</div>
+
+

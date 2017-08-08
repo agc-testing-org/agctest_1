@@ -177,6 +177,9 @@ label{
 .dropdown-menu{
     width:100%;
 }
+.dropdown-item{
+    padding:4px;
+}
 .dropdown-item .title, .dropdown-item .description{
     white-space: nowrap;
     overflow: hidden;
@@ -212,9 +215,8 @@ label{
 .highlight-false{
     border-bottom: 2px solid #28B6C3 !important;
 }
-.explain{
-    background-color: #4C4C4C;
-    color: #fff;
+.explain,.top{
+    background-color: #ededed;
     padding:20px;
     margin-bottom:20px;
 }
@@ -615,8 +617,6 @@ button{
     padding-right: 0px;
     padding-top: 0px;
     font-weight:300;
-    min-width:100px;
-    max-width:100px;
 }
 .sidebar.hidden-md-up{
     background-color: #333;
@@ -753,8 +753,8 @@ button{
     position:absolute;
     padding:5px;
     font-weight:300;
-    padding-top:10px;
-    padding-bottom:2px;
+    left: 4px;
+    top: 0px;
     color: #ccc;
     z-index:1;
 }
