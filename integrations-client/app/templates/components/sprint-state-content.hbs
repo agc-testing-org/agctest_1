@@ -1,6 +1,5 @@
+<div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
 {{#if (or (eq selected-state.state_id.name "idea") (eq selected-state.state_id.name "closed"))}}
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
         <div class="overview">
             <div class="text-center">
                 {{#if (eq selected-state.state_id.name "closed")}}
@@ -10,13 +9,9 @@
                 {{/if}}
             </div>
         </div>
-    </div>
-</div>
 {{else}}
 
 {{#if selected-state.state_id.contributors}}
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
         <div class="overview">
             {{#if (or (eq selected-state.id last-state.id) (and (and selected-state.active_contribution_id (eq last-state.pull_request null)) (eq selected-state.id second-to-last-state.id) ))}}
                 {{#if (eq last-state.state_id.name "closed")}}
@@ -65,8 +60,6 @@
                 </div>
             {{/if}}
         </div>
-    </div>
-</div>
 {{else}}
 {{#if last-contributor-state.contributors.length}}
 <div class="full">
@@ -111,16 +104,17 @@
         </div>
 </div>
 {{else}}
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
+
+
         <div class="overview">
             <div class="text-center">
                 <h3>No proposals submitted</h3>
             </div>
         </div>
-    </div>
-</div>
+
+
 {{/if}}
 {{/if}}
 
 {{/if}}
+</div>

@@ -82,6 +82,10 @@ a:hover,a:hover:not([href]):not([tabindex]) {
 li {
     list-style-position:inside;
 }
+.tooltip{
+    color: #fff;
+    z-index: 1000;
+}
 .cursor-pointer{
     cursor:pointer;
 }
@@ -201,11 +205,12 @@ label{
     color: #989898;
 }
 .logo{
-    background-image: url(w7_logo_white.png);
+    background-image: url(w7_logo_black_small.png);
+    background-repeat:no-repeat;
     width: 50px !important;
     height: 58px;
     background-color: transparent !important;
-    margin-left: 25px !important;
+    margin-left: 14px !important;
     margin-top: 10px !important;
     margin-bottom:5px !important;
 }
@@ -603,6 +608,21 @@ button{
  * Sidebar
  */
 
+.sidebar.float{
+    left:20px;
+    top:20px;
+    width:60px;
+    background-color: transparent;
+}
+.sidebar.float li{
+    margin-bottom:10px !important;
+    -webkit-border-radius: 6px !important;
+    -moz-border-radius: 6px !important;
+    border-radius: 6px !important;
+}
+.sidebar.float li.nav-item .icon{
+    margin-bottom:0px;
+}
 .sidebar {
     position: fixed;
     top: 0px;
@@ -783,7 +803,6 @@ button{
 }
 .main .overview{
     padding:20px;
-    padding-top:50px;
 }
 .main .hidden-md-up .overview{
     margin-top:20px;
