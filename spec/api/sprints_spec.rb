@@ -67,7 +67,10 @@ describe "/sprints" do
         end                                                                                     
         it "should include sprint_state_id" do                          
             expect(@timeline["sprint_state_id"]).to eq(1)                                       
-        end   
+        end 
+        it "should include job_id if exists" do
+            expect(@timeline["job_id"]).to eq(@sprints[0]["job_id"])
+        end
     end
 
     shared_examples_for "sprint_skillsets" do 

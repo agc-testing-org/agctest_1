@@ -823,7 +823,7 @@ class Integrations < Sinatra::Base
         state = State.find_by(:name => "idea").id
         sprint_state = issue.create_sprint_state sprint.id, state, nil
         sprint_state || (return_error "unable to create sprint")
-        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "new"}).id}
+        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :job_id => fields[:job_id], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "new"}).id}
         (issue.log_event log_params) || (return_error "unable to create sprint")
         status 201
         sprint_json = sprint.as_json
