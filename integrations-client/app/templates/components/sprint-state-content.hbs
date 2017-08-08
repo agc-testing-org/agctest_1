@@ -38,6 +38,15 @@
                                     {{#each selected-state.contributors as |contributor|}}
                                         {{#if (eq contributor.id selected-state.active_contribution_id)}}
                                             {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint}}
+                                            <div class="text-left mt-3">
+                                                <h3 class="description section text-capitalize underline mb-2 mt-1">
+                                                    Explanation
+                                                </h3>
+                                                <div class="text-left">
+                                                    {{develop-issue-comments comments=contributor.comments}}
+                                                    {{develop-issue-comment text="Explain your work" contributor=contributor sprint_state=selected-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                                                </div>
+                                            </div>
                                         {{/if}}
                                     {{/each}}
                                 {{else}}
@@ -92,7 +101,7 @@
 
             {{develop-issue-comments comments=contributor.comments}}
             {{#if session.isAuthenticated}}
-                {{develop-issue-comment contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                {{develop-issue-comment text="Your feedback" show_vote=true contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
             {{else}}
                 <div class="about text-center section mb-1">
                     {{#link-to "login"}}Sign in {{/link-to}} to join the conversation 
