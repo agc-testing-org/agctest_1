@@ -634,7 +634,6 @@ button{
     left:20px;
     top:20px;
     min-width:unset;
-    width:60px;
     background-color: transparent;
 }
 .sidebar.float li{
@@ -642,6 +641,7 @@ button{
     -webkit-border-radius: 6px !important;
     -moz-border-radius: 6px !important;
     border-radius: 6px !important;
+    width:60px !important;
 }
 .sidebar.float li.nav-item .icon{
     margin-bottom:0px;
