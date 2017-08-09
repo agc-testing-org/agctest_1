@@ -207,13 +207,18 @@ label{
 .text-muted{
     color: #989898;
 }
-.logo{
+.sidebar.float .logo{
     background-image: url(w7_logo_black_small.png);
+    left:0px; 
+}
+.logo{
+    background-image: url(w7_logo_white.png);
     background-repeat:no-repeat;
     width: 50px !important;
     height: 58px;
     background-color: transparent !important;
     margin-left: 14px !important;
+    left:20px;
     margin-top: 10px !important;
     margin-bottom:5px !important;
 }

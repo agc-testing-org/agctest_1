@@ -1,7 +1,7 @@
 <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
 {{#if (or (eq selected-state.state_id.name "idea") (eq selected-state.state_id.name "closed"))}}
         <div class="overview">
-            <div class="text-center">
+            <div class="text-left">
                 {{#if (eq selected-state.state_id.name "closed")}}
                     <h3>All done here!</h3>
                 {{else}}
@@ -15,11 +15,11 @@
         <div class="overview">
             {{#if (or (eq selected-state.id last-state.id) (and (and selected-state.active_contribution_id (eq last-state.pull_request null)) (eq selected-state.id second-to-last-state.id) ))}}
                 {{#if (eq last-state.state_id.name "closed")}}
-                    <div class="text-center">
+                    <div class="text-left">
                         <h3>This sprint has been completed</h3>
                     </div>
                 {{else}}
-                    <div class="text-center">
+                    <div class="text-left">
                         {{#if session.isAuthenticated}}
                             {{#unless selected-state.active_contribution_id}}
                                 <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
@@ -32,7 +32,8 @@
                                 {{#if selected-state.active_contribution_id}}
                                     {{#each selected-state.contributors as |contributor|}}
                                         {{#if (eq contributor.id selected-state.active_contribution_id)}}
-                                            {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint}}
+                                            {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint class="hidden-md-up text-left"}}
+                                            {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint class="hidden-sm-down text-center"}}
                                             <div class="text-left mt-3">
                                                 <h3 class="description section text-capitalize underline mb-2 mt-1">
                                                     Explain Your Work
@@ -56,14 +57,14 @@
                 {{/if}}
             
             {{else}}
-                <div class="text-center">
+                <div class="text-left">
                     <h3>This sprint state is no longer open</h3>
                 </div>
             {{/if}}
         </div>
 {{else}}
 {{#if last-contributor-state.contributors.length}}
-<div class="full">
+<div class="full text-left">
 
     <h4 class="about section mb-3">
         Proposed Contributions
@@ -97,7 +98,7 @@
             {{#if session.isAuthenticated}}
                 {{develop-issue-comment text="Your feedback" show_vote=true contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
             {{else}}
-                <div class="about text-center section mb-1">
+                <div class="about text-left section mb-1">
                     {{#link-to "login"}}Sign in {{/link-to}} to join the conversation 
                 </div>
             {{/if}}
@@ -108,7 +109,7 @@
 
 
         <div class="overview">
-            <div class="text-center">
+            <div class="text-left">
                 <h3>No proposals submitted</h3>
             </div>
         </div>
