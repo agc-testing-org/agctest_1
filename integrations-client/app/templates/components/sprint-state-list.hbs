@@ -7,7 +7,9 @@
             Profile
         </div>
         <div class="icon hidden-sm-down">
+            {{#if has_tooltips}}
             {{tooltip-on-component text="My Profile" class="tooltip rounded" side="right" enableLazyRendering=true}}
+            {{/if}}
             <i class="fa fa-fw fa-2x fa-user"></i>
         </div>
         {{/link-to}}
@@ -17,7 +19,9 @@
                 Sign In
             </div>
             <div class="icon hidden-sm-down">
+                {{#if has_tooltips}}
                 {{tooltip-on-component text="Sign In" class="tooltip rounded" side="right" enableLazyRendering=true}}
+                {{/if}}
                 <i class="fa fa-fw fa-2x fa-sign-in"></i>
             </div>
         {{/link-to}}
@@ -29,7 +33,9 @@
         {{sprint_state.state_id.name}}
     </div>
     <div class="icon hidden-sm-down">
+        {{#if has_tooltips}}
         {{tooltip-on-component text=sprint_state.state_id.name class="tooltip rounded" side="right" enableLazyRendering=true}}
+        {{/if}}
         <i class="fa fa-fw fa-2x {{sprint_state.state_id.fa_icon}}"></i>
     </div>
     {{/link-to}}

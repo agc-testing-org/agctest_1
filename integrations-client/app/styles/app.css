@@ -89,6 +89,9 @@ li {
     color: #fff;
     z-index: 1000;
 }
+.hidden-sm-up .tooltip{
+    visibility:hidden;
+}
 .cursor-pointer{
     cursor:pointer;
 }
@@ -209,7 +212,8 @@ label{
 }
 .sidebar.float .logo{
     background-image: url(w7_logo_black_small.png);
-    left:0px; 
+    left:0px;
+    top:10px;
 }
 .logo{
     background-image: url(w7_logo_white.png);
@@ -218,7 +222,8 @@ label{
     height: 58px;
     background-color: transparent !important;
     margin-left: 14px !important;
-    left:20px;
+    left:14px;
+    top:-6px;
     margin-top: 10px !important;
     margin-bottom:5px !important;
 }
@@ -628,6 +633,7 @@ button{
 .sidebar.float{
     left:20px;
     top:20px;
+    min-width:unset;
     width:60px;
     background-color: transparent;
 }
@@ -654,6 +660,8 @@ button{
     padding-right: 0px;
     padding-top: 0px;
     font-weight:300;
+    min-width:100px;
+    max-width:100px;
 }
 .sidebar.hidden-md-up{
     background-color: #333;
@@ -662,6 +670,8 @@ button{
     position:relative;
     min-width:100%;
     max-width:100%;
+    left:0px;
+    top:0px;
 }
 
 .sidebar .nav, .sidebar.hidden-md-up .nav {
@@ -669,6 +679,11 @@ button{
 }
 .sidebar.hidden-md-up .nav li{
     text-align:left !important;
+    box-shadow:none;
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+    margin-bottom:0px !important;
 }
 .sidebar .nav li, .sidebar.hidden-md-up .nav li{
     color: #28B6C3;
