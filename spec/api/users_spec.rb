@@ -520,6 +520,21 @@ describe "/users" do
                 expect(n["id"]).to eq(@res[i]["id"])
             end 
         end
+        it "should return team_name" do
+            @notification_results.each_with_index do |n,i|
+                if@res[i]["job_id"]
+                    team_id = @mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["team_id"]
+                    expect(@res[i]["job_team_name"]).to eq(@mysql_client.query("select * from teams where id = #{team_id}").first["name"])
+                end
+            end
+        end
+        it "should return job_title" do
+            @notification_results.each_with_index do |n,i|
+                if@res[i]["job_id"]
+                    expect(@res[i]["job_title"]).to eq(@mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["title"])
+                end
+            end
+        end
     end
     shared_examples_for "user_notifications_timeline" do
         it "should return notification" do
@@ -529,8 +544,8 @@ describe "/users" do
         end
     end
 
-    describe "GET /me/notifications" do
-        fixtures :sprint_timelines, :user_notifications, :notifications
+    describe "GET /me/notifications", :focus => true do
+        fixtures :sprint_timelines, :user_notifications, :notifications, :jobs, :teams
         context "signed in" do 
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
