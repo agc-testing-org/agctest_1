@@ -40,6 +40,8 @@ export default Ember.Component.extend({
                         }).save().then(function(payload) {
                             _this.sendAction("refresh");
                             _this.set("displayCreate",false);
+                            _this.set("title","");
+                            _this.set("description","");
                             //_this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
                         }, function(xhr, status, error) {
 
