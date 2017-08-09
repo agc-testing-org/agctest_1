@@ -1166,7 +1166,16 @@ class Integrations < Sinatra::Base
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
         (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
-        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id
+        
+        if fields[:seat_id] == Seat.find_by(:name => "sponsored").id
+            expires = Time.now + 60*60*24*30*3 #3 months
+        elsif fields[:seat_id] == Seat.find_by(:name => "priority").id
+            pexpires = Time.now + 60*60*24*14  #2 weeks      
+        else
+            expires = nil
+        end
+
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id, expires
         invitation || (return_error "invite error")
         invitation.id || (return_error "this email address has an existing invitation")
         UserInviteWorker.perform_async invitation.token

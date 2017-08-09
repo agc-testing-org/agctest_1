@@ -27,5 +27,6 @@ export default DS.Model.extend({
     team_contributors: DS.belongsTo('team-contributor'),
     team_comments_received: DS.belongsTo('team-comments-received'),
     team_votes_received: DS.belongsTo('team-votes-received'),
-    team_contributors_received: DS.belongsTo('team-contributors-received')
+    team_contributors_received: DS.belongsTo('team-contributors-received'),
+    expires: attr('date')
 });

@@ -15,6 +15,7 @@ class UserTeam < ActiveRecord::Base
     
     validates_uniqueness_of :user_email, scope: :team_id, unless: Proc.new { |invite| invite.profile_id } #conditions: -> { where(profile_id: nil) }
     validates_uniqueness_of :user_email, scope: [:team_id, :profile_id], if: Proc.new { |invite| invite.profile_id }
+    validates_uniqueness_of :user_email, conditions: -> { where("expires > ?", Time.now) }, :message => "this user is already part of other team"
 
     belongs_to :team
     belongs_to :sender, :class_name => "User"
