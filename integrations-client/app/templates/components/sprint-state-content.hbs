@@ -35,9 +35,10 @@
                                             {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint}}
                                             <div class="text-left mt-3">
                                                 <h3 class="description section text-capitalize underline mb-2 mt-1">
-                                                    Explanation
+                                                    Explain Your Work
                                                 </h3>
-                                                <div class="text-left">
+                                                <div class="description section">What approaches were you considering?  Are you satisfied with your solution?  How did you test?</div>
+                                                <div class="text-left pl-0 col-md-6 col-sm-12">
                                                     {{develop-issue-comments comments=contributor.comments}}
                                                     {{develop-issue-comment text="Explain your work" contributor=contributor sprint_state=selected-state project=project.id class="mb-3 comments" refresh="refresh"}}
                                                 </div>
