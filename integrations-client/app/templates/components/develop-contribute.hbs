@@ -23,6 +23,14 @@
         {{application-error error="This phase is closed but you can improve your submission until a proposal is selected" class="mt-2"}}
     {{/unless}} 
 
+    {{#if sprint_state.pull_request}}
+        {{#unless sprint_state.merged}}
+            {{#if (eq sprint_state.contributor_id contributor.id)}}
+            <div class="about section mt-1 text-left">Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></div>
+            {{/if}}
+        {{/unless}}
+    {{/if}}
+
     {{#if showingGit}}
     <div class="about section mb-2 text-left">
         If you <strong>have not</strong> cloned the repository
@@ -39,13 +47,6 @@
         Add your changes to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">this requirements document file</a> (Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md)
         {{/if}}
     </div>
-
-        {{#if sprint_state.pull_request}}
-        {{#unless sprint_state.merged}}
-            <small class="line text-muted">Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></small>
-        {{/unless}}
-        {{/if}}
-
 </div>
 
 <div class="text-left mt-2">
