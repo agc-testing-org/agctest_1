@@ -7,6 +7,7 @@ class Sprint < ActiveRecord::Base
         encrypt self[:user_id]
     end
 
+    belongs_to :job
     belongs_to :project
     belongs_to :user
     has_many :sprint_states

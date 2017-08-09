@@ -1,0 +1,15 @@
+<h3>Your Job Listings</h3>
+<div class="about section">Listings that your team has created</div>
+
+{{#each jobs as |job|}}
+    <div class="list-group-item rounded"> 
+        <h4 class="line">
+            {{stacked-icon value=job.role.fa_icon icon="fa-circle" size="1" class="d-inline"}}
+            {{#link-to "develop.roadmap" (query-params id=job.id)}}{{job.title}}{{/link-to}} (<a class="text-lowercase" target="_blank" href={{job.link}}>{{job.link}}</a>)
+        </h4>
+        {{profile-overview-skillsets-roles items=job.roles type="role" namespace="" class="skillsets"}}
+        <small class="line text-muted">
+            Created by {{#link-to "profile" job.user_id}}{{job.user_first_name}}{{/link-to}} {{moment-from-now job.created_at}}    
+        </small>
+    </div>
+{{/each}}

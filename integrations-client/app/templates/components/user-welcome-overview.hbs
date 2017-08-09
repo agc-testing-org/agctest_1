@@ -28,9 +28,9 @@
             {{#if (eq params.section "team")}}
             <div class="text-center">
                 <h3 class="about section text-capitalize">Your Roles</h3>
-                {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
+                {{profile-overview-skillsets-roles user=user items=roles type="role" namespace="users/me" class="skillsets"}}
                 <h3 class="about section text-capitalize">Your Skillsets</h3>
-                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
+                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" namespace="users/me" class="skillsets"}}
             </div>
             {{/if}}
         </div>

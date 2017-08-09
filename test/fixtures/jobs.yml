@@ -1,0 +1,28 @@
+developer:
+  user: adam_confirmed
+  title: "TITLE"
+  link: "wired7.com/developer"
+  team: ateam
+  sprint: sprint1
+  role: development
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+senior_developer:
+  user: adam_confirmed
+  title: "TITLEB"
+  link: "wired7.com/senior_developer"
+  team: ateam
+  sprint: sprint1b
+  role: development
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+product_manager:
+  user: adam_confirmed
+  title: "TITLE"
+  role: product
+  link: "wired7.com/product_manager"
+  team: ateam
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

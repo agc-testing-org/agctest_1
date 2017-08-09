@@ -14,7 +14,7 @@
                     </div>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                         {{#each repositories as |repository|}}
-                            <button class="dropdown-item" {{action "createProject" repository.owner repository.name}}>{{repository.owner}}/{{repository.name}}</button>
+                            <button class="dropdown-item" {{action "createProject" repository.owner repository.name repository.description}}><div class="title">{{repository.owner}}/{{repository.name}}</div><small class="description text-muted">{{repository.description}}</small></button>
                         {{/each}}
                     </div>
                 </div>

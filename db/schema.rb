@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170801025838) do
+ActiveRecord::Schema.define(version: 20170807001022) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -37,6 +37,22 @@ ActiveRecord::Schema.define(version: 20170801025838) do
     t.boolean "preparing"
     t.index ["sprint_state_id"], name: "index_contributors_on_sprint_state_id"
     t.index ["user_id"], name: "index_contributors_on_user_id"
+  end
+
+  create_table "jobs", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id", null: false
+    t.integer "team_id", null: false
+    t.integer "sprint_id"
+    t.text "link", null: false
+    t.text "title", null: false
+    t.boolean "open", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "role_id", null: false
+    t.index ["open"], name: "index_jobs_on_open"
+    t.index ["sprint_id"], name: "fk_rails_babd5df9aa"
+    t.index ["team_id"], name: "index_jobs_on_team_id"
+    t.index ["user_id"], name: "index_jobs_on_user_id"
   end
 
   create_table "logins", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -73,6 +89,8 @@ ActiveRecord::Schema.define(version: 20170801025838) do
     t.string "commit"
     t.string "commit_remote"
     t.boolean "commit_success"
+    t.string "description"
+    t.text "caption"
   end
 
   create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -126,10 +144,10 @@ ActiveRecord::Schema.define(version: 20170801025838) do
   end
 
   create_table "sprint_timelines", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
-    t.integer "sprint_id", null: false
+    t.integer "sprint_id"
     t.integer "state_id"
     t.datetime "created_at", null: false
-    t.integer "project_id", null: false
+    t.integer "project_id"
     t.integer "user_id", null: false
     t.integer "comment_id"
     t.integer "sprint_state_id"
@@ -139,8 +157,10 @@ ActiveRecord::Schema.define(version: 20170801025838) do
     t.integer "processed", default: 0
     t.integer "processing"
     t.integer "next_sprint_state_id"
+    t.integer "job_id"
     t.index ["comment_id"], name: "index_sprint_timelines_on_comment_id"
     t.index ["contributor_id"], name: "index_sprint_timelines_on_contributor_id"
+    t.index ["job_id"], name: "fk_rails_1d21bcd0f9"
     t.index ["project_id"], name: "index_sprint_timelines_on_project_id"
     t.index ["sprint_id"], name: "index_sprint_timelines_on_sprint_id"
     t.index ["sprint_state_id"], name: "index_sprint_timelines_on_sprint_state_id"
@@ -155,6 +175,8 @@ ActiveRecord::Schema.define(version: 20170801025838) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "job_id"
+    t.index ["job_id"], name: "fk_rails_4ec8411d63"
     t.index ["project_id"], name: "index_sprints_on_project_id"
     t.index ["user_id"], name: "index_sprints_on_user_id"
   end
@@ -310,6 +332,9 @@ ActiveRecord::Schema.define(version: 20170801025838) do
   add_foreign_key "comments", "users"
   add_foreign_key "contributors", "sprint_states"
   add_foreign_key "contributors", "users"
+  add_foreign_key "jobs", "sprints"
+  add_foreign_key "jobs", "teams"
+  add_foreign_key "jobs", "users"
   add_foreign_key "logins", "users"
   add_foreign_key "role_states", "roles"
   add_foreign_key "role_states", "states"
@@ -321,11 +346,13 @@ ActiveRecord::Schema.define(version: 20170801025838) do
   add_foreign_key "sprint_states", "users", column: "arbiter_id"
   add_foreign_key "sprint_timelines", "comments"
   add_foreign_key "sprint_timelines", "contributors"
+  add_foreign_key "sprint_timelines", "jobs"
   add_foreign_key "sprint_timelines", "projects"
   add_foreign_key "sprint_timelines", "sprint_states"
   add_foreign_key "sprint_timelines", "sprints"
   add_foreign_key "sprint_timelines", "states"
   add_foreign_key "sprint_timelines", "votes"
+  add_foreign_key "sprints", "jobs"
   add_foreign_key "sprints", "projects"
   add_foreign_key "sprints", "users"
   add_foreign_key "teams", "plans"

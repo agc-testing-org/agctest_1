@@ -24,6 +24,7 @@ require 'aws-sdk'
 #Helpers
 require_relative '../helpers/obfuscate.rb'
 require_relative '../helpers/slack.rb'
+require_relative '../helpers/params_helper.rb'
 
 # Controllers
 require_relative '../controllers/account.rb'
@@ -32,7 +33,6 @@ require_relative '../controllers/repo.rb'
 require_relative '../controllers/organization.rb'
 require_relative '../controllers/activity.rb'
 require_relative '../controllers/feedback.rb'
-require_relative '../controllers/params_helper.rb'
 
 # Models
 require_relative '../models/user.rb'
@@ -62,6 +62,8 @@ require_relative '../models/user_connection.rb'
 require_relative '../models/role_state.rb' 
 require_relative '../models/notification.rb'
 require_relative '../models/user_notification_setting.rb'
+require_relative '../models/job.rb'
+
 # Workers
 require_relative '../workers/user_notification_worker.rb'
 require_relative '../workers/contributor_join_worker.rb'
@@ -448,7 +450,7 @@ class Integrations < Sinatra::Base
     users_roles_get = lambda do
         account = Account.new
         status 200
-        return (account.get_account_roles decrypt(params[:user_id]), nil).to_json
+        return (account.get_roles decrypt(params[:user_id]), nil).to_json
     end
 
     users_roles_get_by_me = lambda do
@@ -462,7 +464,7 @@ class Integrations < Sinatra::Base
         account = Account.new
         query = {:id => params[:role_id]}
         status 200
-        return (account.get_account_roles @session_hash["id"], query)[0].to_json
+        return (account.get_roles @session_hash["id"], query)[0].to_json
     end
 
     users_roles_patch_by_id = lambda do
@@ -471,7 +473,7 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field !fields[:active].nil?, "active"
         account = Account.new
-        response = (account.update_user_role @session_hash["id"], params[:role_id], fields[:active])
+        response = (account.update_role @session_hash["id"], params[:role_id], fields[:active])
         response || (return_error "unable not update role")
         status 200
         return response.to_json
@@ -480,7 +482,7 @@ class Integrations < Sinatra::Base
     roles_get = lambda do
         account = Account.new
         status 200
-        return account.get_roles.to_json
+        return Role.all.order(:name).to_json rescue (return_error "unable to find roles")
     end
 
     states_get = lambda do
@@ -537,9 +539,9 @@ class Integrations < Sinatra::Base
 
     users_skillsets_get = lambda do
         check_required_field params[:user_id], "user_id"
-        issue = Issue.new
+        account = Account.new
         status 200
-        return (issue.get_user_skillsets decrypt(params[:user_id]), nil).to_json
+        return (account.get_skillsets decrypt(params[:user_id]), nil).to_json
     end
 
     users_skillsets_get_by_me = lambda do
@@ -550,10 +552,10 @@ class Integrations < Sinatra::Base
     users_skillsets_get_by_skillset = lambda do
         protected!
         check_required_field params[:skillset_id], "skillset_id"
-        issue = Issue.new
+        account = Account.new
         query = {:id => params[:skillset_id]}
         status 200
-        return (issue.get_user_skillsets @session_hash["id"], query)[0].to_json
+        return (account.get_skillsets @session_hash["id"], query)[0].to_json
     end
 
     users_skillsets_patch = lambda do
@@ -561,8 +563,8 @@ class Integrations < Sinatra::Base
         check_required_field params[:skillset_id], "skillset_id"
         fields = get_json
         check_required_field !fields[:active].nil?, "active"  
-        issue = Issue.new
-        response = (issue.update_user_skillsets @session_hash["id"], params[:skillset_id], fields[:active])
+        account = Account.new
+        response = (account.update_skillset @session_hash["id"], params[:skillset_id], fields[:active])
         response || (return_error "unable to update skillset")
         status 200
         return response.to_json
@@ -578,7 +580,8 @@ class Integrations < Sinatra::Base
                 repositories[repositories.length] = {
                     :id => repo.id,
                     :name => repo.name,         
-                    :owner => repo.owner.login 
+                    :owner => repo.owner.login,
+                    :description => repo.description
                 } 
             end
         rescue => e
@@ -593,6 +596,21 @@ class Integrations < Sinatra::Base
         projects = issue.get_projects nil
         status 200
         return projects.to_json
+    end
+
+    projects_patch_by_id = lambda do
+        protected!
+        @session_hash["admin"] || return_unauthorized_admin
+        fields = get_json
+        check_required_field fields[:caption], "caption"
+        caption_length = fields[:caption].to_s.length
+        (caption_length < 501 && caption_length > 4) || (return_error "caption must be 5-500 characters")
+        issue = Issue.new
+        project = issue.get_projects params
+        (project && project.first) || return_not_found 
+        project.first.caption = fields[:caption]
+        project.first.save
+        return project.first.to_json
     end
 
     projects_get_by_id = lambda do
@@ -610,8 +628,8 @@ class Integrations < Sinatra::Base
         check_required_field fields[:org], "org"
         check_required_field fields[:org], "name"
         issue = Issue.new
-        project = issue.create_project @session_hash["id"], fields[:org], fields[:name]
-        
+        project = issue.create_project @session_hash["id"], fields[:org], fields[:name], fields[:description]
+
         repo = Repo.new
         github = (repo.github_client ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET'])
         github || (return_error "unable to authenticate github")
@@ -627,7 +645,7 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         status 200
-        return (account.get_teams @session_hash["id"]).to_json
+        return (account.get_teams @session_hash["id"], params).to_json
     end
 
     teams_get_by_id = lambda do
@@ -687,6 +705,79 @@ class Integrations < Sinatra::Base
         return team.to_json
     end
 
+    jobs_get = lambda do
+        issue = Issue.new
+        jobs = issue.get_jobs params
+        jobs || (return_error "unable to find jobs")
+        jobs_with_sprints = issue.jobs_with_sprints jobs
+        jobs_with_sprints || (return_error "unable to find jobs")
+        status 200
+        return jobs_with_sprints.to_json
+    end
+
+    jobs_get_by_id = lambda do
+        issue = Issue.new
+        jobs = issue.get_jobs params
+        (jobs && jobs.first) || return_not_found
+        jobs_with_sprints = issue.jobs_with_sprints jobs
+        (jobs_with_sprints && jobs_with_sprints.first) || (return_error "unable to find job")
+        status 200
+        return jobs_with_sprints.first.to_json
+    end
+
+    jobs_patch_by_id = lambda do
+        protected!
+        fields = get_json
+        check_required_field fields[:team_id], "team_id"
+        check_required_field fields[:sprint_id], "sprint_id"
+        
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], fields[:team_id]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
+        
+        issue = Issue.new
+        query = {:id => params[:id], :team_id => fields[:team_id]}
+        jobs = issue.get_jobs query
+        (jobs && jobs.first) || return_not_found
+        saved = jobs.first.update_attributes!(:sprint_id => fields[:sprint_id])
+        saved || (return_error "unable to select idea")
+
+        fields[:state] = State.find_by({:name => "requirements design"}).id
+        fields[:sprint] = fields[:sprint_id]
+    
+        sprint_state = sprint_states_post_helper fields
+
+        status 200
+        return jobs.first.to_json
+    end
+
+    jobs_post = lambda do
+        protected!
+        fields = get_json
+        check_required_field fields[:team_id], "team_id"
+        check_required_field fields[:role_id], "role_id"
+        check_required_field fields[:link], "link"
+        check_required_field fields[:title], "title"
+
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], fields[:team_id]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
+
+        title_length = fields[:title].to_s.length
+        (title_length < 101 && title_length > 4) || (return_error "title must be 5-100 characters")
+
+        (fields[:link].to_s.include? "http") || (return_error "a full link (http or https is required)")
+
+        issue = Issue.new
+        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link]
+        job || (return_error "unable to create job listing")
+
+        log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}
+        (issue.log_event log_params) || (return_error "unable to create job")
+        status 201
+        return job.to_json
+    end 
+
     sprints_get = lambda do
         issue = Issue.new
         sprints = issue.get_sprints params
@@ -726,16 +817,34 @@ class Integrations < Sinatra::Base
         (description_length < 501 && description_length > 4) || (return_error "description must be 5-500 characters")
 
         issue = Issue.new
-        sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id].to_i
+        sprint = issue.create @session_hash["id"], fields[:title],  fields[:description],  fields[:project_id], fields[:job_id]
         sprint || (return_error "unable to create sprint for this project")
 
         state = State.find_by(:name => "idea").id
         sprint_state = issue.create_sprint_state sprint.id, state, nil
         sprint_state || (return_error "unable to create sprint")
-        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "new"}).id}
+        log_params = {:sprint_id => sprint.id, :state_id => state, :user_id => @session_hash["id"], :job_id => fields[:job_id], :project_id => fields[:project_id], :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "new"}).id}
         (issue.log_event log_params) || (return_error "unable to create sprint")
         status 201
+        sprint_json = sprint.as_json
+        sprint_json[:project] = sprint.project_id
         return sprint.to_json
+    end
+
+    def sprint_states_post_helper fields
+        issue = Issue.new
+        sprint = (issue.get_sprint fields[:sprint])
+        sprint || return_not_found
+        repo = Repo.new
+        github = (repo.github_client ENV["INTEGRATIONS_GITHUB_ADMIN_SECRET"])
+        sprint || (return_error "unable to connect to github")
+        sha = github.branch("#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{sprint.project.name}_#{sprint.project.id}","master").commit.sha
+        sha || (return_error "unable to retrieve sha")
+        sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
+        sprint_state || (return_error "unable to create sprint state")
+        log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "transition"}).id}
+        (issue.log_event log_params) ||  (return_error "unable to create sprint state")
+        return sprint_state
     end
 
     sprint_states_post = lambda do
@@ -744,19 +853,9 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:state], "state"
         check_required_field fields[:sprint], "sprint"
-
-        issue = Issue.new
-        sprint = (issue.get_sprint fields[:sprint])
-        sprint || return_not_found
-        repo = Repo.new
-        github = (repo.github_client github_authorization)
-        sprint || (return_error "unable to connect to github")
-        sha = github.branch("#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{sprint.project.name}_#{sprint.project.id}","master").commit.sha
-        sha || (return_error "unable to retrieve sha")
-        sprint_state = issue.create_sprint_state fields[:sprint], fields[:state], sha
-        sprint_state || (return_error "unable to create sprint state")
-        log_params = {:sprint_id => fields[:sprint], :state_id => fields[:state], :user_id => @session_hash["id"], :project_id => sprint.project.id, :sprint_state_id => sprint_state.id, :notification_id => Notification.find_by({:name => "transition"}).id}
-        (issue.log_event log_params) ||  (return_error "unable to create sprint state")
+        
+        sprint_state = sprint_states_post_helper fields
+        
         status 201
         return sprint_state.to_json
     end
@@ -1399,6 +1498,7 @@ class Integrations < Sinatra::Base
     post "/projects", &projects_post
     get "/projects", &projects_get
     get "/projects/:id", allows: [:id], needs: [:id], &projects_get_by_id
+    patch "/projects/:id", allows: [:id], needs: [:id], &projects_patch_by_id
 
     #    post "/projects/:project_id/refresh", &refresh_post #TODO - later
     post "/contributors", &contributors_post
@@ -1417,8 +1517,14 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/winner", &contributors_post_winner
     post "/contributors/:id/merge", &contributors_post_merge
 
+
+    get "/jobs", allows: [:id], &jobs_get
+    post "/jobs", &jobs_post
+    get "/jobs/:id", allows: [:id], &jobs_get_by_id
+    patch "/jobs/:id", &jobs_patch_by_id
+
     post "/teams", &teams_post
-    get "/teams", &teams_get
+    get "/teams", allows: [:seat_id], &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/team-invites", &team_invites_get
 

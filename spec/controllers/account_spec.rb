@@ -656,26 +656,7 @@ describe ".Account" do
             end
         end
     end
-
-    context "#get_roles" do
-        fixtures :roles
-        before(:each) do
-            @roles = @account.get_roles
-        end
-        it "should return more than one result" do
-            expect(@roles.length).to be > 0
-        end
-        it "should return name" do
-            @roles.each_with_index do |r,i|
-                expect(r["name"]).to eq(roles(r["name"]).name)
-            end
-        end
-        it "should return fa_icon" do
-            @roles.each_with_index do |r,i|
-                expect(r["fa_icon"]).to eq(roles(r["name"]).fa_icon)
-            end
-        end
-    end
+    
     context "#update_role" do
         fixtures :users, :roles
         before(:each) do

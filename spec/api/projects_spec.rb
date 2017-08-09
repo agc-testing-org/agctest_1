@@ -34,6 +34,16 @@ describe "/projects" do
                 expect(@projects[i]["name"]).to eq(project_result["name"])
             end
         end
+        it "should return description" do
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["description"]).to eq(project_result["description"])
+            end
+        end
+        it "should return caption" do
+            @project_results.each_with_index do |project_result,i|
+                expect(@projects[i]["caption"]).to eq(project_result["caption"])
+            end
+        end
         it "should return user_id" do
             @project_results.each_with_index do |project_result,i|
                 expect(decrypt(@projects[i]["user_id"]).to_i).to eq(project_result["user_id"])
@@ -64,6 +74,7 @@ describe "/projects" do
         before(:each) do
             @org = @username
             @name = "NEWPROJECT"
+            @description = "A PROJECT"
             %x( mv test/#{@org}/DEMO.git test/#{@org}/#{@name}.git )
             Octokit::Client.any_instance.stub(:login) { @username }
             Octokit::Client.any_instance.stub(:create_repo) { %x( mkdir "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{@name}_1"; cd "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{@name}_1"; git init --bare;)}
@@ -94,7 +105,7 @@ describe "/projects" do
         context "admin" do
             context "valid fields" do
                 before(:each) do
-                    post "/projects", { :name => @name, :org => @org }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    post "/projects", { :name => @name, :org => @org, :description => @description }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                     @project_results = @mysql_client.query("select * from projects")
                     @projects = [JSON.parse(last_response.body)]
                     @git = %x(cd "test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/#{@name}_1"; git branch)
@@ -142,6 +153,48 @@ describe "/projects" do
         end
         it_should_behave_like "projects"
         it_should_behave_like "ok"
+    end
+
+    describe "PATCH /:id" do
+        fixtures :sprints, :states, :projects, :sprint_timelines
+        before(:each) do
+            @caption = "a"*5
+            @project_id = projects(:demo).id
+        end
+        context "admin" do
+            before(:each) do
+                patch "/projects/#{@project_id}", {:caption => @caption }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @projects = [JSON.parse(last_response.body)]
+                @project_results = @mysql_client.query("select * from projects where id = #{@project_id}")
+            end
+            it "should save caption" do
+                expect(@project_results.first["caption"]).to eq @caption
+            end
+            it_should_behave_like "projects"
+            it_should_behave_like "ok"
+            context "too short caption" do
+                before(:each) do
+                    patch "/projects/#{@project_id}", {:caption => "a"*4 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                end
+                it_behaves_like "error", "caption must be 5-500 characters"
+            end
+            context "too long caption" do
+                before(:each) do
+                    patch "/projects/#{@project_id}", {:caption => "a"*501 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                end                 
+                it_behaves_like "error", "caption must be 5-500 characters"
+            end
+        end
+        context "non-admin" do
+            before(:each) do
+                patch "/projects/#{@project_id}", {:caption => @caption }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @project_results = @mysql_client.query("select * from projects where id = #{@project_id}")
+            end
+            it "should not save caption" do
+                expect(@project_results.first["caption"]).to be nil
+            end
+            it_behaves_like "unauthorized_admin"
+        end
     end
 
     describe "POST /:id/refresh" do

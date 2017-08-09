@@ -1,5 +1,5 @@
 class Organization
-
+    include ParamsHelper 
     def initialize
         @per_page = 10
     end
@@ -71,9 +71,8 @@ class Organization
     end
 
     def get_sprint_timeline_aggregate_counts result, params
-        params_helper = ParamsHelper.new
-        params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
-        params = params_helper.assign_param_to_model params, "team_id", "user_teams"
+        params = assign_param_to_model params, "seat_id", "user_teams"
+        params = assign_param_to_model params, "team_id", "user_teams"
         response = []
         result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(sprint_timelines.id)) as count","users.id as user_id").group("users.id").each_with_index do |s,i|
             response[i] = {:id => s.user_id, :count => s.count}
@@ -82,9 +81,8 @@ class Organization
     end
 
     def get_contributor_aggregate_counts result, params
-        params_helper = ParamsHelper.new
-        params = params_helper.assign_param_to_model params, "seat_id", "user_teams"
-        params = params_helper.assign_param_to_model params, "team_id", "user_teams"
+        params = assign_param_to_model params, "seat_id", "user_teams"
+        params = assign_param_to_model params, "team_id", "user_teams"
         response = []
         result.joins("INNER JOIN user_teams ON user_teams.user_id = users.id").where(params).select("count(distinct(contributors.id)) as count","users.id as user_id").group("users.id").each_with_index do |s,i|
             response[i] = {:id => s.user_id, :count => s.count}
@@ -155,8 +153,7 @@ class Organization
     def get_team_notifications params
         team_id = params["id"]
         page = (params["page"].to_i if params["page"].to_i > 0) || 1
-        params_helper = ParamsHelper.new
-        params = params_helper.drop_key params, "page"
+        params = drop_key params, "page"
         account = Account.new
         begin
             vote_comment_winner = Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "winner"})).select(:id).map(&:id).join(",")

@@ -297,8 +297,8 @@ describe "/users" do
 
     shared_examples_for "user_role_update" do
         context "response" do
-            it "should return role_id as id" do
-                expect(@res["id"]).to eq(@role_id)
+            it "should return id" do
+                expect(@res["id"]).to eq(@mysql["role_id"])
             end
         end
         context "user_role" do
@@ -589,7 +589,7 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /me/notifications/:id", :focus => true do
+    describe "PATCH /me/notifications/:id" do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do
             before(:each) do                

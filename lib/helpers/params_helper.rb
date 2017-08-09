@@ -1,4 +1,4 @@
-class ParamsHelper
+module ParamsHelper
     def drop_key params, key
         if !params[key].nil? 
             params.delete(key)
