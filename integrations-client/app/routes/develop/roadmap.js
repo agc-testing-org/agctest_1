@@ -1,11 +1,6 @@
 import Ember from 'ember';
 
 export default Ember.Route.extend({
-    queryParams: {
-        id: {
-            refreshModel: true
-        }
-    },
     actions: {
         refresh(){
             this.refresh();
@@ -24,8 +19,6 @@ export default Ember.Route.extend({
         return Ember.RSVP.hash({
             projects: this.store.findAll('project'),
             teams: teams,
-            jobs: this.store.query('job',params,{reload: true}),
-            params: params
         });
     },
 });

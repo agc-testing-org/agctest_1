@@ -17,7 +17,9 @@ Router.map(function() {
         this.route('resend');
     });
     this.route('develop', function() {
-        this.route('roadmap');
+        this.route('roadmap', function() {
+            this.route('job', {path: '/job/:id'});
+        });
         this.route('new');
         this.route('project', {path: '/:project_id'}, function() {
             this.route('state', {path: '/state/:id'});
