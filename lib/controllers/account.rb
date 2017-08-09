@@ -634,8 +634,11 @@ class Account
                 user_profile = get_profile notification.sprint_timeline.user
                 profile = user_profile_descriptor user_profile
 
-                project = "#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}"
-                sprint = "#{notification.sprint_timeline.sprint.title}"
+                if notification.sprint_timeline.project
+                    project = "#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}"
+                    sprint = "#{notification.sprint_timeline.sprint.title}"
+                end
+
                 signature = "- The Wired7 ATeam"
 
                 if notification.sprint_timeline.notification.name == "comment" #|| notification.sprint_timeline.notification.name == "vote"
