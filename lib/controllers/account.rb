@@ -568,6 +568,10 @@ class Account
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
                 response[i][:notification] = notification.notification
+                if notification.job
+                    response[i][:job_title] = notification.job.title
+                    response[i][:job_team_name] = notification.job.team.name
+                end
             end
 
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}

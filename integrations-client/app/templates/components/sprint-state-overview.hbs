@@ -1,13 +1,17 @@
-<div class="footprint hidden-sm-down"><span class="text-capitalize">{{showing-state.state_id.name}} Phase </span>of<span class="text-capitalize"> Sprint {{sprint.id}}</span> for {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) }}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
-
 <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
     <div class="overview row text-left">
         <div class="col-md-6 col-sm-12">
             <h2 class="name text-capitalize">{{sprint.title}}</h2>
             <div class="description">{{sprint.description}}</div>
-            <div class="about text-capitalize">{{showing-state.state_id.description}}</div>
+            <div class="about mb-0"><strong><span class="text-capitalize">{{showing-state.state_id.name}} Phase </span></strong>of sprint ({{showing-state.state_id.description}})</div>
+            <div class="about mb-0"><strong>Project</strong> {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) }}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
+            {{#if job.id}}
+                <div class="about">
+                    Proposed for {{#link-to "develop.roadmap.job" (concat job.id "-" job.title "-at-" job.team_name)}}{{job.title}}{{/link-to}} at <strong>{{job.team_name}}</strong>
+                </div>
+            {{/if}}
 		    {{#if mergedStates}}
-                <a class="btn btn-secondary rounded btn-sm" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
+                <a class="btn btn-secondary rounded btn-sm mt-2" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
             {{/if}}
             {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="mt-2"}}
             {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets mt-2"}}

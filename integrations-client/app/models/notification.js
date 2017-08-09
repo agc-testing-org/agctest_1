@@ -19,6 +19,9 @@ export default DS.Model.extend({
     talent_id: attr('string'),
     talent_first_name: attr('string'),
     sprint_state_id: attr('number'),
-    state_id: DS.belongsTo('state')
+    state_id: DS.belongsTo('state'),
+    job_id: attr('number'),
+    job_title: attr('string'),
+    job_team_name: attr('string')
 });
 
