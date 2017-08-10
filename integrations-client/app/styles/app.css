@@ -227,6 +227,9 @@ label{
     margin-top: 10px !important;
     margin-bottom:5px !important;
 }
+.hidden-md-up .logo{
+    margin-left:0px !important;
+}
 .highlight-true{
     background-color: #fff;
 }

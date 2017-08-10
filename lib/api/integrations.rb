@@ -434,12 +434,22 @@ class Integrations < Sinatra::Base
     end
 
     users_get_by_id = lambda do
+        protected!
         account = Account.new 
         params["id"] = decrypt params["id"]
-        user = account.get_users params
-        user[0] || return_not_found
+        user = account.get params
+        user || return_not_found
+        response = {
+            :id => user.id, 
+            :created_at => user.created_at, 
+            :location => user.user_profile.location_name, 
+            :title => user.user_profile.user_position.title, 
+            :industry => user.user_profile.user_position.industry, 
+            :size => user.user_profile.user_position.size,
+            :company => (user.user_profile.user_position.company if (@session_hash["id"] == user[:id]))
+        }
         status 200
-        return user[0].to_json
+        return response.to_json 
     end
 
     users_get_by_me = lambda do
@@ -730,11 +740,11 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:team_id], "team_id"
         check_required_field fields[:sprint_id], "sprint_id"
-        
+
         account = Account.new
         seat = account.get_seat @session_hash["id"], fields[:team_id]
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
-        
+
         issue = Issue.new
         query = {:id => params[:id], :team_id => fields[:team_id]}
         jobs = issue.get_jobs query
@@ -744,7 +754,7 @@ class Integrations < Sinatra::Base
 
         fields[:state] = State.find_by({:name => "requirements design"}).id
         fields[:sprint] = fields[:sprint_id]
-    
+
         sprint_state = sprint_states_post_helper fields
 
         status 200
@@ -771,7 +781,7 @@ class Integrations < Sinatra::Base
         (zip_length < 7 && zip_length > 4) || (return_error "a valid zip code is required")
 
         (fields[:link].to_s.include? "http") || (return_error "a full link (http or https is required)")
- 
+
         query = {:id => @session_hash["id"]}
         user = account.get query
         company = user.user_profile.user_position.company || (return_error "you must connect Linkedin to post a job")
@@ -861,9 +871,9 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:state], "state"
         check_required_field fields[:sprint], "sprint"
-        
+
         sprint_state = sprint_states_post_helper fields
-        
+
         status 201
         return sprint_state.to_json
     end

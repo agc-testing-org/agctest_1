@@ -244,15 +244,6 @@ class Account
         end
     end
 
-    def get_users params # can be used if we add search functionality later
-        begin
-            return User.joins("LEFT JOIN user_profiles ON user_profiles.user_id = users.id LEFT JOIN user_positions ON user_positions.user_profile_id = user_profiles.id").where(params).select(:id, :created_at, "user_profiles.location_name as location", "user_positions.title", "user_positions.industry", "user_positions.size").as_json
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def update id, fields
         begin
             user = User.find_by(id: id)
