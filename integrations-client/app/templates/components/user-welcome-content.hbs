@@ -6,15 +6,16 @@
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
     <h3 class="description mb-3">Wired7 is an <strong>open</strong> platform that allows companies to connect with job seekers through <strong>project development</strong></h3>  
     <h3 class="description">
-        Use Wired7 
+        Use Wired7 to 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-             to <strong>benchmark and compare</strong> software team hires <strong>before you invest</strong> time in the interview process
+            <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions
         {{else}} 
-             to build your <strong>portfolio</strong> and skills while <strong>actively or passively</strong> looking for jobs
+            <strong>get your foot in the door</strong> for positions you're interested in
         {{/if}}
     </h3>
-    <h3 class="about mt-3">Please take a moment to go through a quick overview.  
-    {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
+    <h3 class="about mt-3">Please take a moment to get set up</h3>
+    <h3 class="about mt-4 text-center">
+        {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
     </h3>
     {{/unless}}
 
@@ -49,10 +50,10 @@
 
     {{#if (eq params.section "sprint")}}
         <h3 class="description mb-3">Projects on Wired7 are <strong>open to all users</strong></h3>
-        <h3 class="description mb-3">Anyone can propose a project feature or task known as a <strong>sprint</strong></h3>
-        <h3 class="description mb-3">Sprints start as ideas and transition through <strong>requirements, design, and development</strong> phases until complete</h3>
-        <h3 class="description mb-3"><strong>Companies</strong> can attach <strong>job listings</strong> to sprints that require skills and experience parallel to an open job listing</h3>
-        <h3 class="about mt-3">
+        <h3 class="description mb-3">Project roadmaps are driven by <strong>job listings</strong> that hiring managers post</h3>
+        <h3 class="description mb-3">Anyone can pitch a project feature or task known as a <strong>sprint</strong>, as long as the skills and experience needed to implement the idea match the <strong>requirements of an open job listing</strong></h3>
+        <h3 class="description mb-3">An idea that a hiring manager approves will transition through <strong>requirements, design, and development</strong> phases until complete</h3>
+        <h3 class="about mt-4 text-center">
             {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "welcome" (query-params section="team")}}Continue{{/link-to}}
         </h3>
     {{/if}}
@@ -89,7 +90,7 @@
             {{/if}}
         {{/if}}
 
-        <h3 class="description">
+        <h3 class="description text-center mt-4">
             {{#link-to "welcome" (query-params section="sprint")}}Back{{/link-to}} | {{#link-to "me.overview"}}Exit{{/link-to}}
         </h3>
     {{/if}}
