@@ -23,8 +23,8 @@
                         {{#if session.isAuthenticated}}
                             {{#unless selected-state.active_contribution_id}}
                                 <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
+                                <h3>{{selected-state.state_id.instruction}}</h3>
                             {{/unless}}
-                            <h3>{{selected-state.state.instruction}}</h3>
 
                             {{#unless sessionAccount.account.github}}
                                 {{user-login-oauth text=" to participate" provider="github"}}
@@ -66,10 +66,10 @@
 {{#if last-contributor-state.contributors.length}}
 <div class="overview text-left">
 
+    <h3 class="mb-3">{{selected-state.state_id.instruction}}</h3>
     <h4 class="about section mb-3">
         Proposed Contributions
     </h4>
-
         <div class="mb-4">
         {{#each last-contributor-state.contributors as |contributor index|}}
 
