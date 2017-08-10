@@ -4,9 +4,9 @@ export default Ember.Component.extend({
     session: Ember.inject.service('session'),
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
-    comment_votes_count: Ember.computed.filterBy('contributor.votes', 'comment_id'),
-
-    
+    comment_votes: function() {
+        return this.get('contributor.votes').filterBy('comment_id',parseInt(this.get("comment_id")));
+    }.property('contributor.votes.@each'),
     actions: {
         commentVote(contributor_id,sprint_state_id,comment_id){
             this.set("errorMessage", "");
