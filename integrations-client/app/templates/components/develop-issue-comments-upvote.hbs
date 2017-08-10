@@ -1,1 +1,1 @@
-<button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "commentVote" contributor.id sprint_state.id comment_id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote</button>
+<button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "commentVote" contributor.id sprint_state.id comment_id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote{{#if comment_votes_count.length}}({{comment_votes_count.length}}){{/if}}</button>
