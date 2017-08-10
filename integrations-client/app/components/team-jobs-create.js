@@ -17,23 +17,30 @@ export default Ember.Component.extend({
         create(team_id){
             var title = this.get("title");
             var link = this.get("link");
+            var zip = this.get("zip");
             var role_id = this.get("role_id");
             var _this = this;
             if(title && title.length > 4){
                 if(link){
                     if(link.includes("http")){
                         if(role_id){
-                            var job = this.get('store').createRecord('job', {
-                                team_id: team_id,
-                                title: title,
-                                role_id: role_id,
-                                link: link,
-                            }).save().then(function(response){
-                                _this.set("errorMessage",null); 
-                                _this.set("title",null);
-                                _this.set("link",null);
-                                _this.sendAction("refresh");
-                            });
+                            if(zip && zip.length > 4){
+                                var job = this.get('store').createRecord('job', {
+                                    team_id: team_id,
+                                    title: title,
+                                    role_id: role_id,
+                                    link: link,
+                                    zip: zip
+                                }).save().then(function(response){
+                                    _this.set("errorMessage",null); 
+                                    _this.set("title",null);
+                                    _this.set("link",null);
+                                    _this.sendAction("refresh");
+                                });
+                            }
+                            else {
+                                _this.set("errorMessage","A valid zip code is required");
+                            }
                         }
                         else{
                             _this.set("errorMessage","Target user is required");

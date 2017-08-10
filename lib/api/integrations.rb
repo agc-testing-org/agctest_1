@@ -758,6 +758,7 @@ class Integrations < Sinatra::Base
         check_required_field fields[:role_id], "role_id"
         check_required_field fields[:link], "link"
         check_required_field fields[:title], "title"
+        check_required_field fields[:zip], "zip"
 
         account = Account.new
         seat = account.get_seat @session_hash["id"], fields[:team_id]
@@ -766,10 +767,17 @@ class Integrations < Sinatra::Base
         title_length = fields[:title].to_s.length
         (title_length < 101 && title_length > 4) || (return_error "title must be 5-100 characters")
 
+        zip_length = fields[:zip].to_s.length
+        (zip_length < 7 && zip_length > 4) || (return_error "a valid zip code is required")
+
         (fields[:link].to_s.include? "http") || (return_error "a full link (http or https is required)")
+ 
+        query = {:id => @session_hash["id"]}
+        user = account.get query
+        company = user.user_profile.user_position.company || (return_error "you must connect Linkedin to post a job")
 
         issue = Issue.new
-        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link]
+        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link], fields[:zip], company
         job || (return_error "unable to create job listing")
 
         log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}

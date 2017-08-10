@@ -92,12 +92,14 @@ class Issue
         end
     end
 
-    def create_job user_id, team_id, role_id, title, link
+    def create_job user_id, team_id, role_id, title, link, zip, company
         begin
             return Job.create({
                 user_id: user_id,
                 team_id: team_id,
                 role_id: role_id,
+                zip: zip,
+                company: company,
                 title: (title.strip if title),
                 link: link
             })

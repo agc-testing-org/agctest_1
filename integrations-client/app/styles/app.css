@@ -983,6 +983,9 @@ textarea.form-control{
     color: #fff;
     background-color:#fff;
 }
+.form-control.unset-width{
+    width:unset;
+}
 .no-select {
     -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
