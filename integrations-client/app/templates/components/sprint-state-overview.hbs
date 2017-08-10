@@ -20,7 +20,7 @@
                     {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "comments") title="comments"}}
                 </div>
                 <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
+                    {{sprint-state-overview-score total=(sum-feedback-vote selected-state.contributors "votes") title="votes"}}
                 </div>
                 {{/if}}
 
