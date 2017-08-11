@@ -50,24 +50,38 @@ describe "/users" do
     end
 
     describe "GET /:id" do
-        fixtures :user_profiles, :user_positions
-        before(:each) do
-            @user_id = users(:adam_confirmed).id
-            @position = user_positions(:adam_confirmed)
-            @profile = user_profiles(:adam_confirmed)
-        end
-        context "user exists" do
+        context "with linkedin" do
+            fixtures :user_profiles, :user_positions
             before(:each) do
-                get "/users/#{@user_id}", {}, {}
-                @res = JSON.parse(last_response.body)
+                @user_id = users(:adam_confirmed).id
+                @position = user_positions(:adam_confirmed)
+                @profile = user_profiles(:adam_confirmed)
             end
-            it_behaves_like "profile"
+            context "user exists" do
+                before(:each) do
+                    get "/users/#{@user_id}", {}, {}
+                    @res = JSON.parse(last_response.body)
+                end
+                it_behaves_like "profile"
+            end
+            context "invalid user" do
+                before(:each) do
+                    get "/users/930", {}, {}
+                    it_behaves_like "not_found"
+                end                                             
+            end
         end
-        context "invalid user" do
-            before(:each) do
-                get "/users/930", {}, {}
-                it_behaves_like "not_found"
-            end                                             
+        context "without linkedin" do
+            context "user exists" do
+                before(:each) do
+                    @user_id = users(:adam_confirmed).id
+                    get "/users/#{@user_id}", {}, {}
+                    @res = JSON.parse(last_response.body)
+                end
+                it "should return id" do
+                    expect(@res["id"]).to eq(@user_id)
+                end
+            end
         end
     end
 
