@@ -22,6 +22,7 @@ export default DS.Model.extend({
     state_id: DS.belongsTo('state'),
     job_id: attr('number'),
     job_title: attr('string'),
-    job_team_name: attr('string')
+    job_team_name: attr('string'),
+    job_company: attr('string')
 });
 

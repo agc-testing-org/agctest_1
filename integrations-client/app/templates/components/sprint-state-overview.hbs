@@ -7,7 +7,7 @@
             <div class="about mb-0"><strong>Project</strong> {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) }}<span class="text-uppercase">{{project.org}}/{{project.name}}</span>{{/link-to}}</div>
             {{#if job.id}}
                 <div class="about">
-                    Proposed for {{#link-to "develop.roadmap.job" (concat job.id "-" job.title "-at-" job.team_name)}}{{job.title}}{{/link-to}} at <strong>{{job.team_name}}</strong>
+                    Proposed for {{#link-to "develop.roadmap.job" (concat job.id "-" job.title "-at-" job.team_name)}}{{job.title}}{{/link-to}} at <strong>{{job.company}}</strong>
                 </div>
             {{/if}}
 		    {{#if mergedStates}}

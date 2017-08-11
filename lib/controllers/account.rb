@@ -562,6 +562,7 @@ class Account
                 if notification.job
                     response[i][:job_title] = notification.job.title
                     response[i][:job_team_name] = notification.job.team.name
+                    response[i][:job_company] = notification.job.company
                 end
             end
 
@@ -654,15 +655,15 @@ class Account
                     if notification.sprint_timeline.user_id == notification.user_id 
                         #TODO - confirmation
                     else
-                        return mail notification.user.email, "Wired7 Idea Pitch for #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.team.name}", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.team.name} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.team.name} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
+                        return mail notification.user.email, "Wired7 Idea Pitch for #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company}", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
                     end
                 elsif notification.sprint_timeline.notification.name == "job"
-                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{notification.sprint_timeline.job.id}-#{notification.sprint_timeline.job.title}-at-#{notification.sprint_timeline.job.team.name}"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{notification.sprint_timeline.job.id}-#{notification.sprint_timeline.job.title}-at-#{notification.sprint_timeline.job.company}"
                     if notification.sprint_timeline.user_id == notification.user.id
                         #TODO send confirmation / email with information on next steps
                         return true
                     else
-                        return mail notification.user.email, "#{notification.sprint_timeline.job.team.name} is looking for a #{notification.sprint_timeline.job.title} on Wired7", "#{notification.user.first_name},<br><br>A hiring manager at #{notification.sprint_timeline.job.team.name} started a search for a #{notification.sprint_timeline.job.title} on Wired7.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nA hiring manager at #{notification.sprint_timeline.job.team.name} started a search for a #{notification.sprint_timeline.job.title} on Wired7.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:\n\n#{link}\n\n\n#{signature}"
+                        return mail notification.user.email, "#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} is looking for a #{notification.sprint_timeline.job.title} on Wired7", "#{notification.user.first_name},<br><br>#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:\n\n#{link}\n\n\n#{signature}"
                     end
                 end
             end

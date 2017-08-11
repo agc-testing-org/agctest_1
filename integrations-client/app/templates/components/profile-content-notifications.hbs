@@ -24,14 +24,14 @@
                    
                     {{#if (eq notification.notification.name "job")}}
                         <p class="line">
-                        A hiring manager at <strong>{{notification.job_team_name}}</strong> started a search for a {{notification.job_title}}.  If you're interested, {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_team_name)}}  propose and build an idea{{/link-to}} that earns the hiring manager's attention.
+                        {{notification.job_team_name}} at <strong>{{notification.job_company}}</strong> started a search for a {{notification.job_title}}.  If you're interested, {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company)}}  propose and build an idea{{/link-to}} that earns the hiring manager's attention.
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "new")}}
                         <p class="line">
                             {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
-                            proposed a new sprint idea ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) for the {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_team_name)}}{{notification.job_title}}{{/link-to}} listing at <strong>{{notification.job_team_name}}</strong> using {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
+                            proposed a new sprint idea ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) for the {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company)}}{{notification.job_title}}{{/link-to}} listing at <strong>{{notification.job_company}}</strong> using {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
                         </p>
                     {{/if}}
 
