@@ -17,3 +17,7 @@ vote:
 winner:
   name: "winner"
   description: "i hate bragging but"
+
+comment_vote:
+  name: "comment vote"
+  description: "its new vote for comment"
