@@ -442,12 +442,14 @@ class Integrations < Sinatra::Base
         user || return_not_found
         response = {
             :id => user.id, 
-            :created_at => user.created_at, 
-            :location => user.user_profile.location_name, 
-            :title => user.user_profile.user_position.title, 
-            :industry => user.user_profile.user_position.industry, 
-            :size => user.user_profile.user_position.size,
-            :company => (user.user_profile.user_position.company if ( user.user_profile && user.user_profile.user_position && @session_hash && (@session_hash["id"] == user[:id])))
+            :created_at => user.created_at,
+        }
+        if user.user_profile && user.user_profile.user_position
+            response[:location] = user.user_profile.location_name
+            response[:title] = user.user_profile.user_position.title
+            response[:industry] = user.user_profile.user_position.industry
+            response[:size] = user.user_profile.user_position.size
+            response[:company] = (user.user_profile.user_position.company if ( @session_hash && (@session_hash["id"] == user[:id])))
         }
         status 200
         return response.to_json 
