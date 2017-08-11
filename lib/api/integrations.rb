@@ -1041,7 +1041,7 @@ class Integrations < Sinatra::Base
         contributor.preparing = true
         contributor.prepared = 0
         contributor.save
-        ContributorSyncWorker.perform_async @session, @session_hash["github_token"], contributor[:id], @session_hash["github_username"]
+        ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
         status 200
         return contributor.to_json 
     end
