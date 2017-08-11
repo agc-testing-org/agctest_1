@@ -90,10 +90,10 @@ describe ".Activity" do
     end
 
     context "#user_notifications_for_job" do
-        fixtures :users, :jobs, :sprint_timelines, :user_roles
+        fixtures :users, :jobs, :sprint_timelines, :roles, :user_roles
         before(:each) do
             @sprint_timeline_id = sprint_timelines(:job_developer).id
-            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, user_roles.user_id as user_id from jobs INNER JOIN sprint_timelines ON sprint_timelines.job_id = jobs.id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1 where (user_roles.user_id != #{decrypt(sprint_timelines(:job_developer).user_id).to_i}) and sprint_timelines.id = #{sprint_timelines(:job_developer_idea).id}")
+            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, user_roles.user_id as user_id from jobs INNER JOIN sprint_timelines ON sprint_timelines.job_id = jobs.id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1 where (user_roles.user_id != #{decrypt(sprint_timelines(:job_developer).user_id).to_i}) and sprint_timelines.id = #{@sprint_timeline_id}")
             @res = @activity.user_notifications_for_job @sprint_timeline_id
         end
         it_behaves_like "user_notifications"
@@ -102,8 +102,8 @@ describe ".Activity" do
     context "#user_notifications_for_job_owner" do
         fixtures :users, :jobs, :sprint_timelines
         before(:each) do
-            @sprint_timeline_id = sprint_timelines(:job_developer).id
-            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, jobs.user_id as user_id from jobs INNER JOIN sprint_timelines ON sprint_timelines.job_id = jobs.id where sprint_timelines.id = #{sprint_timelines(:job_developer_idea).id}")
+            @sprint_timeline_id = sprint_timelines(:job_developer_idea).id
+            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, jobs.user_id as user_id from jobs INNER JOIN sprint_timelines ON sprint_timelines.job_id = jobs.id where sprint_timelines.id = #{@sprint_timeline_id}")
             @res = @activity.user_notifications_for_job_owner @sprint_timeline_id
         end
         it_behaves_like "user_notifications"

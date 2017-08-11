@@ -58,14 +58,14 @@ describe "/users" do
         end
         context "user exists" do
             before(:each) do
-                get "/users/#{@user_id}", {},  {}
+                get "/users/#{@user_id}", {}, {}
                 @res = JSON.parse(last_response.body)
             end
             it_behaves_like "profile"
         end
         context "invalid user" do
             before(:each) do
-                get "/users/930", {},  {}
+                get "/users/930", {}, {}
                 it_behaves_like "not_found"
             end                                             
         end
@@ -73,7 +73,7 @@ describe "/users" do
 
     describe "GET /me" do
         fixtures :user_profiles, :user_positions
-        context "signed in" do
+        context "signed in", :focus => true do
             before(:each) do
                 @position = user_positions(:adam_confirmed)
                 @profile = user_profiles(:adam_confirmed)
@@ -551,7 +551,7 @@ describe "/users" do
         end
     end
 
-    describe "GET /me/notifications", :focus => true do
+    describe "GET /me/notifications" do
         fixtures :sprint_timelines, :user_notifications, :notifications, :jobs, :teams
         context "signed in" do 
             before(:each) do
