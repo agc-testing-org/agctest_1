@@ -47,6 +47,16 @@ describe "/jobs" do
                 end
             end
         end
+        it "should return zip" do
+            @job_results.each_with_index do |job_result,i|
+                expect(@jobs[i]["zip"]).to eq(job_result["zip"])
+            end
+        end
+        it "should return company" do
+            @job_results.each_with_index do |job_result,i|
+                expect(@jobs[i]["company"]).to eq(job_result["company"])
+            end
+        end
         it "should return sprint_id" do
             @job_results.each_with_index do |job_result,i|
                 expect(@jobs[i]["sprint_id"]).to eq(job_result["sprint_id"])
@@ -72,10 +82,11 @@ describe "/jobs" do
             @link = "https://wired7.com/12345"
             @team_id = teams(:ateam).id
             @role_id = roles(:development).id
+            @zip = "94105"
         end
         context "not on team" do
             before(:each) do
-                post "jobs", {:title => @title, :role_id => @role_id, :team_id => @team_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                post "jobs", {:title => @title, :role_id => @role_id, :team_id => @team_id, :link => @link, :zip => @zip }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
             end
             it_behaves_like "unauthorized"
         end
@@ -85,8 +96,9 @@ describe "/jobs" do
                 @team_id = user_teams(:adam_confirmed).team_id
             end
             context "valid" do
+                fixtures :user_profiles, :user_positions
                 before(:each) do
-                    post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :zip => @zip, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @job_results = @mysql_client.query("select * from jobs")
                     @jobs = [JSON.parse(last_response.body)]
                     @timeline = @mysql_client.query("select * from sprint_timelines").first
@@ -105,21 +117,33 @@ describe "/jobs" do
             context "invalid" do
                 context "title too short" do
                     before(:each) do
-                        post "jobs", {:title => "a"*4, :team_id => @team_id, :role_id => @role_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        post "jobs", {:title => "a"*4, :team_id => @team_id, :role_id => @role_id, :zip => @zip, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     end
                     it_behaves_like "error", "title must be 5-100 characters"
                 end
                 context "title too long" do
                     before(:each) do
-                        post "jobs", {:title => "a"*101, :team_id => @team_id, :role_id => @role_id, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        post "jobs", {:title => "a"*101, :team_id => @team_id, :role_id => @role_id, :zip => @zip, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     end
                     it_behaves_like "error", "title must be 5-100 characters"
                 end
                 context "invalid link" do
                     before(:each) do
-                        post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :link => "www.wired7.com/12345" }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
+                        post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :zip => @zip, :link => "www.wired7.com/12345" }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                     end
                     it_behaves_like "error", "a full link (http or https is required)"
+                end
+                context "invalid zip" do
+                    before(:each) do
+                        post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :zip => 111, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    end
+                    it_behaves_like "error", "a valid zip code is required"
+                end
+                context "no linkedin data" do
+                    before(:each) do
+                        post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :zip => @zip, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    end
+                    it_behaves_like "error", "you must connect linkedin to post a job"
                 end
             end
         end

@@ -784,7 +784,7 @@ class Integrations < Sinatra::Base
 
         query = {:id => @session_hash["id"]}
         user = account.get query
-        company = user.user_profile.user_position.company || (return_error "you must connect Linkedin to post a job")
+        ((user.user_profile && user.user_profile.user_position) && company = user.user_profile.user_position.company) || (return_error "you must connect linkedin to post a job")
 
         issue = Issue.new
         job = issue.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link], fields[:zip], company

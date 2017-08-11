@@ -535,6 +535,13 @@ describe "/users" do
                 end
             end
         end
+        it "should return job_company" do
+            @notification_results.each_with_index do |n,i|
+                if@res[i]["job_id"]
+                    expect(@res[i]["job_company"]).to eq(@mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["company"])
+                end
+            end
+        end
     end
     shared_examples_for "user_notifications_timeline" do
         it "should return notification" do
