@@ -223,12 +223,18 @@ label{
     background-color: transparent !important;
     margin-left: 14px !important;
     left:14px;
-    top:-6px;
+    top:4px;
     margin-top: 10px !important;
     margin-bottom:5px !important;
 }
 .hidden-md-up .logo{
     margin-left:0px !important;
+    top:-6px;
+}
+.sidebar.hidden-md-up.float .logo{
+    background-image: url(w7_logo_white.png);
+    top:0px;
+    left:10px;
 }
 .highlight-true{
     background-color: #fff;
@@ -698,6 +704,9 @@ button{
     width:100%;
     display:block;
     position:relative;
+}
+.sidebar.hidden-md-up .nav li{
+    width:100% !important;
 }
 .sidebar .nav li.nested, .sidebar.hidden-md-up .nav li.nested{
     color:#fff;
