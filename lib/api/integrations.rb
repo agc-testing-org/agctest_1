@@ -447,7 +447,7 @@ class Integrations < Sinatra::Base
             :title => user.user_profile.user_position.title, 
             :industry => user.user_profile.user_position.industry, 
             :size => user.user_profile.user_position.size,
-            :company => (user.user_profile.user_position.company if ( @session_hash && (@session_hash["id"] == user[:id])))
+            :company => (user.user_profile.user_position.company if ( user.user_profile && user.user_profile.user_position && @session_hash && (@session_hash["id"] == user[:id])))
         }
         status 200
         return response.to_json 
