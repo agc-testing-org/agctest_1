@@ -319,7 +319,7 @@ describe "/contributors" do
                 expect(@mysql.count).to eq(1)
             end
             it "should return previous vote" do
-                expect(@res["previous"]).to eq(@contributor_id.id)
+                expect(@res["previous"]).to eq(@contributor_id)
             end
         end
     end

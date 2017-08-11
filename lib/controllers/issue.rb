@@ -70,18 +70,22 @@ class Issue
              check = { 
                 user_id: user_id, 
                 sprint_state_id: sprint_state_id,
-                contributor_id: contributor_id,
                 comment_id: comment_id
                 } 
             end
             vote = Vote.find_or_initialize_by(check) 
 
-            new_record = false
-            previous_record = vote.id
+            previous_record = vote.contributor_id
 
-            if previous_record == nil
+            if vote.id == nil
+                vote.update_attributes!(:contributor_id => contributor_id)
                 vote.save
                 new_record = true
+            elsif previous_record != contributor_id.to_i
+                vote.update_attributes!(:contributor_id => contributor_id)
+                new_record = true
+            else 
+                new_record = false
             end
 
             record = vote.as_json
