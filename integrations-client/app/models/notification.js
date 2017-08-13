@@ -19,6 +19,8 @@ export default DS.Model.extend({
     talent_id: attr('string'),
     talent_first_name: attr('string'),
     sprint_state_id: attr('number'),
-    state_id: DS.belongsTo('state')
+    state_id: DS.belongsTo('state'),
+    comment_vote: attr(),
+    user_profile_comment_vote: attr()
 });
 

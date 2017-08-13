@@ -559,6 +559,10 @@ class Account
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
                 response[i][:notification] = notification.notification
+                if notification.vote != nil && notification.vote.comment != nil
+                    response[i][:comment_vote] = notification.vote.comment
+                    response[i][:user_profile_comment_vote] = get_profile notification.vote.comment.user
+                end
             end
 
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
