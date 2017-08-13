@@ -10,7 +10,9 @@
              by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
             {{/unless}}
         </small>
+        {{#if session.isAuthenticated}}
         {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id}}
+        {{/if}}
     </div>
 {{/each}}
 </div>
