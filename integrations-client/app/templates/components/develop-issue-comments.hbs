@@ -11,7 +11,7 @@
             {{/unless}}
         </small>
         {{#if session.isAuthenticated}}
-        {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id}}
+        {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
         {{/if}}
     </div>
 {{/each}}

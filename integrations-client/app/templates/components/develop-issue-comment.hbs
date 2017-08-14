@@ -4,7 +4,7 @@
 {{textarea value=comment class="form-control input-lg rounded mt-2 mb-2" rows="1" placeholder=text}}
 <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment" aria-hidden="true"></i> Post Comment</button>
 {{#if show_vote}}
-    <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote {{#if votes_count.length}}({{votes_count.length}}){{/if}}</button>
+    <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i>{{#if votes_count.length}} ({{votes_count.length}}){{/if}}</button>
 {{/if}}
 
 {{#if sessionAccount.account.admin}}

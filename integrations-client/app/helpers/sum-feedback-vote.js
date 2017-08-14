@@ -5,14 +5,17 @@ export function sumFeedbackVote(params/*, hash*/) {
     if (params[0]) {
         var contributions = params[0].toArray();
         for (var i = 0; i < contributions.length; i++) {
-            var votes = contributions[i].get(params[1]).toArray()
-            var votes_count = []
-            for (var i = 0; i < votes.length; i++) {
-                var data = votes[i].data
-                if (data.comment_id == null) {
-                    votes_count.push(votes[i])
+            if(contributions[i].get(params[1])){
+                console.log(contributions[i]); 
+                var votes = contributions[i].get(params[1]).toArray();
+                var votes_count = [];
+                for (var j = 0; j < votes.length; j++) {
+                    var data = votes[j].data;
+                    if (data.comment_id == null) {
+                        votes_count.push(votes[j]);
+                    }
+                    total = total + votes_count.length;
                 }
-                total = votes_count.length
             }
         }
     }
