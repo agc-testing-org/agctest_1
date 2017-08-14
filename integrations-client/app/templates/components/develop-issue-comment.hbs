@@ -1,8 +1,8 @@
 {{application-error error=errorMessage class="mt-2"}}
 {{textarea value=comment class="form-control input-lg rounded mt-2 mb-2" rows="1" placeholder=text}}
-    <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment" aria-hidden="true"></i> Post Comment</button>
+    <button class="btn btn-info btn-sm d-inline-block mr-1 rounded" {{action "comment" contributor.id sprint_state.id}}><i class="fa fa-comment" aria-hidden="true"></i> Post Comment</button>
     {{#if show_vote}}
-        <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</button>
+        <button class="btn btn-info btn-sm d-inline-block mr-1 rounded" {{action "vote" contributor.id sprint_state.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Upvote {{#if contributor.votes.length}}({{contributor.votes.length}}){{/if}}</button>
     {{/if}}
 {{#if sessionAccount.account.admin}}
 
@@ -13,10 +13,10 @@
 {{else}}
 {{#if sprint_state.contributor_id}}
 {{#unless sprint_state.merged}}
-<button class="btn btn-outline-secondary btn-sm d-inline-block rounded" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</button>
+<button class="btn btn-info btn-sm d-inline-block rounded" {{action "merge" contributor.id sprint_state.id project}}><i class="fa fa-compress" aria-hidden="true"></i> Merge</button>
 {{/unless}}
 {{else}}
-<button class="btn btn-outline-secondary btn-sm d-inline-block rounded" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</button>
+<button class="btn btn-info btn-sm d-inline-block rounded" {{action "judge" contributor.id sprint_state.id project}}><i class="fa fa-balance-scale" aria-hidden="true"></i> Judge</button>
 {{/if}}
 {{/unless}}
 

@@ -30,8 +30,8 @@
         </div>
         {{/if}}
     
-        <button {{action "createSprint" project_id for_job}} type="submit" class="btn btn-secondary btn-sm rounded">Create</button>
-        <button {{action "showCreate"}} type="submit" class="btn btn-secondary btn-sm rounded">Cancel</button>
+        <button {{action "createSprint" project_id for_job}} type="submit" class="btn btn-info btn-sm rounded">Create</button>
+        <button {{action "showCreate"}} type="submit" class="btn btn-info btn-sm rounded">Cancel</button>
     {{else}}
         <a class="line" {{action "showCreate"}}>Pitch your own idea</a>
     {{/if}}
