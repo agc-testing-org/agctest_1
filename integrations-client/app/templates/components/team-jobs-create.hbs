@@ -13,20 +13,20 @@
         <label>Zip Code</label>
         {{input type="text" value=zip placeholder="94105" class="form-control unset-width input-lg rounded" size=5 maxlength=6}}
 
-        <label>Target User</label>
+        <label>Target User Function</label>
         <div class="form-group mb-3">
             <div class="btn-group" data-toggle="buttons">
                 {{#each roles as |role|}}
                     {{#if (eq role_id role.id)}}
-                        <label class="btn btn-secondary btn-sm cursor-pointer active rounded" {{action "role" role.id}} ><i class="fa fa-fw fa-1x {{role.fa_icon}}"></i> {{role.name}}</label>
+                        <label class="btn btn-secondary btn-sm cursor-pointer active rounded ml-0" {{action "role" role.id}} ><i class="fa fa-fw fa-1x {{role.fa_icon}}"></i> {{role.name}}</label>
                     {{else}}
-                        <label class="btn btn-secondary btn-sm cursor-pointer rounded" {{action "role" role.id}} ><i class="fa fa-fw fa-1x {{role.fa_icon}}"></i> {{role.name}}</label>
+                        <label class="btn btn-secondary bright btn-sm cursor-pointer rounded ml-0" {{action "role" role.id}} ><i class="fa fa-fw fa-1x {{role.fa_icon}}"></i> {{role.name}}</label>
                     {{/if}}
                 {{/each}}
             </div>
         </div>
 
-        <button type="submit" class="btn btn-secondary rounded d-inline">Create</button>
+        <button type="submit" class="btn btn-info rounded d-inline">Create</button>
     </div>
 </form>
 

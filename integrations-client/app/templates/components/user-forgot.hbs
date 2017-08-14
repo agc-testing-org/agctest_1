@@ -5,7 +5,7 @@
                 <div class="title">Password Reset</div>
             </div>                                                  
             <div class="modal-header subtitle">                                 
-                <div class="text-muted">Reset your Wired7 account password</div>
+                <div class="text-light">Reset your Wired7 account password</div>
             </div>                                                                                              
             <div class="modal-body">                               
                 <form {{action 'reset' on="submit"}} class="register-form">
@@ -13,11 +13,11 @@
                         {{application-error error=errorMessage}}
                         {{input type="email" value=email placeholder="Email" class="form-control input-lg rounded"}}
 
-                        <button type="submit" class="btn btn-secondary btn-lg btn-block rounded">Reset</button>
+                        <button type="submit" class="btn btn-info btn-lg btn-block rounded">Reset</button>
                     </div>
                 </form>
             </div>                                                                                                          
-            <div class="modal-foot rounded-bottom text-center text-muted cursor-pointer">{{#link-to "index" class="text-muted"}}Cancel{{/link-to}}</div>
+            <div class="modal-foot rounded-bottom text-center text-light cursor-pointer">{{#link-to "index" class="text-light"}}Cancel{{/link-to}}</div>
         </div>
     </div>                                                                                                                              
     {{application-foot-absolute}}

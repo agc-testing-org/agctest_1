@@ -16,16 +16,16 @@ body {
     font-weight:400;
     font-size:14px;
     /*color: #4C4C4C;*/
-    color: #4C4C4C;
+    color: #496174;
     /*    -webkit-font-smoothing: subpixel-antialiased; */
 }
 
 .body-dark{
-    background: #28B6C3; /* For browsers that do not support gradients */
-    background: -webkit-linear-gradient(left top, #ededed, #fff); /* For Safari 5.1 to 6.0 */
-    background: -o-linear-gradient(bottom right, #ededed, #fff); /* For Opera 11.1 to 12.0 */
-    background: -moz-linear-gradient(bottom right, #ededed, #fff); /* For Firefox 3.6 to 15 */
-    background: linear-gradient(to bottom right, #ededed, #fff); /* Standard syntax */
+    background: #2f3e47; /* For browsers that do not support gradients */
+    background: -webkit-linear-gradient(left top, #2f3e47, #2f3e47); /* For Safari 5.1 to 6.0 */
+    background: -o-linear-gradient(bottom right, #2f3e47, #2f3e47); /* For Opera 11.1 to 12.0 */
+    background: -moz-linear-gradient(bottom right, #2f3e47, #2f3e47); /* For Firefox 3.6 to 15 */
+    background: linear-gradient(to bottom right, #2f3e47, #2f3e47); /* Standard syntax */
 }
 strong{
     font-weight: 600;
@@ -119,7 +119,7 @@ li {
 }
 label{
     margin-bottom:2px;
-    font-weight:400;
+    font-weight:300;
 }
 .btn, a{
     font-weight: 400;
@@ -136,32 +136,39 @@ label{
 .btn:hover{
     border:0px;
 }
-.btn-secondary{  
-    background-color:#28B6C3;
+.btn-outline-info{
+    color: #fff;
+    border-width:2px;
 }
-.btn-secondary:hover{
-    background-color:#20919c;
+.btn.btn-secondary.selected{
+    color: #fff !important;
 }
-.btn-outline-secondary{
-    background-color: #999;
-    color:#fff;
+.btn.btn-secondary{
+    background-color: #2a373f;
+    border: 1px solid #2f3e47 !important;
+    margin-right: 5px;
+    margin-top:10px;
+    border:0px;
+}
+.btn.btn-secondary.bright{
+    color: #5bc0de !important;
 }
 .btn-group{
     display:inline-block;
 }
 .btn-group label{
-    margin-left:4px !important;
-    background-color: #ccc;
-    color: #fff !important;
+    margin-left:4px !important; 
     font-weight:400 !important;
+    color: #636c72!important;
 }
 .btn-group label:hover{
-    background-color: #ededed;
-    color: #28B6C3 !important;
+
 }
 .btn-group label.active{
-    background-color: #ededed;
-    color: #28B6C3 !important;
+    color: #fff !important;
+}
+.btn-group > .btn:first-child {
+    margin-left: 0px !important;
 }
 
 .badge, .btn-group label{
@@ -207,8 +214,8 @@ label{
 .orange{
     color: orange;
 }
-.text-muted{
-    color: #989898;
+.text-muted, .text-light{
+    color: rgba(255,255,255,.7);
 }
 .sidebar.float .logo{
     background-image: url(w7_logo_black_small.png);
@@ -420,9 +427,11 @@ button{
     position: fixed !important;
 }
 .modal-content{
-    background-color: #fff;
+    padding: 0px;
+    border-radius: 5px;
+    background-color: #2a373f;
+    box-shadow: 0 2px 3px rgba(0,0,0,.1);
     border:0px;
-    border: 1px solid #ededed;
 }
 .modal.in {
     display:block;
@@ -437,7 +446,6 @@ button{
 }
 .modal-header .title{
     font-size:22px;
-    color: #4C4C4C;
     font-weight:400;
 }
 .modal-header.subtitle{
@@ -450,7 +458,7 @@ button{
 .modal-foot{
     padding: 0px;
     border: 0px;
-    background-color: #ededed;
+    background-color: #2F3E4B;
 }
 .modal-foot a{
     text-decoration:none;
@@ -579,12 +587,19 @@ button{
     border:0px;
     padding:0px;
 }
+.register-form label{
+    color: #fff;
+}
 .register-form .form-group{
     margin-bottom:0px;
 
 }
 .register-form input{
-    color: #28B6C3 !important;
+    border: 1px solid #2f3e47 !important;
+    height: 38px;
+    background-color: #2a373f !important;
+    box-shadow: none !important;
+    color:#fff;
 }
 .register-form button{
     margin-top:10px;
@@ -599,8 +614,8 @@ button{
     margin-top:10px; 
 }
 .register-form .form-control,.register-form .form-control[disabled]{
-    background-color: #fff;
-    border: 1px solid #ededed !important;
+    border: 1px solid #2f3e47 !important;
+    color:#fff !important;
 }
 
 
@@ -664,7 +679,7 @@ button{
     padding: 20px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
-    background-color: #4C4C4C;
+    background-color: #2f3e47; 
     padding-left: 0px;
     padding-right: 0px;
     padding-top: 0px;
@@ -673,7 +688,6 @@ button{
     max-width:100px;
 }
 .sidebar.hidden-md-up{
-    background-color: #333;
     margin-top: 0px;
     padding:0px;
     position:relative;
@@ -698,7 +712,7 @@ button{
     color: #28B6C3;
     margin:0px;
     padding:10px;
-    background-color: #333;
+    background-color: #2a373f; 
     border-bottom: 0px solid #333;
     color: #cfcfcf;
     width:100%;
@@ -710,7 +724,7 @@ button{
 }
 .sidebar .nav li.nested, .sidebar.hidden-md-up .nav li.nested{
     color:#fff;
-    background-color: #4C4C4C;
+    background-color: #2f3e47;
     padding-top:4px;
     padding-bottom:4px;
     line-height: 16px;
@@ -730,7 +744,7 @@ button{
 }
 
 .sidebar .nav .menu li.active{
-    background-color: #4c4c4c;
+    background-color: #2f3e47; 
     color: #cfcfcf;
 }
 .sidebar .nav .menu li.active.selectable{
@@ -761,9 +775,9 @@ button{
     margin:0px;
     padding:10px;
     border-bottom: 0px;
-    color: #cfcfcf;     
+    color: #fff;     
     width:100%;
-    background-color: #4c4c4c;
+    background-color: #2f3e47; 
     display:block;              
     position:relative;              
 } 

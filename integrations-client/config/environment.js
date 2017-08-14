@@ -7,6 +7,7 @@ module.exports = function(environment) {
     rootURL: '/',
     locationType: 'auto',
     org: process.env.INTEGRATIONS_GITHUB_ORG,
+    splash: process.env.INTEGRATIONS_SPLASH_HOST,
     EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build

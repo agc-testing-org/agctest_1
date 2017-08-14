@@ -11,7 +11,7 @@
                 </div>
             {{/if}}
 		    {{#if mergedStates}}
-                <a class="btn btn-secondary rounded btn-sm mt-2" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
+                <a class="btn btn-info rounded btn-sm mt-2" target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/blob/master/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Sprint Requirements</a>
             {{/if}}
             {{develop-issue-transition refresh="refresh" sprint=sprint states=states class="mt-2"}}
             {{sprint-state-overview-skillsets skillsets=skillsets sprint_id=sprint.id class="skillsets mt-2"}}

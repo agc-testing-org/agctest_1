@@ -7,7 +7,7 @@
                 </div>
             </div>
             <div class="modal-header subtitle">
-                <div class="text-muted">
+                <div class="text-light">
                     This invitation appears to be
                     {{#if invitation.expired}}
                         expired.  Use the button below and we'll send you a new one.
@@ -22,7 +22,7 @@
             {{#if invitation.expired}}
                 {{#if showResend}}
                     <form class="register-form">
-                        <button {{action "resend" token}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Resend</button>
+                        <button {{action "resend" token}} type="submit" class="btn btn-info btn-lg rounded btn-block">Resend</button>
                     </form>
                 {{/if}}
             {{/if}}
@@ -31,7 +31,7 @@
 
             </div>
 
-            <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "register" class="text-muted"}}Cancel{{/link-to}}</div>
+            <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "register" class="text-light"}}Cancel{{/link-to}}</div>
         </div>
     </div>
 </div>
