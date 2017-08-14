@@ -8,6 +8,7 @@ class Team < ActiveRecord::Base
     end
     validates_uniqueness_of :name
     has_many :user_teams
+    has_many :jobs
     belongs_to :user
     belongs_to :plan
 end

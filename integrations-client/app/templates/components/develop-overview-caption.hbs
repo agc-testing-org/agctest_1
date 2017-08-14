@@ -1,0 +1,15 @@
+{{application-error error=errorMessage}}
+
+{{#if (and showUpdate sessionAccount.account.admin)}}
+    <div class="text-right">
+        {{textarea rows=1 value=project.caption placeholder="explain the project in more detail" class="form-control form-control-gray input-lg rounded"}}
+        <button class="btn btn-secondary rounded mt-1 btn-sm text-right" {{action "update" project.id project.caption }}>Update</button>
+        <button class="btn btn-secondary rounded mt-1 btn-sm text-right" {{action "show"}}>Cancel</button>
+    </div>
+{{else}}
+    <div class="description">
+        {{project.caption}} 
+        {{#if sessionAccount.account.admin}}<a {{action 'show'}}>Edit</a>{{/if}}
+    </div>
+{{/if}}
+

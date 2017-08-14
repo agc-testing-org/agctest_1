@@ -32,12 +32,16 @@ describe ".Account" do
             end
         end
     end
-    context "#linkedin_profile" do
+    context "#pull_linkedin_profile" do
         before(:each) do 
+            @id = 12345678
             @headline = "headline"
             @location = {:country => {:code => "US"}, :name => "San Francisco Bay"}
             @summary = "summary"
+            @url = "http://www.linkedin.com/in/evanmorikawa"
             LinkedIn::API.any_instance.stub(:profile) { JSON.parse({
+                :id => @id,
+                :public_profile_url => @url,
                 :headline => @headline,
                 :location => @location,
                 :summary => @summary,
@@ -47,6 +51,12 @@ describe ".Account" do
             @pull = @account.pull_linkedin_profile client
         end
         context "#pull_linkedin_profile" do
+            it "should return id" do
+                expect(@pull.id).to eq @id
+            end
+            it "should return url" do
+                expect(@pull.public_profile_url).to eq @url
+            end
             it "should return headline" do
                 expect(@pull.headline).to eq @headline
             end
@@ -646,26 +656,7 @@ describe ".Account" do
             end
         end
     end
-
-    context "#get_roles" do
-        fixtures :roles
-        before(:each) do
-            @roles = @account.get_roles
-        end
-        it "should return more than one result" do
-            expect(@roles.length).to be > 0
-        end
-        it "should return name" do
-            @roles.each_with_index do |r,i|
-                expect(r["name"]).to eq(roles(r["name"]).name)
-            end
-        end
-        it "should return fa_icon" do
-            @roles.each_with_index do |r,i|
-                expect(r["fa_icon"]).to eq(roles(r["name"]).fa_icon)
-            end
-        end
-    end
+    
     context "#update_role" do
         fixtures :users, :roles
         before(:each) do

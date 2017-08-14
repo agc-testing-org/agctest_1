@@ -108,6 +108,22 @@ describe "/contributors" do
             end
             it_behaves_like "contributors_post"
         end
+        context "different sprint, same project" do
+            fixtures :sprint_states, :states, :projects, :contributors
+            before(:each) do
+                @sprint_state_id = sprint_states(:sprint_1b_state_1).id
+                @project = projects(:demo).id
+                %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
+                %x( mkdir "test/#{@username}/#{@mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}").first["repo"]}"; cd "test/#{@username}/#{@mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id}").first["repo"]}"; git init --bare)
+                post "/contributors", {:sprint_state_id => @sprint_state_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors where sprint_state_id = #{@sprint_state_id} ORDER BY ID DESC").first
+            end
+            it "should use the same repo" do
+                expect(@sql["repo"]).to eq(contributors(:adam_confirmed_1).repo)
+            end
+            it_behaves_like "contributors_post"
+        end
         context "invalid sprint_state_id" do
             fixtures :projects
             before(:each) do

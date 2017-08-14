@@ -6,7 +6,16 @@ export default Ember.Component.extend({
     sessionAccount: Ember.inject.service('session-account'),
     store: Ember.inject.service(),
     org: config.org,
+    showingGit: false,
     actions: {
+        showGit(){
+            if(this.get("showingGit")){
+                this.set("showingGit",false);
+            }
+            else{
+                this.set("showingGit",true);
+            }
+        },
         submit(project_id, contributor_id){
             var _this = this;
             var store = this.get('store');

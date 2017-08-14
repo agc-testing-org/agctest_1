@@ -1,17 +1,18 @@
 {{#unless (eq model.state.name "any")}}{{title model.state.name " sprints"}}{{else}}{{title "Sprints"}}{{/unless}}
 <div class="container-fluid pl-0 pr-0">
-    <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
-        {{state-list states=model.states}}
+    <nav class="col-md-1 bg-faded sidebar float hidden-sm-down">
+        {{state-list states=model.states has_tooltips=true}}
     </nav>
-    <nav class="col-md-1 bg-faded sidebar hidden-md-up">
+    <nav class="col-md-1 bg-faded sidebar float hidden-md-up">
         {{state-list states=model.states}}
     </nav>
     <main class="col-sm-12 col-md-12 offset-sm-0 pl-0 pr-0">
     <div class="row main">
-        <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{develop-overview model=model}}</div>
-        <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{develop-overview model=model}}</div>
-        <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{develop-content model=model}}</div>
-        <div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{develop-content model=model}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down">{{develop-overview model=model}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up">{{develop-overview model=model}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 content hidden-sm-down">{{develop-content model=model}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 content hidden-md-up">{{develop-content model=model}}</div>
     </div>
     </main>
+    {{application-foot class="foot-hold text-center"}}
 </div>

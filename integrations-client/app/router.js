@@ -17,6 +17,9 @@ Router.map(function() {
         this.route('resend');
     });
     this.route('develop', function() {
+        this.route('roadmap', function() {
+            this.route('job', {path: '/job/:id'});
+        });
         this.route('new');
         this.route('project', {path: '/:project_id'}, function() {
             this.route('state', {path: '/state/:id'});
@@ -34,6 +37,7 @@ Router.map(function() {
             this.route('notifications');
             this.route('shares');
             this.route('leads');
+            this.route('jobs');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile
@@ -47,8 +51,8 @@ Router.map(function() {
         this.route('contributions-selected');
         this.route('token', {path: '/:token'});
     });
+    this.route('welcome');
     this.route('me', function() { // private profile (logged in)
-        this.route('welcome');
         this.route('notifications');
         this.route('overview');
         this.route('connections');

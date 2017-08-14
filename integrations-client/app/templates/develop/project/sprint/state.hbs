@@ -1,12 +1,12 @@
 <div class="row main">
     {{#if model.selected_state.state_id.contributors}}
-        <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{sprint-state-overview states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.selected_state showing-state=model.selected_state contributors=true refresh="refresh"}}</div>
-        <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{sprint-state-overview states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.selected_state showing-state=model.selected_state contributors=true refresh="refresh"}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down shadow">{{sprint-state-overview job=model.job states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.selected_state showing-state=model.selected_state contributors=true refresh="refresh"}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up shadow">{{sprint-state-overview job=model.job states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=model.selected_state showing-state=model.selected_state contributors=true refresh="refresh"}}</div>
     {{else}}
-        <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{sprint-state-overview states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=last_contributor_state showing-state=model.selected_state contributors=false refresh="refresh"}}</div>
-        <div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{sprint-state-overview states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=last_contributor_state showing-state=model.selected_state contributors=false refresh="refresh"}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down shadow">{{sprint-state-overview job=model.job states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=last_contributor_state showing-state=model.selected_state contributors=false refresh="refresh"}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up shadow">{{sprint-state-overview job=model.job states=model.states skillsets=model.skillsets sprint=model.sprint project=model.project selected-state=last_contributor_state showing-state=model.selected_state contributors=false refresh="refresh"}}</div>
     {{/if}}
-        <div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{sprint-state-content sprint=model.sprint project=model.project selected-state=model.selected_state last-state=last_state last-contributor-state=last_contributor_state refresh="refresh"}}</div>
-        <div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{sprint-state-content sprint=model.sprint project=model.project selected-state=model.selected_state last-state=last_state last-contributor-state=last_contributor_state refresh="refresh"}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 content hidden-sm-down">{{sprint-state-content sprint=model.sprint project=model.project selected-state=model.selected_state second-to-last-state=second_to_last_state last-state=last_state last-contributor-state=last_contributor_state refresh="refresh"}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 content hidden-md-up">{{sprint-state-content sprint=model.sprint project=model.project selected-state=model.selected_state second-to-last-state=second_to_last_state last-state=last_state last-contributor-state=last_contributor_state refresh="refresh"}}</div>
 </div>
 

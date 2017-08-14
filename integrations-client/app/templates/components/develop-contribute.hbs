@@ -1,31 +1,54 @@
-<div class="list-group rounded text-left">
-    <div class="list-group-item active rounded justify-content-between">
-        <h4>{{#if contributor.preparing}}{{application-loading size=1 class="d-inline"}}{{/if}} How to Contribute</h4>
-        <button class="btn btn-secondary btn-sm rounded" {{action "submit" project.id contributor.id }}>Synchronize</button>
+<div class="list-group rounded">
+    <h3 class="description section underline mb-1 mt-1 text-left">
+        {{#if contributor.preparing}}{{application-loading size=1 class="d-inline"}}{{/if}} How to Contribute
+    </h3>    
+    <small class="text-muted mb-2 text-left"><strong>Last Commit</strong> {{moment-from-now contributor.updated_at}} {{#if contributor.commit_success}}({{contributor.commit_remote}}){{/if}}</small>
+    
+    <div class="row top ml-0 mr-0 mt-0 rounded">
+        <div class="col-sm-4 col-md-4">
+            {{stacked-icon value="fa-clone" icon="fa-square" size="2" class="hidden-sm-down"}}
+            <h4 class="line">{{stacked-icon value="fa-clone" icon="fa-square" size="1" class="hidden-md-up d-inline"}} We've disguised and cloned this project to <strong>{{sessionAccount.account.github_username}}/{{contributor.repo}}</strong></h4>
+        </div>
+        <div class="col-sm-4 col-md-4">
+            {{stacked-icon value="fa-wrench" icon="fa-square" size="2" class="hidden-sm-down"}}
+            <h4 class="line">{{stacked-icon value="fa-wrench" icon="fa-square" size="1" class="hidden-md-up d-inline"}} Make all of your changes to <strong>branch {{sprint_state.id}}</strong> of this repository with <a {{action "showGit"}}>Git</a> or <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">edit directly on Github</a><br><a {{action "showGit"}}>{{#if showingGit}}Hide{{else}}Show{{/if}}</a> Git instructions</h4>
+        </div>
+         <div class="col-sm-4 col-md-4">
+            {{stacked-icon value="fa-rss" icon="fa-square" size="2" class="hidden-sm-down"}}
+            <h4 class="line">{{stacked-icon value="fa-rss" icon="fa-square" size="1" class="hidden-md-up d-inline"}} When you're ready <a {{action "submit" project.id contributor.id }}>submit your changes</a> and we will update your proposal</h4>
+        </div>
     </div>
-    <div class="list-group-item rounded">
-        <h4 class="line"><span class="badge badge-default rounded mr-1">Option 1</span> Command Line Access</h4>
-        <p class="line">git clone -b {{sprint_state.id}} git@github.com:{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</p>  
-    </div>
-    <div class="list-group-item rounded">
-        <h4 class="line"><span class="badge badge-default rounded mr-1">Option 2</span> Github User Interface Access</h4>
-        <p class="line"><a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">{{sessionAccount.account.github_username}}/{{contributor.repo}} branch {{sprint_state.id}}</a></p>
-        <small class="line text-muted">Use this option if you're less familiar with git and the command line</small>
-    </div>
-    {{#if (eq sprint_state.state_id.name "requirements design")}}
-        <div class="list-group-item rounded">
-            <h4 class="line">Requirements Document Placeholder</h4>
-            <p class="line">We've created a file for your changes: <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md</a></p>
-        </div>                                                                          
-    {{/if}}
-    <div class="list-group-item rounded">
-        <h4 class="line">Synchronize (let us know when you're done)</h4>
-        <p class="line">Last Commit: {{moment-from-now contributor.updated_at}} {{#if contributor.commit_success}}({{contributor.commit_remote}}){{/if}}</p>
-        {{#if sprint_state.pull_request}}
+
+    {{#unless open}}
+        {{application-error error="This phase is closed but you can improve your submission until a proposal is selected" class="mt-2"}}
+    {{/unless}} 
+
+    {{#if sprint_state.pull_request}}
         {{#unless sprint_state.merged}}
-            <small class="line text-muted">Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></small>
+            {{#if (eq sprint_state.contributor_id contributor.id)}}
+            <div class="about section mt-1 text-left">Please resolve any merge conflicts related to this pull request by synchronizing your changes: <a target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/pull/{{sprint_state.pull_request}}">{{project.org}}/{{project.name}} PR {{sprint_state.pull_request}}</a></div>
+            {{/if}}
         {{/unless}}
+    {{/if}}
+
+    {{#if showingGit}}
+    <div class="about section mb-2 text-left">
+        If you <strong>have not</strong> cloned the repository
+        <code class="line rounded">git clone -b {{sprint_state.id}} git@github.com:{{sessionAccount.account.github_username}}/{{contributor.repo}}.git</code>
+    </div>
+    <div class="about section text-left">
+        If you <strong>have</strong> previously cloned the repository
+        <code class="line rounded">git fetch origin {{sprint_state.id}}; git checkout {{sprint_state.id}}</code>
+    </div>
+    {{/if}}
+        
+    <div class="about section mt-1 text-left">
+        {{#if (eq sprint_state.state_id.name "requirements design")}}
+        Add your changes to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">this requirements document file</a> (Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md)
         {{/if}}
     </div>
 </div>
 
+<div class="text-left mt-2">
+    <button class="btn btn-secondary btn-sm rounded" type="button" {{action "submit" project.id contributor.id }}>Submit Changes</button>
+</div>

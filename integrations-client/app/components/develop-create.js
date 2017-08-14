@@ -10,11 +10,12 @@ export default Ember.Component.extend({
         this._super(...arguments);   
     },
     actions: {
-        createProject(org,name){
+        createProject(org,name,description){
             var _this = this;
             var project = this.get('store').createRecord('project', {
                 org: org,
-                name: name
+                name: name,
+                description: description
             }).save().then(function(response){
                 _this.set("project",response);
             });

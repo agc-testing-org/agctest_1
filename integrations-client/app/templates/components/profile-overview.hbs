@@ -13,10 +13,10 @@
                 {{profile-overview-linkedin complete=user.title refresh="refresh"}}
                 
                 {{profile-overview-skillsets-roles-instruction type="roles" text="to subscribe to relevant contribution opportunities" items=roles}}
-                {{profile-overview-skillsets-roles user=user items=roles type="role" class="skillsets"}}
+                {{profile-overview-skillsets-roles namespace="users/me" user=user items=roles type="role" class="skillsets"}}
               
                 {{profile-overview-skillsets-roles-instruction type="skillsets" text="to subscribe to specific interests" items=skillsets}}
-                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" class="skillsets"}}
+                {{profile-overview-skillsets-roles namespace="users/me" user=user items=skillsets type="skillset" class="skillsets"}}
             {{else}}
                 {{profile-overview-skillsets-roles-list items=roles type="role" class="skillsets"}}
                 {{profile-overview-skillsets-roles-list items=skillsets type="skillset" class="skillsets"}}

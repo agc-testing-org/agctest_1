@@ -5,3 +5,5 @@ adam_confirmed:
   location_name: "San Francisco Bay"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+  username: "adamcockell"
+  l_id: "A83123f3"

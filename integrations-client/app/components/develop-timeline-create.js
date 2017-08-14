@@ -11,6 +11,10 @@ export default Ember.Component.extend({
         this._super(...arguments);
     },
     actions: {
+        selectProject(project_id,project){
+            this.set("project_id",project_id);
+            this.set("project",project);
+        },
         showCreate(){
             if(this.get("displayCreate")){
                 this.set("displayCreate",false);
@@ -19,22 +23,33 @@ export default Ember.Component.extend({
                 this.set("displayCreate",true);
             }
         },
-        createSprint(projectId){
+        createSprint(projectId,checkJob){
             var _this = this;
             var title = this.get("title");
             var description = this.get("description");
+            var jobId = this.get("job_id");
             if(title && title.length > 5){
                 if(description && description.length > 5){
-                    var store = this.get('store');
-                    var sprint = store.createRecord('sprint', {
-                        title: title,
-                        description: description,
-                        project_id: projectId
-                    }).save().then(function(payload) {
-                        _this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
-                    }, function(xhr, status, error) {
+                    if(checkJob && projectId){
+                        var store = this.get('store');
+                        var sprint = store.createRecord('sprint', {
+                            title: title,
+                            description: description,
+                            project_id: projectId,
+                            job_id: jobId,
+                        }).save().then(function(payload) {
+                            _this.sendAction("refresh");
+                            _this.set("displayCreate",false);
+                            _this.set("title","");
+                            _this.set("description","");
+                            //_this.get('routes').redirectWithId("develop.project.sprint",payload.id); 
+                        }, function(xhr, status, error) {
 
-                    });
+                        });
+                    }
+                    else {
+                        this.set('errorMessage', "Please select a project");
+                    }
                 }
                 else {
                     this.set('errorMessage', "Please enter a more detailed description");

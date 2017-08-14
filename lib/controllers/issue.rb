@@ -4,15 +4,15 @@ class Issue
 
     end 
 
-    def create user_id, title, description, project_id
+    def create user_id, title, description, project_id, job_id
         begin
-            sprint = Sprint.create({
+            return Sprint.create({
                 user_id: user_id,
                 title: title.strip,
                 description: description.strip,
-                project_id: project_id
+                project_id: project_id,
+                job_id: job_id
             })
-            return sprint
         rescue => e
             puts e
             return nil
@@ -30,12 +30,11 @@ class Issue
 
     def create_sprint_state sprint_id, state_id, sha
         begin
-            sprint_state = SprintState.create({
+            return SprintState.create({
                 sprint_id: sprint_id,
                 state_id: state_id,
                 sha: sha
             })
-            return sprint_state 
         rescue => e
             puts e
             return nil
@@ -44,13 +43,12 @@ class Issue
 
     def create_comment user_id, contributor_id, sprint_state_id, text
         begin
-            comment = Comment.create({
+            return Comment.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
                 text: text.strip
             })
-            return comment
         rescue => e
             puts e
             return nil
@@ -111,15 +109,59 @@ class Issue
         end
     end
 
-    def create_project user_id, org, name
+    def create_job user_id, team_id, role_id, title, link, zip, company
         begin
-            project = Project.create({
+            return Job.create({
+                user_id: user_id,
+                team_id: team_id,
+                role_id: role_id,
+                zip: zip,
+                company: company,
+                title: (title.strip if title),
+                link: link
+            })
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_project user_id, org, name, description
+        begin
+            return Project.create({
                 org: org.strip,
                 name: name.strip,
+                description: (description.strip if description),
                 user_id: user_id,
                 preparing: true
             })
-            return project
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def jobs_with_sprints jobs
+        begin
+            jobs_result = []
+            jobs.each_with_index do |j,i|
+                jobs_result[i] = j.as_json
+                jobs_result[i][:role] = j.role_id
+                jobs_result[i][:sprints] = j.sprints.select("sprints.*, IF(sprints.id = #{(j.sprint_id || "NULL")}, 1, 0) as selected").order("selected DESC, id DESC").as_json
+                jobs_result[i][:sprints].each_with_index do |s,c|
+                    jobs_result[i][:sprints][c][:project] =  s["project_id"]
+                end
+            end
+            return jobs_result
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_jobs query
+        begin
+            return Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id").select("jobs.*,users.first_name as user_first_name,teams.name as team_name").order(:id => "DESC")
         rescue => e
             puts e
             return nil
@@ -128,7 +170,7 @@ class Issue
 
     def get_projects query
         begin
-            return Project.where(query).as_json
+            return Project.where(query)
         rescue => e
             puts e
             return nil
@@ -262,26 +304,6 @@ class Issue
     def update_skillsets sprint_id, skillset_id, active
         begin
             ss = SprintSkillset.find_or_initialize_by(:sprint_id => sprint_id, :skillset_id => skillset_id)
-            ss.update_attributes!(:active => active)
-            return {:id => ss.skillset_id}
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def get_user_skillsets user_id, query
-        begin            
-            return Skillset.joins("LEFT JOIN user_skillsets ON user_skillsets.skillset_id = skillsets.id AND user_skillsets.user_id = #{user_id.to_i} OR user_skillsets.user_id is null").where(query).select("skillsets.id","skillsets.name","user_skillsets.active").as_json
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def update_user_skillsets user_id, skillset_id, active
-        begin
-            ss = UserSkillset.find_or_initialize_by(:user_id => user_id, :skillset_id => skillset_id)
             ss.update_attributes!(:active => active)
             return {:id => ss.skillset_id}
         rescue => e

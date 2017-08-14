@@ -21,3 +21,8 @@ winner:
 comment_vote:
   name: "comment vote"
   description: "its new vote for comment"
+
+job:
+  name: "job"
+  description: "gotta get paid"
+

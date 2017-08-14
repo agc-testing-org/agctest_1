@@ -1,11 +1,12 @@
+<div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
 {{#if model.sprints}}
-<div class="full">
+<div class="overview">
+
+    <h4 class="about section">
+        Sprints
+    </h4>
 
     <div class="list-group rounded text-left">
-        <div class="list-group-item active rounded">
-            <h4>Sprints</h4>
-        </div>
-
         {{#each model.sprints as |sprint|}}
             <div class="list-group-item rounded">
                 <h3 class="line">{{#link-to "develop.project.sprint" (concat sprint.id "-" sprint.title)}}{{sprint.title}}{{/link-to}}</h3>
@@ -17,13 +18,14 @@
     </div>
 </div>
 {{else}}
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
+
+
         <div class="overview">
-            <div class="text-center">
+            <div class="text-left">
                 <h3>No sprints currently in this phase of development</h3>
             </div>      
         </div>
-    </div>
-</div>
+
+
 {{/if}}
+</div>

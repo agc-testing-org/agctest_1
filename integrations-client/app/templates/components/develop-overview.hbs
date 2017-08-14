@@ -1,17 +1,18 @@
-<div class="footprint hidden-sm-down">Showing Sprints in {{#unless (eq model.state.name "any")}}the{{/unless}} <span class="text-capitalize">{{model.state.name}} Phase</span></div>
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
-        <div class="overview text-center">
+<div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+
+    <div class="overview row text-left">
+        <div class="col-md-6 col-sm-12">
             <h2 class="name text-capitalize">{{model.project.org}} / {{model.project.name}}</h2>
-            <div class="about text-capitalize">{{model.state.description}}</div>
-            <div class="row">
+            <div class="description">{{model.project.description}}</div>
+            {{develop-overview-caption project=model.project}}
+            <div class="about mb-0">Showing Sprints in {{#unless (eq model.state.name "any")}}the{{/unless}} <strong><span class="text-capitalize">{{model.state.name}} Phase</span></strong></div>
+            <div class="about text-capitalize mb-0">{{model.state.description}}</div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <div class="row text-center">
                 <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
                     {{sprint-state-overview-score total=model.sprints.length title="Sprints"}}
                 </div>
-            </div>
-            <div class="row">
-                <a class="btn btn-secondary mt-5 rounded col-sm-12 col-md-8 offset-md-2" target="_blank" href="https://github.com/{{org}}/{{model.project.name}}_{{model.project.id}}/tree/master">View on Github</a>
-                {{develop-timeline-create project_id=model.project.id class="mt-2 col-sm-12 col-md-8 offset-md-2 pl-0 pr-0"}}
             </div>
         </div>
     </div>

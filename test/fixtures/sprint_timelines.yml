@@ -8,6 +8,19 @@ sprint_1_transition:
   notification: transition
   created_at: <%= 3.day.ago.to_s(:db) %>
 
+job_developer:
+  user: adam_confirmed
+  job: developer
+  notification: job
+  created_at: <%= 3.day.ago.to_s(:db) %>
+
+job_developer_idea:
+  user: adam
+  job: developer
+  sprint_id: sprint_1
+  notification: new
+  created_at: <%= 3.day.ago.to_s(:db) %>
+
 sprint_1_state_1_comment:
   user: adam_admin
   project: demo

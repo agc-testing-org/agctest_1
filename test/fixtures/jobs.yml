@@ -1,0 +1,34 @@
+developer:
+  user: adam_confirmed
+  title: "TITLE"
+  link: "wired7.com/developer"
+  team: ateam
+  sprint: sprint1
+  role: development
+  zip: "94105"
+  company: "ATEAM TECHNOLOGIES"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+senior_developer:
+  user: adam_confirmed
+  title: "TITLEB"
+  link: "wired7.com/senior_developer"
+  team: ateam
+  sprint: sprint1b
+  role: development
+  zip: "94105"
+  company: "ATEAM TECHNOLOGIES"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+product_manager:
+  user: adam_confirmed
+  title: "TITLE"
+  role: product
+  link: "wired7.com/product_manager"
+  team: ateam
+  zip: "94105"
+  company: "ATEAM TECHNOLOGIES"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

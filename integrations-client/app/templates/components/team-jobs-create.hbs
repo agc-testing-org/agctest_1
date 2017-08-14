@@ -1,0 +1,32 @@
+<h3>Create a Job Listing for {{user.company}}</h3>
+<div class="about section">Users will propose ideas for feature development that meet the responsibilities of the listing.  Approve ideas that you like and we'll invite candidates to compete and show their skills.</div>
+
+<form {{action 'create' team.id on="submit"}} class="mt-1">
+    <div class="form-group">
+        {{application-error error=errorMessage}}
+        <label>Title</label>
+        {{input type="text" value=title placeholder="Lead Backend Engineer" class="form-control input-lg rounded"}}
+        
+        <label>Link</label>
+        {{input type="text" value=link placeholder="https://example.com/job-listing" class="form-control input-lg rounded"}}
+
+        <label>Zip Code</label>
+        {{input type="text" value=zip placeholder="94105" class="form-control unset-width input-lg rounded" size=5 maxlength=6}}
+
+        <label>Target User</label>
+        <div class="form-group mb-3">
+            <div class="btn-group" data-toggle="buttons">
+                {{#each roles as |role|}}
+                    {{#if (eq role_id role.id)}}
+                        <label class="btn btn-secondary btn-sm cursor-pointer active rounded" {{action "role" role.id}} ><i class="fa fa-fw fa-1x {{role.fa_icon}}"></i> {{role.name}}</label>
+                    {{else}}
+                        <label class="btn btn-secondary btn-sm cursor-pointer rounded" {{action "role" role.id}} ><i class="fa fa-fw fa-1x {{role.fa_icon}}"></i> {{role.name}}</label>
+                    {{/if}}
+                {{/each}}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-secondary rounded d-inline">Create</button>
+    </div>
+</form>
+

@@ -50,30 +50,44 @@ describe "/users" do
     end
 
     describe "GET /:id" do
-        fixtures :user_profiles, :user_positions
-        before(:each) do
-            @user_id = users(:adam_confirmed).id
-            @position = user_positions(:adam_confirmed)
-            @profile = user_profiles(:adam_confirmed)
-        end
-        context "user exists" do
+        context "with linkedin" do
+            fixtures :user_profiles, :user_positions
             before(:each) do
-                get "/users/#{@user_id}", {},  {}
-                @res = JSON.parse(last_response.body)
+                @user_id = users(:adam_confirmed).id
+                @position = user_positions(:adam_confirmed)
+                @profile = user_profiles(:adam_confirmed)
             end
-            it_behaves_like "profile"
+            context "user exists" do
+                before(:each) do
+                    get "/users/#{@user_id}", {}, {}
+                    @res = JSON.parse(last_response.body)
+                end
+                it_behaves_like "profile"
+            end
+            context "invalid user" do
+                before(:each) do
+                    get "/users/930", {}, {}
+                    it_behaves_like "not_found"
+                end                                             
+            end
         end
-        context "invalid user" do
-            before(:each) do
-                get "/users/930", {},  {}
-                it_behaves_like "not_found"
-            end                                             
+        context "without linkedin" do
+            context "user exists" do
+                before(:each) do
+                    @user_id = users(:adam_confirmed).id
+                    get "/users/#{@user_id}", {}, {}
+                    @res = JSON.parse(last_response.body)
+                end
+                it "should return id" do
+                    expect(@res["id"]).to eq(@user_id)
+                end
+            end
         end
     end
 
     describe "GET /me" do
         fixtures :user_profiles, :user_positions
-        context "signed in" do
+        context "signed in", :focus => true do
             before(:each) do
                 @position = user_positions(:adam_confirmed)
                 @profile = user_profiles(:adam_confirmed)
@@ -297,8 +311,8 @@ describe "/users" do
 
     shared_examples_for "user_role_update" do
         context "response" do
-            it "should return role_id as id" do
-                expect(@res["id"]).to eq(@role_id)
+            it "should return id" do
+                expect(@res["id"]).to eq(@mysql["role_id"])
             end
         end
         context "user_role" do
@@ -520,6 +534,28 @@ describe "/users" do
                 expect(n["id"]).to eq(@res[i]["id"])
             end 
         end
+        it "should return team_name" do
+            @notification_results.each_with_index do |n,i|
+                if@res[i]["job_id"]
+                    team_id = @mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["team_id"]
+                    expect(@res[i]["job_team_name"]).to eq(@mysql_client.query("select * from teams where id = #{team_id}").first["name"])
+                end
+            end
+        end
+        it "should return job_title" do
+            @notification_results.each_with_index do |n,i|
+                if@res[i]["job_id"]
+                    expect(@res[i]["job_title"]).to eq(@mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["title"])
+                end
+            end
+        end
+        it "should return job_company" do
+            @notification_results.each_with_index do |n,i|
+                if@res[i]["job_id"]
+                    expect(@res[i]["job_company"]).to eq(@mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["company"])
+                end
+            end
+        end
     end
     shared_examples_for "user_notifications_timeline" do
         it "should return notification" do
@@ -530,7 +566,7 @@ describe "/users" do
     end
 
     describe "GET /me/notifications" do
-        fixtures :sprint_timelines, :user_notifications, :notifications
+        fixtures :sprint_timelines, :user_notifications, :notifications, :jobs, :teams
         context "signed in" do 
             before(:each) do
                 get "/users/me/notifications", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
@@ -589,7 +625,7 @@ describe "/users" do
         end
     end
 
-    describe "PATCH /me/notifications/:id", :focus => true do
+    describe "PATCH /me/notifications/:id" do
         fixtures :sprint_timelines, :user_notifications
         context "signed in" do
             before(:each) do                

@@ -18,6 +18,6 @@ export default DS.RESTSerializer.extend(DS.EmbeddedRecordsMixin, {
         sprint: { embedded: 'always' },
         project: { embedded: 'always' },
         comment: { embedded: 'always' },
-        vote: { embedded: 'always' }
+        vote: { embedded: 'always' },
     }
 });

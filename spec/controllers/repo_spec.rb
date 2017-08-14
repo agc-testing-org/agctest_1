@@ -288,9 +288,15 @@ describe ".Repo" do
     context "#log_head_remote" do
         before(:each) do
             branch = 1
-            owner = "agc-testing"
+            @owner = "agc-testing"
             repository = "actest"
-            secret = "abc"
+
+            @code = "123"
+            @github_access_token = "ACCESS123"
+            Octokit::Client.any_instance.stub(:exchange_code_for_token) { JSON.parse({
+                :access_token => @github_access_token
+            }.to_json, object_class: OpenStruct) }
+            Octokit::Client.any_instance.stub(:login) { @owner }
 
             body = { 
                 :name=>branch, 
@@ -302,7 +308,7 @@ describe ".Repo" do
             @body = JSON.parse(body.to_json, object_class: OpenStruct)
 
             Octokit::Client.any_instance.stub(:branch => @body)
-            @res = @repo.log_head_remote secret, owner, repository, branch
+            @res = @repo.log_head_remote @code, @owner, repository, branch
         end
         it "should return the last hash of a remote repository" do
             expect(@res).to eq(@body.commit.sha) 
