@@ -559,6 +559,12 @@ class Account
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
                 response[i][:notification] = notification.notification
+
+                if notification.vote && notification.vote.comment
+                    response[i][:comment_vote] = notification.vote.comment
+                    response[i][:user_profile_comment_vote] = get_profile notification.vote.comment.user
+                end
+
                 if notification.job
                     response[i][:job_title] = notification.job.title
                     response[i][:job_team_name] = notification.job.team.name

@@ -19,25 +19,25 @@
         <div class="col-md-6 col-sm-12">
             <div class="vertical-align-hold">
                 <div class="vertical-align-cell">
-                <div class="row text-center">
-                    {{#unless (or (eq showing-state.state_id.name "idea") (eq showing-state.state_id.name "closed"))}}
-                    {{#if contributors}}
-                    <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
-                        {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                    <div class="row text-center">
+                        {{#unless (or (eq showing-state.state_id.name "idea") (eq showing-state.state_id.name "closed"))}}
+                            {{#if contributors}}
+                                <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4 col-4 offset-4">
+                                    {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                                </div>
+                            {{else}}
+                                <div class="col-md-4 col-sm-4 col-4">
+                                    {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
+                                </div>
+                                <div class="col-md-4 col-sm-4 col-4">
+                                    {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "comments") title="comments"}}
+                                </div>
+                                <div class="col-md-4 col-sm-4 col-4">
+                                    {{sprint-state-overview-score total=(sum-feedback-vote selected-state.contributors "votes") title="votes"}}
+                                </div>
+                            {{/if}}
+                        {{/unless}}
                     </div>
-                    {{else}}
-                    <div class="col-md-4 col-sm-4 col-4">
-                        {{sprint-state-overview-score total=selected-state.contributors.length title="contributors"}}
-                    </div>
-                    <div class="col-md-4 col-sm-4 col-4">
-                        {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "comments") title="comments"}}
-                    </div>
-                    <div class="col-md-4 col-sm-4 col-4">
-                        {{sprint-state-overview-score total=(sum-feedback selected-state.contributors "votes") title="votes"}}
-                    </div>
-                    {{/if}}
-                    {{/unless}}
-                </div>
                 </div>
             </div>
         </div>

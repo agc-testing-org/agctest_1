@@ -94,8 +94,12 @@
                     </a>)
             </div>
 
+
+
+
             <div class="text-left pl-0 col-md-6 col-sm-12">
-            {{develop-issue-comments comments=contributor.comments}}
+            {{develop-issue-comments contributor=contributor comments=contributor.comments sprint_state=last-contributor-state}}
+
             {{#if session.isAuthenticated}}
                 {{develop-issue-comment text="Your feedback" show_vote=true contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
             {{else}}

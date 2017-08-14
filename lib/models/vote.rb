@@ -9,5 +9,7 @@ class Vote < ActiveRecord::Base
     belongs_to :contributor
     belongs_to :sprint_state
     belongs_to :user
-    validates_uniqueness_of :user, scope: :sprint_state
+    belongs_to :comment
+    validates_uniqueness_of :user, scope: [:sprint_state, :comment], conditions: -> { where(comment: nil) }
+    validates_uniqueness_of :user, scope: [:comment], conditions: -> { where.not(comment: nil) }
 end

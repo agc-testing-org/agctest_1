@@ -8,6 +8,7 @@ export default Ember.Component.extend({
     showingAll: false,
     sortedComments: Ember.computed.sort('comments', 'sortDefinition'),
     sortDefinition: ['created_at:desc'],
+
     actions: {
         showAll(yesNo){
             var number = 3;
@@ -16,6 +17,6 @@ export default Ember.Component.extend({
             }
             this.set("count",number);
             this.set("showingAll",yesNo);
-        }
+        },
     }
 });
