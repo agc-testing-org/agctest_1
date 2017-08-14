@@ -44,6 +44,7 @@
     export INTEGRATIONS_SIDEKIQ_CONCURRENCY=5 #20 for production
     export INTEGRATIONS_INITIAL_USER_EMAIL="adamwired7+admin@gmail.com" #this is to allow us to sign in once we first deploy
     export INTEGRATIONS_SLACK_WEBHOOK=0
+    export INTEGRATIONS_SPLASH_HOST="http://localhost:4200" #https://www.wired7.com
 
     if [ "$RACK_ENV" == "test" ]; then
         export INTEGRATIONS_GITHUB_URL="test"

@@ -131,6 +131,15 @@ class Integrations < Sinatra::Base
 
     register Sinatra::StrongParams
 
+
+    before do
+        #content_type :json  
+        headers 'Access-Control-Allow-Origin' => ENV['INTEGRATIONS_SPLASH_HOST'],
+            'Access-Control-Allow-Methods' => ['POST'],
+            'Access-Control-Allow-Headers' => 'Content-Type'
+    end
+
+
     def protected!
         @session = retrieve_token
         return if authorized?
