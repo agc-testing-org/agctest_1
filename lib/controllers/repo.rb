@@ -7,7 +7,7 @@ class Repo
 
     def github_client access_code
         begin
-            client = Octokit::Client.new(:access_token => access_code)
+            client = Octokit::Client.new(:access_token => access_code, :auto_paginate => true)
             if client.login
                 return client
             else
@@ -76,11 +76,11 @@ class Repo
         end
     end
 
-    def sync session, github_token, contributor_id, username
+    def sync contributor_id, username
         params = {:id => contributor_id}
         contributor = get_contributor params
 
-        fetched = refresh session, github_token, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
+        fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
         if fetched
             contributor.prepared = true
@@ -122,23 +122,18 @@ class Repo
         # create branch named after contributor_id
         # push single branch to user repo, using access token
 
+        account = Account.new
+
         begin
             if (clear_clone sprint_state_id, contributor_id)
                 r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
                 original_hash = log_head r
                 
-                if session
-                    account = Account.new
-                    github_secret = account.unlock_github_token session, github_token
+                github_secret = ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']
+                
+                session && (github_secret = account.unlock_github_token session, github_token)
 
-                    prefix = "https://#{slave_username}:#{github_secret}@github.com"
-                else
-                    prefix = "https://#{slave_username}:#{ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']}@github.com"
-                end
-
-                if ENV['RACK_ENV'] == "test"
-                    prefix = "test"
-                end
+                ((ENV['RACK_ENV'] != "test") && (prefix = "https://#{slave_username}:#{github_secret}@github.com")) || (prefix = "test")
 
                 added_remote = add_remote r, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
 

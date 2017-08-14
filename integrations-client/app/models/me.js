@@ -7,5 +7,6 @@ export default DS.Model.extend({
     industry: attr('string'),
     size: attr('string'),
     location: attr('string'),
-    created_at: attr('date')
+    created_at: attr('date'),
+    company: attr('string')
 });

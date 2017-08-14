@@ -10,7 +10,13 @@ export default Ember.Route.extend({
 
         this.store.adapterFor('skillset').set('namespace', ''); // unset from 
         var splitUrl = params.state_id.split("-");
+        var job = {};
+        var job_id = this.modelFor("develop.project.sprint").sprint.get("job_id");
+        if(job_id){
+            job = this.store.findRecord("job",job_id);
+        }
         return Ember.RSVP.hash({
+            job: job,
             sprint: this.modelFor("develop.project.sprint").sprint,
             states: this.modelFor("develop.project").states,
             skillsets: this.modelFor("develop.project.sprint").skillsets,

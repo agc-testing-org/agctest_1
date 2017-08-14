@@ -116,12 +116,22 @@ describe "/teams" do
     describe "GET /" do
         context "teams" do
             fixtures :teams, :user_teams
-            before(:each) do
-                get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true")
-                @teams = JSON.parse(last_response.body)
+            context "no params" do
+                before(:each) do
+                    get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true")
+                    @teams = JSON.parse(last_response.body)
+                end
+                it_behaves_like "teams"
             end
-            it_behaves_like "teams"
+            context "params - seat_id" do
+                before(:each) do
+                    get "/teams", {:seat_id => seats(:member).id}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true AND user_teams.seat_id = #{seats(:member).id}")
+                    @teams = JSON.parse(last_response.body)
+                end
+                it_behaves_like "teams"
+            end
         end
         context "no teams" do
             before(:each) do

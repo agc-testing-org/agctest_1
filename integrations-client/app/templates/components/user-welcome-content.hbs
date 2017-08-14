@@ -4,17 +4,18 @@
 
     {{#unless params.section}}
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
-    <h3 class="description mb-3">Wired7 is an <strong>open</strong> platform that allows companies to connect with job seekers through <strong>project development</strong></h3>  
+    <h3 class="description mb-3">Wired7 <strong>connects</strong> companies and job seekers through <strong>project development</strong></h3>  
     <h3 class="description">
-        Use Wired7 
+        Use Wired7 to 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-             to <strong>benchmark and compare</strong> software team hires <strong>before you invest</strong> time in the interview process
+            <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions
         {{else}} 
-             to build your <strong>portfolio</strong> and skills while <strong>actively or passively</strong> looking for jobs
+            <strong>get your foot in the door</strong> for positions you're interested in
         {{/if}}
     </h3>
-    <h3 class="about mt-3">Please take a moment to go through a quick overview.  
-    {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
+    <h3 class="about mt-3">Please take a moment to get set up</h3>
+    <h3 class="about mt-4 text-center">
+        {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
     </h3>
     {{/unless}}
 
@@ -49,23 +50,10 @@
 
     {{#if (eq params.section "sprint")}}
         <h3 class="description mb-3">Projects on Wired7 are <strong>open to all users</strong></h3>
-        <h3 class="description mb-3">Anyone can propose a project feature or task known as a <strong>sprint</strong></h3>
-        <h3 class="description mb-3">Sprints start as ideas and transition through <strong>requirements, design, and development</strong> phases until complete</h3>
-        <h3 class="description mb-3"><strong>Companies</strong> can attach <strong>job listings</strong> to sprints that require skills and experience parallel to an open job listing</h3>
-        <h3 class="about mt-3">
-            {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "welcome" (query-params section="team")}}Continue{{/link-to}}
-        </h3>
-    {{/if}}
-
-    {{#if (eq params.section "team")}}  
-
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            <h3 class="description">We use the roles and skillsets candidates select on their profiles to notify them of <strong>opportunities on relevant sprint phases</strong></h3>
-        {{else}}
-            <h3 class="description">We use the roles and skillsets you select on your profile to <strong>notify you of opportunities on sprint phases</strong> you might be interested in</h3> 
-        {{/if}}
-
-        <h3 class="description mt-3 mb-3">Like most <strong>team-based work environments</strong>, we ask other stakeholders to review proposals and provide feedback</h3>
+        <h3 class="description mb-3">Project roadmaps are driven by <strong>job listings</strong> that hiring managers post</h3>
+        <h3 class="description mb-3">Anyone can pitch a project feature or improvement known as a <strong>sprint</strong>, as long as the skills and experience needed to implement the idea match the <strong>requirements of an open job listing</strong></h3>
+        <h3 class="description mb-3">If you're interested in an idea, this is a great way to make a first impression with a hiring manager</h3>
+        <h3 class="description mb-3">When a hiring manager approves an idea we invite users to contribute and provide feedback as the idea transitions through <strong>requirements, design, and development</strong> phases</h3>
 
         {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
             {{#if (eq sessionAccount.account.seat_id.name "member")}}               
@@ -85,12 +73,12 @@
                     {{/if}}
                 {{/each}}
             {{else}}
-                <h3 class="description">Check out {{#link-to "me.overview"}}your profile{{/link-to}} to get started</h3>
+                <h3 class="description">Check out {{#link-to "develop.roadmap"}}the roadmap{{/link-to}} find open positions</h3>
             {{/if}}
         {{/if}}
 
-        <h3 class="description">
-            {{#link-to "welcome" (query-params section="sprint")}}Back{{/link-to}} | {{#link-to "me.overview"}}Exit{{/link-to}}
+        <h3 class="description text-center mt-4">
+            {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "me.overview"}}My Profile{{/link-to}}
         </h3>
     {{/if}}
     </div>

@@ -17,6 +17,9 @@ Router.map(function() {
         this.route('resend');
     });
     this.route('develop', function() {
+        this.route('roadmap', function() {
+            this.route('job', {path: '/job/:id'});
+        });
         this.route('new');
         this.route('project', {path: '/:project_id'}, function() {
             this.route('state', {path: '/state/:id'});
@@ -35,6 +38,7 @@ Router.map(function() {
             this.route('connections');
             this.route('shares');
             this.route('leads');
+            this.route('jobs');
         });
     });
     this.route('profile',{ path: '/wired/:id'}, function(){ // public profile

@@ -9,6 +9,13 @@
     {{#if team}}
     {{#if team.show}}
 
+        {{#link-to "team.select.jobs" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-briefcase"></i>
+            </div>
+            Jobs 
+        {{/link-to}}
+
         {{#link-to "team.select.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}            
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-paper-plane-o"></i>

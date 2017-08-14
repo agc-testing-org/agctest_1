@@ -4,8 +4,6 @@ class Activity
 
     end
 
-    #TODO - who should get the new notification_id type?
-    
     def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
@@ -25,6 +23,36 @@ class Activity
             return []
         end
     end 
+
+    def user_notifications_for_job sprint_timeline_id
+        # all users that subscribe to a role that corresponds to a job role
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "job"}).id).joins("INNER JOIN jobs ON jobs.id = sprint_timelines.job_id INNER JOIN user_roles ON user_roles.role_id = jobs.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end
+
+    def user_notifications_for_job_owner sprint_timeline_id
+        # job owner
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER JOIN jobs ON jobs.id = sprint_timelines.job_id").where("jobs.user_id != sprint_timelines.user_id").select("jobs.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end   
+
+    def user_notifications_for_job_contributors sprint_timeline_id
+        #people that propose ideas (sprints) for a job
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "new"}).id).joins("INNER JOIN sprints ON sprints.job_id = sprint_timelines.job_id").where("sprints.user_id != sprint_timelines.user_id").select("sprints.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end
 
     def user_notifications_for_contributor sprint_timeline_id
         # vote or comment for user that owns contribution
@@ -126,6 +154,9 @@ class Activity
     def process_notification id
 
         user_ids = []
+        user_ids = (get_decrypted_user_ids (user_notifications_for_job id), user_ids)
+        user_ids = (get_decrypted_user_ids (user_notifications_for_job_contributors id), user_ids)
+        user_ids = (get_decrypted_user_ids (user_notifications_for_job_owner id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_contributor id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_owner id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_contributors_with_winner id), user_ids)
@@ -152,7 +183,7 @@ class Activity
 
     def user_notifications_that_need_to_be_mailed id
         begin
-            return UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id LEFT JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id").where("(user_notification_settings.active = 1 OR user_notification_settings.active IS NULL) and (user_notification_settings.notification_id = sprint_timelines.notification_id OR user_notification_settings.notification_id IS NULL) and user_notifications.read = 0 and notifications.name in ('comment', 'transition', 'winner', 'new') and sprint_timelines.id = ?", id).select("user_notifications.user_id, user_notifications.sprint_timeline_id")
+            return UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id LEFT JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id").where("(user_notification_settings.active = 1 OR user_notification_settings.active IS NULL) and (user_notification_settings.notification_id = sprint_timelines.notification_id OR user_notification_settings.notification_id IS NULL) and user_notifications.read = 0 and notifications.name != 'vote' and sprint_timelines.id = ?", id).select("user_notifications.user_id, user_notifications.sprint_timeline_id")
         rescue => e
             puts e
             return nil

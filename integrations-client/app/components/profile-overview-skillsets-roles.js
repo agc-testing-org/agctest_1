@@ -5,11 +5,11 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     actions: {
-        updateItem(type,userId,itemId,active){
+        updateItem(type,itemId,active,namespace){
 
             var store = this.get('store');
 
-            store.adapterFor(type).set('namespace', 'users/me'); 
+            store.adapterFor(type).set('namespace', namespace); 
 
             var update = store.findRecord(type,itemId).then(function(item) {
                 item.set('active', active);

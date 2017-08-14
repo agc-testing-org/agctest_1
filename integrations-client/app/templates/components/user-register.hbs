@@ -11,11 +11,11 @@
                 </div>
             </div>
             <div class="modal-header subtitle">
-                <div class="text-muted">    
+                <div class="text-light">    
                 {{#if invitation}}
                     Would you like to join the <span class="text-capitalize">{{invitation.name}} team</span> on Wired7?
                 {{else}}
-                    Wired7 is gradually onboarding users through invitations.  Create an account and we will invite you as soon as we can! 
+                    We're onboarding users through invitations at this time
                 {{/if}}
                 </div>
             </div>
@@ -53,7 +53,7 @@
                     {{/if}}
 
                     <div class="form-group">
-                        <label>What group(s) are you in?</label>
+                        <label>Team Function</label>
                     </div>
                     <div class="form-group mb-3">
                         <div class="btn-group" data-toggle="buttons">
@@ -64,21 +64,21 @@
                     </div>
                     
                     {{#if invitation}}
-                        <button {{action "accept" token}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Accept</button>
+                        <button {{action "accept" token}} type="submit" class="btn btn-info btn-lg rounded btn-block">Accept</button>
                     {{else}}
-                        <button {{action "register"}} type="submit" class="btn btn-secondary btn-lg rounded btn-block">Register</button>
+                        <button {{action "register"}} type="submit" class="btn btn-info btn-lg rounded btn-block">Register</button>
                     {{/if}}
                     <h4 class="tos text-center">
-                        By {{#if invitation}}accepting{{else}}registering{{/if}} you agree to our {{link-to 'Terms of Service' 'terms'}} and {{link-to 'Privacy Policy' 'privacy'}}
+                        By {{#if invitation}}accepting{{else}}registering{{/if}} you agree to our <br>{{link-to 'Terms of Service' 'terms'}} and {{link-to 'Privacy Policy' 'privacy'}}
                     </h4>
 
                     {{/if}}
                 </form>
             </div>
             {{#if invitation}}
-                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "invitation.resend" class="text-muted"}}Want us to send another email{{/link-to}}</div>
+                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "invitation.resend" class="text-light"}}Want us to send another email{{/link-to}}</div>
             {{else}}
-                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "login" class="text-muted"}}Already Have An Account?{{/link-to}}</div>
+                <div class="modal-foot rounded-bottom text-center cursor-pointer">{{#link-to "login" class="text-light"}}Already Have An Account?{{/link-to}}</div>
             {{/if}}
         </div>
     </div>

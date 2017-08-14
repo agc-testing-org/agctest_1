@@ -1,5 +1,6 @@
 class Account
     include Obfuscate
+    include ParamsHelper
     def initialize
         @per_page = 10
     end
@@ -243,15 +244,6 @@ class Account
         end
     end
 
-    def get_users params # can be used if we add search functionality later
-        begin
-            return User.joins("LEFT JOIN user_profiles ON user_profiles.user_id = users.id LEFT JOIN user_positions ON user_positions.user_profile_id = user_profiles.id").where(params).select(:id, :created_at, "user_profiles.location_name as location", "user_positions.title", "user_positions.industry", "user_positions.size").as_json
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def update id, fields
         begin
             user = User.find_by(id: id)
@@ -338,25 +330,18 @@ class Account
         end 
     end 
 
-    def get_roles
-        begin 
-            return Role.all.order(:name)
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def update_role user_id, role_id, active
         begin
-            return UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id).update_attributes!(:active => active)
+            user_role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
+            user_role.update_attributes!(:active => active)
+            return user_role.role
         rescue => e
             puts e
             return nil 
         end
     end
 
-    def get_account_roles user_id, query
+    def get_roles user_id, query
         begin            
             return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active","roles.fa_icon").order(:name).as_json
         rescue => e
@@ -365,12 +350,34 @@ class Account
         end
     end
 
-    def get_teams user_id
+    def get_skillsets user_id, query
+        begin
+            return Skillset.joins("LEFT JOIN user_skillsets ON user_skillsets.skillset_id = skillsets.id AND user_skillsets.user_id = #{user_id.to_i} OR user_skillsets.user_id is null").where(query).select("skillsets.id","skillsets.name","user_skillsets.active").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def update_skillset user_id, skillset_id, active
+        begin
+            ss = UserSkillset.find_or_initialize_by(:user_id => user_id, :skillset_id => skillset_id)
+            ss.update_attributes!(:active => active)
+            return ss.skillset
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+
+    def get_teams user_id, params
+        params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
             return Team.joins(:user_teams).where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
-            })
+            }).where(params)
         rescue => e
             puts e
             return nil
@@ -424,17 +431,6 @@ class Account
             else
                 return nil
             end
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def update_user_role user_id, role_id, active
-        begin
-            user_role = UserRole.find_or_initialize_by(:user_id => user_id, :role_id => role_id)
-            user_role.update_attributes!(:active => active)
-            return {:id => user_role.role_id}
         rescue => e
             puts e
             return nil
@@ -594,8 +590,8 @@ class Account
 
     def get_user_notifications user_id, params
         page = (params["page"].to_i if params["page"].to_i > 0) || 1
-        params_helper = ParamsHelper.new
-        params = params_helper.drop_key params, "page"
+
+        params = drop_key params, "page"
         begin     
             response = []
             notifications = SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
@@ -609,6 +605,11 @@ class Account
                 response[i][:comment] = notification.comment
                 response[i][:vote] = notification.vote
                 response[i][:notification] = notification.notification
+                if notification.job
+                    response[i][:job_title] = notification.job.title
+                    response[i][:job_team_name] = notification.job.team.name
+                    response[i][:job_company] = notification.job.company
+                end
             end
 
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
@@ -675,8 +676,11 @@ class Account
                 user_profile = get_profile notification.sprint_timeline.user
                 profile = user_profile_descriptor user_profile
 
-                project = "#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}"
-                sprint = "#{notification.sprint_timeline.sprint.title}"
+                if notification.sprint_timeline.project
+                    project = "#{notification.sprint_timeline.project.org}/#{notification.sprint_timeline.project.name}"
+                    sprint = "#{notification.sprint_timeline.sprint.title}"
+                end
+
                 signature = "- The Wired7 ATeam"
 
                 if notification.sprint_timeline.notification.name == "comment" #|| notification.sprint_timeline.notification.name == "vote"
@@ -692,9 +696,21 @@ class Account
                     else
                         return mail notification.user.email, "Wired7 Proposal Selected", "#{notification.user.first_name},<br><br>A winning proposal has been selected for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i>.  Use the following link to check out all of the proposals:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nA winning proposal has been selected for the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint}.  Use the following link to check out all of the proposals:\n\n#{link}\n\n\n#{signature}"
                     end
-                elsif notification.sprint_timeline.notification.name == "new"
+                elsif notification.sprint_timeline.notification.name == "new" && notification.sprint_timeline.job_id
                     link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}"
-                    return mail notification.user.email, "New Wired7 Sprint", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
+                    if notification.sprint_timeline.user_id == notification.user_id 
+                        #TODO - confirmation
+                    else
+                        return mail notification.user.email, "Wired7 Idea Pitch for #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company}", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
+                    end
+                elsif notification.sprint_timeline.notification.name == "job"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{notification.sprint_timeline.job.id}-#{notification.sprint_timeline.job.title}-at-#{notification.sprint_timeline.job.company}"
+                    if notification.sprint_timeline.user_id == notification.user.id
+                        #TODO send confirmation / email with information on next steps
+                        return true
+                    else
+                        return mail notification.user.email, "#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} is looking for a #{notification.sprint_timeline.job.title} on Wired7", "#{notification.user.first_name},<br><br>#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:\n\n#{link}\n\n\n#{signature}"
+                    end
                 end
             end
         rescue => e
