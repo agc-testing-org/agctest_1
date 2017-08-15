@@ -23,7 +23,9 @@
             </div>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 {{#each projects as |project|}}
-                    <button class="dropdown-item" {{action "selectProject" project.id project}}><div class="title">{{project.org}}/{{project.name}}</div><small class="description text-muted">{{project.description}}</small></button>
+                    {{#unless project.hidden}}
+                        <button class="dropdown-item" {{action "selectProject" project.id project}}><div class="title">{{project.org}}/{{project.name}}</div><small class="description text-muted">{{project.description}}</small></button>
+                    {{/unless}}
                 {{/each}}
             </div>
         </div>
