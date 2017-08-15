@@ -18,13 +18,13 @@
         <div class="form-group">
         <label>Project</label>
         <div class="dropdown btn-block rounded mb-3">
-            <div class="dropdown-toggle" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <div class="dropdown-toggle cursor-pointer" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <strong>{{#if project}}{{project.org}}/{{project.name}}{{else}}Select a Project{{/if}}</strong>
             </div>
             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                 {{#each projects as |project|}}
                     {{#unless project.hidden}}
-                        <button class="dropdown-item" {{action "selectProject" project.id project}}><div class="title">{{project.org}}/{{project.name}}</div><small class="description text-muted">{{project.description}}</small></button>
+                        <button class="dropdown-item cursor-pointer" {{action "selectProject" project.id project}}><div class="title">{{project.org}}/{{project.name}}</div><small class="description text-muted">{{project.description}}</small></button>
                     {{/unless}}
                 {{/each}}
             </div>

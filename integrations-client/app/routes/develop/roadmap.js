@@ -8,6 +8,7 @@ export default Ember.Route.extend({
     },
     store: Ember.inject.service(),
     model: function(params) {
+        this.store.adapterFor('clear').set('namespace', ''); //clear namespaces
         var memberSeat = this.store.peekAll("seat").findBy("name","member");
         var authenticated = this.get('session.isAuthenticated');
         var teams = [];
