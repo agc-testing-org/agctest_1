@@ -1170,14 +1170,12 @@ class Integrations < Sinatra::Base
         if fields[:seat_id] == Seat.find_by(:name => "sponsored").id
             expires = Time.now + 60*60*24*30*3 #3 months
         elsif fields[:seat_id] == Seat.find_by(:name => "priority").id
-            pexpires = Time.now + 60*60*24*14  #2 weeks      
-        else
-            expires = nil
+            expires = Time.now + 60*60*24*14  #2 weeks      
         end
 
         invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id, expires
-        invitation || (return_error "invite error")
-        invitation.id || (return_error "this email address has an existing invitation")
+        invitation || (return_error "invite error") # entire request failed
+        invitation.id || (invitation.errors.messages[:user_email] && (return_error invitation.errors.messages[:user_email][0])) # validation failed
         UserInviteWorker.perform_async invitation.token
         invitation = invitation.as_json
         invitation.delete("token")

@@ -118,11 +118,7 @@ class Organization
 
     def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id, expires
         begin
-            if expires == ""
-                return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id})
-            else
-                return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id, expires: expires})
-            end
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id, expires: expires})
         rescue => e
             puts e
             return nil
