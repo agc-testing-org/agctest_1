@@ -186,6 +186,9 @@ label{
     background-color: #fff;
     color: #28B6C3;
 }
+.top .badge.unselected{
+    background-color:#ededed;
+}
 .badge.role, .btn-group label{
     font-size: 14px;
     padding: 10px;
@@ -217,11 +220,6 @@ label{
 .text-muted, .text-light{
     color: rgba(255,255,255,.7);
 }
-.sidebar.float .logo{
-    background-image: url(w7_logo_black_small.png);
-    left:0px;
-    top:10px;
-}
 .logo{
     background-image: url(w7_logo_white.png);
     background-repeat:no-repeat;
@@ -238,11 +236,6 @@ label{
     margin-left:0px !important;
     top:-6px;
 }
-.sidebar.hidden-md-up.float .logo{
-    background-image: url(w7_logo_white.png);
-    top:0px;
-    left:10px;
-}
 .highlight-true{
     background-color: #fff;
 }
@@ -256,7 +249,7 @@ label{
     margin-bottom:20px;
 }
 .top{
-    background-color: #ededed;
+    background-color: #fff;
     padding:20px;
     margin-bottom:20px;
 }
@@ -468,9 +461,6 @@ button{
 .welcome .sprint{
     min-width:162px;
 }
-.welcome .score{
-    border-bottom: 5px solid #f9f9f9 !important;
-}
 .welcome .feedback{
     max-width: 550px;
     margin: 0 auto 0;
@@ -644,23 +634,6 @@ button{
 /*
  * Sidebar
  */
-
-.sidebar.float{
-    left:20px;
-    top:20px;
-    min-width:unset;
-    background-color: transparent;
-}
-.sidebar.float li{
-    margin-bottom:10px !important;
-    -webkit-border-radius: 6px !important;
-    -moz-border-radius: 6px !important;
-    border-radius: 6px !important;
-    width:60px !important;
-}
-.sidebar.float li.nav-item .icon{
-    margin-bottom:0px;
-}
 .sidebar {
     position: fixed;
     top: 0px;
@@ -908,7 +881,10 @@ button{
 .main .overview .score, .welcome .score{
     margin-bottom:10px;
     padding:10px;
-    border-bottom:5px solid #f9f9f9; 
+    border-bottom:5px solid #f9f9f9;
+}
+.top .score{
+    border-bottom:5px solid #ededed !important;
 }
 .main .overview .score .title {
 

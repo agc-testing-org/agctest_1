@@ -1,50 +1,37 @@
 <ul class="nav nav-pills flex-column timeline">
     <li class="logo"></li>
 
+    <div class="menu">
         {{#if session.isAuthenticated}}
             {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="hidden-sm-down">
-                    {{#if has_tooltips}}
-                    {{tooltip-on-component text="My Profile" class="tooltip rounded" side="right" enableLazyRendering=true}}
-                    <i class="fa fa-fw fa-2x fa-user"></i>
-                    {{/if}}
-                </div>
-                <div class="hidden-md-up">Profile</div>
+                <i class="fa fa-fw fa-user"></i>Profile
             {{/link-to}}
         {{else}}
             {{#link-to "login" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize"}}
-                <div class="hidden-sm-down">
-                    {{#if has_tooltips}}
-                    {{tooltip-on-component text="Sign In" class="tooltip rounded" side="right" enableLazyRendering=true}}
-                    {{/if}}
-                    <i class="fa fa-fw fa-2x fa-sign-in" aria-hidden="true"></i>
-                </div>
-                <div class="hidden-md-up">Sign In</div>
+                <i class="fa fa-fw fa-2x fa-sign-in" aria-hidden="true"></i>Sign In
             {{/link-to}}
         {{/if}}
-        
+    </div>
 
     {{#link-to "develop.project.state" "all" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }} 
-        <div class="icon hidden-sm-down">
             {{#if has_tooltips}}
-            {{tooltip-on-component text="All" class="tooltip rounded" side="right" enableLazyRendering=true}}
+            {{tooltip-on-component text="All Sprints" class="tooltip rounded" side="right" enableLazyRendering=true}}
             {{/if}}
+            <div class="icon hidden-sm-down"> 
             <i class="fa fa-fw fa-2x fa-circle-o"></i>
-        </div>
-        <div class="hidden-md-up">All</div>
+            </div>
+            All
     {{/link-to}}
     {{#each states as |state|}}
     {{#link-to "develop.project.state" (concat state.id "-" state.name) tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-    <div class="icon hidden-sm-down">
         {{#if has_tooltips}}
-        {{tooltip-on-component text=state.name class="tooltip rounded" side="right" enableLazyRendering=true}}
+        {{tooltip-on-component text=state.description class="tooltip rounded" side="right" enableLazyRendering=true}}
         {{/if}}
-        <i class="fa fa-fw fa-2x {{state.fa_icon}}"></i>
-    </div>
-    <div class="hidden-md-up">{{state.name}}</div>
+        <div class="icon hidden-sm-down">
+            <i class="fa fa-fw fa-2x {{state.fa_icon}}"></i>
+        </div>
+        {{state.name}}
     {{/link-to}}
     {{/each}}
-
-
 </ul>
 

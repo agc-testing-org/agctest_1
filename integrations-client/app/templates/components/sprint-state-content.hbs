@@ -23,7 +23,7 @@
                         {{#if session.isAuthenticated}}
                             {{#unless selected-state.active_contribution_id}}
                                 <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
-                                <h3>{{selected-state.state_id.instruction}}</h3>
+                                <h4>{{selected-state.state_id.instruction}}</h4>
                             {{/unless}}
 
                             {{#unless sessionAccount.account.github}}
@@ -47,7 +47,7 @@
                                         {{/if}}
                                     {{/each}}
                                 {{else}}
-                                    <button class="btn btn-info rounded" {{action "join" project.id selected-state.id }}>Join</button>
+                                    <button class="btn btn-info rounded mt-2" {{action "join" project.id selected-state.id }}>Join</button>
                                 {{/if}}
                             {{/unless}}
                         {{else}}
@@ -66,7 +66,7 @@
 {{#if last-contributor-state.contributors.length}}
 <div class="overview text-left">
 
-    <h3 class="mb-3">{{selected-state.state_id.instruction}}</h3>
+    <h4 class="mb-4">{{selected-state.state_id.instruction}}</h4>
     <h4 class="about section mb-3">
         Proposed Contributions
     </h4>
