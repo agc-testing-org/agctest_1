@@ -6,15 +6,12 @@ export function sumFeedbackVote(params/*, hash*/) {
         var contributions = params[0].toArray();
         for (var i = 0; i < contributions.length; i++) {
             if(contributions[i].get(params[1])){
-                console.log(contributions[i]); 
                 var votes = contributions[i].get(params[1]).toArray();
-                var votes_count = [];
                 for (var j = 0; j < votes.length; j++) {
                     var data = votes[j].data;
                     if (data.comment_id == null) {
-                        votes_count.push(votes[j]);
+                        total = total + 1;
                     }
-                    total = total + votes_count.length;
                 }
             }
         }
