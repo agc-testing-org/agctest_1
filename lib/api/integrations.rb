@@ -1107,8 +1107,16 @@ class Integrations < Sinatra::Base
         check_required_field params[:id], "id"
         id = decrypt(params[:id]) || return_not_found
         account = Account.new
+        candidate_team = account.get_active_team(id)
+        read = 0
+        confirmed = 1
+        if candidate_team != nil
+            candidate_team = candidate_team["id"]
+            read = 1
+            confirmed = 2
+        end
         status 201
-        return (account.create_connection_request @session_hash["id"], id).to_json
+        return (account.create_connection_request @session_hash["id"], id, candidate_team, read, confirmed).to_json
     end
 
     connections_requests_get = lambda do

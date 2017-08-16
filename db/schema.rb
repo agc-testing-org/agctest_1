@@ -94,14 +94,7 @@ ActiveRecord::Schema.define(version: 20170816041813) do
     t.boolean "commit_success"
     t.string "description"
     t.text "caption"
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
     t.integer "hidden"
->>>>>>> 71092b8e3741442c5f0fd282c5ce49a16dfd4ad1
-=======
-    t.integer "hidden"
->>>>>>> fb6316b3828c6b57f17b2315058016dc15548c87
   end
 
   create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
