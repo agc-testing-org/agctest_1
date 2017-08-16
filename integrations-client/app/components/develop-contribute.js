@@ -19,7 +19,7 @@ export default Ember.Component.extend({
         submit(project_id, contributor_id){
             var _this = this;
             var store = this.get('store');
-
+            store.adapterFor('clear').set('namespace', ''); //clear namespaces
             var contributorUpdate = store.findRecord('contributor',contributor_id).then(function(contributor) {
                 contributor.save().then(function() {
                     _this.sendAction("refresh");

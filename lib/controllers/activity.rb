@@ -7,7 +7,7 @@ class Activity
     def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id=sprint_timelines.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1").select("user_skillsets.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("LEFT JOIN projects ON (sprint_timelines.project_id = projects.id AND projects.hidden != 1) INNER JOIN sprint_skillsets ON sprint_skillsets.sprint_id=sprint_timelines.sprint_id INNER JOIN user_skillsets ON user_skillsets.skillset_id = sprint_skillsets.skillset_id").where("user_skillsets.active = 1 and sprint_skillsets.active=1").select("user_skillsets.user_id")
         rescue => e
             puts e
             return [] 
@@ -57,7 +57,7 @@ class Activity
     def user_notifications_for_contributor sprint_timeline_id
         # vote or comment for user that owns contribution
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON sprint_timelines.contributor_id = contributors.id AND sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).select(:id).map(&:id).join(",")})").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id as user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON sprint_timelines.contributor_id = contributors.id AND sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "comment vote"})).select(:id).map(&:id).join(",")})").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id as user_id")
         rescue => e
             puts e
             return []
@@ -84,6 +84,16 @@ class Activity
         end
     end 
 
+    def user_notifications_by_comment_votes sprint_timeline_id
+        # all users that voted on a specific comment
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join votes ON votes.contributor_id = sprint_timelines.contributor_id").where("votes.user_id != sprint_timelines.user_id and votes.comment_id != 0").select("votes.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end 
+
     def user_notifications_for_contributors_with_winner sprint_timeline_id
         # all users that contributed to a sprint state that now has a winner
         begin
@@ -98,7 +108,7 @@ class Activity
         # all comment and vote notifications not written by owner
         # TODO rethink ownership (anyone can create a sprint...) - also need a way to let the project owner know what's going on
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).select(:id).map(&:id).join(",")})").select("sprints.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "comment vote"})).select(:id).map(&:id).join(",")})").select("sprints.user_id")
         rescue => e
             puts e
             return []
@@ -163,6 +173,7 @@ class Activity
         user_ids = (get_decrypted_user_ids (user_notifications_by_comments id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_votes id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_roles id), user_ids)
+        user_ids = (get_decrypted_user_ids (user_notifications_by_comment_votes id), user_ids)
 
         store_user_notifications_count id, user_ids.length, "processing"
 

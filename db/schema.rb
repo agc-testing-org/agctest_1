@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170815034952) do
+ActiveRecord::Schema.define(version: 20170816041813) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 20170815034952) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "text", null: false
+    t.boolean "explain", default: false
     t.index ["contributor_id"], name: "index_comments_on_contributor_id"
     t.index ["sprint_state_id"], name: "index_comments_on_sprint_state_id"
     t.index ["user_id"], name: "index_comments_on_user_id"
@@ -94,9 +95,13 @@ ActiveRecord::Schema.define(version: 20170815034952) do
     t.string "description"
     t.text "caption"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
     t.integer "hidden"
 >>>>>>> 71092b8e3741442c5f0fd282c5ce49a16dfd4ad1
+=======
+    t.integer "hidden"
+>>>>>>> fb6316b3828c6b57f17b2315058016dc15548c87
   end
 
   create_table "role_states", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|

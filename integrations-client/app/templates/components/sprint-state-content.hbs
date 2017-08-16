@@ -23,7 +23,7 @@
                         {{#if session.isAuthenticated}}
                             {{#unless selected-state.active_contribution_id}}
                                 <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
-                                <h3>{{selected-state.state_id.instruction}}</h3>
+                                <h4>{{selected-state.state_id.instruction}}</h4>
                             {{/unless}}
 
                             {{#unless sessionAccount.account.github}}
@@ -39,15 +39,16 @@
                                                     Explain Your Work
                                                 </h3>
                                                 <div class="description section">What approaches were you considering?  Are you satisfied with your solution?  How did you test?</div>
-                                                <div class="text-left pl-0 col-md-6 col-sm-12">
+                                                <small>{{stacked-icon value="fa-asterisk" icon="fa-circle" size="1" class="d-inline"}} This is a submission <strong><u>requirement</u></strong></small>
+                                                <div class="text-left pl-0 col-md-6 col-sm-12 mt-2">
                                                     {{develop-issue-comments comments=contributor.comments}}
-                                                    {{develop-issue-comment text="Explain your work" contributor=contributor sprint_state=selected-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                                                    {{develop-issue-comment text="Explain your work" contributor=contributor sprint_state=selected-state project=project.id class="mb-3 comments" explain=true refresh="refresh"}}
                                                 </div>
                                             </div>
                                         {{/if}}
                                     {{/each}}
                                 {{else}}
-                                    <button class="btn btn-secondary rounded" {{action "join" project.id selected-state.id }}>Join</button>
+                                    <button class="btn btn-info rounded mt-2" {{action "join" project.id selected-state.id }}>Join</button>
                                 {{/if}}
                             {{/unless}}
                         {{else}}
@@ -66,15 +67,15 @@
 {{#if last-contributor-state.contributors.length}}
 <div class="overview text-left">
 
-    <h3 class="mb-3">{{selected-state.state_id.instruction}}</h3>
+    <h4 class="mb-4">{{selected-state.state_id.instruction}}</h4>
     <h4 class="about section mb-3">
-        Proposed Contributions
+        Solution Proposals 
     </h4>
         <div class="mb-4">
         {{#each last-contributor-state.contributors as |contributor index|}}
 
-            <h3 class="description section text-capitalize underline mb-2 mt-1">
-                Proposal {{plus 1 index}}
+            <h3 class="description section text-capitalize underline mb-2 mt-1 col-md-6 col-sm-12">
+                Proposal {{contributor.id}}
             </h3>
 
             <div class="about section mb-1">
@@ -94,8 +95,12 @@
                     </a>)
             </div>
 
+
+
+
             <div class="text-left pl-0 col-md-6 col-sm-12">
-            {{develop-issue-comments comments=contributor.comments}}
+            {{develop-issue-comments contributor=contributor comments=contributor.comments sprint_state=last-contributor-state}}
+
             {{#if session.isAuthenticated}}
                 {{develop-issue-comment text="Your feedback" show_vote=true contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
             {{else}}

@@ -109,7 +109,7 @@ li {
 }
 .exit{
     position:fixed;
-    right:5px;
+    left:5px;
     top:5px;
     color: #292b2c !important;
     z-index:101;
@@ -167,6 +167,9 @@ label{
 .btn-group label.active{
     color: #fff !important;
 }
+.btn-group > .btn:first-child {
+    margin-left: 0px !important;
+}
 
 .badge, .btn-group label{
     font-weight: 400;
@@ -182,6 +185,9 @@ label{
 .badge.unselected{
     background-color: #fff;
     color: #28B6C3;
+}
+.top .badge.unselected{
+    background-color:#ededed;
 }
 .badge.role, .btn-group label{
     font-size: 14px;
@@ -212,12 +218,7 @@ label{
     color: orange;
 }
 .text-muted, .text-light{
-     color: rgba(255,255,255,.7);
-}
-.sidebar.float .logo{
-    background-image: url(w7_logo_black_small.png);
-    left:0px;
-    top:10px;
+    color: rgba(255,255,255,.7);
 }
 .logo{
     background-image: url(w7_logo_white.png);
@@ -235,11 +236,6 @@ label{
     margin-left:0px !important;
     top:-6px;
 }
-.sidebar.hidden-md-up.float .logo{
-    background-image: url(w7_logo_white.png);
-    top:0px;
-    left:10px;
-}
 .highlight-true{
     background-color: #fff;
 }
@@ -247,13 +243,13 @@ label{
     border-bottom: 2px solid #28B6C3 !important;
 }
 .explain{
-    background-color: #4C4C4C;
+    background-color: #2f3e47; 
     padding:20px;
     color:#fff;
     margin-bottom:20px;
 }
 .top{
-    background-color: #ededed;
+    background-color: #fff;
     padding:20px;
     margin-bottom:20px;
 }
@@ -353,7 +349,6 @@ button{
 }    
 
 .list-group-item{
-    color: #4C4C4C;
     background-color:#fff;
     border: 1px solid #ededed;
     margin-bottom:5px;
@@ -466,9 +461,6 @@ button{
 .welcome .sprint{
     min-width:162px;
 }
-.welcome .score{
-    border-bottom: 5px solid #f9f9f9 !important;
-}
 .welcome .feedback{
     max-width: 550px;
     margin: 0 auto 0;
@@ -563,18 +555,10 @@ button{
     width:100%;
     height:100%;
     background-color:#fff;
-    filter: alpha(opacity=30);    
-    -moz-opacity: 0.30;   
-    -webkit-opacity: 0.30;   
-    -khtml-opacity: 0.30;   
-    opacity: 0.30;
-}
-.background-white{
-    background-color:#fff;
-    filter: alpha(opacity=50);
-    -moz-opacity: 0.70;
-    -webkit-opacity: 0.70;
-    -khtml-opacity: 0.70;
+    filter: alpha(opacity=70);    
+    -moz-opacity: 0.70;   
+    -webkit-opacity: 0.70;   
+    -khtml-opacity: 0.70;   
     opacity: 0.70;
 }
 .register-form {
@@ -611,8 +595,8 @@ button{
     margin-top:10px; 
 }
 .register-form .form-control,.register-form .form-control[disabled]{
-     border: 1px solid #2f3e47 !important;
-     color:#fff !important;
+    border: 1px solid #2f3e47 !important;
+    color:#fff !important;
 }
 
 
@@ -650,23 +634,6 @@ button{
 /*
  * Sidebar
  */
-
-.sidebar.float{
-    left:20px;
-    top:20px;
-    min-width:unset;
-    background-color: transparent;
-}
-.sidebar.float li{
-    margin-bottom:10px !important;
-    -webkit-border-radius: 6px !important;
-    -moz-border-radius: 6px !important;
-    border-radius: 6px !important;
-    width:60px !important;
-}
-.sidebar.float li.nav-item .icon{
-    margin-bottom:0px;
-}
 .sidebar {
     position: fixed;
     top: 0px;
@@ -721,7 +688,7 @@ button{
 }
 .sidebar .nav li.nested, .sidebar.hidden-md-up .nav li.nested{
     color:#fff;
-    background-color: #4C4C4C;
+    background-color: #2f3e47;
     padding-top:4px;
     padding-bottom:4px;
     line-height: 16px;
@@ -741,7 +708,7 @@ button{
 }
 
 .sidebar .nav .menu li.active{
-    background-color: #4c4c4c;
+    background-color: #2f3e47; 
     color: #cfcfcf;
 }
 .sidebar .nav .menu li.active.selectable{
@@ -914,7 +881,10 @@ button{
 .main .overview .score, .welcome .score{
     margin-bottom:10px;
     padding:10px;
-    border-bottom:5px solid #f9f9f9; 
+    border-bottom:5px solid #f9f9f9;
+}
+.top .score{
+    border-bottom:5px solid #ededed !important;
 }
 .main .overview .score .title {
 
@@ -983,6 +953,10 @@ button{
     padding:0px;
     padding-left:5px;
     padding-right:5px;
+}
+.carousel.slide .carousel-caption .carousel-text{
+    position:relative;
+    color: #496174;
 }
 
 /* misc */

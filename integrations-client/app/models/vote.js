@@ -10,5 +10,6 @@ export default DS.Model.extend({
     sprint_state_id: attr('number'),
     sprint_state: DS.belongsTo('sprint-state'),
     user_id: attr('string'),
-    previous: attr('number')
+    previous: attr('number'),
+    comment_id: attr('number')
 });

@@ -14,7 +14,7 @@ export default Ember.Component.extend({
             var skillsetUpdate = store.findRecord('skillset',id).then(function(skillset) {
                 skillset.set('active', active);
                 skillset.save().then(function() {
-
+                    store.adapterFor('skillset').set('namespace', ''); //clear namespaces
                 });
             });
         }

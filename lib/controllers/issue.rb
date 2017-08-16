@@ -41,13 +41,14 @@ class Issue
         end
     end
 
-    def create_comment user_id, contributor_id, sprint_state_id, text
+    def create_comment user_id, contributor_id, sprint_state_id, text, explain
         begin
             return Comment.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
-                text: text.strip
+                text: text.strip,
+                explain: explain
             })
         rescue => e
             puts e
@@ -55,19 +56,35 @@ class Issue
         end
     end
 
-    def vote user_id, contributor_id, sprint_state_id
+    def vote user_id, contributor_id, sprint_state_id, comment_id
         begin
-            vote = Vote.find_or_initialize_by({ # get or create vote by sprint state for specific user
-                user_id: user_id,
-                sprint_state_id: sprint_state_id
-            })
+            if comment_id 
+                check = {
+                user_id: user_id, 
+                sprint_state_id: sprint_state_id, 
+                contributor_id: contributor_id, 
+                comment_id: comment_id 
+             };
+            else 
+             check = { 
+                user_id: user_id, 
+                sprint_state_id: sprint_state_id,
+                comment_id: comment_id
+                } 
+            end
+            vote = Vote.find_or_initialize_by(check) 
 
-            new_record = false
             previous_record = vote.contributor_id
 
-            if previous_record != contributor_id.to_i # if vote is new or different (let the frontend know votes will change with new_record)
+            if vote.id == nil
+                vote.update_attributes!(:contributor_id => contributor_id)
+                vote.save
+                new_record = true
+            elsif previous_record != contributor_id.to_i
                 vote.update_attributes!(:contributor_id => contributor_id)
                 new_record = true
+            else 
+                new_record = false
             end
 
             record = vote.as_json
@@ -81,6 +98,7 @@ class Issue
         end
     end
 
+    
     def log_event params 
         begin
             sprint_event = SprintTimeline.create(params)

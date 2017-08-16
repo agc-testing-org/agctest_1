@@ -81,12 +81,25 @@ describe ".Activity" do
 
     context "#user_notifications_by_roles" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
-        before(:each) do
-            @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
-            @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where (user_roles.user_id != #{decrypt(sprint_timelines(:sprint_1_transition).user_id).to_i}) AND user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
-            @res = @activity.user_notifications_by_roles @sprint_timeline_id
+        context "not hidden" do
+            before(:each) do
+                @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
+                @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where (user_roles.user_id != #{decrypt(sprint_timelines(:sprint_1_transition).user_id).to_i}) AND user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
+                @res = @activity.user_notifications_by_roles @sprint_timeline_id
+            end
+            it_behaves_like "user_notifications"
         end
-        it_behaves_like "user_notifications"
+        context "hidden" do
+            fixtures :projects
+            before(:each) do
+                @sprint_timeline = sprint_timelines(:sprint_1_transition)
+                @mysql_client.query("update projects set hidden = 1 where id = #{@sprint_timeline.project.id}")
+                @res = @activity.user_notifications_by_roles @sprint_timeline_id
+            end
+            it "should return no results" do
+                expect(@res).to be_empty
+            end
+        end
     end
 
     context "#user_notifications_for_job" do

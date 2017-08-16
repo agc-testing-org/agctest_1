@@ -5,8 +5,10 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     errorMessage: null,
+    votes_count: Ember.computed.filterBy('contributor.votes','comment_id', null),
+
     actions: {
-        comment(contributor_id,sprint_state_id){
+        comment(contributor_id,sprint_state_id,explain){
             this.set("errorMessage", "");
             var _this = this;
             var comment = this.get("comment");
@@ -18,7 +20,8 @@ export default Ember.Component.extend({
                     var feedback = store.createRecord('comment', {
                         contributor_id: contributor_id,
                         sprint_state_id: sprint_state_id,
-                        text: comment
+                        text: comment,
+                        explain: explain
                     }).save().then(function(payload) {
                         store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
                         _this.set("comment",null);
@@ -39,19 +42,33 @@ export default Ember.Component.extend({
             this.set("errorMessage", "");
             var _this = this;
             var store = this.get('store');
+            var sprint_state_votes = store.peekAll('vote').filterBy("sprint_state_id",parseInt(sprint_state_id));
+            var owned_vote = null;
+            var owned_vote_id = null;
+            if(sprint_state_votes){
+                sprint_state_votes = sprint_state_votes.filterBy("comment_id",null);
+                owned_vote = sprint_state_votes.findBy("user_id",this.get("sessionAccount.account.id"));
+                if(owned_vote){
+                    owned_vote_id = owned_vote.get("id");
+                    store.unloadRecord(owned_vote);
+            //        store.peekAll('vote').removeObject(owned_vote);
+            //        store._removeFromIdMap(owned_vote._internalModel);
+                }
+            }
             store.adapterFor('vote').set('namespace', 'contributors/' + contributor_id );
             var feedback = store.createRecord('vote', {
+                id: owned_vote_id,
                 contributor_id: contributor_id,
                 sprint_state_id: sprint_state_id
-            }).save().then(function(payload) {      
+            }).save().then(function(payload) {    
                 if(payload.get("created")){
                     if(payload.get("previous")){
                         var previous_contributor = store.peekRecord('contributor',payload.get("previous")).get('votes');
                         var previous_vote = previous_contributor.findBy("id",payload.get("id"));
                         previous_contributor.removeObject(previous_vote);
                     }
-                    store.peekRecord('contributor',contributor_id).get('votes').addObject(payload);
                 }
+                store.peekRecord('contributor',contributor_id).get('votes').addObject(payload);
             }, function(xhr, status, error) {
                 if(error){ // handle non-api error
                     var response = xhr.errors[0].detail;
