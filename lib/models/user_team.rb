@@ -13,9 +13,9 @@ class UserTeam < ActiveRecord::Base
         encrypt self[:profile_id]
     end
     
-    validates_uniqueness_of :user_email, scope: :team_id, unless: Proc.new { |invite| invite.profile_id } #conditions: -> { where(profile_id: nil) }
-    validates_uniqueness_of :user_email, scope: [:team_id, :profile_id], if: Proc.new { |invite| invite.profile_id }
-    validates_uniqueness_of :user_email, conditions: -> { where("expires > ?", Time.now) }, :message => "this user is already part of other team"
+    validates_uniqueness_of :user_email, scope: :team_id, unless: Proc.new { |invite| invite.profile_id }, :message => "this email address has an existing invitation" #conditions: -> { where(profile_id: nil) } # for invites
+    validates_uniqueness_of :user_email, scope: [:team_id, :profile_id], if: Proc.new { |invite| invite.profile_id }, :message => "this email address has an existing invitation" # for shares
+    validates_uniqueness_of :user_email, conditions: -> { where("expires > ?", Time.now) }, :message => "this user is exclusively working with another team" # for invites where a user is working with another team
 
     belongs_to :team
     belongs_to :sender, :class_name => "User"

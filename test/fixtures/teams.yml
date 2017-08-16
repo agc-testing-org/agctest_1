@@ -28,3 +28,8 @@ cteam:
   user: adam_admin
   name: "CTEAM"
   plan: manager
+
+different_team_for_invite:
+  user: adam_confirmed
+  name: "DIFFERENT"
+  plan: manager

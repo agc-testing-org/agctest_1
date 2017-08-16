@@ -48,6 +48,8 @@ adam_confirmed_b_team:
   updated_at: <%= 1.hour.ago.to_s(:db) %>
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: priority 
+  user_email: "adam+confirmed_b_team@wired7.com"
+  expires:  <%= 1.day.from_now.to_s(:db) %>
 
 adam_protected:
   sender: adam_confirmed
@@ -112,3 +114,9 @@ adam_confirmed_share_2_cteam:
   seat: share
   profile: adam
 
+adam_confirmed_different_team_for_invite:
+  sender: adam_admin
+  user: adam_confirmed
+  team: different_team_for_invite
+  seat: member
+  accepted: true
