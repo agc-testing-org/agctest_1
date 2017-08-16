@@ -10,6 +10,7 @@ export default Component.extend({
     org: config.org,
     didRender() {
         this._super(...arguments);
+  //      this.$('#masonry').masonry({});
     },
     actions: {
         join(project_id, sprint_state_id){

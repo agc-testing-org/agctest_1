@@ -898,7 +898,7 @@ class Integrations < Sinatra::Base
         comment_length = fields[:text].to_s.length
         (comment_length > 1 && comment_length < 5001) || (return_error "comments must be 2-5000 characters") 
         issue = Issue.new
-        comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text]
+        comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text], fields[:explain]
         comment || (return_error "unable to save comment")
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id

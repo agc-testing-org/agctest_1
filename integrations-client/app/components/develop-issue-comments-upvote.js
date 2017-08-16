@@ -5,7 +5,12 @@ export default Ember.Component.extend({
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     comment_votes: function() {
-        return this.get('contributor.votes').filterBy('comment_id',parseInt(this.get("comment_id")));
+        if(this.get('contributor.votes')){
+            return this.get('contributor.votes').filterBy('comment_id',parseInt(this.get("comment_id")));
+        }
+        else{
+            return [];
+        }
     }.property('contributor.votes.@each'),
     actions: {
         commentVote(contributor_id,sprint_state_id,comment_id){

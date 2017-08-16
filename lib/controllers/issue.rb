@@ -41,13 +41,14 @@ class Issue
         end
     end
 
-    def create_comment user_id, contributor_id, sprint_state_id, text
+    def create_comment user_id, contributor_id, sprint_state_id, text, explain
         begin
             return Comment.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
-                text: text.strip
+                text: text.strip,
+                explain: explain
             })
         rescue => e
             puts e
