@@ -863,6 +863,9 @@ button{
     font-weight:300;
     margin-bottom:5px;
 }
+.caption{
+    white-space: pre-line;
+}
 .main .slide.hidden-md-up .overview .description, .main .slide.hidden-md-up .overview .name, .main .slide.hidden-md-up .about{
     text-align:left !important;   
 }

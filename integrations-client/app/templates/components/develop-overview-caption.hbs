@@ -7,7 +7,7 @@
         <button class="btn btn-secondary rounded mt-1 btn-sm text-right" {{action "show"}}>Cancel</button>
     </div>
 {{else}}
-    <div class="description">
+    <div class="description caption">
         {{project.caption}} 
         {{#if sessionAccount.account.admin}}<a {{action 'show'}}>Edit</a>{{/if}}
     </div>
