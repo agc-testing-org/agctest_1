@@ -5,7 +5,13 @@ export function sumFeedback(params/*, hash*/) {
     if(params[0]){
         var contributions = params[0].toArray();
         for(var i = 0; i < contributions.length; i++){
-            total = total + contributions[i].get(params[1]).toArray().length;
+            var comments = contributions[i].get(params[1]).toArray();
+            if(comments){
+                var not_explain = comments.filterBy("explain",false);
+                if(not_explain){
+                    total = total + not_explain.length;
+                }
+            }
         }
     }
 
