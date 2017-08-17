@@ -370,20 +370,10 @@ class Account
         end
     end
 
-    def get_active_team user_id
-        begin 
-            now = Time.now
-            return Team.joins("inner join user_teams on teams.id = user_teams.team_id").where("user_teams.user_id = ? and user_teams.accepted = ? and expires > ?", user_id, true, now).select("teams.id").first
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def get_teams user_id, params
         params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
-            return Team.joins(:user_teams).where({
+            return Team.joins(:user_teams).select("teams.*, user_teams.expires").where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
             }).where(params)
@@ -500,14 +490,12 @@ class Account
         end
     end
 
-    def create_connection_request user_id, contact_id, team_id, read, confirmed
+    def create_connection_request user_id, contact_id, team_id
         begin
             return UserConnection.find_or_create_by({
                 user_id: user_id,
                 contact_id: contact_id,
-                team_id: team_id, 
-                read: read,
-                confirmed: confirmed
+                team_id: team_id
             }).as_json
         rescue => e
             puts e
