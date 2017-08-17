@@ -927,7 +927,7 @@ class Integrations < Sinatra::Base
         check_required_field fields[:sprint_state_id], "sprint_state_id"
         issue = Issue.new
         if params[:id]
-            vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:comment_id]
+            vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:comment_id], fields[:flag]
             vote || (return_error "unable to save vote")
             vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
             sprint_state = issue.get_sprint_state fields[:sprint_state_id]
@@ -945,7 +945,7 @@ class Integrations < Sinatra::Base
             sprint_state = issue.get_sprint_state fields[:sprint_state_id]
             state = State.find_by(:name => "idea").id
             if sprint_state.state_id == state
-                vote = issue.vote @session_hash["id"], nil, fields[:sprint_state_id], fields[:comment_id]
+                vote = issue.vote @session_hash["id"], nil, fields[:sprint_state_id], fields[:comment_id], fields[:flag]
                 vote || (return_error "unable to save vote")
                 vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
                 sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id

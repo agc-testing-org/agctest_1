@@ -55,14 +55,15 @@ class Issue
         end
     end
 
-    def vote user_id, contributor_id, sprint_state_id, comment_id
+    def vote user_id, contributor_id, sprint_state_id, comment_id, flag
         begin
             if comment_id 
                 check = {
                 user_id: user_id, 
                 sprint_state_id: sprint_state_id, 
                 contributor_id: contributor_id, 
-                comment_id: comment_id 
+                comment_id: comment_id,
+                flag: flag
              };
             else 
              check = { 
@@ -110,49 +111,6 @@ class Issue
             return nil
         end
     end
-
-    def sprint_vote user_id, sprint_state_id, comment_id
-        begin
-            if comment_id 
-                check = {
-                user_id: user_id, 
-                sprint_state_id: sprint_state_id, 
-                contributor_id: contributor_id, 
-                comment_id: comment_id 
-             };
-            else 
-             check = { 
-                user_id: user_id, 
-                sprint_state_id: sprint_state_id,
-                comment_id: comment_id
-                } 
-            end
-            vote = Vote.find_or_initialize_by(check) 
-
-            previous_record = vote.contributor_id
-
-            if vote.id == nil
-                vote.update_attributes!(:contributor_id => contributor_id)
-                vote.save
-                new_record = true
-            elsif previous_record != contributor_id.to_i
-                vote.update_attributes!(:contributor_id => contributor_id)
-                new_record = true
-            else 
-                new_record = false
-            end
-
-            record = vote.as_json
-            record[:previous] = previous_record
-            record[:created] = new_record #created = false would mean no change to the frontend
-
-            return record
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     
     def log_event params 
         begin
