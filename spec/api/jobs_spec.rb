@@ -139,12 +139,6 @@ describe "/jobs" do
                     end
                     it_behaves_like "error", "a valid zip code is required"
                 end
-                context "no linkedin data" do
-                    before(:each) do
-                        post "jobs", {:title => @title, :team_id => @team_id, :role_id => @role_id, :zip => @zip, :link => @link }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    end
-                    it_behaves_like "error", "you must connect linkedin to post a job"
-                end
             end
         end
     end

@@ -8,7 +8,7 @@ export default Ember.Component.extend({
     planId: null,
     activeRoles: Ember.computed.filterBy("roles","active",true),
     recruiter: Ember.computed.filterBy("activeRoles","name","recruiting"),
-    manager: Ember.computed.filterBy("activeRoles","name","hiring"),
+    manager: Ember.computed.filterBy("activeRoles","name","management"),
     init() {
         this._super(...arguments);
         var manager = this.get("manager");

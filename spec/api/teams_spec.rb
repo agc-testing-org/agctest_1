@@ -38,71 +38,74 @@ describe "/teams" do
         before(:each) do
             @name = "NEW TEAM"
         end
-        context "owner or admin" do
-            context "owner" do
-                fixtures :user_teams
-                context "valid fields" do
-                    before(:each) do
-                        post "/teams", { :name => @name, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                        @team_results = @mysql_client.query("select * from teams")
-                        @teams = [JSON.parse(last_response.body)]
-                    end
-                    it_behaves_like "teams"
-
-                    context "user_teams" do
-                        before(:each) do
-                            @user_team_result = @mysql_client.query("select * from user_teams ORDER BY id DESC").first
-                        end
-                        it "saves owner as sender_id" do
-                            expect(@user_team_result["sender_id"]).to eq(decrypt(@user).to_i)
-                        end
-                        it "saves owner as user_id" do
-                            expect(@user_team_result["user_id"]).to eq(decrypt(@user).to_i)
-                        end 
-                        it "saves accepted as true" do
-                            expect(@user_team_result["accepted"]).to eq 1 
-                        end
-                        it "saves owner as member" do
-                            expect(@user_team_result["seat_id"]).to eq(seats(:member).id)
-                        end
-                    end
-                end
-                context "invalid fields" do
-                    context "name < 2 char" do
-                        before(:each) do
-                            post "/teams", { :name => "A", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                        end 
-                        it_behaves_like "error", "team name must be 2-30 characters" 
-                    end
-                    context "name > 30 char" do
-                        before(:each) do
-                            post "/teams", { :name => "A"*31, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                        end 
-                        it_behaves_like "error", "team name must be 2-30 characters" 
-                    end
-                    context "name (exists already)" do
-                        fixtures :teams
-                        before(:each) do
-                            post "/teams", { :name => "ATEAM", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"} 
-                        end
-                        it_behaves_like "error", "this name is not available"
-                    end
-                    context "invalid plan id" do
-                        before(:each) do
-                            post "/teams", { :name => "ATEAMNEW", :plan_id => 33 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                        end
-                        it_behaves_like "error", "invalid plan_id"
-                    end
-                end
-            end
-
-            context "admin" do
+        context "signed in" do
+            fixtures :user_teams
+            context "valid fields" do
+                fixtures :user_profiles, :user_positions
                 before(:each) do
-                    post "/teams", { :name => @name, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    post "/teams", { :name => @name, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @team_results = @mysql_client.query("select * from teams")
                     @teams = [JSON.parse(last_response.body)]
                 end
                 it_behaves_like "teams"
+
+                context "user_teams" do
+                    before(:each) do
+                        @user_team_result = @mysql_client.query("select * from user_teams ORDER BY id DESC").first
+                    end
+                    it "saves owner as sender_id" do
+                        expect(@user_team_result["sender_id"]).to eq(decrypt(@user).to_i)
+                    end
+                    it "saves owner as user_id" do
+                        expect(@user_team_result["user_id"]).to eq(decrypt(@user).to_i)
+                    end 
+                    it "saves accepted as true" do
+                        expect(@user_team_result["accepted"]).to eq 1 
+                    end
+                    it "saves owner as member" do
+                        expect(@user_team_result["seat_id"]).to eq(seats(:member).id)
+                    end
+                end
+                context "same name" do
+                    before(:each) do
+                        post "/teams", { :name => @name, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    end
+                    it_behaves_like "error", "this team name already exists for your company"
+                end
+            end
+            context "invalid fields" do
+                fixtures :user_profiles, :user_positions
+                context "name < 2 char" do
+                    before(:each) do
+                        post "/teams", { :name => "A", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    end 
+                    it_behaves_like "error", "team name must be 2-30 characters" 
+                end
+                context "name > 30 char" do
+                    before(:each) do
+                        post "/teams", { :name => "A"*31, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    end 
+                    it_behaves_like "error", "team name must be 2-30 characters" 
+                end
+                context "name (exists already)" do
+                    fixtures :teams
+                    before(:each) do
+                        post "/teams", { :name => "ATEAM", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"} 
+                    end
+                    it_behaves_like "error", "this name is not available"
+                end
+                context "invalid plan id" do
+                    before(:each) do
+                        post "/teams", { :name => "ATEAMNEW", :plan_id => 33 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    end
+                    it_behaves_like "error", "invalid plan_id"
+                end
+            end
+            context "no linkedin data" do
+                before(:each) do
+                    post "/teams", { :name => @name, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
+                end
+                it_behaves_like "error", "you must connect linkedin to post a job"
             end
         end
         context "unauthorized" do

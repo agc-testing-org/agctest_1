@@ -568,7 +568,7 @@ class Account
                 if notification.job
                     response[i][:job_title] = notification.job.title
                     response[i][:job_team_name] = notification.job.team.name
-                    response[i][:job_company] = notification.job.company
+                    response[i][:job_company] = notification.job.team.company
                 end
             end
 

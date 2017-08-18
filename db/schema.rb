@@ -51,7 +51,6 @@ ActiveRecord::Schema.define(version: 20170817012228) do
     t.datetime "updated_at", null: false
     t.integer "role_id", null: false
     t.string "zip", null: false
-    t.string "company", null: false
     t.index ["open"], name: "index_jobs_on_open"
     t.index ["sprint_id"], name: "fk_rails_babd5df9aa"
     t.index ["team_id"], name: "index_jobs_on_team_id"
@@ -202,6 +201,7 @@ ActiveRecord::Schema.define(version: 20170817012228) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "plan_id", default: 2, null: false
+    t.string "company", null: false
     t.index ["plan_id"], name: "index_teams_on_plan_id"
     t.index ["user_id"], name: "index_teams_on_user_id"
   end
