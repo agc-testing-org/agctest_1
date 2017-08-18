@@ -343,7 +343,7 @@ class Account
 
     def get_roles user_id, query
         begin            
-            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active","roles.fa_icon").order(:name).as_json
+            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","roles.description","user_roles.active","roles.fa_icon").order(:name).as_json
         rescue => e
             puts e
             return nil

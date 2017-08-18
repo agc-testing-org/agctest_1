@@ -211,8 +211,16 @@ label{
 .card{
     border: 1px solid #ededed;
 }
+.card-block{
+    background-color: #ededed;
+    color: #2a373f;
+}
 .card-title{
     font-weight:400;
+    color: #5bc0de;
+}
+.card-footer{
+    border: 0px;
 }
 .orange{
     color: orange;

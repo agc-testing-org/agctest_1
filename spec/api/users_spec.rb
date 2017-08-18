@@ -225,6 +225,11 @@ describe "/users" do
                     expect(@res[i]["fa_icon"]).to eq(role.fa_icon)
                 end
             end
+            it "should return role description" do
+                Role.all.order(:name).each_with_index do |role,i|
+                    expect(@res[i]["description"]).to eq(role.description)
+                end
+            end
         end
         context "user roles" do
             it "should include active" do

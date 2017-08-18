@@ -15,8 +15,12 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     },
     store: Ember.inject.service(),
     model: function(params) {
+        this.store.adapterFor('me').set('namespace', 'users');
+        var user = this.store.queryRecord('me',{});
+        this.store.adapterFor('me').set('namespace', '');
+        
         return Ember.RSVP.hash({
-
+            user: user
         });
     },
 });

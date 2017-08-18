@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170816041813) do
+ActiveRecord::Schema.define(version: 20170817012228) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -79,6 +79,7 @@ ActiveRecord::Schema.define(version: 20170816041813) do
     t.string "description", null: false
     t.string "seat_id", null: false
     t.datetime "created_at", null: false
+    t.integer "period", default: 30, null: false
   end
 
   create_table "projects", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -109,6 +110,7 @@ ActiveRecord::Schema.define(version: 20170816041813) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.string "fa_icon", null: false
+    t.string "description"
   end
 
   create_table "seats", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -211,7 +213,6 @@ ActiveRecord::Schema.define(version: 20170816041813) do
     t.boolean "read", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer "team_id"
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"
     t.index ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true
     t.index ["user_id"], name: "index_user_connections_on_user_id"
@@ -292,7 +293,7 @@ ActiveRecord::Schema.define(version: 20170816041813) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "seat_id"
-    t.datetime "expires"
+    t.integer "period"
     t.integer "profile_id"
     t.index ["sender_id"], name: "index_user_teams_on_sender_id"
     t.index ["team_id"], name: "index_user_teams_on_team_id"

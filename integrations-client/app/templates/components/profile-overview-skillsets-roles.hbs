@@ -1,7 +1,19 @@
 {{#each items as |item|}}
     {{#if item.active}}
-        <span {{action "updateItem" type item.id false namespace}} class="badge badge-default rounded selected cursor-pointer {{type}}">{{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} {{item.name}}</span>
+        <span {{action "updateItem" type item.id false namespace}} class="badge badge-default rounded selected cursor-pointer {{type}} text-capitalize">
+            {{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} 
+            {{item.name}}
+            {{#if item.description}}
+                {{tooltip-on-element text=item.description class="tooltip rounded" side="top" enableLazyRendering=true}}
+            {{/if}}
+        </span>
     {{else}}
-        <span {{action "updateItem" type item.id true namespace}} class="badge badge-default rounded unselected cursor-pointer {{type}}">{{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} {{item.name}}</span>
+        <span {{action "updateItem" type item.id true namespace}} class="badge badge-default rounded unselected cursor-pointer {{type}} text-capitalize">
+            {{#if (eq type "role")}}<i class="fa fa-fw fa-1x {{item.fa_icon}}"></i>{{/if}} 
+            {{item.name}}
+            {{#if item.description}}
+                {{tooltip-on-element text=item.description class="tooltip rounded" side="top" enableLazyRendering=true}}
+            {{/if}}
+        </span>
     {{/if}}
 {{/each}}
