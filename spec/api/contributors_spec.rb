@@ -358,6 +358,9 @@ describe "/contributors" do
         it "should return created status true for a new vote" do
             expect(@res["created"]).to be true
         end
+        it "should return created flag false for a new vote" do
+            expect(@res["flag"]).to be nil
+        end
         context "votes" do
             it "should save contributor_id" do
                 expect(@mysql["contributor_id"]).to eq(@contributor_id)
@@ -389,6 +392,96 @@ describe "/contributors" do
             end
             it "should not create a new vote" do
                 expect(@mysql.count).to eq(1)
+            end
+        end
+        context "comment offensive" do
+            before(:each) do
+                @flag = true
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id, :comment_id => @comment_id, :flag => @flag}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from votes").first
+            end
+            it "should return vote id" do
+                expect(@res["id"]).to eq(2)
+            end
+            it "should return created status true for a new vote" do
+                expect(@res["created"]).to be true
+            end
+            it "should return created flag true for a new vote" do
+                expect(@res["flag"]).to be true
+            end
+        end
+    end
+
+    describe "POST report offensive" do
+        fixtures :projects, :sprints, :sprint_states, :contributors, :states, :comments
+        before(:each) do
+            @flag = true 
+            @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
+            @contributor_id = contributors(:adam_confirmed_1).id
+            @project = projects(:demo).id
+            @comment_id = comments(:adam_admin_1).id
+            post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id, :comment_id => @comment_id, :flag => @flag}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+            @res = JSON.parse(last_response.body)
+            @mysql = @mysql_client.query("select * from votes").first
+            @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+        end
+        it "should return vote id" do
+            expect(@res["id"]).to eq(1)
+        end
+        it "should return created status true for a new vote" do
+            expect(@res["created"]).to be true
+        end
+        it "should return created flag true for a new vote" do
+            expect(@res["flag"]).to be true
+        end
+        context "votes" do
+            it "should save contributor_id" do
+                expect(@mysql["contributor_id"]).to eq(@contributor_id)
+            end
+            it "should save sprint_state_id" do
+                expect(@mysql["sprint_state_id"]).to eq(@sprint_state_id)
+            end
+            it "should save comment_id" do
+                expect(@mysql["comment_id"]).to eq(@comment_id)
+            end
+        end
+        context "sprint_timelines" do
+            it "should record vote id" do
+                expect(@sprint_timeline["vote_id"]).to eq(@res["id"])
+            end 
+            it "should set notification_id = comment offensive" do
+                expect(@sprint_timeline["notification_id"]).to eq(notifications(:comment_offensive).id)
+            end  
+            it_behaves_like "sprint_timelines_for_feedback_actions"
+        end
+        context "duplicate vote" do
+            before(:each) do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id, :comment_id => @comment_id, :flag => @flag}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from votes")
+            end
+            it "should return created status false" do
+                expect(@res["created"]).to be false
+            end
+            it "should not create a new vote" do
+                expect(@mysql.count).to eq(1)
+            end
+        end
+        context "comment vote" do
+            before(:each) do
+                post "/contributors/#{@contributor_id}/votes", {:sprint_state_id => @sprint_state_id, :comment_id => @comment_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from votes").first
+            end
+            it "should return vote id" do
+                expect(@res["id"]).to eq(2)
+            end
+            it "should return created status true for a new vote" do
+                expect(@res["created"]).to be true
+            end
+            it "should return created flag false for a new vote" do
+                expect(@res["flag"]).to be nil
             end
         end
     end

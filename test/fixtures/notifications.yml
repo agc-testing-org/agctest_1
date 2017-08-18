@@ -38,3 +38,11 @@ sprint_comment_vote:
   name: "sprint comment vote"
   description: "its new comment vote for sprint idea"
 
+comment_offensive:
+  name: "comment offensive"
+  description: "its offensive comment"
+
+sprint_comment_offensive:
+  name: "sprint comment offensive"
+  description: "its offensive sprint comment"
+
