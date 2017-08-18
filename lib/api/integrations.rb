@@ -1109,16 +1109,18 @@ class Integrations < Sinatra::Base
         account = Account.new
         candidate_teams = account.get_teams(id, {})
         for team in candidate_teams
-            if team != nil && team["expires"] > Time.now
-                team = team["id"]
+            active_team = UserTeam.where("team_id = ? and expires > ?", team["id"], Time.now).first
+            if active_team
+                team_id = active_team["team_id"]
                 read = 1
                 confirmed = 2
             end
         end
-        status 201
-        connection = (account.create_connection_request @session_hash["id"], id, team).to_json
 
-        if team != nil
+        status 201
+        connection = (account.create_connection_request @session_hash["id"], id, team_id).to_json
+
+        if active_team
             account.update_user_connections id, @session_hash["id"], read, confirmed
         end            
 

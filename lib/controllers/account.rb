@@ -373,7 +373,7 @@ class Account
     def get_teams user_id, params
         params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
-            return Team.joins(:user_teams).select("teams.*, user_teams.expires").where({
+            return Team.joins(:user_teams).where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
             }).where(params)
