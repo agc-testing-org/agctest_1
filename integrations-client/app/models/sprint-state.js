@@ -16,5 +16,7 @@ export default DS.Model.extend({
     created_at: attr('date'),
     updated_at: attr('date'),
     pull_request: attr('number'),
-    merged: attr('boolean')
+    merged: attr('boolean'),
+    comments: DS.hasMany('comment'),
+    votes: DS.hasMany('vote')
 });

@@ -5,7 +5,16 @@
                 {{#if (eq selected-state.state_id.name "closed")}}
                     <h3>All done here!</h3>
                 {{else}}
-                    <h3>Nothing to do here yet!</h3>
+                <div class="text-left pl-0 col-md-6 col-sm-12">
+                {{sprint-state-idea-comments sprint_state=selected-state}}
+                {{#if session.isAuthenticated}}
+                {{sprint-state-idea-comment text="Your feedback" show_vote=true sprint_state=selected-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                {{else}}
+                <div class="about text-left section mb-1">
+                {{#link-to "login"}}Sign in {{/link-to}} to join the conversation 
+                </div>
+            {{/if}}
+            </div>
                 {{/if}}
             </div>
         </div>
