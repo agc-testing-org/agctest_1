@@ -24,6 +24,16 @@ describe "/user-teams" do
                 expect(@res[i]["seat_id"]).to eq(r["seat_id"])
             end
         end
+        it "should return profile_id" do
+            @team_invite_result.each_with_index do |r,i|
+                expect(@res[i]["profile_id"]).to eq(r["profile_id"])
+            end
+        end
+        it "should return job_id" do
+            @team_invite_result.each_with_index do |r,i|
+                expect(@res[i]["job_id"]).to eq(r["job_id"])
+            end
+        end
         it "should not return token" do
             @team_invite_result.each_with_index do |r,i|
                 expect(@res[i].keys).to_not include "token"
@@ -119,6 +129,18 @@ describe "/user-teams" do
                             @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND profile_id = #{decrypt(users(:adam_admin).id)}")
                         end
                         it_behaves_like "invites_teams"
+                    end
+                end
+                context "with job" do
+                    fixtures :jobs
+                    before(:each) do
+                        post "/user-teams", { :user_email => @email, :team_id => @team, :seat_id => @seat, :job_id => jobs(:developer).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        @res = [JSON.parse(last_response.body)]
+                        @single_res = @res[0]
+                        @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND seat_id = #{@seat}")
+                    end
+                    it "should save job_id", :focus => true do
+                        expect(@team_invite_result.first["job_id"]).to eq jobs(:developer).id
                     end
                 end
                 context "unauthorized seat id" do
