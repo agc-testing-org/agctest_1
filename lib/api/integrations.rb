@@ -733,16 +733,9 @@ class Integrations < Sinatra::Base
         account = Account.new
         seat = account.get_seat @session_hash["id"], params[:id]
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
-
-        accepted = account.get_team_connections_accepted params[:id]
-        puts "ACCEPTED"
-        puts accepted
         requested = account.get_team_connections_requested params[:id]
-        puts "REQUESTED"
-        puts requested
-        response = accepted + requested
         status 200
-        return response.to_json
+        return requested.to_json
     end
 
     team_connections_patch = lambda do
@@ -1107,23 +1100,18 @@ class Integrations < Sinatra::Base
         check_required_field params[:id], "id"
         id = decrypt(params[:id]) || return_not_found
         account = Account.new
-        candidate_teams = account.get_teams(id, {})
-        for team in candidate_teams
-            active_team = UserTeam.where("team_id = ? and expires > ?", team["id"], Time.now).first
-            if active_team
-                team_id = active_team["team_id"]
-                read = 1
-                confirmed = 2
-            end
-        end
+        candidate_teams = account.get_teams id, {}
+        active_team = candidate_teams.where("expires > ?", Time.now).first
+
+        connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team)
+
+        if active_team && connection
+            connection.read = 1
+            connection.confirmed = 2
+            connection.save
+        end    
 
         status 201
-        connection = (account.create_connection_request @session_hash["id"], id, team_id).to_json
-
-        if active_team
-            account.update_user_connections id, @session_hash["id"], read, confirmed
-        end            
-
         return connection
     end
 
