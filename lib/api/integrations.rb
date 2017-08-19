@@ -738,18 +738,6 @@ class Integrations < Sinatra::Base
         return requested.to_json
     end
 
-    team_connections_patch = lambda do
-        protected!
-        fields = get_json
-        check_required_field fields[:contact_id], "contact_id"
-        check_required_field fields[:user_id], "user_id"
-        check_required_field fields[:read], "read"
-        check_required_field fields[:confirmed], "confirmed"
-        account = Account.new
-        status 200
-        return (account.update_user_connections decrypt(fields[:contact_id]), decrypt(fields[:user_id]), fields[:read], fields[:confirmed]).to_json
-    end
-
     jobs_get = lambda do
         issue = Issue.new
         jobs = issue.get_jobs params
@@ -1604,7 +1592,6 @@ class Integrations < Sinatra::Base
     get "/teams", allows: [:seat_id], &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
     get "/teams/:id/connections", needs: [:id], &team_connections_get
-    patch "/teams/:id/connections/:connection_id", &team_connections_patch
     get "/team-invites", &team_invites_get
 
     get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get
