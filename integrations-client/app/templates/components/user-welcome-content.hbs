@@ -63,8 +63,12 @@
         {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
             {{#if (eq sessionAccount.account.seat_id.name "member")}}               
                 {{#each teams as |team index|}}                                                                     
-                    {{#if (eq index 0)}}    
-                        <h3 class="description">Invite candidates through your organization's team {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} to get started</h3>
+                    {{#if (eq index 0)}}
+                        {{#if (greater-than manager.length 0)}}
+                            <h3 class="description">List jobs for {{#link-to "team.select.jobs" team.id}}{{team.name}}{{/link-to}} at {{team.company}} to get started</h3>
+                        {{else}}
+                            <h3 class="description">Invite candidates through the {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} team at {{team.company}} to get started</h3>
+                        {{/if}}
                     {{/if}}
                 {{/each}}
             {{else}}
@@ -74,7 +78,7 @@
             {{#if (eq sessionAccount.account.seat_id.name "share")}}
                 {{#each teams as |team index|}}
                     {{#if (eq index 0)}}
-                        <h3 class="description">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team has generated for you to get started</h3>
+                        <h3 class="description">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team at {{team.company}} has generated for you to get started</h3>
                     {{/if}}
                 {{/each}}
             {{else}}

@@ -14,9 +14,7 @@ export default Ember.Route.extend({
             user: this.modelFor("team").user,
             team: this.modelFor("team.select").team,
             roles: this.store.findAll('role'),
-            jobs: this.store.query('job',{
-                team_id: this.paramsFor("team.select").id
-            },{reload: true}),
+            jobs: this.modelFor("team.select").jobs
         });
     }
 });

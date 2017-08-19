@@ -3,12 +3,21 @@
         {{application-error error=errorMessage}}
         <label>Email Address</label>
         {{input type="text" value=email placeholder="name@example.com" class="form-control input-lg rounded"}}
-      
-        {{#if member}}
-            {{input type="hidden" value=default_seat.id}}
-        {{else}}
-            {{input type="hidden" value=default_seat.id}}
+        {{input type="hidden" value=default_seat.id}}
+
+        {{#if jobs}}
+            <div class="dropdown d-inline">
+                <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Jobs
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {{#each jobs as |job|}}
+                        <a class="dropdown-item" {{action "selectJob" job.id}}>{{job.title}}</a>
+                    {{/each}}
+                </div>
+            </div>
         {{/if}}
+
         {{#if sessionAccount.account.admin}}
             <div class="dropdown d-inline">
                 <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

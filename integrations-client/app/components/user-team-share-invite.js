@@ -7,6 +7,7 @@ export default Ember.Component.extend({
     store: Ember.inject.service(''),
     errorMessage: null,
     selectedSeat: null,
+    selectedJob: null,
     actions: {
         invite(teamId, profileId){
             var _this = this;
@@ -21,6 +22,7 @@ export default Ember.Component.extend({
                     team_id: teamId,
                     user_email: email,
                     seat_id: selectedSeat,
+                    job_id: selectedJob,
                     profile_id: profileId
                 });
                 invitation.save().then(function(){
@@ -37,6 +39,9 @@ export default Ember.Component.extend({
         },
         selectSeat(seatId){
             this.set("selectedSeat",seatId);
+        },
+        selectJob(jobId){
+            this.set("selectedJob",jobId);
         }
 
     }
