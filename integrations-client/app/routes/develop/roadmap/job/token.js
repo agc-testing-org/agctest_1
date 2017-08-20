@@ -9,7 +9,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     },
     model: function (params) {
 
-        var share = this.get('store').createRecord('share-job', {
+        var share = this.get('store').createRecord('share', {
             token: params.token
         });
         share.save();

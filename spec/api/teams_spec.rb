@@ -87,13 +87,6 @@ describe "/teams" do
                     end 
                     it_behaves_like "error", "team name must be 2-30 characters" 
                 end
-                context "name (exists already)" do
-                    fixtures :teams
-                    before(:each) do
-                        post "/teams", { :name => "ATEAM", :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"} 
-                    end
-                    it_behaves_like "error", "this name is not available"
-                end
                 context "invalid plan id" do
                     before(:each) do
                         post "/teams", { :name => "ATEAMNEW", :plan_id => 33 }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
@@ -105,14 +98,14 @@ describe "/teams" do
                 before(:each) do
                     post "/teams", { :name => @name, :plan_id => plans(:manager).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"} 
                 end
-                it_behaves_like "error", "you must connect linkedin to post a job"
+                it_behaves_like "error", "you must connect linkedin to create a team"
             end
         end
         context "unauthorized" do
             before(:each) do
-                post "/teams", { :name => "12", :plan_id => plans(:manager) }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                post "/teams", { :name => "12", :plan_id => plans(:manager).id }.to_json, {}
             end
-            it_behaves_like "unauthorized_admin"
+            it_behaves_like "unauthorized"
         end
     end
 

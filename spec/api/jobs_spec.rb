@@ -152,7 +152,7 @@ describe "/jobs" do
             before(:each) do
                 get "/jobs"
                 @jobs = JSON.parse(last_response.body)
-                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id ORDER BY id DESC")
+                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name, teams.company as company from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id ORDER BY id DESC")
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"
@@ -161,7 +161,7 @@ describe "/jobs" do
             before(:each) do
                 get "/jobs?id=#{jobs(:developer).id}"
                 @jobs = JSON.parse(last_response.body)
-                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{jobs(:developer).id} ORDER BY id DESC")
+                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name, teams.company as company from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{jobs(:developer).id} ORDER BY id DESC")
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"
@@ -175,7 +175,7 @@ describe "/jobs" do
             get "/jobs/#{job.id}"
             @include_role = true
             @jobs = [JSON.parse(last_response.body)]
-            @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{job.id} ORDER BY id DESC")
+            @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name, teams.company as company from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{job.id} ORDER BY id DESC")
         end
         it_behaves_like "jobs"
         it_behaves_like "ok"
@@ -211,7 +211,7 @@ describe "/jobs" do
                 @team_id = user_teams(:adam_confirmed).team_id        
                 patch "jobs/#{@job}", {:team_id => @team_id, :sprint_id => @sprint_id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @jobs = [JSON.parse(last_response.body)]
-                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{@job} ORDER BY id DESC")
+                @job_results = @mysql_client.query("select jobs.*, users.first_name as user_first_name,teams.name as team_name, teams.company as company from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{@job} ORDER BY id DESC")
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"

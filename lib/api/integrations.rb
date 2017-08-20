@@ -720,7 +720,7 @@ class Integrations < Sinatra::Base
         (Plan.find_by(:id => fields[:plan_id])) || (return_error "invalid plan_id")
         query = {:id => @session_hash["id"]}
         user = account.get query
-        ((user.user_profile && user.user_profile.user_position) && company = user.user_profile.user_position.company) || (return_error "you must connect linkedin to post a job")
+        ((user.user_profile && user.user_profile.user_position) && company = user.user_profile.user_position.company) || (return_error "you must connect linkedin to create a team")
         org = Organization.new
         team = org.create_team fields[:name], @session_hash["id"], fields[:plan_id], company
         (team && team.id) || (team.errors.messages[:name] && (return_error team.errors.messages[:name][0]))

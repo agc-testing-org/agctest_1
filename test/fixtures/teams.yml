@@ -4,6 +4,7 @@ ateam:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   plan: manager
+  company: "ATEAM TECHNOLOGIES"
 
 bteam:
   user: adam_confirmed
@@ -11,6 +12,7 @@ bteam:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   plan: manager
+  company: "ATEAM TECHNOLOGIES"
 
 wired7_team:
   user: adam_confirmed
@@ -18,13 +20,16 @@ wired7_team:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   plan: manager
+  company: "ATEAM TECHNOLOGIES"
 
 adam_admin_team:
   user: adam_admin
   name: "ADAMSTEAM"
   plan: recruiter
+  company: "ATEAM TECHNOLOGIES"
 
 cteam:
   user: adam_admin
   name: "CTEAM"
   plan: manager
+  company: "ATEAM TECHNOLOGIES"

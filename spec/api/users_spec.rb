@@ -557,7 +557,7 @@ describe "/users" do
         it "should return job_company" do
             @notification_results.each_with_index do |n,i|
                 if@res[i]["job_id"]
-                    expect(@res[i]["job_company"]).to eq(@mysql_client.query("select * from jobs where id = #{@res[i]["job_id"]}").first["company"])
+                    expect(@res[i]["job_company"]).to eq(@mysql_client.query("select teams.company as company from jobs inner join teams on jobs.team_id = teams.id where jobs.id = #{@res[i]["job_id"]}").first["company"])
                 end
             end
         end
