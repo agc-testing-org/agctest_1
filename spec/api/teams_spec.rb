@@ -305,7 +305,7 @@ describe "/teams" do
             before(:each) do
                 get "/teams/#{@ateam}/connections", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                base_query = "SELECT users.id, users.first_name, users.email FROM users INNER JOIN user_connections ON users.id = user_connections.contact_id INNER JOIN user_teams ON users.id = user_teams.user_id WHERE (user_teams.team_id = #{teams(:ateam).id} and user_connections.confirmed = 2 and user_teams.seat_id in (#{seats(:sponsored).id}, #{seats(:priority).id}))"
+                base_query = "SELECT user_connections.*, users.id, users.first_name, users.email FROM user_connections INNER JOIN users ON user_connections.user_id = users.id WHERE user_connections.team_id = #{teams(:ateam).id}"
                 @connections_results = @mysql_client.query("#{base_query}")
             end 
             it_behaves_like "team_connections"
