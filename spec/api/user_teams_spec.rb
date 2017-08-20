@@ -26,7 +26,9 @@ describe "/user-teams" do
         end
         it "should return profile_id" do
             @team_invite_result.each_with_index do |r,i|
-                expect(@res[i]["profile_id"]).to eq(r["profile_id"])
+                if r["profile_id"]
+                    expect(decrypt(@res[i]["profile_id"]).to_i).to eq(r["profile_id"])
+                end
             end
         end
         it "should return job_id" do
