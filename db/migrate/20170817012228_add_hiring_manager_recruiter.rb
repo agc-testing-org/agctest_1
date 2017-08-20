@@ -1,6 +1,7 @@
 class AddHiringManagerRecruiter < ActiveRecord::Migration[5.1]
     def change
         add_column :roles, :description, :string, :null => true
+        Role.reset_column_information
         Role.create(name: "management", :fa_icon => "fa-puzzle-piece", :description => "I have the authority to hire")
         Role.create(name: "recruiting", :fa_icon => "fa-wifi", :description => "I help place talent")
         add_column :plans, :period, :integer, :default => 30, :null => false
