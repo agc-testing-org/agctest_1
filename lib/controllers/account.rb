@@ -479,12 +479,10 @@ class Account
     def get_user_connections query
         begin    
             contacts = []
-            UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).where("user_connections.team_id is null").select("user_connections.*","users.first_name").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("inner join users ON user_connections.user_id = users.id").where(query).select("user_connections.*","users.first_name").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.user 
             end
-            puts "get_user_connections"
-            puts contacts
             return contacts
         rescue => e
             puts e
@@ -523,8 +521,20 @@ class Account
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.user
             end
-            puts "get_user_connections_requested"
-            puts contacts
+            return contacts
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_connections_with_team user_id
+        begin
+            contacts = []
+            UserTeam.joins("inner join users on user_teams.sender_id = users.id inner join user_connections on user_teams.user_id = user_connections.contact_id").where("user_connections.user_id != user_teams.sender_id and user_connections.user_id = ? and user_connections.team_id is not null", user_id).select("user_connections.*, user_teams.sender_id, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+                contacts[i] = c.as_json
+                contacts[i][:user_profile] = get_profile c.sender
+            end
             return contacts
         rescue => e
             puts e
@@ -539,8 +549,6 @@ class Account
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.contact
             end
-            puts "get_user_connections_accepted"
-            puts contacts
             return contacts
         rescue => e
             puts e

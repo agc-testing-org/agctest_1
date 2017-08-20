@@ -1131,8 +1131,9 @@ class Integrations < Sinatra::Base
         account = Account.new
         accepted = account.get_user_connections_accepted @session_hash["id"]
         requested = account.get_user_connections_requested @session_hash["id"]
+        inviter_contact = account.get_user_connections_with_team @session_hash["id"]
         status 200
-        return (accepted + requested).to_json
+        return (accepted + requested + inviter_contact).to_json
     end
 
     connections_requests_get_by_id = lambda do
