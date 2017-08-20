@@ -145,7 +145,7 @@ class Account
     def mail to, subject, html_body, body
         begin
             if !ENV['INTEGRATIONS_EMAIL_ADDRESS'].empty?
-                Pony.mail({
+                return Pony.mail({
                     :to => to,
                     :from => 'DoNotReply@wired7.com',
                     :bcc => 'ateam@wired7.com',
@@ -164,8 +164,9 @@ class Account
                         :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
                     }
                 })
+            else
+                return {:to => to, :subject => subject, :html_body => html_body, :body => body}
             end
-            return true
         rescue Exception => e
             puts e
             return false
@@ -399,12 +400,19 @@ class Account
         else #not on team that sent invite, regardless of user confirmed status -- need to add user to team
             link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
             if invite.profile_id
-                return mail invite.user_email, "#{invite.team.company} has shared a Wired7 profile with you", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+                subject = "#{invite.team.company} has shared a Wired7 profile with you"
+                html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
             elsif invite.job_id
-                return mail invite.user_email, "#{invite.team.company} has shared a Wired7 job listing with you", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+                subject = "#{invite.team.company} has shared a Wired7 job listing with you"
+                html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
             else
-                return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} at #{invite.team.company} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+                subject = "Wired7 Invitation to #{invite.team.name} at #{invite.team.company} from #{invite.sender.first_name}"
+                html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
             end
+            return mail invite.user_email, subject, html_body, body
         end
     end
 
