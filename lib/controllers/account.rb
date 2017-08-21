@@ -562,8 +562,7 @@ class Account
             UserConnection.joins("inner join users on user_connections.user_id = users.id").where("user_connections.team_id = ?", team_id).select("user_connections.*, users.id, users.first_name, users.email").order("user_connections.created_at DESC").each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.user
-                contact = User.where("id = ? ", decrypt(contacts[i]["contact_id"])).first
-                contacts[i][:contact_first_name] = contact["first_name"]
+                contacts[i][:contact_first_name] = c.contact.first_name
             end
             return contacts
         rescue => e
