@@ -1293,7 +1293,8 @@ class Integrations < Sinatra::Base
             registered: invite.first.user.confirmed,
             valid: true,
             expired: false,
-            name: invite.first.team.name
+            name: invite.first.team.name,
+            company: invite.first.team.company
         }.to_json
     end
 

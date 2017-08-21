@@ -8,11 +8,11 @@
         {{#if jobs}}
             <div class="dropdown d-inline">
                 <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Jobs
+                    {{#if selectedJob}}{{selectedJob.title}}{{else}}Jobs{{/if}}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     {{#each jobs as |job|}}
-                        <a class="dropdown-item" {{action "selectJob" job.id}}>{{job.title}}</a>
+                        <a class="dropdown-item" {{action "selectJob" job}}>{{job.title}}</a>
                     {{/each}}
                 </div>
             </div>
@@ -21,11 +21,11 @@
         {{#if sessionAccount.account.admin}}
             <div class="dropdown d-inline">
                 <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Seat Types
+                    {{#if selectedSeat}}{{selectedSeat.name}}{{else}}Seat Types{{/if}}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     {{#each team.seats as |seat|}}
-                        <a class="dropdown-item" {{action "selectSeat" seat.id}}>{{seat.name}}</a>
+                        <a class="dropdown-item" {{action "selectSeat" seat}}>{{seat.name}}</a>
                     {{/each}}
                 </div>
             </div>

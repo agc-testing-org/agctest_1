@@ -59,6 +59,11 @@ class Organization
                 else
                     row["share_profile"] = {:id => 0}
                 end
+                if user.job
+                    row["job_title"] = user.job.title
+                    row["job_company"] = user.job.team.company
+                    row["job_team_name"] = user.job.team.name
+                end
                 row["sender_first_name"] = user.sender.first_name
                 row["sender_last_name"] = user.sender.last_name
                 row.delete("token")

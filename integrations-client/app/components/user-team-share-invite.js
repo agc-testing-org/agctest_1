@@ -13,10 +13,11 @@ export default Ember.Component.extend({
             var _this = this;
             var email = this.get('email');
              _this.set("errorMessage",null);   
-            var selectedSeat = this.get("selectedSeat");
+            var selectedSeat = this.get("selectedSeat.id");
             if(!selectedSeat){
                 selectedSeat = this.get('default_seat.id');
             }
+            var selectedJob = this.get("selectedJob.id");
             if(email && email.length > 4){
                 var invitation = this.get('store').createRecord('user-team', {
                     team_id: teamId,
@@ -37,11 +38,11 @@ export default Ember.Component.extend({
                 });
             }
         },
-        selectSeat(seatId){
-            this.set("selectedSeat",seatId);
+        selectSeat(seat){
+            this.set("selectedSeat",seat);
         },
-        selectJob(jobId){
-            this.set("selectedJob",jobId);
+        selectJob(job){
+            this.set("selectedJob",job);
         }
 
     }

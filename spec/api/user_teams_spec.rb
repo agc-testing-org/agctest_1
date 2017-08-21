@@ -36,6 +36,21 @@ describe "/user-teams" do
                 expect(@res[i]["job_id"]).to eq(r["job_id"])
             end
         end
+        it "should return job_title" do
+            @team_invite_result.each_with_index do |r,i|
+                expect(@res[i]["job_title"]).to eq(r["job_title"])
+            end
+        end
+        it "should return job_company" do
+            @team_invite_result.each_with_index do |r,i|
+                expect(@res[i]["job_company"]).to eq(r["job_company"])
+            end
+        end
+        it "should return job_team_name" do
+            @team_invite_result.each_with_index do |r,i|
+                expect(@res[i]["job_team_name"]).to eq(r["job_team_name"])
+            end
+        end
         it "should not return token" do
             @team_invite_result.each_with_index do |r,i|
                 expect(@res[i].keys).to_not include "token"
@@ -104,7 +119,7 @@ describe "/user-teams" do
                         @single_res = @res[0]
                         @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND seat_id = #{@seat}")
                     end
-                    it "should save profile_id", :focus => true do
+                    it "should save profile_id" do
                         expect(@team_invite_result.first["profile_id"]).to eq decrypt(users(:adam).id).to_i
                     end
                     it_behaves_like "invites_teams"
@@ -141,7 +156,7 @@ describe "/user-teams" do
                         @single_res = @res[0]
                         @team_invite_result = @mysql_client.query("select * from user_teams where user_email = '#{@email}' AND seat_id = #{@seat}")
                     end
-                    it "should save job_id", :focus => true do
+                    it "should save job_id" do
                         expect(@team_invite_result.first["job_id"]).to eq jobs(:developer).id
                     end
                 end
@@ -230,11 +245,11 @@ describe "/user-teams" do
                 it_behaves_like "not_found"
             end
             context "member" do
-                fixtures :user_teams
+                fixtures :user_teams, :jobs, :teams
                 before(:each) do
                     get "/user-teams?team_id=#{@team}", nil, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
-                    @team_invite_result = @mysql_client.query("select * from user_teams where team_id = #{@team} ORDER BY ID DESC")
+                    @team_invite_result = @mysql_client.query("select user_teams.*,jobs.title as job_title,teams.company as job_company, teams.name as job_team_name from user_teams left join jobs on user_teams.job_id = jobs.id left join teams on jobs.team_id = teams.id where user_teams.team_id = #{@team} ORDER BY ID DESC")
                 end 
                 it_behaves_like "invites_teams"
             end

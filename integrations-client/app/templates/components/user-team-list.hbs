@@ -18,12 +18,16 @@
                 <span class="badge badge-info uppercase rounded">Accepted</span>
             {{/if}}
             {{#if (eq default_seat.name "share")}}
-                {{#link-to "profile" user.share_profile.id}}{{user.share_first_name}} {{user.share_last_name}}{{/link-to}} {{#if user.share_profile.title}} - {{user-profile-descriptor user_profile=user.share_profile class="d-inline"}}{{/if}} to 
+                {{#link-to "profile" user.share_profile.id}}{{user.share_first_name}} {{user.share_last_name}}{{/link-to}} {{#if user.share_profile.title}} - {{user-profile-descriptor user_profile=user.share_profile class="d-inline"}}{{/if}} with
             {{/if}}
             {{#if user.user_first_name}}
                 {{#link-to "profile" user.user_profile.id}}{{user.user_first_name}} {{user.user_last_name}}{{/link-to}} {{#if user.user_profile.title}} - {{user-profile-descriptor user_profile=user.user_profile class="d-inline"}}{{/if}}
             {{else}}
                 {{user.user_email}}
+            {{/if}}
+
+            {{#if user.job_id}}   
+                for {{#link-to "develop.roadmap.job" (concat user.job_id "-" user.job_title "-for-" user.job_team_name "-at-" user.job_company)}}{{user.job_title}}{{/link-to}} on {{user.job_team_name}} at {{user.job_company}}
             {{/if}}
 
             </h4>
