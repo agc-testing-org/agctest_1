@@ -355,6 +355,17 @@ describe "/users" do
         end
     end
 
+    shared_examples_for "contact_team" do
+        it "should include team_id" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["team_id"]).to eq(r["team_id"])
+                expect(r["team_id"]).to eq(@team_id)
+                expect(r["confirmed"]).to eq(@confirmed)
+                expect(r["read"]).to eq(@read)
+            end
+        end
+    end
+
     shared_examples_for "contact" do
         it "should include user_id" do
             @contact_result.each_with_index do |r,i|
@@ -472,6 +483,7 @@ describe "/users" do
     end
 
     describe "POST /:id/requests" do
+        fixtures :user_teams, :teams, :users
         context "signed in" do
             before(:each) do
                 post "/users/#{users(:adam_admin).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
@@ -486,6 +498,19 @@ describe "/users" do
                 post "/users/#{users(:adam_admin).id}/requests"
             end
             it_behaves_like "unauthorized"
+        end
+        context "when user belongs to team" do
+            before(:each) do
+                post "/users/#{users(:elina_bteam).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @res = [JSON.parse(last_response.body)]
+                @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(users(:elina_bteam).id).to_i}")
+                @team_id = teams(:bteam).id
+                @confirmed = 2
+                @read = 1
+            end
+            it_behaves_like "contact"
+            it_behaves_like "created"
+            it_behaves_like "contact_team"
         end
     end
 

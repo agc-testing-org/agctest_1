@@ -120,3 +120,11 @@ adam_confirmed_different_team_for_invite:
   team: different_team_for_invite
   seat: member
   accepted: true
+
+elina_bteam:
+  sender: adam_confirmed
+  user: elina_bteam
+  team: bteam
+  seat: sponsored
+  accepted: true
+  expires:  <%= 1.day.from_now.to_s(:db) %>

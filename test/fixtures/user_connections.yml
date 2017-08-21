@@ -15,3 +15,10 @@ adam_confirmed_request_adam_admin_pending:
   contact: adam_admin
   read: false
   confirmed: 1
+
+elina_bteam_connection:
+  user: adam_admin
+  contact: elina_bteam
+  read: true
+  confirmed: 2
+  team_id: bteam
