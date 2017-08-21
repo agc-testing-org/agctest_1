@@ -3,9 +3,10 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 export default Ember.Route.extend({
     actions: {
-        refresh(){
-            this.refresh();
-        }
+        //refresh(){
+
+
+        //}
     },
     store: Ember.inject.service(),
     model: function(params) {
