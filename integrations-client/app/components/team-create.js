@@ -35,7 +35,12 @@ export default Ember.Component.extend({
                         plan_id: plan
                     });
                     team.save().then(function(payload){
-                        _this.get("routes").redirectWithId("team.select.talent",payload.id);
+                        if(plan === _this.get("plans").findBy("name","manager").id){
+                            _this.get("routes").redirectWithId("team.select.jobs",payload.id);
+                        }
+                        else {
+                            _this.get("routes").redirectWithId("team.select.talent",payload.id);
+                        }
                     }, function(xhr, status, error) {
                         var response = xhr.errors[0].detail;
                         _this.set("errorMessage",response);

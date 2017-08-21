@@ -4,7 +4,7 @@
 
     {{#unless params.section}}
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
-    <h3 class="description mb-3">Wired7 <strong>connects</strong> companies and job seekers through <strong>project development</strong></h3>  
+    <h3 class="description mt-3 mb-3">Wired7 <strong>connects</strong> companies and job seekers through <strong>project development</strong></h3>  
     <h3 class="description mb-4">
         Use Wired7 to 
         {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
@@ -14,8 +14,8 @@
         {{/if}}
     </h3>
 
-    <h3 class="description mb-3">If you haven't done so, please let us know your team function or role</h3>
-    <div class="text-center">
+    <h3 class="description mb-3 mt-4">Before we begin let us know your team function</h3>
+    <div class="text-center mt-3">
         {{profile-overview-skillsets-roles user=user items=roles type="role" namespace="users/me" class="skillsets"}}
     </div>
 
