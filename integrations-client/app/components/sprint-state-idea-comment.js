@@ -62,7 +62,7 @@ export default Ember.Component.extend({
             }).save().then(function(payload) {    
                 if(payload.get("created")){
                     if(payload.get("previous")){
-                        var previous_contributor = store.peekRecord('contributor',payload.get("previous")).get('votes');
+                        var previous_contributor = store.peekRecord('sprint_state',payload.get("previous")).get('votes');
                         var previous_vote = previous_contributor.findBy("id",payload.get("id"));
                         previous_contributor.removeObject(previous_vote);
                     }

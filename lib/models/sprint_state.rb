@@ -12,4 +12,6 @@ class SprintState < ActiveRecord::Base
     has_many :states
     has_many :contributors
     belongs_to :contributor
+    has_many :comments
+    has_many :votes
 end
