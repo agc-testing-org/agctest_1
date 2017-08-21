@@ -8,6 +8,15 @@ adam_original_invite:
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: owner
 
+adam_admin_invite:
+  sender: adam_confirmed
+  user: adam_admin
+  team: ateam
+  accepted: true
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: member
+
 adam_confirmed:
   sender: adam_confirmed
   user: adam_confirmed
@@ -140,7 +149,7 @@ mail_invite_not_on_team:
 
 mail_invite_on_team_profile:
   sender: adam_confirmed
-  user: adam
+  user: adam_admin
   team: ateam
   user_email: "mail_invite_on_team_profile@wired7.com"
   token: "mail_invite_on_team_profile"
@@ -148,9 +157,9 @@ mail_invite_on_team_profile:
   seat: share
   profile: adam
 
-mail_invite_not_on_team_job:
+mail_invite_on_team_job:
   sender: adam_confirmed
-  user: adam
+  user: adam_admin
   team: ateam
   user_email: "mail_invite_on_team_job@wired7.com"
   token: "mail_invite_on_team_job"
