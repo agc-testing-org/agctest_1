@@ -1100,7 +1100,7 @@ class Integrations < Sinatra::Base
         end    
 
         status 201
-        return connection
+        return connection.to_json
     end
 
     connections_requests_get = lambda do
