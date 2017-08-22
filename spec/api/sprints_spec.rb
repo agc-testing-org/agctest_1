@@ -596,7 +596,7 @@ describe "/sprints" do
                     @new_sprint_state_id = contributors(:adam_sprint_1_state_2).sprint_state_id
                     post "/sprints/comments", {:text => "AA", :sprint_state_id => @new_sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
-                it_behaves_like "error", "an error has occurred"
+                it_behaves_like "error", "unable to comment on this item"
             end
         end
     end

@@ -26,7 +26,7 @@ describe "/contributors" do
             expect(@sprint_timeline["contributor_id"]).to eq(@contributor_id)
         end
         it "should record next_sprint_state_id" do
-            expect(@sprint_timeline["next_sprint_state_id"]).to eq(sprint_states(:sprint_1_state_2).id)
+            expect(@sprint_timeline["next_sprint_state_id"]).to eq(@next_sprint_state)
         end
     end
 
@@ -216,8 +216,9 @@ describe "/contributors" do
     describe "POST /:id/comments" do
         fixtures :projects, :sprints, :sprint_states, :contributors, :states
         before(:each) do
-            @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
-            @contributor_id = contributors(:adam_confirmed_1).id
+            @sprint_state_id = contributors(:adam_confirmed_2).sprint_state_id
+            @contributor_id = contributors(:adam_confirmed_2).id
+            @next_sprint_state = sprint_states(:sprint_1_state_3).id
             @project = projects(:demo).id
         end
         context "valid comment" do
@@ -293,6 +294,7 @@ describe "/contributors" do
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from votes").first
             @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            @next_sprint_state = sprint_states(:sprint_1_state_2).id
         end
         it "should return vote id" do
             expect(@res["id"]).to eq(1)
@@ -363,6 +365,7 @@ describe "/contributors" do
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from votes").first
             @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            @next_sprint_state = sprint_states(:sprint_1_state_2).id
         end
         it "should return vote id" do
             expect(@res["id"]).to eq(1)
@@ -437,6 +440,7 @@ describe "/contributors" do
             @res = JSON.parse(last_response.body)
             @mysql = @mysql_client.query("select * from votes").first
             @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            @next_sprint_state = sprint_states(:sprint_1_state_2).id
         end
         it "should return vote id" do
             expect(@res["id"]).to eq(1)
@@ -521,6 +525,7 @@ describe "/contributors" do
             @mysql = @mysql_client.query("select * from sprint_states").first
             @timeline = @mysql_client.query("select * from sprint_timelines").first
             @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            @next_sprint_state = sprint_states(:sprint_1_state_2).id
         end
         context "valid" do
             context "admin" do

@@ -160,7 +160,7 @@ class Issue
 
     def get_sprint_state_ids_by_sprint sprint_id
         begin
-            return SprintState.where(:sprint_id => sprint_id).select(:id).map(&:id)
+            return SprintState.where(:sprint_id => sprint_id).select(:id).order(:created_at => "ASC").map(&:id)
         rescue => e
             puts e
             return nil
