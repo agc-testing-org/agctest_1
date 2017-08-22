@@ -12,7 +12,7 @@
         </small>
         {{#if session.isAuthenticated}}
         {{sprint-state-idea-comments-upvote sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
-        {{sprint-state-idea-report-offensive sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
+        {{sprint-state-idea-report-offensive user_id=sessionAccount.account.id sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
         {{/if}}
     </div>
 {{/each}}
