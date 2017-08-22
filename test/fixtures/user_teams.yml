@@ -122,7 +122,7 @@ adam_confirmed_different_team_for_invite:
   accepted: true
 
 elina_bteam:
-  sender: adam_confirmed
+  sender: adam
   user: elina_bteam
   team: bteam
   seat: sponsored
