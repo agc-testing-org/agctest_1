@@ -148,7 +148,7 @@ describe "/jobs" do
         before(:each) do
             @include_role = true
         end
-        context "no filter" do
+        context "no filter", :focus => true do
             before(:each) do
                 get "/jobs"
                 @jobs = JSON.parse(last_response.body)
@@ -162,6 +162,15 @@ describe "/jobs" do
                 get "/jobs?id=#{jobs(:developer).id}"
                 @jobs = JSON.parse(last_response.body)
                 @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name, teams.company as company from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.id = #{jobs(:developer).id} ORDER BY id DESC")
+            end
+            it_behaves_like "jobs"
+            it_behaves_like "ok"
+        end
+        context "filter by team_id" do
+            before(:each) do
+                get "/jobs?team_id=#{jobs(:developer_bteam).team_id}"
+                @jobs = JSON.parse(last_response.body)
+                @job_results = @mysql_client.query("select jobs.*, jobs.role_id as role, users.first_name as user_first_name,teams.name as team_name, teams.company as company from jobs INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id where jobs.team_id = #{jobs(:developer_bteam).team_id} ORDER BY id DESC")
             end
             it_behaves_like "jobs"
             it_behaves_like "ok"
@@ -202,8 +211,8 @@ describe "/jobs" do
                 body = {
                     :name=>"1",
                     :commit=>{
-                        :sha=>sprint_states(:sprint_1_state_1).sha
-                    }
+                    :sha=>sprint_states(:sprint_1_state_1).sha
+                }
                 }
 
                 @body = JSON.parse(body.to_json, object_class: OpenStruct)

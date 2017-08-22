@@ -29,3 +29,14 @@ product_manager:
   zip: "94105"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
+
+developer_bteam:
+  user: adam_confirmed
+  title: "TITLE"
+  link: "wired7.com/developer123"
+  team: bteam
+  sprint: sprint1
+  role: development
+  zip: "94105"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>

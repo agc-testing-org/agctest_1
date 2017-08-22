@@ -90,12 +90,14 @@
 
         {{else}}
             {{#unless (eq user.id sessionAccount.account.id)}}
-                {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                    <div class="icon hidden-sm-down">
-                        <i class="fa fa-fw fa-2x fa-user-plus"></i>
-                    </div>
-                    Request Contact
-                {{/link-to}}
+                {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
+                    {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                        <div class="icon hidden-sm-down">
+                            <i class="fa fa-fw fa-2x fa-user-plus"></i>
+                        </div>
+                        Request Contact
+                    {{/link-to}}
+                {{/unless}}
             {{/unless}}
 
             {{#link-to "profile.overview" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
