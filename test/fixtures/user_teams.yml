@@ -1,12 +1,21 @@
 adam_original_invite:
   sender: adam_confirmed
   user: adam_confirmed
-  team: "Wired7"
+  team: wired7_team 
   accepted: true
   token: "ABC00"
   updated_at: <%= 1.hour.ago.to_s(:db) %>
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: owner
+
+adam_admin_invite:
+  sender: adam_confirmed
+  user: adam_admin
+  team: ateam
+  accepted: true
+  updated_at: <%= 1.hour.ago.to_s(:db) %>
+  created_at: <%= 1.hour.ago.to_s(:db) %>
+  seat: member
 
 adam_confirmed:
   sender: adam_confirmed
@@ -128,3 +137,49 @@ elina_bteam:
   seat: sponsored
   accepted: true
   expires:  <%= 1.day.from_now.to_s(:db) %>
+
+mail_invite_not_on_team_profile:
+  sender: adam_confirmed
+  team: ateam
+  user_email: "mail_invite_not_on_team_profile@wired7.com"
+  token: "mail_invite_not_on_team_profile"
+  created_at: <%= 1.minute.ago.to_s(:db) %>
+  seat: share
+  profile: adam
+
+mail_invite_not_on_team_job:
+  sender: adam_confirmed
+  team: ateam
+  user_email: "mail_invite_not_on_team_job@wired7.com"
+  token: "mail_invite_not_on_team_job"
+  created_at: <%= 1.minute.ago.to_s(:db) %>
+  seat: priority
+  job: developer
+
+mail_invite_not_on_team:
+  sender: adam_confirmed
+  team: ateam
+  user_email: "mail_invite_not_on_team@wired7.com"
+  token: "mail_invite_not_on_team"
+  created_at: <%= 1.minute.ago.to_s(:db) %>
+  seat: member
+
+mail_invite_on_team_profile:
+  sender: adam_confirmed
+  user: adam_admin
+  team: ateam
+  user_email: "mail_invite_on_team_profile@wired7.com"
+  token: "mail_invite_on_team_profile"
+  created_at: <%= 1.minute.ago.to_s(:db) %>
+  seat: share
+  profile: adam
+
+mail_invite_on_team_job:
+  sender: adam_confirmed
+  user: adam_admin
+  team: ateam
+  user_email: "mail_invite_on_team_job@wired7.com"
+  token: "mail_invite_on_team_job"
+  created_at: <%= 1.minute.ago.to_s(:db) %>
+  seat: priority
+  job: developer

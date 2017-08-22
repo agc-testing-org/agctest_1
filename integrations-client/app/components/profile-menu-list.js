@@ -6,6 +6,9 @@ export default Component.extend({
     session: service('session'),
     sessionAccount: Ember.inject.service('session-account'),
     showTeams: false,
+    activeRoles: Ember.computed.filterBy("roles","active",true),
+    recruiter: Ember.computed.filterBy("activeRoles","name","recruiting"),
+    manager: Ember.computed.filterBy("activeRoles","name","management"),
     didRender() {
         this._super(...arguments);
     },

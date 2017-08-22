@@ -18,7 +18,10 @@ Router.map(function() {
     });
     this.route('develop', function() {
         this.route('roadmap', function() {
-            this.route('job', {path: '/job/:id'});
+            this.route('job', {path: '/job/:id'}, function(){
+                this.route('token', {path: '/:token'});
+            });
+
         });
         this.route('new');
         this.route('project', {path: '/:project_id'}, function() {

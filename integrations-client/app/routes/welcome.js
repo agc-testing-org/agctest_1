@@ -32,13 +32,6 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             skillsets: skillsets,
             roles: roles,
             seats: this.store.findAll('seat'),
-            /*
-               skillsets: this.modelFor("me").skillsets,
-               seats: this.modelFor("me").seats,
-               notifications: this.modelFor("me").notifications,
-               roles: this.modelFor("me").roles,
-               states: this.modelFor("me").states
-             */
         });
     }
 });

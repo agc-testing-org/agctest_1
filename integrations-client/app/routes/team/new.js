@@ -12,7 +12,14 @@ export default Ember.Route.extend({
     },
     store: Ember.inject.service(),
     model: function(params) {
+        
+        this.store.adapterFor('role').set('namespace', 'users/me');
+        var roles = this.store.findAll('role');
+        this.store.adapterFor('role').set('namespace', '');
+
         return Ember.RSVP.hash({
+            roles: roles,
+            user: this.modelFor("team").user,
             plans: this.store.findAll('plan')
         });
     },

@@ -5,8 +5,7 @@ developer:
   team: ateam
   sprint: sprint1
   role: development
-  zip: "94105"
-  company: "ATEAM TECHNOLOGIES"
+  zip: "94105" 
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 
@@ -18,7 +17,6 @@ senior_developer:
   sprint: sprint1b
   role: development
   zip: "94105"
-  company: "ATEAM TECHNOLOGIES"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 
@@ -29,6 +27,16 @@ product_manager:
   link: "wired7.com/product_manager"
   team: ateam
   zip: "94105"
-  company: "ATEAM TECHNOLOGIES"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+developer_bteam:
+  user: adam_confirmed
+  title: "TITLE"
+  link: "wired7.com/developer123"
+  team: bteam
+  sprint: sprint1
+  role: development
+  zip: "94105"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

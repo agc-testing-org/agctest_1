@@ -9,7 +9,7 @@
             
             {{#if (eq params.section "connect")}}
                 {{#unless user.title}}
-                <h3 class="description mb-5 text-center">Before we continue, connect Wired7 and LinkedIn to <strong>anonymously share your background</strong> when interacting with other users</h3>
+                <h3 class="description mb-5 text-center">Connect Wired7 and LinkedIn to <strong>anonymously share your background</strong> when interacting with other users</h3>
                 <h3 class="description text-center">{{user-login-oauth provider="linkedin" refresh="refresh" lg=true}}</h3>
                 {{else}}
                 <h2 class="name text-center mb-5">{{user-profile-descriptor user_profile=user multiple_lines=true}}</h2>

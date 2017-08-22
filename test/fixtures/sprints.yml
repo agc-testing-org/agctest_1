@@ -16,10 +16,20 @@ sprint_1b:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
 
+sprint_1c:
+  user: adam_confirmed
+  title: "TITLEC"
+  description: "DESCRIPTION"
+  project: demo
+  job: product_manager
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
 sprint_2:
   user: adam_confirmed
   title: "TITLE"
   description: "DESCRIPTION"
   project: demob
+  job: developer_bteam
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>

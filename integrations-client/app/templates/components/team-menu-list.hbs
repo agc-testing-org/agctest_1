@@ -8,13 +8,15 @@
 
     {{#if team}}
     {{#if team.show}}
-
+        
+        {{#if (eq team.plan.name "manager")}}
         {{#link-to "team.select.jobs" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-briefcase"></i>
             </div>
             Jobs 
         {{/link-to}}
+        {{/if}}
 
         {{#link-to "team.select.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}            
             <div class="icon hidden-sm-down">
@@ -37,12 +39,14 @@
             Talent
         {{/link-to}}
 
-        {{#link-to "team.select.shares" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-share-alt"></i>
-            </div>
-            Shares 
-        {{/link-to}}
+        {{#if (eq team.plan.name "recruiter")}}
+            {{#link-to "team.select.shares" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-share-alt"></i>
+                </div>
+                Shares 
+            {{/link-to}}
+        {{/if}}
 
         {{#if sessionAccount.account.admin}}
         {{#link-to "team.select.owners" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}

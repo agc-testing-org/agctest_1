@@ -22,5 +22,6 @@ class UserTeam < ActiveRecord::Base
     belongs_to :profile, :class_name => "User"
     belongs_to :user
     belongs_to :seat
+    belongs_to :job
 end
 

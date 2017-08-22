@@ -145,7 +145,7 @@ class Account
     def mail to, subject, html_body, body
         begin
             if !ENV['INTEGRATIONS_EMAIL_ADDRESS'].empty?
-                Pony.mail({
+                return Pony.mail({
                     :to => to,
                     :from => 'DoNotReply@wired7.com',
                     :bcc => 'ateam@wired7.com',
@@ -164,8 +164,9 @@ class Account
                         :domain               => "webmail.wired7.com" # the HELO domain provided by the client to the server
                     }
                 })
+            else
+                return {:to => to, :subject => subject, :html_body => html_body, :body => body}
             end
-            return true
         rescue Exception => e
             puts e
             return false
@@ -343,7 +344,7 @@ class Account
 
     def get_roles user_id, query
         begin            
-            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","user_roles.active","roles.fa_icon").order(:name).as_json
+            return Role.joins("LEFT JOIN user_roles ON user_roles.role_id = roles.id AND user_roles.user_id = #{user_id.to_i} OR user_roles.user_id is null").where(query).select("roles.id","roles.name","roles.description","user_roles.active","roles.fa_icon").order(:name).as_json
         rescue => e
             puts e
             return nil
@@ -385,14 +386,36 @@ class Account
 
     def mail_invite token
         invite = (get_invitation token).take
-        on_team = get_seat invite[:user_id], invite.team_id
-        if invite.profile_id && on_team # profile share
-            link = "#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}"
-            return mail invite.user_email, "New Lead on Wired7 from #{invite.team.name}", "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam", "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team would like for you to check out a new lead.  Please use the following link to view #{invite.profile.first_name}'s profile:\n\n#{link}\n\n\n- The Wired7 ATeam"
-        else
+        on_team = get_seat invite[:user_id], invite.team_id # on team that sent invite / share
+        if on_team
+            if invite.profile_id # profile share
+                link = "#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}"
+                subject = "#{invite.team.company} has shared a Wired7 profile with you"
+                html_body = "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead.  Use the following link to view #{invite.profile.first_name}'s profile:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                body = "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead.  Use the following link to view #{invite.profile.first_name}'s profile:\n\n#{link}\n\n\n- The Wired7 ATeam"        
+            elsif invite.job_id # job share
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{invite.job_id}-#{invite.job.title}-for-#{invite.job.team.name}-at-#{invite.job.team.company}/#{invite.token}"
+                subject = "#{invite.team.company} has shared a Wired7 job listing with you"
+                html_body = "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company}.  Use the following link to get your foot in the door:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                body = "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company}.  Use the following link to get your foot in the door:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end
+        else #not on team that sent invite, regardless of user confirmed status -- need to add user to team
             link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
-            return mail invite.user_email, "Wired7 Invitation to #{invite.team.name} from #{invite.sender.first_name}", "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam", "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+            if invite.profile_id
+                subject = "#{invite.team.company} has shared a Wired7 profile with you"
+                html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+            elsif invite.job_id
+                subject = "#{invite.team.company} has shared a Wired7 job listing with you"
+                html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+            else
+                subject = "Wired7 Invitation to #{invite.team.name} at #{invite.team.company} from #{invite.sender.first_name}"
+                html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+            end
         end
+        return mail invite.user_email, subject, html_body, body
     end
 
     def refresh_team_invite token
@@ -597,7 +620,7 @@ class Account
                 if notification.job
                     response[i][:job_title] = notification.job.title
                     response[i][:job_team_name] = notification.job.team.name
-                    response[i][:job_company] = notification.job.company
+                    response[i][:job_company] = notification.job.team.company
                 end
             end
 
