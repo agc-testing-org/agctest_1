@@ -32,6 +32,7 @@ cteam:
   user: adam_admin
   name: "CTEAM"
   plan: manager
+  company: "ATEAM TECHNOLOGIES"
 
 different_team_for_invite:
   user: adam_confirmed

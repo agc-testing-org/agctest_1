@@ -213,6 +213,7 @@ ActiveRecord::Schema.define(version: 20170817012228) do
     t.boolean "read", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "team_id"
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"
     t.index ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true
     t.index ["user_id"], name: "index_user_connections_on_user_id"
@@ -293,7 +294,7 @@ ActiveRecord::Schema.define(version: 20170817012228) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "seat_id"
-    t.integer "period"
+    t.datetime "expires"
     t.integer "profile_id"
     t.integer "job_id"
     t.index ["job_id"], name: "fk_rails_078dfb7402"
