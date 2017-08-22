@@ -899,16 +899,16 @@ class Integrations < Sinatra::Base
         issue = Issue.new
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
 
-        (params[:id] || sprint_state.state.name == "idea") || return_error "unable to comment on this item"
+        (params[:id] || sprint_state.state.name == "idea") || (return_error "unable to comment on this item")
         comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text], fields[:explain]
         comment || (return_error "unable to save comment")
-        
+
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
 
         log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment"}).id}
 
-        (sprint_state.state.name == "idea") && (log_params[:notification_id] => Notification.find_by({:name => "sprint comment"}).id})
+        (sprint_state.state.name == "idea") && (log_params[:notification_id] = Notification.find_by({:name => "sprint comment"}).id)
 
         (issue.log_event log_params) || (return_error "an error has occurred")
         status 201
