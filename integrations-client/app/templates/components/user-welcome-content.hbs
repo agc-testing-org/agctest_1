@@ -63,15 +63,19 @@
         {{#unless (eq sessionAccount.account.seat_id.name "share")}}
             {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
                 {{#if (eq sessionAccount.account.seat_id.name "member")}}               
-                    {{#each teams as |team index|}}                                                                     
-                        {{#if (eq index 0)}}
-                            {{#if (greater-than manager.length 0)}}
+                    {{#if (and (greater-than manager.length 0) (greater-than managerTeams.length 0))}}
+                        {{#each managerTeams as |team index|}}                                                                     
+                            {{#if (eq index 0)}}
                                 <h3 class="description">List jobs for {{#link-to "team.select.jobs" team.id}}{{team.name}}{{/link-to}} at {{team.company}} to get started</h3>
-                            {{else}}
+                            {{/if}}
+                        {{/each}}
+                    {{else}}
+                        {{#each teams as |team index|}}
+                            {{#if (eq index 0)}}
                                 <h3 class="description">Invite candidates through the {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} team at {{team.company}} to get started</h3>
                             {{/if}}
-                        {{/if}}
-                    {{/each}}
+                        {{/each}}
+                    {{/if}}
                 {{else}}
                     <h3 class="about mt-3">{{#link-to "team.new"}}create a team{{/link-to}} to get started</h3> 
                 {{/if}}

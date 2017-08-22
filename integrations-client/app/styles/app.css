@@ -188,6 +188,7 @@ label{
 }
 .top .badge.unselected{
     background-color:#ededed;
+    color: #496174;
 }
 .badge.role, .btn-group label{
     font-size: 14px;

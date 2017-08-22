@@ -897,12 +897,19 @@ class Integrations < Sinatra::Base
         comment_length = fields[:text].to_s.length
         (comment_length > 1 && comment_length < 5001) || (return_error "comments must be 2-5000 characters") 
         issue = Issue.new
+        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+
+        (params[:id] || sprint_state.state.name == "idea") || (return_error "unable to comment on this item")
         comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text], fields[:explain]
         comment || (return_error "unable to save comment")
-        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
         next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+
         log_params = {:comment_id => comment.id, :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment"}).id}
+
+        (sprint_state.state.name == "idea") && (log_params[:notification_id] = Notification.find_by({:name => "sprint comment"}).id)
+
         (issue.log_event log_params) || (return_error "an error has occurred")
         status 201
         return comment.to_json
@@ -913,19 +920,43 @@ class Integrations < Sinatra::Base
         fields = get_json
         check_required_field fields[:sprint_state_id], "sprint_state_id"
         issue = Issue.new
-        vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:comment_id]
-        vote || (return_error "unable to save vote")
-        vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
-        sprint_state = issue.get_sprint_state fields[:sprint_state_id]
-        sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
-        next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
-        if vote["id"] != nil
-        if fields[:comment_id]
-            log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment vote"}).id}
+        if params[:id]
+            vote = issue.vote @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:comment_id], fields[:flag]
+            vote || (return_error "unable to save vote")
+            vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
+            sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+            sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+            next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+            if vote["id"] != nil
+                if fields[:comment_id] && fields[:flag]
+                    log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment offensive"}).id}
+                elsif fields[:comment_id]
+                    log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "comment vote"}).id}
+                else
+                    log_params = {:vote_id => vote["id"], :comment_id => vote["comment_id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "vote"}).id}
+                end
+            end
+            (issue.log_event log_params) || (return_error "an error has occurred")
         else
-            log_params = {:vote_id => vote["id"], :comment_id => vote["comment_id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "vote"}).id}
-        end
-        (issue.log_event log_params) || (return_error "an error has occurred")
+            sprint_state = issue.get_sprint_state fields[:sprint_state_id]
+            state = State.find_by(:name => "idea").id
+            if sprint_state.state_id == state
+                vote = issue.vote @session_hash["id"], nil, fields[:sprint_state_id], fields[:comment_id], fields[:flag]
+                vote || (return_error "unable to save vote")
+                vote[:created] || (halt 200, vote.to_json) # vote already cast, don't save another event
+                sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id
+                next_sprint_state_id = issue.get_next_sprint_state sprint_state.id, sprint_ids
+                if vote["id"] != nil
+                    if fields[:comment_id] && fields[:flag]
+                        log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "sprint comment offensive"}).id}
+                    elsif fields[:comment_id]
+                        log_params = {:vote_id => vote["id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "sprint comment vote"}).id}
+                    else
+                        log_params = {:vote_id => vote["id"], :comment_id => vote["comment_id"], :project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :next_sprint_state_id => next_sprint_state_id, :user_id => @session_hash["id"], :contributor_id => params[:id], :notification_id => Notification.find_by({:name => "sprint vote"}).id}
+                    end
+                end
+            end
+            (issue.log_event log_params) || (return_error "an error has occurred")
         end
         status 201
         return vote.to_json
@@ -1544,6 +1575,8 @@ class Integrations < Sinatra::Base
     get "/sprints", allows: [:id, :project_id, "sprint_states.state_id"], &sprints_get
     get "/sprints/:id", allows: [:id], needs: [:id], &sprints_get_by_id
     post "/sprints", &sprints_post
+    post "/sprints/comments", &contributors_post_comments
+    post "/sprints/votes", &contributors_post_votes
 
     get "/sprint-states", allows: [:sprint_id, :id], &sprint_states_get
     post "/sprint-states", &sprint_states_post

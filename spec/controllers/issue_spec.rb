@@ -69,7 +69,7 @@ describe ".Issue" do
     context "#get_sprint_state_ids_by_sprint" do
         fixtures :sprints, :sprint_states
         it "should return a list of all sprint_state_ids" do
-            expect(@issue.get_sprint_state_ids_by_sprint sprint_states(:sprint_1_state_1).id).to eq(@mysql_client.query("select id from sprint_states where sprint_id = #{sprint_states(:sprint_1_state_1).id}").to_a)
+            expect(@issue.get_sprint_state_ids_by_sprint sprint_states(:sprint_1_state_1).id).to eq(@mysql_client.query("select id from sprint_states where sprint_id = #{sprint_states(:sprint_1_state_1).id} ORDER BY created_at ASC").to_a)
         end
     end
     context "#get_next_sprint_state" do

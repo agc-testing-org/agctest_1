@@ -56,14 +56,15 @@ class Issue
         end
     end
 
-    def vote user_id, contributor_id, sprint_state_id, comment_id
+    def vote user_id, contributor_id, sprint_state_id, comment_id, flag
         begin
             if comment_id 
                 check = {
                 user_id: user_id, 
                 sprint_state_id: sprint_state_id, 
                 contributor_id: contributor_id, 
-                comment_id: comment_id 
+                comment_id: comment_id,
+                flag: flag
              };
             else 
              check = { 
@@ -80,7 +81,7 @@ class Issue
                 vote.update_attributes!(:contributor_id => contributor_id)
                 vote.save
                 new_record = true
-            elsif previous_record != contributor_id.to_i
+            elsif previous_record && previous_record != contributor_id.to_i 
                 vote.update_attributes!(:contributor_id => contributor_id)
                 new_record = true
             else 
@@ -98,6 +99,19 @@ class Issue
         end
     end
 
+    def create_sprint_comment user_id, sprint_state_id, text
+        begin
+            return Comment.create({
+                user_id: user_id,
+                sprint_state_id: sprint_state_id,
+                contributor_id: contributor_id,
+                text: text.strip
+            })
+        rescue => e
+            puts e
+            return nil
+        end
+    end
     
     def log_event params 
         begin
@@ -146,7 +160,7 @@ class Issue
 
     def get_sprint_state_ids_by_sprint sprint_id
         begin
-            return SprintState.where(:sprint_id => sprint_id).select(:id).map(&:id)
+            return SprintState.where(:sprint_id => sprint_id).select(:id).order(:created_at => "ASC").map(&:id)
         rescue => e
             puts e
             return nil
@@ -160,6 +174,8 @@ class Issue
             sprint_state_results = SprintState.joins(:sprint).where(query)
             sprint_state_results.each_with_index do |ss,i|
                 response[i] = ss.as_json
+                sprint_state = response[i]
+                sprint_state_id = sprint_state['id']
                 response[i][:active_contribution_id] = nil
                 response[i][:contributors] = []
                 ss.contributors.each_with_index do |c,k|
@@ -184,6 +200,18 @@ class Issue
                             response[i][:active_contribution_id] = c.id
                         end
                     end
+                end
+                sprint_comments = Comment.where(:sprint_state_id => sprint_state_id, :contributor_id => nil)
+                if sprint_comments
+                    sprint_state_comments = sprint_comments.as_json
+                    sprint_comments.each_with_index do |l,m|
+                        sprint_state_comments[m][:user_profile] = account.get_profile l.user
+                    end
+                    response[i][:comments] = sprint_state_comments
+                end
+                sprint_state_votes = Vote.where(:sprint_state_id => sprint_state_id, :contributor_id => nil).as_json
+                if sprint_state_votes
+                    response[i][:votes] = sprint_state_votes
                 end
             end
             return response
