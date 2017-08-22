@@ -11,8 +11,8 @@
             {{/unless}}
         </small>
         {{#if session.isAuthenticated}}
-        {{sprint-state-idea-comments-upvote nil sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
-        {{sprint-state-idea-report-offensive nil sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
+        {{sprint-state-idea-comments-upvote sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
+        {{sprint-state-idea-report-offensive sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
         {{/if}}
     </div>
 {{/each}}

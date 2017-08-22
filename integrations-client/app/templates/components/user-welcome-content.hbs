@@ -63,7 +63,7 @@
         {{#unless (eq sessionAccount.account.seat_id.name "share")}}
             {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
                 {{#if (eq sessionAccount.account.seat_id.name "member")}}               
-                    {{#if (and (greater-than manager.length 0) (greater-than managerTeams.length 0)}}
+                    {{#if (and (greater-than manager.length 0) (greater-than managerTeams.length 0))}}
                         {{#each managerTeams as |team index|}}                                                                     
                             {{#if (eq index 0)}}
                                 <h3 class="description">List jobs for {{#link-to "team.select.jobs" team.id}}{{team.name}}{{/link-to}} at {{team.company}} to get started</h3>

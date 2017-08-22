@@ -27,11 +27,12 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
         return Ember.RSVP.hash({
             params: params,
-            user: user,
-            teams: this.store.findAll('team'), 
-            skillsets: skillsets,
-            roles: roles,
-            seats: this.store.findAll('seat'),
+               user: user,
+               teams: this.store.findAll('team'),
+               skillsets: skillsets,
+               roles: roles,
+               seats: this.store.findAll('seat'),
+               plans: this.store.findAll('plan')
         });
     }
 });

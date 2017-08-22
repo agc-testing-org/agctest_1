@@ -8,7 +8,7 @@
                 <div class="text-left pl-0 col-md-6 col-sm-12">
                 {{sprint-state-idea-comments sprint_state=selected-state comments=selected-state.comments}}
                 {{#if session.isAuthenticated}}
-                {{sprint-state-idea-comment text="Your feedback" show_vote=true sprint_state=selected-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                {{sprint-state-idea-comment text="Thoughts on this idea?" show_vote=true sprint_state=selected-state project=project.id class="mb-3 comments" refresh="refresh"}}
                 {{else}}
                 <div class="about text-left section mb-1">
                     {{#link-to "login"}}Sign in {{/link-to}} to join the conversation 
