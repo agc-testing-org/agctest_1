@@ -4,7 +4,7 @@
             <div class="modal-header">
                 <div class="title">
                 {{#if invitation}}
-                    You've been invited to <span class="orange">{{invitation.name}}</span>
+                    Your invitation from <span class="orange">{{invitation.company}}</span>
                 {{else}}
                     Register for Early Access
                 {{/if}}
@@ -13,7 +13,7 @@
             <div class="modal-header subtitle">
                 <div class="text-light">    
                 {{#if invitation}}
-                    Would you like to join the <span class="text-capitalize">{{invitation.name}} team</span> on Wired7?
+                    Would you like to join the <span class="text-capitalize">{{invitation.name}} team</span> at {{invitation.company}} on Wired7?
                 {{else}}
                     We're onboarding users through invitations at this time
                 {{/if}}

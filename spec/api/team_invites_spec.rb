@@ -21,6 +21,9 @@ describe "/team-invites" do
             it "should return team name" do
                 expect(@res["name"]).to eq @invite.team.name
             end
+            it "should return team company" do
+                expect(@res["company"]).to eq @invite.team.company
+            end
             it "should return valid" do
                 expect(@res["valid"]).to be true
             end

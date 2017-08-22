@@ -3,10 +3,9 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 export default Ember.Route.extend(AuthenticatedRouteMixin,{
     activate () {
-        Ember.$('body').addClass('body-dark');
+
     },                                       
     deactivate () {
-        Ember.$('body').removeClass('body-dark');
         Ember.$('#register-modal').modal('hide');
     },    
     actions: {

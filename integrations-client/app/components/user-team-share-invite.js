@@ -7,20 +7,23 @@ export default Ember.Component.extend({
     store: Ember.inject.service(''),
     errorMessage: null,
     selectedSeat: null,
+    selectedJob: null,
     actions: {
         invite(teamId, profileId){
             var _this = this;
             var email = this.get('email');
              _this.set("errorMessage",null);   
-            var selectedSeat = this.get("selectedSeat");
+            var selectedSeat = this.get("selectedSeat.id");
             if(!selectedSeat){
                 selectedSeat = this.get('default_seat.id');
             }
+            var selectedJob = this.get("selectedJob.id");
             if(email && email.length > 4){
                 var invitation = this.get('store').createRecord('user-team', {
                     team_id: teamId,
                     user_email: email,
                     seat_id: selectedSeat,
+                    job_id: selectedJob,
                     profile_id: profileId
                 });
                 invitation.save().then(function(){
@@ -35,8 +38,11 @@ export default Ember.Component.extend({
                 });
             }
         },
-        selectSeat(seatId){
-            this.set("selectedSeat",seatId);
+        selectSeat(seat){
+            this.set("selectedSeat",seat);
+        },
+        selectJob(job){
+            this.set("selectedJob",job);
         }
 
     }

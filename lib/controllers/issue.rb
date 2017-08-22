@@ -110,23 +110,6 @@ class Issue
         end
     end
 
-    def create_job user_id, team_id, role_id, title, link, zip, company
-        begin
-            return Job.create({
-                user_id: user_id,
-                team_id: team_id,
-                role_id: role_id,
-                zip: zip,
-                company: company,
-                title: (title.strip if title),
-                link: link
-            })
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def create_project user_id, org, name, description
         begin
             return Project.create({
@@ -136,33 +119,6 @@ class Issue
                 user_id: user_id,
                 preparing: true
             })
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def jobs_with_sprints jobs
-        begin
-            jobs_result = []
-            jobs.each_with_index do |j,i|
-                jobs_result[i] = j.as_json
-                jobs_result[i][:role] = j.role_id
-                jobs_result[i][:sprints] = j.sprints.select("sprints.*, IF(sprints.id = #{(j.sprint_id || "NULL")}, 1, 0) as selected").order("selected DESC, id DESC").as_json
-                jobs_result[i][:sprints].each_with_index do |s,c|
-                    jobs_result[i][:sprints][c][:project] =  s["project_id"]
-                end
-            end
-            return jobs_result
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
-    def get_jobs query
-        begin
-            return Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id").select("jobs.*,users.first_name as user_first_name,teams.name as team_name").order(:id => "DESC")
         rescue => e
             puts e
             return nil

@@ -711,7 +711,6 @@ class Integrations < Sinatra::Base
 
     teams_post = lambda do
         protected!
-        ((@session_hash["seat_id"] == Seat.find_by(:name => "owner").id) || @session_hash["admin"]) || return_unauthorized_admin
         fields = get_json
         check_required_field fields[:name], "name"
         check_required_field fields[:plan_id], "plan_id"
@@ -719,29 +718,32 @@ class Integrations < Sinatra::Base
         account = Account.new
         (name_length < 31 && name_length > 1) || (return_error "team name must be 2-30 characters") 
         (Plan.find_by(:id => fields[:plan_id])) || (return_error "invalid plan_id")
+        query = {:id => @session_hash["id"]}
+        user = account.get query
+        ((user.user_profile && user.user_profile.user_position) && company = user.user_profile.user_position.company) || (return_error "you must connect linkedin to create a team")
         org = Organization.new
-        team = org.create_team fields[:name], @session_hash["id"], fields[:plan_id]
-        (team && team["id"]) || (return_error "this name is not available")
+        team = org.create_team fields[:name], @session_hash["id"], fields[:plan_id], company
+        (team && team.id) || (team.errors.messages[:name] && (return_error team.errors.messages[:name][0]))
         (org.add_owner @session_hash["id"], team["id"]) || (return_error "unable to create team")
         status 201
         return team.to_json
     end
 
     jobs_get = lambda do
-        issue = Issue.new
-        jobs = issue.get_jobs params
+        org = Organization.new
+        jobs = org.get_jobs params
         jobs || (return_error "unable to find jobs")
-        jobs_with_sprints = issue.jobs_with_sprints jobs
+        jobs_with_sprints = org.jobs_with_sprints jobs
         jobs_with_sprints || (return_error "unable to find jobs")
         status 200
         return jobs_with_sprints.to_json
     end
 
     jobs_get_by_id = lambda do
-        issue = Issue.new
-        jobs = issue.get_jobs params
+        org = Organization.new
+        jobs = org.get_jobs params
         (jobs && jobs.first) || return_not_found
-        jobs_with_sprints = issue.jobs_with_sprints jobs
+        jobs_with_sprints = org.jobs_with_sprints jobs
         (jobs_with_sprints && jobs_with_sprints.first) || (return_error "unable to find job")
         status 200
         return jobs_with_sprints.first.to_json
@@ -757,9 +759,9 @@ class Integrations < Sinatra::Base
         seat = account.get_seat @session_hash["id"], fields[:team_id]
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_unauthorized
 
-        issue = Issue.new
+        org = Organization.new
         query = {:id => params[:id], :team_id => fields[:team_id]}
-        jobs = issue.get_jobs query
+        jobs = org.get_jobs query
         (jobs && jobs.first) || return_not_found
         saved = jobs.first.update_attributes!(:sprint_id => fields[:sprint_id])
         saved || (return_error "unable to select idea")
@@ -794,14 +796,11 @@ class Integrations < Sinatra::Base
 
         (fields[:link].to_s.include? "http") || (return_error "a full link (http or https is required)")
 
-        query = {:id => @session_hash["id"]}
-        user = account.get query
-        ((user.user_profile && user.user_profile.user_position) && company = user.user_profile.user_position.company) || (return_error "you must connect linkedin to post a job")
-
-        issue = Issue.new
-        job = issue.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link], fields[:zip], company
+        org = Organization.new
+        job = org.create_job @session_hash["id"], fields[:team_id], fields[:role_id], fields[:title], fields[:link], fields[:zip]
         job || (return_error "unable to create job listing")
 
+        issue = Issue.new
         log_params = {:user_id => @session_hash["id"], :job_id => job.id, :notification_id => Notification.find_by({:name => "job"}).id}
         (issue.log_event log_params) || (return_error "unable to create job")
         status 201
@@ -1271,7 +1270,7 @@ class Integrations < Sinatra::Base
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
         (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
-        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id, fields[:job_id]
         invitation || (return_error "invite error")
         invitation.id || (return_error "this email address has an existing invitation")
         UserInviteWorker.perform_async invitation.token
@@ -1294,7 +1293,8 @@ class Integrations < Sinatra::Base
             registered: invite.first.user.confirmed,
             valid: true,
             expired: false,
-            name: invite.first.team.name
+            name: invite.first.team.name,
+            company: invite.first.team.company
         }.to_json
     end
 
@@ -1554,7 +1554,7 @@ class Integrations < Sinatra::Base
     post "/contributors/:id/merge", &contributors_post_merge
 
 
-    get "/jobs", allows: [:id], &jobs_get
+    get "/jobs", allows: [:id, :team_id], &jobs_get
     post "/jobs", &jobs_post
     get "/jobs/:id", allows: [:id], &jobs_get_by_id
     patch "/jobs/:id", &jobs_patch_by_id

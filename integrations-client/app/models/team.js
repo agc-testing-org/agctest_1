@@ -4,6 +4,7 @@ const { attr, Model } = DS;
 
 export default DS.Model.extend({
     name: attr('string'),
+    company: attr('string'),
     seats: DS.hasMany('seat'),
     user: attr(),
     show: attr('boolean'),

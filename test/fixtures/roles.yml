@@ -13,3 +13,13 @@ design:
 development:
   name: "development"
   fa_icon: "fa fa-cool"
+
+management:
+  name: "management"
+  fa_icon: "fa fa-cool"
+  description: "I run this place"
+
+recruiting:
+  name: "recruiting"
+  fa_icon: "fa fa-cool"
+  description: "I know someone"

@@ -4,17 +4,22 @@
 
     {{#unless params.section}}
     <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
-    <h3 class="description mb-3">Wired7 <strong>connects</strong> companies and job seekers through <strong>project development</strong></h3>  
-    <h3 class="description">
+    <h3 class="description mt-3 mb-3">Wired7 <strong>connects</strong> companies and job seekers through <strong>project development</strong></h3>  
+    <h3 class="description mb-4">
         Use Wired7 to 
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
+        {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
             <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions
         {{else}} 
             <strong>get your foot in the door</strong> for positions you're interested in
         {{/if}}
     </h3>
-    <h3 class="about mt-3">Please take a moment to get set up</h3>
-    <h3 class="about mt-4 text-center">
+
+    <h3 class="about mb-3 mt-4">Before we begin let us know your team function</h3>
+    <div class="text-left mt-3">
+        {{profile-overview-skillsets-roles user=user items=roles type="role" namespace="users/me" class="skillsets"}}
+    </div>
+
+    <h3 class="about mt-4 text-left">
         {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
     </h3>
     {{/unless}}
@@ -55,27 +60,32 @@
         <h3 class="description mb-3">If you're interested in an idea, this is a great way to make a first impression with a hiring manager</h3>
         <h3 class="description mb-3">When a hiring manager approves an idea we invite users to contribute and provide feedback as the idea transitions through <strong>requirements, design, and development</strong> phases</h3>
 
-        {{#if (or (or (eq sessionAccount.account.seat_id.name "member") (eq sessionAccount.account.seat_id.name "owner")) sessionAccount.account.admin)}}
-            {{#if (eq sessionAccount.account.seat_id.name "member")}}               
-                {{#each teams as |team index|}}                                                                     
-                    {{#if (eq index 0)}}    
-                        <h3 class="description">Invite candidates through your organization's team {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} to get started</h3>
-                    {{/if}}
-                {{/each}}
-            {{else}}
-                <h3 class="about mt-3">{{#if (or (eq sessionAccount.account.seat_id.name "owner") sessionAccount.account.admin)}}{{#link-to "team.new"}}create a team{{/link-to}}{{/if}} to get started</h3> 
-            {{/if}}
-        {{else}}
-            {{#if (eq sessionAccount.account.seat_id.name "share")}}
-                {{#each teams as |team index|}}
-                    {{#if (eq index 0)}}
-                        <h3 class="description">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team has generated for you to get started</h3>
-                    {{/if}}
-                {{/each}}
+        {{#unless (eq sessionAccount.account.seat_id.name "share")}}
+            {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
+                {{#if (eq sessionAccount.account.seat_id.name "member")}}               
+                    {{#each teams as |team index|}}                                                                     
+                        {{#if (eq index 0)}}
+                            {{#if (greater-than manager.length 0)}}
+                                <h3 class="description">List jobs for {{#link-to "team.select.jobs" team.id}}{{team.name}}{{/link-to}} at {{team.company}} to get started</h3>
+                            {{else}}
+                                <h3 class="description">Invite candidates through the {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} team at {{team.company}} to get started</h3>
+                            {{/if}}
+                        {{/if}}
+                    {{/each}}
+                {{else}}
+                    <h3 class="about mt-3">{{#link-to "team.new"}}create a team{{/link-to}} to get started</h3> 
+                {{/if}}
             {{else}}
                 <h3 class="description">Check out {{#link-to "develop.roadmap"}}the roadmap{{/link-to}} to find open positions</h3>
             {{/if}}
-        {{/if}}
+        {{else}}
+            {{#each teams as |team index|}}
+                {{#if (eq index 0)}}
+                    <h3 class="description">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team at {{team.company}} has generated for you to get started</h3>
+                {{/if}}
+            {{/each}}
+        {{/unless}}
+
 
         <h3 class="description text-center mt-4">
             {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "me.overview"}}My Profile{{/link-to}}
