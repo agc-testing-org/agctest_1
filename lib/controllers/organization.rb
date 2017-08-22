@@ -59,6 +59,11 @@ class Organization
                 else
                     row["share_profile"] = {:id => 0}
                 end
+                if user.job
+                    row["job_title"] = user.job.title
+                    row["job_company"] = user.job.team.company
+                    row["job_team_name"] = user.job.team.name
+                end
                 row["sender_first_name"] = user.sender.first_name
                 row["sender_last_name"] = user.sender.last_name
                 row.delete("token")
@@ -90,9 +95,9 @@ class Organization
         return response
     end
 
-    def create_team name, user_id, plan_id
+    def create_team name, user_id, plan_id, company
         begin
-            return Team.create({ name: name.strip, user_id: user_id, plan_id: plan_id }).as_json
+            return Team.create({ name: name.strip, user_id: user_id, plan_id: plan_id, company: company })
         rescue => e
             puts e
             return nil
@@ -114,9 +119,9 @@ class Organization
         end
     end
 
-    def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id
+    def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id, job_id
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id, job_id: job_id})
         rescue => e
             puts e
             return nil
@@ -177,6 +182,49 @@ class Organization
 
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
 
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def create_job user_id, team_id, role_id, title, link, zip
+        begin
+            return Job.create({
+                user_id: user_id,
+                team_id: team_id,
+                role_id: role_id,
+                zip: zip,
+                title: (title.strip if title),
+                link: link
+            })
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def jobs_with_sprints jobs
+        begin
+            jobs_result = []
+            jobs.each_with_index do |j,i|
+                jobs_result[i] = j.as_json
+                jobs_result[i][:role] = j.role_id
+                jobs_result[i][:sprints] = j.sprints.select("sprints.*, IF(sprints.id = #{(j.sprint_id || "NULL")}, 1, 0) as selected").order("selected DESC, id DESC").as_json
+                jobs_result[i][:sprints].each_with_index do |s,c|
+                    jobs_result[i][:sprints][c][:project] =  s["project_id"]
+                end
+            end
+            return jobs_result
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_jobs query
+        begin
+            return Job.where(query).joins("INNER JOIN users ON users.id = jobs.user_id INNER JOIN teams ON jobs.team_id = teams.id").select("jobs.*,users.first_name as user_first_name,teams.name as team_name,teams.company as company").order(:id => "DESC")
         rescue => e
             puts e
             return nil

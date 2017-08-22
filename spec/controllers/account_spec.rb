@@ -101,7 +101,7 @@ describe ".Account" do
             end
         end
     end
-    context "#user_profile_descriptor", :focus => true do
+    context "#user_profile_descriptor" do
         fixtures :users
         context "with profile" do
             fixtures :user_profiles, :user_positions
@@ -861,5 +861,87 @@ describe ".Account" do
             expect(@res).to eq(user_teams(:adam_original_invite).seat_id)
         end
     end
+    
+    shared_examples_for "invite" do
+        it "to" do
+            expect(@res[:to]).to eq @to
+        end
+        it "subject" do
+            expect(@res[:subject]).to eq @subject
+        end
+        it "html_body" do
+            expect(@res[:html_body]).to eq @html_body
+        end
+        it "html" do
+            expect(@res[:html]).to eq @html
+        end
+    end
 
+    context "#mail_invite", :focus => true do
+        fixtures :users, :jobs, :teams, :user_teams, :seats
+        context "not on team" do
+            context "profile" do
+                before(:each) do
+                    invite = user_teams(:mail_invite_not_on_team_profile)
+                    link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
+                    @res = @account.mail_invite invite.token
+                    @to = invite.user_email
+                    @subject = "#{invite.team.company} has shared a Wired7 profile with you"
+                    @html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                    @body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead (#{invite.profile.first_name}) on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+                end 
+                it_behaves_like "invite"
+            end
+            context "job" do
+                before(:each) do
+                    invite = user_teams(:mail_invite_not_on_team_job)
+                    link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
+                    @res = @account.mail_invite invite.token
+                    @to = invite.user_email
+                    @subject = "#{invite.team.company} has shared a Wired7 job listing with you"
+                    @html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                    @body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+                end
+                it_behaves_like "invite"
+            end
+            context "basic" do
+                before(:each) do
+                    invite = user_teams(:mail_invite_not_on_team)
+                    link = "#{ENV['INTEGRATIONS_HOST']}/invitation/#{invite[:token]}"
+                    @res = @account.mail_invite invite.token
+                    @to = invite.user_email
+                    @subject = "Wired7 Invitation to #{invite.team.name} at #{invite.team.company} from #{invite.sender.first_name}"
+                    @html_body = "Great news,<br><br>#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!<br><br>To accept this invitation please use the following link:<br><br><a href='#{link}'>#{link}</a><br><br>This link is valid for 24 hours.<br><br><br>- The Wired7 ATeam"
+                    @body = "Great news,\n\n#{invite.sender.first_name} (#{invite.sender.email}) has invited you to the #{invite.team.name} team at #{invite.team.company} on Wired7!\n\nTo accept this invitation please use the following link:\n\n#{link}\n\nThis link is valid for 24 hours.\n\n\n- The Wired7 ATeam"
+                end
+                it_behaves_like "invite"
+            end
+        end
+        context "on team" do
+            context "profile" do
+                before(:each) do
+                    invite = user_teams(:mail_invite_on_team_profile)
+                    link = "#{ENV['INTEGRATIONS_HOST']}/wired/#{invite.user_id}/#{invite.token}"
+                    @res = @account.mail_invite invite.token
+                    @to = invite.user_email  
+                    @subject = "#{invite.team.company} has shared a Wired7 profile with you"
+                    @html_body = "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead.  Use the following link to view #{invite.profile.first_name}'s profile:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                    @body = "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a new lead.  Use the following link to view #{invite.profile.first_name}'s profile:\n\n#{link}\n\n\n- The Wired7 ATeam"  
+                end
+                it_behaves_like "invite"
+            end
+            context "job" do
+                before(:each) do
+                    invite = user_teams(:mail_invite_on_team_job)
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{invite.job_id}-#{invite.job.title}-for-#{invite.job.team.name}-at-#{invite.job.team.company}/#{invite.token}"
+                    @res = @account.mail_invite invite.token
+                    @to = invite.user_email  
+                    @subject = "#{invite.team.company} has shared a Wired7 job listing with you"
+                    @html_body = "#{invite.user.first_name},<br><br>#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company}.  Use the following link to get your foot in the door:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                    @body = "#{invite.user.first_name},\n\n#{invite.sender.first_name} (#{invite.sender.email}) on the #{invite.team.name} team at #{invite.team.company} would like for you to check out a job listing for #{invite.job.title} at #{invite.job.team.company}.  Use the following link to get your foot in the door:\n\n#{link}\n\n\n- The Wired7 ATeam"
+                end
+                it_behaves_like "invite"
+            end
+        end
+    end
 end

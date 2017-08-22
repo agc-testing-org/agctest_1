@@ -8,7 +8,7 @@ export default Ember.Component.extend({
     votes_count: Ember.computed.filterBy('contributor.votes','comment_id', null),
 
     actions: {
-        comment(contributor_id,sprint_state_id){
+        comment(contributor_id,sprint_state_id,explain){
             this.set("errorMessage", "");
             var _this = this;
             var comment = this.get("comment");
@@ -20,7 +20,8 @@ export default Ember.Component.extend({
                     var feedback = store.createRecord('comment', {
                         contributor_id: contributor_id,
                         sprint_state_id: sprint_state_id,
-                        text: comment
+                        text: comment,
+                        explain: explain
                     }).save().then(function(payload) {
                         store.peekRecord('contributor',contributor_id).get('comments').addObject(payload);
                         _this.set("comment",null);

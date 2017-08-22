@@ -1,6 +1,7 @@
 class AddNotificationDescriptions < ActiveRecord::Migration[5.1]
     def change
         add_column :notifications, :description, :string, :null => false
+        Notification.reset_column_information
         begin
             Notification.find_by(:name => "new").update_attributes!({:description => "new sprint (feature, bug, or task request) created"})
             Notification.find_by(:name => "transition").update_attributes!({:description => "sprint state change that corresponds with your role subscriptions"})

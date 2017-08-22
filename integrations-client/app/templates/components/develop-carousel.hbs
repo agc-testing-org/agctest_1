@@ -1,14 +1,26 @@
-<div id="carouselExampleControls" class="carousel slide shadow" data-ride="carousel">
+<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner" role="listbox">
+        {{#each visibleProjects as |project index|}}
+        {{#if (eq index 0)}}
         <div class="carousel-item active">
             <div class="d-block img-fluid mars_frontend" alt="Musk to Mars"></div>    
             <div class="text-center carousel-caption">
-                <div class="background rounded"></div>
-                <div class="carousel-text">showing <strong>wired7-projects/musk-to-mars</strong></div>
+                <div class="background"></div>
+                <div class="carousel-text">Project {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) class="text-uppercase"}}{{project.org}}/{{project.name}}{{/link-to}}</div>
             </div>
         </div>
+        {{else}}
+            <div class="carousel-item">
+                <div class="d-block img-fluid mars_frontend" alt="Musk to Mars"></div>
+                <div class="text-center carousel-caption">
+                    <div class="background"></div>
+                    <div class="carousel-text">Project {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) class="text-uppercase"}}{{project.org}}/{{project.name}}{{/link-to}}</div>
+                </div>
+            </div>
+        {{/if}}
+        {{/each}}
     </div>
-    <!--
+    {{#if (greater-than visibleProjects.length 1)}}
     <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
@@ -17,5 +29,5 @@
         <span class="carousel-control-next-icon" aria-hidden="true"></span>
         <span class="sr-only">Next</span>
     </a>
-    -->
+    {{/if}}
 </div>

@@ -3,20 +3,29 @@
         {{application-error error=errorMessage}}
         <label>Email Address</label>
         {{input type="text" value=email placeholder="name@example.com" class="form-control input-lg rounded"}}
-      
-        {{#if member}}
-            {{input type="hidden" value=default_seat.id}}
-        {{else}}
-            {{input type="hidden" value=default_seat.id}}
+        {{input type="hidden" value=default_seat.id}}
+
+        {{#if jobs}}
+            <div class="dropdown d-inline">
+                <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{#if selectedJob}}{{selectedJob.title}}{{else}}Jobs{{/if}}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    {{#each jobs as |job|}}
+                        <a class="dropdown-item" {{action "selectJob" job}}>{{job.title}}</a>
+                    {{/each}}
+                </div>
+            </div>
         {{/if}}
+
         {{#if sessionAccount.account.admin}}
             <div class="dropdown d-inline">
                 <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Seat Types
+                    {{#if selectedSeat}}{{selectedSeat.name}}{{else}}Seat Types{{/if}}
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                     {{#each team.seats as |seat|}}
-                        <a class="dropdown-item" {{action "selectSeat" seat.id}}>{{seat.name}}</a>
+                        <a class="dropdown-item" {{action "selectSeat" seat}}>{{seat.name}}</a>
                     {{/each}}
                 </div>
             </div>

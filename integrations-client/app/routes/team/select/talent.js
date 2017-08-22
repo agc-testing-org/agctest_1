@@ -54,7 +54,8 @@ export default Ember.Route.extend({
                 seat_id: defaultSeatId
             }),
             default_seat: defaultSeat,
-            share_seat: shareSeat
+            share_seat: shareSeat,
+            jobs: this.modelFor("team.select").jobs
         });
     },
 });

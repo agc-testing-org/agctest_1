@@ -1,5 +1,23 @@
 {{#if comments}}
 <div class="list-group rounded text-left">
+
+{{#if explainComments}}
+<div class="list-group-item rounded">
+    <div class="line"><strong>Author's Explanation</strong></div>
+    {{#each explainComments as |comment index|}}
+        <div class="line">{{comment.text}}</div> 
+        {{#if (eq explainComments.length (plus 1 index))}}
+        <small class="text-muted">
+            {{#unless (eq comment.user_id sessionAccount.account.id)}}
+                - {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
+            {{/unless}}
+        </small>
+        {{/if}}
+    {{/each}}
+</div>
+{{/if}}
+
+
 {{#each (limited sortedComments count) as |comment|}}
     <div class="list-group-item rounded">
         <div class="line">{{comment.text}}</div>
@@ -22,8 +40,8 @@
     {{#if showingAll}}
     <a {{action "showAll" false}}>Show Less</a>
     {{else}}
-    {{#if (greater-than comments.length count)}}
-    <a {{action "showAll" true}}>Show More Comments ( {{comments.length}} Total )</a>
+    {{#if (greater-than sortedComments.length count)}}
+    <a {{action "showAll" true}}>Show More Comments ( {{sortedComments.length}} Total )</a>
     {{/if}}
     {{/if}}
 </small>

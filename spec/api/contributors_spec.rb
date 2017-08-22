@@ -249,6 +249,18 @@ describe "/contributors" do
                 it_behaves_like "sprint_timelines_for_feedback_actions"
             end
         end
+        context "explain type comment" do
+            before(:each) do
+                @text = "AB"
+                post "/contributors/#{@contributor_id}/comments", {:text => @text, :explain => true, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from comments").first
+                @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            end
+            it "should save explain true" do
+                expect(@mysql["explain"]).to eq(1) 
+            end
+        end
         context "invalid comment" do
             context "< 2 char" do
                 before(:each) do
