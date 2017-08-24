@@ -11,5 +11,7 @@ class Vote < ActiveRecord::Base
     belongs_to :user
     belongs_to :comment
     validates_uniqueness_of :user, scope: [:sprint_state, :comment], conditions: -> { where(comment: nil) }
-    validates_uniqueness_of :user, scope: [:comment], conditions: -> { where.not(comment: nil) }
+    validates_uniqueness_of :user, scope: [:comment, :flag], conditions: -> { where.not(comment: nil)} {where.not(flag: false) }
+    validates_uniqueness_of :user, scope: [:comment, :flag], conditions: -> { where.not(comment: nil)} {where(flag: true) }
+
 end

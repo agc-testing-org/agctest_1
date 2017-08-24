@@ -1,0 +1,6 @@
+{{#if comment_offensive}}
+<div class="d-inline-block ml-1"><i class="fa fa-check" aria-hidden="true"> reported</i></div>
+{{else}}
+<div class="d-inline-block ml-1 cursor-pointer" {{action "commentOffensive" contributor.id sprint_state.id comment_id true}}><i class="fa fa-exclamation-triangle" aria-hidden="true"> report</i></div>
+{{/if}}
+

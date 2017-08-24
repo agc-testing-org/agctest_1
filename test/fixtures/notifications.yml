@@ -26,3 +26,23 @@ job:
   name: "job"
   description: "gotta get paid"
 
+sprint_vote:
+  name: "sprint vote"
+  description: "its new vote for sprint idea"
+
+sprint_comment:
+  name: "sprint comment"
+  description: "its new comment for sprint idea"
+
+sprint_comment_vote:
+  name: "sprint comment vote"
+  description: "its new comment vote for sprint idea"
+
+comment_offensive:
+  name: "comment offensive"
+  description: "its offensive comment"
+
+sprint_comment_offensive:
+  name: "sprint comment offensive"
+  description: "its offensive sprint comment"
+
