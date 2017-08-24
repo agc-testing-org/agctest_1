@@ -79,7 +79,6 @@ class Repo
     def sync contributor_id, username
         params = {:id => contributor_id}
         contributor = get_contributor params
-
         fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
         if fetched
@@ -87,7 +86,16 @@ class Repo
             contributor.commit = fetched[:sha]
             contributor.commit_remote = fetched[:sha_remote]
             contributor.commit_success = fetched[:success]
-            return contributor.save #updates timestamp
+            contributor.save #updates timestamp
+            existing_contributor = get_existing_contributor contributor[:sprint_state_id]
+            if existing_contributor.length == 3
+                sprint_state = SprintState.find_by(id: contributor[:sprint_state_id])
+                if sprint_state.expires == nil
+                    sprint_state.expires = (Time.now.utc + 2.day)
+                    return (contributor && sprint_state.save)
+                end
+            end
+            return contributor 
         else
             contributor.prepared = false
             return (contributor.save && contributor.prepared)
@@ -319,4 +327,12 @@ class Repo
                             return final
     end
 
+    def get_existing_contributor sprint_state_id
+        begin
+            return Contributor.joins("INNER JOIN sprint_states on contributors.sprint_state_id = sprint_states.id").where("contributors.sprint_state_id = #{sprint_state_id} and contributors.commit_success = 1 and sprint_states.expires is NULL").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 end
