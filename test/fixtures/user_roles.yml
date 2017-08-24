@@ -27,3 +27,8 @@ notification_role_development:
   user: masha_notifications
   role_id: 3
   active: 1
+
+adam_confirmed_management:
+  user: adam_confirmed
+  role_id: 5
+  active: 1

@@ -52,6 +52,8 @@ describe "/teams" do
                 context "user_teams" do
                     before(:each) do
                         @user_team_result = @mysql_client.query("select * from user_teams ORDER BY id DESC").first
+                        puts @user_team_result.to_json
+                        puts decrypt(@user).to_i
                     end
                     it "saves owner as sender_id" do
                         expect(@user_team_result["sender_id"]).to eq(decrypt(@user).to_i)

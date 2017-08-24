@@ -14,7 +14,7 @@ describe ".Organization" do
         context "not on another team" do
             before(:each) do
                 @email = "adam+not+on+another+team@wired7.com"
-                @res = @team.invite_member @new_team.id, @new_team[:user_id], nil, @email, seats(:priority).id, nil, nil 
+                @res = @team.invite_member @new_team.id, @new_team[:user_id], nil, @email, seats(:priority).id, nil, nil, nil 
             end
             it "should not return an error" do
                 expect(@res.errors.messages).to be_empty
@@ -23,7 +23,7 @@ describe ".Organization" do
         context "on another team prior to expiration" do
             before(:each) do
                 @current_user_team = user_teams(:adam_confirmed_b_team)
-                @res = @team.invite_member @new_team.id, @new_team[:user_id], nil, @current_user_team.user_email, seats(:priority).id, nil, nil 
+                @res = @team.invite_member @new_team.id, @new_team[:user_id], nil, @current_user_team.user_email, seats(:priority).id, nil, nil, nil 
             end 
             it "should return error" do
                 expect(@res.errors.messages[:user_email][0]).to eq "this user is exclusively working with another team"
@@ -32,8 +32,8 @@ describe ".Organization" do
         context "on another team after expiration" do
             before(:each) do
                 @current_user_team = user_teams(:adam_confirmed_b_team)
-                @mysql_client.query("update user_teams set expires = '#{1.hour.ago.to_s(:db)}' where user_email = '#{@current_user_team.user_email}'")
-                @res = @team.invite_member @new_team.id, @new_team[:user_id], nil, @current_user_team.user_email, seats(:priority).id, nil, nil
+                @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}' where user_email = '#{@current_user_team.user_email}'")
+                @res = @team.invite_member @new_team.id, @new_team[:user_id], nil, @current_user_team.user_email, seats(:priority).id, nil, nil, nil
             end 
             it "should return error" do
                 expect(@res.errors.messages).to be_empty 

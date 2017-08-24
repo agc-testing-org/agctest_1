@@ -834,13 +834,13 @@ describe ".Account" do
             before(:each) do
                 @contact_id = (decrypt(users(:adam_protected).id).to_i)
                 @user_id = (decrypt(users(:adam).id).to_i)
-                @res = (@account.create_connection_request @user_id, @contact_id)
+                @res = (@account.create_connection_request @user_id, @contact_id, nil)
             end
             it "should include user_id" do
-                expect(decrypt(@res["user_id"]).to_i).to eq(@user_id)
+                expect(@res["user_id"]).to eq(@user_id)
             end
             it "should include contact_id" do
-                expect(decrypt(@res["contact_id"]).to_i).to eq(@contact_id)
+                expect(@res["contact_id"]).to eq(@contact_id)
             end
             it "should include read" do
                 expect(@res["read"]).to eq(false)
