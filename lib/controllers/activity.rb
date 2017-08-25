@@ -115,6 +115,16 @@ class Activity
         end
     end
 
+    def user_notifications_by_roles_for_deadline sprint_timeline_id
+        # all users that subscribe to a role that corresponds to a sprint state/phase change (transition notification_id)
+        begin
+            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "deadline"}).id).joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id")
+        rescue => e
+            puts e
+            return []
+        end
+    end 
+
     def record_user_notifications users
         begin
             UserNotification.import users, :validate => true #ignores uniqueness though
@@ -174,6 +184,8 @@ class Activity
         user_ids = (get_decrypted_user_ids (user_notifications_by_votes id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_roles id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_comment_votes id), user_ids)
+        user_ids = (get_decrypted_user_ids (user_notifications_by_roles_for_deadline id), user_ids)
+
 
         store_user_notifications_count id, user_ids.length, "processing"
 

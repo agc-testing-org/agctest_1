@@ -81,6 +81,8 @@ class Repo
         contributor = get_contributor params
         fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
+        issue = Issue.new
+        sprint_state = issue.get_sprint_state contributor[:sprint_state_id]
         if fetched
             contributor.prepared = true
             contributor.commit = fetched[:sha]
@@ -92,7 +94,10 @@ class Repo
                 sprint_state = SprintState.find_by(id: contributor[:sprint_state_id])
                 if sprint_state.expires == nil
                     sprint_state.expires = (Time.now.utc + 2.day)
-                    return (contributor && sprint_state.save)
+                    sprint_state.save
+                    log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
+                    (issue.log_event log_params) || (return_error "an error has occurred")
+                    return (contributor && sprint_state)
                 end
             end
             return contributor 
