@@ -39,7 +39,6 @@ describe "/teams" do
             @name = "NEW TEAM"
         end
         context "signed in" do
-            :user_teams
             context "valid fields" do
                 fixtures :user_profiles, :user_positions
                 before(:each) do
