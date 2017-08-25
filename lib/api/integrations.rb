@@ -1120,10 +1120,15 @@ class Integrations < Sinatra::Base
         account = Account.new
         candidate_teams = account.get_teams id, {}
         active_team = candidate_teams.where("expires > ?", Time.now).first
+        if active_team
+            seat = account.get_seat id, active_team
+            puts "seat"
+            puts seat 
+        end
 
         connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team)
 
-        if active_team && connection
+        if active_team && connection && seat == "sponsored"
             connection.read = 1
             connection.confirmed = 2
             connection.save
