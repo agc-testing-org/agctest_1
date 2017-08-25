@@ -50,7 +50,7 @@ describe "/teams" do
 
                 context "user_teams" do
                     before(:each) do
-                        @user_team_result = @mysql_client.query("select * from user_teams ORDER by created_at DESC").first
+                        @user_team_result = @mysql_client.query("select * from user_teams").first
                     end
                     it "saves owner as sender_id" do
                         expect(@user_team_result["sender_id"]).to eq(decrypt(@user).to_i)
