@@ -1122,11 +1122,10 @@ class Integrations < Sinatra::Base
         active_team = candidate_teams.where("expires > ?", Time.now).first
         if active_team
             seat = account.get_seat id, active_team
-            puts "seat"
-            puts seat 
+            active_seat = Seat.where({:name => seat}).first
         end
 
-        connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team)
+        connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team), (active_seat.id if active_seat)
 
         if active_team && connection && seat == "sponsored"
             connection.read = 1

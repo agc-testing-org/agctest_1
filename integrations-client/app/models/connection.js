@@ -14,6 +14,5 @@ export default DS.Model.extend({
 	confirmed: DS.attr('number'),
 	team_id: DS.attr('number'),
 	seat_id: DS.attr('number'),
-	is_talent: DS.attr('boolean'),
     contact_first_name: DS.attr('string')
 });

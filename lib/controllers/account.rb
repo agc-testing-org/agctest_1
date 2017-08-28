@@ -513,12 +513,13 @@ class Account
         end
     end
 
-    def create_connection_request user_id, contact_id, team_id
+    def create_connection_request user_id, contact_id, team_id, seat_id
         begin
             return UserConnection.find_or_create_by({
                 user_id: user_id,
                 contact_id: contact_id,
-                team_id: team_id
+                team_id: team_id,
+                seat_id: seat_id
             })
         rescue => e
             puts e
