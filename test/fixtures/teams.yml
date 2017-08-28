@@ -39,3 +39,11 @@ different_team_for_invite:
   name: "DIFFERENT"
   plan: manager
   company: "ATEAM TECHNOLOGIES"
+
+dteam:
+  user: adam
+  name: "DTEAM"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  plan: recruiter
+  company: "ATEAM TECHNOLOGIES"

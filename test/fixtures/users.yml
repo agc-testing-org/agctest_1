@@ -64,16 +64,23 @@ masha_notifications_skillsets:
   created_at: <%= 5.day.ago.to_s(:db) %>
   token: XZY
 
-elina_bteam:
-  first_name: elina_bteam
-  email: elina@wired7.com
+elina_dteam_sponsored:
+  first_name: elina_bteam_sponsored
+  email: elina1@wired7.com
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   token: ASD
   confirmed: true
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
 
-
+elina_bteam_priority:
+  first_name: elina_dteam_priority
+  email: elina2@wired7.com
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  token: DSA
+  confirmed: true
+  password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
 
 
 

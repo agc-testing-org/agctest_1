@@ -830,11 +830,10 @@ describe ".Account" do
     context "#create_connection_request" do
         fixtures :users
         context "connection_request_confirmed" do
-            fixtures :user_connections
             before(:each) do
                 @contact_id = (decrypt(users(:adam_protected).id).to_i)
                 @user_id = (decrypt(users(:adam).id).to_i)
-                @res = (@account.create_connection_request @user_id, @contact_id, nil)
+                @res = (@account.create_connection_request @user_id, @contact_id, nil, nil)
             end
             it "should include user_id" do
                 expect(@res["user_id"]).to eq(@user_id)

@@ -16,9 +16,18 @@ adam_confirmed_request_adam_admin_pending:
   read: false
   confirmed: 1
 
-elina_bteam_connection:
+elina_dteam_sponsored:
   user: adam_admin
-  contact: elina_bteam
+  contact: elina_dteam_sponsored
+  read: true
+  confirmed: 2
+  team: dteam 
+  seat: sponsored
+
+elina_bteam_priority:
+  user: adam_confirmed
+  contact: elina_bteam_priority
   read: true
   confirmed: 2
   team: bteam 
+  seat: priority

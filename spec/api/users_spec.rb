@@ -364,7 +364,9 @@ describe "/users" do
         it "should include team_id" do
             @contact_result.each_with_index do |r,i|
                 expect(@res[i]["team_id"]).to eq(r["team_id"])
+                expect(@res[i]["seat_id"]).to eq(r["seat_id"])                
                 expect(r["team_id"]).to eq(@team_id)
+                expect(r["seat_id"]).to eq(@seat_id)
                 expect(r["confirmed"]).to eq(@confirmed)
                 expect(r["read"]).to eq(@read)
             end
@@ -405,12 +407,12 @@ describe "/users" do
     end
 
     describe "GET /me/connections" do
-        fixtures :user_connections, :user_teams
+        fixtures :user_connections
         context "signed in" do
             before(:each) do
                 get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} where user_connections.confirmed=2) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i})")
+                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} where user_connections.confirmed=2 and user_connections.team_id is null or user_connections.seat_id = #{seats(:priority).id}) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} where user_connections.team_id is null or user_connections.seat_id = #{seats(:priority).id})")
             end
             it_behaves_like "contact"
             it_behaves_like "contact_info"
@@ -423,18 +425,31 @@ describe "/users" do
             it_behaves_like "unauthorized"
         end
         context "contact belongs to team" do
-            before(:each) do
-                get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("SELECT user_connections.*, user_teams.sender_id, users.first_name, users.email FROM user_teams inner join users on user_teams.sender_id = users.id inner join user_connections on user_teams.user_id = user_connections.contact_id WHERE user_connections.user_id != user_teams.sender_id and user_connections.user_id = #{decrypt(user_connections(:elina_bteam_connection).user_id).to_i} and user_connections.team_id is not null")
-                @inviter_id = user_teams(:elina_bteam).sender_id
-            end
-
-            it "should include sender_id" do
-                @contact_result.each_with_index do |r, i|
-                    expect(decrypt(@res[i]["sender_id"]).to_i).to eq(r["sender_id"])
-                    expect(@res[i]["sender_id"]).to eq(@inviter_id)
+            fixtures :user_teams, :seats
+            context "with sponsored seat" do
+                before(:each) do
+                    get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @contact_result = @mysql_client.query("SELECT user_connections.*, user_teams.sender_id, users.first_name, users.email FROM user_teams inner join users on user_teams.sender_id = users.id inner join user_connections on user_teams.user_id = user_connections.contact_id WHERE user_connections.user_id != user_teams.sender_id and user_connections.user_id = #{decrypt(user_connections(:elina_dteam_sponsored).user_id).to_i} and user_connections.team_id is not null and user_connections.seat_id = #{seats(:sponsored).id}")
+                    @inviter_id = user_teams(:elina_dteam_sponsored).sender_id
                 end
+
+                it "should include sender_id" do
+                    @contact_result.each_with_index do |r, i|
+                        expect(decrypt(@res[i]["sender_id"]).to_i).to eq(r["sender_id"])
+                        expect(@res[i]["sender_id"]).to eq(@inviter_id)
+                    end
+                end
+            end
+            context "with priority seat" do
+                before(:each) do
+                    get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = JSON.parse(last_response.body)
+                    @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:elina_bteam_priority).user_id).to_i} where user_connections.confirmed=2 and user_connections.team_id is null or user_connections.seat_id = #{seats(:priority).id}) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:elina_bteam_priority).user_id).to_i} where user_connections.team_id is null or user_connections.seat_id = #{seats(:priority).id})")
+                end
+                it_behaves_like "contact"
+                it_behaves_like "contact_info"
+                it_behaves_like "ok"
             end
         end
     end
@@ -503,7 +518,7 @@ describe "/users" do
     end
 
     describe "POST /:id/requests" do
-        fixtures :user_teams, :teams, :users
+        fixtures :users
         context "signed in" do
             before(:each) do
                 post "/users/#{users(:adam_admin).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
@@ -520,17 +535,35 @@ describe "/users" do
             it_behaves_like "unauthorized"
         end
         context "contact belongs to team" do
-            before(:each) do
-                post "/users/#{users(:elina_bteam).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                @res = [JSON.parse(last_response.body)]
-                @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(users(:elina_bteam).id).to_i}")
-                @team_id = teams(:bteam).id
-                @confirmed = 2
-                @read = 1
+            fixtures :users, :user_teams, :teams, :seats
+            context "with sponsored seat" do
+                before(:each) do
+                    post "/users/#{users(:elina_bteam_priority).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(users(:elina_bteam_priority).id).to_i}")
+                    @team_id = teams(:bteam).id
+                    @seat_id = seats(:priority).id
+                    @confirmed = 1
+                    @read = 0
+                end 
+                it_behaves_like "contact"
+                it_behaves_like "created"
+                it_behaves_like "contact_team"
             end
-            it_behaves_like "contact"
-            it_behaves_like "created"
-            it_behaves_like "contact_team"
+            context "with sponsored seat" do
+                before(:each) do
+                    post "/users/#{users(:elina_dteam_sponsored).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(users(:elina_dteam_sponsored).id).to_i}")
+                    @team_id = teams(:dteam).id
+                    @seat_id = seats(:sponsored).id
+                    @confirmed = 2
+                    @read = 1
+                end 
+                it_behaves_like "contact"
+                it_behaves_like "created"
+                it_behaves_like "contact_team"
+            end
         end
     end
 

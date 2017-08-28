@@ -130,10 +130,20 @@ adam_confirmed_different_team_for_invite:
   seat: member
   accepted: true
 
-elina_bteam:
+elina_bteam_priority:
   sender: adam
-  user: elina_bteam
+  user: elina_bteam_priority
+  user_email: "elina1@wired7.com"
   team: bteam
+  seat: priority
+  accepted: true
+  expires:  <%= 1.day.from_now.to_s(:db) %>
+
+elina_dteam_sponsored:
+  sender: adam
+  user: elina_dteam_sponsored
+  user_email: "elina2@wired7.com"
+  team: dteam
   seat: sponsored
   accepted: true
   expires:  <%= 1.day.from_now.to_s(:db) %>
