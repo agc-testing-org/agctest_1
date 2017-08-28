@@ -18,5 +18,8 @@ export default DS.Model.extend({
     pull_request: attr('number'),
     merged: attr('boolean'),
     comments: DS.hasMany('comment'),
-    votes: DS.hasMany('vote')
+    votes: DS.hasMany('vote'),
+    expires: attr('date'),
+    review: attr('boolean')
+
 });

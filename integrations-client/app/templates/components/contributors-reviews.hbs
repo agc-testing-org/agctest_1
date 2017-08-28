@@ -1,0 +1,28 @@
+{{#if comments}}
+<div class="list-group rounded text-left">
+
+{{#each (limited sortedComments count) as |comment|}}
+    <div class="list-group-item rounded">
+        <div class="line">{{comment.text}}</div>
+        <small class="text-muted">
+        {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
+            posted {{moment-from-now comment.created_at}}
+            {{#unless (eq comment.user_id sessionAccount.account.id)}}
+             by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
+            {{/unless}}
+        </small>
+    </div>
+{{/each}}
+</div>
+
+<small class="more">
+    {{#if showingAll}}
+    <a {{action "showAll" false}}>Show Less</a>
+    {{else}}
+    {{#if (greater-than sortedComments.length count)}}
+    <a {{action "showAll" true}}>Show More Comments ( {{sortedComments.length}} Total )</a>
+    {{/if}}
+    {{/if}}
+</small>
+
+{{/if}}

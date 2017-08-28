@@ -41,14 +41,15 @@ class Issue
         end
     end
 
-    def create_comment user_id, contributor_id, sprint_state_id, text, explain
+    def create_comment user_id, contributor_id, sprint_state_id, text, explain, review
         begin
             return Comment.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
                 text: text.strip,
-                explain: explain
+                explain: explain,
+                review: review
             })
         rescue => e
             puts e
@@ -176,6 +177,7 @@ class Issue
                 response[i] = ss.as_json
                 sprint_state = response[i]
                 sprint_state_id = sprint_state['id']
+                sprint_state_expires = sprint_state['expires']
                 response[i][:active_contribution_id] = nil
                 response[i][:contributors] = []
                 ss.contributors.each_with_index do |c,k|
@@ -185,13 +187,17 @@ class Issue
                         c.comments.each_with_index do |com,x|
                             comments[x][:user_profile] = account.get_profile com.user
                         end
+                        if sprint_state_expires && sprint_state_expires < Time.now.utc
+                            response[i][:review] = true
+                        end 
                         response[i][:contributors][contributor_length] = {
                             :id => c.id,
                             :created_at => c.created_at,
                             :updated_at => c.updated_at,
                             :comments => comments,
-                            :votes => c.votes.as_json
-                        }
+                            :votes => c.votes.as_json,
+                            :commit_success => c.commit_success
+                        } 
                         if decrypt(c.user_id).to_i == user_id
                             response[i][:contributors][contributor_length][:commit] = c.commit
                             response[i][:contributors][contributor_length][:commit_success] =  c.commit_success
@@ -218,8 +224,9 @@ class Issue
         rescue => e
             puts e
             return nil
+            end
         end
-    end
+
 
     def get_sprint id # This also returns the project
         begin
