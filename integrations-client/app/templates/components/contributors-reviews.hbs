@@ -3,6 +3,9 @@
 
 {{#each (limited sortedComments count) as |comment|}}
     <div class="list-group-item rounded">
+    {{#if (eq comment.review true)}}
+    {{stacked-icon value="fa-comment" icon="fa-certificate" size="1" class="d-inline"}} Review
+    {{/if}}
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
         {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}

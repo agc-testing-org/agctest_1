@@ -39,6 +39,50 @@
                                 {{user-login-oauth text=" to participate" provider="github"}}
                             {{else}}
                                 {{#if selected-state.active_contribution_id}}
+                                    {{#if (eq selected-state.review true)}}
+                                        {{#each selected-state.contributors as |contributor index|}}
+                                              {{#if (eq contributor.id selected-state.active_contribution_id)}}
+                                              {{#if (eq contributor.commit_success true)}}
+                                              <h4 class="mb-4">This is your chance to review (through comments) proposals for this phase.</h4>
+                                              <h3 class="description section text-capitalize underline mb-2 mt-1 col-md-6 col-sm-12">
+                                              Yours proposal {{contributor.id}}
+                                              </h3>
+                                              <div class="about section mb-1">
+                                              <i class="fa fa-tag fa-fw mr-0" aria-hidden="true"></i> 
+                                              Branch {{last-contributor-state.id}}_{{contributor.id}} 
+                                              (<a target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{contributor.id}}">
+                                              <i class="fa fa-window-restore" aria-hidden="true"></i> View on Github </a>)
+                                              </div>
+                                              <div class="text-left pl-0 col-md-6 col-sm-12">
+                                              {{contributors-reviews contributor=contributor comments=contributor.comments sprint_state=last-contributor-state reviewContrubutors=true}}
+                                              {{contributors-review text="Your feedback" review=true  contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                                              </div>
+                                              <h4 class="about section mb-3">Please, review next solutions:</h4>
+                                              {{#each (contributors-to-review selected-state.contributors index) as |commit|}}
+                                              {{#if (not-eq commit.id selected-state.active_contribution_id)}}
+                                              <h3 class="description section text-capitalize underline mb-2 mt-1 col-md-6 col-sm-12">
+                                              Proposal {{commit.id}}
+                                              </h3>
+                                              <div class="about section mb-1">
+                                              <i class="fa fa-tag fa-fw mr-0" aria-hidden="true"></i> 
+                                              Branch {{last-contributor-state.id}}_{{commit.id}} 
+                                              (<a target="_blank" href="https://github.com/{{org}}/{{project.name}}_{{project.id}}/compare/{{last-contributor-state.sha}}...{{last-contributor-state.id}}_{{commit.id}}">
+                                              <i class="fa fa-window-restore" aria-hidden="true"></i> View on Github </a>)
+                                              </div>
+                                              <div class="text-left pl-0 col-md-6 col-sm-12">
+                                              {{contributors-reviews contributor=commit comments=commit.comments sprint_state=last-contributor-state reviewContrubutors=true}}
+                                              {{contributors-review text="Your feedback" review=true contributor=commit sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                                              </div>
+                                              {{log commit.id}}
+                                              {{/if}}
+                                              {{/each}}
+                                              {{else}}
+                                               <h3>This sprint state is no longer open for contribute</h3>
+                                            {{/if}}
+                                            {{/if}}
+                                          {{/each}}
+                                    {{else}}
+
                                     {{#each selected-state.contributors as |contributor|}}
                                         {{#if (eq contributor.id selected-state.active_contribution_id)}}
                                             {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint class="hidden-md-up text-left"}}
@@ -56,6 +100,8 @@
                                             </div>
                                         {{/if}}
                                     {{/each}}
+
+                                    {{/if}}
                                 {{else}}
                                     <button class="btn btn-info rounded mt-2" {{action "join" project.id selected-state.id }}>Join</button>
                                 {{/if}}

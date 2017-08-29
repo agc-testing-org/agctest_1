@@ -20,6 +20,7 @@ export default DS.Model.extend({
     comments: DS.hasMany('comment'),
     votes: DS.hasMany('vote'),
     expires: attr('date'),
-    review: attr('boolean')
+    review: attr('boolean'),
+    commit_success: attr('boolean')
 
 });
