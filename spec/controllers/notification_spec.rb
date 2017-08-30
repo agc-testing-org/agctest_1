@@ -132,6 +132,19 @@ describe ".Activity" do
         it_behaves_like "user_notifications"
     end
 
+    context "#user_notifications_by_roles_for_deadline" do
+        fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
+        context "not hidden" do
+            before(:each) do
+                @sprint_timeline_id = sprint_timelines(:sprint_1_deadline).id 
+                @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, user_roles.user_id as user_id from sprint_timelines INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1 WHERE sprint_timelines.id = #{@sprint_timeline_id} AND sprint_timelines.notification_id = #{notifications(:deadline).id} AND (user_roles.user_id != sprint_timelines.user_id)
+")
+                @res = @activity.user_notifications_by_roles_for_deadline @sprint_timeline_id
+            end
+            it_behaves_like "user_notifications"
+        end
+    end
+
     context "#record_user_notifications" do
         fixtures :users, :sprints, :sprint_timelines
         before(:each) do

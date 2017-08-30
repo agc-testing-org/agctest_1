@@ -78,3 +78,14 @@ sprint_1_state_2_winner:
   notification: winner
   created_at: <%= 5.day.ago.to_s(:db) %>
 
+sprint_1_deadline:
+  user: adam_admin
+  project: demo 
+  sprint: sprint_1
+  sprint_state: sprint_1_state_2
+  next_sprint_state: sprint_1_state_2
+  state: requirements_design
+  notification: deadline
+  created_at: <%= 3.day.ago.to_s(:db) %>
+
+

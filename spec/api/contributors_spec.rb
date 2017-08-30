@@ -282,6 +282,18 @@ describe "/contributors" do
                 it_behaves_like "error", "unable to save comment"
             end
         end
+        context "review type comment" do
+            before(:each) do
+                @text = "AB"
+                post "/contributors/#{@contributor_id}/comments", {:text => @text, :review => true, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from comments").first
+                @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            end
+            it "should save explain true" do
+                expect(@mysql["review"]).to eq(1) 
+            end
+        end
     end
 
     describe "POST /:id/votes" do
