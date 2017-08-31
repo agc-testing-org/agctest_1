@@ -198,7 +198,7 @@ class Issue
                             :votes => c.votes.as_json,
                             :commit_success => c.commit_success
                         } 
-                        if decrypt(c.user_id).to_i == user_id
+                        if c[:user_id].to_i == user_id
                             response[i][:contributors][contributor_length][:commit] = c.commit
                             response[i][:contributors][contributor_length][:commit_success] =  c.commit_success
                             response[i][:contributors][contributor_length][:commit_remote] =  c.commit_remote
