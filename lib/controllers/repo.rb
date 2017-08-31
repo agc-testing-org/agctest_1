@@ -91,7 +91,6 @@ class Repo
             contributor.save #updates timestamp
             existing_contributor = get_existing_contributor contributor[:sprint_state_id]
             if existing_contributor.length == 3
-                sprint_state = SprintState.find_by(id: contributor[:sprint_state_id])
                 if sprint_state.expires == nil
                     sprint_state.expires = (Time.now.utc + 2.day)
                     sprint_state.save

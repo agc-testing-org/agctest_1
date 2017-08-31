@@ -144,7 +144,7 @@ describe "/sprints-states" do
             context "with contributors (owned) and comments" do
                 fixtures :contributors, :comments
                 before(:each) do
-                    sprint_state_id = sprint_states(:sprint_1_state_1).id
+                    sprint_state_id = sprint_states(:sprint_1_state_2).id
                     get "/sprint-states?id=#{sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @sprint_state = JSON.parse(last_response.body)[0]
                     @contributors = @sprint_state["contributors"]

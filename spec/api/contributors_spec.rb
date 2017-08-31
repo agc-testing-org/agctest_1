@@ -188,6 +188,7 @@ describe "/contributors" do
                 patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
+                @expires_sql = @mysql_client.query("select * from sprint_states where id = #{contributors(:adam_confirmed_1).sprint_state_id}").first
             end
             context "contributor" do
                 it "should include commit" do
@@ -195,6 +196,9 @@ describe "/contributors" do
                 end
                 it "should include commit_success" do
                     expect(@sql["commit_success"]).to eq(1)
+                end
+                it "should set expires" do
+                    expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H:%M:%S')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H:%M:%S'))
                 end
             end
             it "should return contributor id" do
