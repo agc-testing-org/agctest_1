@@ -1,5 +1,5 @@
 class AddNotificationForDeadline < ActiveRecord::Migration[5.1]
   def change
-      Notification.create("name": "deadline", "description": "the deadline for the sprint set, you can offer a solution")
+      Notification.create("name": "deadline", "description": "deadline set for sprint state that corresponds to your role subscriptions (last call)")
   end
 end
