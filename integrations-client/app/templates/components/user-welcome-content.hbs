@@ -3,14 +3,14 @@
     <div class="overview">
 
     {{#unless params.section}}
-    <h1 class="name text-capitalize">Welcome {{sessionAccount.account.first_name}}</h1>
-    <h3 class="description mt-3 mb-3">Wired7 <strong>connects</strong> companies and job seekers through <strong>project development</strong></h3>  
+    <h1 class="name text-capitalize">The job search is two-way</h1>
+    <h3 class="description mt-3 mb-3">It's hard to get your foot in the door when you don't know what a hiring manager wants to see.  Wired7 <strong>connects</strong> companies with qualified job seekers that demonstrate relevant experience through <strong>project development</strong>.</h3>  
     <h3 class="description mb-4">
         Use Wired7 to 
         {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-            <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions
+            <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions.
         {{else}} 
-            <strong>get your foot in the door</strong> for positions you're interested in
+            <strong>get noticed</strong> by hiring managers responsible for positions you're interested in.
         {{/if}}
     </h3>
 

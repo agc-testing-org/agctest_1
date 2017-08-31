@@ -64,7 +64,7 @@ h3{
     font-weight:300;
     font-size:22px;
     margin-top:22px;
-    line-height:26px;
+    line-height:32px;
     margin-top:0px;
 }
 h4{
@@ -488,8 +488,12 @@ button{
     top:0px;
     z-index:0;
 }
+.welcome .feedback_graphic_hold.hidden-md-up{
+    height:300px !important;
+    position:relative !important;
+}
 .welcome .feedback_graphic{
-    background: url('welcome_feedback.png') no-repeat center center;
+    background: url('find_job_wrong.png') no-repeat center center;
     top:0px;
     left:0px;
     width: 100%;
