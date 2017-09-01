@@ -187,23 +187,37 @@ class Issue
                         c.comments.each_with_index do |com,x|
                             comments[x][:user_profile] = account.get_profile com.user
                         end
+                        if sprint_state_expires == nil || sprint_state_expires > Time.now.utc
+                            if c[:user_id].to_i == user_id
+                                response[i][:active_contribution_id] = c.id
+                                response[i][:contributors][contributor_length] = {
+                                    :id => c.id,
+                                    :created_at => c.created_at,
+                                    :updated_at => c.updated_at,
+                                    :comments => comments,
+                                    :votes => c.votes.as_json,
+                                    :commit => c.commit,
+                                    :commit_success => c.commit_success,
+                                    :commit_remote => c.commit_remote,
+                                    :repo => c.repo
+                                }
+                            end
+                        end
                         if sprint_state_expires && sprint_state_expires < Time.now.utc
                             response[i][:review] = true
-                        end 
-                        response[i][:contributors][contributor_length] = {
-                            :id => c.id,
-                            :created_at => c.created_at,
-                            :updated_at => c.updated_at,
-                            :comments => comments,
-                            :votes => c.votes.as_json,
-                            :commit_success => c.commit_success
-                        } 
-                        if c[:user_id].to_i == user_id
-                            response[i][:contributors][contributor_length][:commit] = c.commit
-                            response[i][:contributors][contributor_length][:commit_success] =  c.commit_success
-                            response[i][:contributors][contributor_length][:commit_remote] =  c.commit_remote
-                            response[i][:contributors][contributor_length][:repo] = c.repo
-                            response[i][:active_contribution_id] = c.id
+                            if c.commit_success == true
+                                response[i][:contributors][contributor_length] = {
+                                    :id => c.id,
+                                    :created_at => c.created_at,
+                                    :updated_at => c.updated_at,
+                                    :comments => comments,
+                                    :votes => c.votes.as_json
+                                } 
+                                if c[:user_id].to_i == user_id
+                                    response[i][:active_contribution_id] = c.id
+                                end
+                            end
+                            
                         end
                     end
                 end

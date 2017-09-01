@@ -21,6 +21,4 @@ export default DS.Model.extend({
     votes: DS.hasMany('vote'),
     expires: attr('date'),
     review: attr('boolean'),
-    commit_success: attr('boolean')
-
 });

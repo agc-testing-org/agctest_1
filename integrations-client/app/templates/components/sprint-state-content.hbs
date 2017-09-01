@@ -31,8 +31,12 @@
                     <div class="text-left">
                         {{#if session.isAuthenticated}}
                             {{#unless selected-state.active_contribution_id}}
+                               {{#if (eq selected-state.review true)}}
+                               <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, this sprint state is no longer open for contribute.</h3>
+                               {{else}}
                                 <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
                                 <h4>{{selected-state.state_id.instruction}}</h4>
+                                {{/if}}
                             {{/unless}}
 
                             {{#unless sessionAccount.account.github}}
@@ -42,7 +46,6 @@
                                     {{#if (eq selected-state.review true)}}
                                         {{#each selected-state.contributors as |contributor index|}}
                                               {{#if (eq contributor.id selected-state.active_contribution_id)}}
-                                              {{#if (eq contributor.commit_success true)}}
                                               <h4 class="mb-4">This is your chance to review (through comments) proposals for this phase.</h4>
                                               <h3 class="description section text-capitalize underline mb-2 mt-1 col-md-6 col-sm-12">
                                               Yours proposal {{contributor.id}}
@@ -75,9 +78,6 @@
                                               </div>
                                               {{/unless}}
                                               {{/each}}
-                                              {{else}}
-                                               <h3>This sprint state is no longer open for contribute</h3>
-                                            {{/if}}
                                             {{/if}}
                                           {{/each}}
                                     {{else}}
@@ -102,7 +102,9 @@
 
                                     {{/if}}
                                 {{else}}
+                                    {{#unless (eq selected-state.review true)}}
                                     <button class="btn btn-info rounded mt-2" {{action "join" project.id selected-state.id }}>Join</button>
+                                    {{/unless}}
                                 {{/if}}
                             {{/unless}}
                         {{else}}
