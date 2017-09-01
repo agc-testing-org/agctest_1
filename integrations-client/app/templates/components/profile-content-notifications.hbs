@@ -66,6 +66,19 @@
                         </p>
                     {{/if}}
 
+                    {{#if (eq notification.notification.name "comment offensive")}}
+                        <p class="line">
+                            Someone has flagged a comment from {{#if (eq notification.user_profile_comment_vote.id sessionAccount.account.id)}}you {{/if}}
+                            {{#unless (eq notification.user_profile_comment_vote.id sessionAccount.account.id)}}
+                            {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
+                            {{/unless}} on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}. Wired7 ATeam will review it.
+                        </p>
+                        <p class="line quotation">
+                            <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment_vote.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                        </p>
+                    {{/if}}
+
+
                     <small class="line text-muted">
                     
                         {{moment-from-now notification.created_at}}
