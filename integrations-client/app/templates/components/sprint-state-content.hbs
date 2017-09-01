@@ -54,12 +54,12 @@
                                               <i class="fa fa-window-restore" aria-hidden="true"></i> View on Github </a>)
                                               </div>
                                               <div class="text-left pl-0 col-md-6 col-sm-12">
-                                              {{contributors-reviews contributor=contributor comments=contributor.comments sprint_state=last-contributor-state reviewContrubutors=true}}
-                                              {{contributors-review text="Your feedback" review=true  contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                                              {{develop-issue-comments contributor=contributor comments=contributor.comments sprint_state=last-contributor-state}}
+                                              {{develop-issue-comment text="Your feedback" review=true  contributor=contributor sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
                                               </div>
                                               <h4 class="about section mb-3">Please, review next solutions:</h4>
                                               {{#each (contributors-to-review selected-state.contributors index) as |commit|}}
-                                              {{#if (not-eq commit.id selected-state.active_contribution_id)}}
+                                              {{#unless (eq commit.id selected-state.active_contribution_id)}}
                                               <h3 class="description section text-capitalize underline mb-2 mt-1 col-md-6 col-sm-12">
                                               Proposal {{commit.id}}
                                               </h3>
@@ -70,11 +70,10 @@
                                               <i class="fa fa-window-restore" aria-hidden="true"></i> View on Github </a>)
                                               </div>
                                               <div class="text-left pl-0 col-md-6 col-sm-12">
-                                              {{contributors-reviews contributor=commit comments=commit.comments sprint_state=last-contributor-state reviewContrubutors=true}}
-                                              {{contributors-review text="Your feedback" review=true contributor=commit sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
+                                              {{develop-issue-comments contributor=commit comments=commit.comments sprint_state=last-contributor-state}}
+                                              {{develop-issue-comment text="Your feedback" review=true contributor=commit sprint_state=last-contributor-state project=project.id class="mb-3 comments" refresh="refresh"}}
                                               </div>
-                                              {{log commit.id}}
-                                              {{/if}}
+                                              {{/unless}}
                                               {{/each}}
                                               {{else}}
                                                <h3>This sprint state is no longer open for contribute</h3>

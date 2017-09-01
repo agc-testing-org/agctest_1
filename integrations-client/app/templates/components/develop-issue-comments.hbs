@@ -1,6 +1,28 @@
 {{#if comments}}
 <div class="list-group rounded text-left">
 
+{{#if reviewComments}}
+
+
+{{#each (limited reviewComments count) as |comment|}}
+    <div class="list-group-item rounded">
+        <div class="line"><strong>Review</strong></div>
+        <div class="line">{{comment.text}}</div>
+        <small class="text-muted">
+        {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
+            posted {{moment-from-now comment.created_at}}
+            {{#unless (eq comment.user_id sessionAccount.account.id)}}
+             by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
+            {{/unless}}
+        </small>
+        {{#if session.isAuthenticated}}
+        {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
+        {{develop-issue-report-offensive user_id=sessionAccount.account.id contributor=contributor sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
+        {{/if}}
+    </div>
+{{/each}}
+{{/if}}
+
 {{#if explainComments}}
 <div class="list-group-item rounded">
     <div class="line"><strong>Author's Explanation</strong></div>
@@ -20,9 +42,6 @@
 
 {{#each (limited sortedComments count) as |comment|}}
     <div class="list-group-item rounded">
-    {{#if (eq comment.review true)}}
-    {{stacked-icon value="fa-comment" icon="fa-certificate" size="1" class="d-inline"}} Review
-    {{/if}}
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
         {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
