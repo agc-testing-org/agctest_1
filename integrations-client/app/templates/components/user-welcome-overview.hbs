@@ -1,42 +1,12 @@
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
         <div class="overview text-left">
-            {{#unless params.section}}
-            <div class="feedback_graphic_hold hidden-sm-down">
-                <div class="feedback_graphic"></div>
+            <div class="graphic_hold hidden-sm-down">
+                <div class="graphic flow"></div>
             </div>
-            <div class="feedback_graphic_hold hidden-md-up">
-                <div class="feedback_graphic"></div>
+            <div class="graphic_hold hidden-md-up">
+                <div class="graphic flow"></div>
             </div>
-            {{/unless}}
-            
-            {{#if (eq params.section "connect")}}
-                {{#unless user.title}}
-                <h3 class="description mb-5 text-center">Connect Wired7 and LinkedIn to <strong>anonymously share your background</strong> when interacting with other users</h3>
-                <h3 class="description text-center">{{user-login-oauth provider="linkedin" refresh="refresh" lg=true}}</h3>
-                {{else}}
-                <h2 class="name text-center mb-5">{{user-profile-descriptor user_profile=user multiple_lines=true}}</h2>
-                <h3 class="description text-center">Looks good! This is what other users will know about you. All other personal identifying information is kept <strong>private</strong>.</h3>
-                <h3 class="description text-center mt-4">
-                {{#link-to "welcome" (query-params section="sprint")}}Continue{{/link-to}}
-                </h3>
-                {{/unless}}
-            {{/if}}
-
-            {{#if (eq params.section "sprint")}}
-                <div class="sprint_graphic_hold hidden-sm-down">
-                    <div class="sprint_graphic"></div>
-                </div>
-            {{/if}}
-
-            {{#if (eq params.section "team")}}
-            <div class="text-center">
-                <h3 class="about section text-capitalize">Your Roles</h3>
-                {{profile-overview-skillsets-roles user=user items=roles type="role" namespace="users/me" class="skillsets"}}
-                <h3 class="about section text-capitalize">Your Skillsets</h3>
-                {{profile-overview-skillsets-roles user=user items=skillsets type="skillset" namespace="users/me" class="skillsets"}}
-            </div>
-            {{/if}}
         </div>
     </div>
 </div>

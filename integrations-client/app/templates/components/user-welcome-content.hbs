@@ -1,100 +1,21 @@
 <div class="vertical-align-hold">
     <div class="vertical-align-cell">
-    <div class="overview">
+        <div class="overview">
+            <h1 class="name text-capitalize">An Agile Job Search</h1>
+            <h3 class="description mt-3 mb-3">It's hard to get your foot in the door when you don't know what a hiring manager wants to see. Even the best resumes and cover letters can be overlooked.</h3>
+            <h3 class="description mt-3 mb-3">Wired7 helps <strong>qualified</strong> job seekers demonstrate relevant experience to hiring managers through <strong>project development</strong>.</h3>  
+            <h3 class="description mb-4">
+                Use Wired7 to
+                {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
+                    <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions.
+                {{else}} 
+                    <strong>get noticed</strong> by hiring managers responsible for positions you're interested in.
+                {{/if}}
+            </h3>
 
-    {{#unless params.section}}
-    <h1 class="name text-capitalize">The job search is two-way</h1>
-    <h3 class="description mt-3 mb-3">It's hard to get your foot in the door when you don't know what a hiring manager wants to see.  Wired7 <strong>connects</strong> companies with qualified job seekers that demonstrate relevant experience through <strong>project development</strong>.</h3>  
-    <h3 class="description mb-4">
-        Use Wired7 to 
-        {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-            <strong>effortlessly identify</strong> ambitious, talented <strong>candidates</strong> for open positions.
-        {{else}} 
-            <strong>get noticed</strong> by hiring managers responsible for positions you're interested in.
-        {{/if}}
-    </h3>
-
-    <h3 class="about mb-3 mt-4">Before we begin let us know your team function</h3>
-    <div class="text-left mt-3">
-        {{profile-overview-skillsets-roles user=user items=roles type="role" namespace="users/me" class="skillsets"}}
-    </div>
-
-    <h3 class="about mt-4 text-left">
-        {{#link-to "welcome" (query-params section="connect")}}Continue{{/link-to}}
-    </h3>
-    {{/unless}}
-
-    {{#if (eq params.section "connect")}}
-        <h4 class="about section">My Notifications</h4>
-        <div class="list-group rounded text-left">
-            <div class="list-group-item rounded highlight-{{notification.read}}">
-                <p class="line"> 
-                    <strong>A Lead Developer in Telecommunications, <i class="fa fa-map-marker" aria-hidden="true"></i> New York, NY</strong> commented on the <strong>Requirements Review</strong> phase of <strong>implement /users/:id/jobs endpoint</strong>
-                </p>
-                <p class="line quotation">
-                    <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>Changing the LEFT JOIN to INNER JOIN in the user search should make the query more efficient (and ultimately yield faster search responses)<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
-                </p>
-                <small class="line text-muted">
-                    7 minutes ago 
-                </small>
-
-            </div>
-            <div class="list-group-item rounded highlight-{{notification.read}}">
-                <p class="line">
-                    <strong>A Senior Quality Engineer in Financial Services, <i class="fa fa-map-marker" aria-hidden="true"></i> San Francisco Bay Area</strong> commented on the <strong>Requirements Review</strong> phase of <strong>implement /users/:id/jobs endpoint</strong>
-                </p>
-                <p class="line quotation">
-                    <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i>There's a few missing scenarios around access control in the spec tests for this proposal that should not be ignored. I would make sure those are covered before moving forward.<i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
-                </p>  
-                <small class="line text-muted">
-                    32 minutes ago 
-                </small>
-            </div>
+            <h3 class="about mt-4 text-left">
+                {{#link-to "welcome.identify"}}Continue{{/link-to}}
+            </h3>
         </div>
-    {{/if}}
-
-    {{#if (eq params.section "sprint")}}
-        <h3 class="description mb-3">Projects on Wired7 are <strong>open to all users</strong></h3>
-        <h3 class="description mb-3">Project roadmaps are driven by <strong>job listings</strong> that hiring managers post</h3>
-        <h3 class="description mb-3">Anyone can pitch a project feature or improvement known as a <strong>sprint</strong>, as long as the skills and experience needed to implement the idea match the <strong>requirements of an open job listing</strong></h3>
-        <h3 class="description mb-3">If you're interested in an idea, this is a great way to make a first impression with a hiring manager</h3>
-        <h3 class="description mb-3">When a hiring manager approves an idea we invite users to contribute and provide feedback as the idea transitions through <strong>requirements, design, and development</strong> phases</h3>
-
-        {{#unless (eq sessionAccount.account.seat_id.name "share")}}
-            {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-                {{#if (eq sessionAccount.account.seat_id.name "member")}}               
-                    {{#if (and (greater-than manager.length 0) (greater-than managerTeams.length 0))}}
-                        {{#each managerTeams as |team index|}}                                                                     
-                            {{#if (eq index 0)}}
-                                <h3 class="description">List jobs for {{#link-to "team.select.jobs" team.id}}{{team.name}}{{/link-to}} at {{team.company}} to get started</h3>
-                            {{/if}}
-                        {{/each}}
-                    {{else}}
-                        {{#each teams as |team index|}}
-                            {{#if (eq index 0)}}
-                                <h3 class="description">Invite candidates through the {{#link-to "team.select.talent" team.id}}{{team.name}}{{/link-to}} team at {{team.company}} to get started</h3>
-                            {{/if}}
-                        {{/each}}
-                    {{/if}}
-                {{else}}
-                    <h3 class="about mt-3">{{#link-to "team.new"}}create a team{{/link-to}} to get started</h3> 
-                {{/if}}
-            {{else}}
-                <h3 class="description">Check out {{#link-to "develop.roadmap"}}the roadmap{{/link-to}} to find open positions</h3>
-            {{/if}}
-        {{else}}
-            {{#each teams as |team index|}}
-                {{#if (eq index 0)}}
-                    <h3 class="description">Check out {{#link-to "team.select.leads" team.id}}leads{{/link-to}} the {{team.name}} team at {{team.company}} has generated for you to get started</h3>
-                {{/if}}
-            {{/each}}
-        {{/unless}}
-
-
-        <h3 class="description text-center mt-4">
-            {{#link-to "welcome" (query-params section="connect")}}Back{{/link-to}} | {{#link-to "me.overview"}}My Profile{{/link-to}}
-        </h3>
-    {{/if}}
-    </div>
     </div>
 </div>
