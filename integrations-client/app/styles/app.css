@@ -995,3 +995,10 @@ textarea.form-control{
     user-select: none; /* Non-prefixed version, currently
     supported by Chrome and Opera */
 }
+
+/* tooltip resize window bug */
+[aria-hidden=true] {
+    position: absolute !important;
+    transform: none !important;
+    visibility: hidden;
+}
