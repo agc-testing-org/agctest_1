@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import UnAuthenticatedRouteMixin from 'ember-simple-auth/mixins/unauthenticated-route-mixin';
 
-export default Ember.Route.extend({
+export default Ember.Route.extend(UnAuthenticatedRouteMixin,{
     activate () {
         Ember.$('body').addClass('body-dark');
     },                                       

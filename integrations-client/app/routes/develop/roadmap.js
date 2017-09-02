@@ -1,6 +1,7 @@
 import Ember from 'ember';
+import BaseRoute from 'integrations-client/routes/base';
 
-export default Ember.Route.extend({
+export default BaseRoute.extend({
     actions: {
         refresh(){
             this.refresh();
