@@ -1002,7 +1002,8 @@ textarea.form-control{
     transform: none !important;
     visibility: hidden;
 }
-
-.carousel [aria-hidden=true] {
+[aria-hidden=true].fa {
+    position: relative !important;
+    transform: none !important;
     visibility: visible;
 }
