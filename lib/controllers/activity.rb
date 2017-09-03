@@ -44,6 +44,8 @@ class Activity
         end
     end   
 
+    #TODO - notifications for people that pitch ideas for a job?
+
     def user_notifications_for_job_contributors sprint_timeline_id
         #people that propose ideas (sprints) for a job
         begin
@@ -104,11 +106,13 @@ class Activity
         end
     end
 
+    #TODO - we should use joins instead of Notification.where...
+
     def user_notifications_for_owner sprint_timeline_id
         # all comment and vote notifications not written by owner
         # TODO rethink ownership (anyone can create a sprint...) - also need a way to let the project owner know what's going on
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "comment vote"})).or(Notification.where({:name => "sprint comment"})).or(Notification.where({:name => "sprint comment vote"})).or(Notification.where({:name => "sprint vote"})).select(:id).map(&:id).join(",")})").select("sprints.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id LEFT join comments on comments.id = sprint_timelines.comment_id").where("comments.explain = 0").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "comment vote"})).or(Notification.where({:name => "sprint comment"})).or(Notification.where({:name => "sprint comment vote"})).or(Notification.where({:name => "sprint vote"})).select(:id).map(&:id).join(",")})").select("sprints.user_id")
         rescue => e
             puts e
             return []

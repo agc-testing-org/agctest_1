@@ -101,3 +101,11 @@ adam_admin_12:
   created_at: <%= 5.hours.ago.to_s(:db) %>
   contributor: adam_confirmed_1
   text: "this is cool"
+
+adam_confirmed_explain:
+  user: adam_confirmed
+  sprint_state: sprint_1_state_1
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>
+  contributor: adam_confirmed_1
+  text: "I am explaining myself"
