@@ -98,3 +98,9 @@ sprint_1_state_1_explain:
   state: requirements_design 
   notification: comment
   created_at: <%= 5.day.ago.to_s(:db) %>
+
+sprint_1_state_1_review:
+  user: adam_confirmed
+  sprint_state: sprint_1_state_1
+  notification: peer
+  created_at: <%= 5.day.ago.to_s(:db) %>

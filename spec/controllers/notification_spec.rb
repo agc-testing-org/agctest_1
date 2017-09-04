@@ -40,14 +40,24 @@ describe ".Activity" do
         end
     end
 
-    context "#user_notifications_for_contributors_with_winner" do
+    context "#user_notifications_for_contributors" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :contributors
-        before(:each) do
-            @sprint_timeline_id = sprint_timelines(:sprint_1_state_1_winner).id
-            @notification_results = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id} AND contributors.user_id != #{decrypt(sprint_timelines(:sprint_1_state_1_winner).user.id).to_i}")
-            @res = @activity.user_notifications_for_contributors_with_winner @sprint_timeline_id
+        context "winner" do
+            before(:each) do
+                @sprint_timeline_id = sprint_timelines(:sprint_1_state_1_winner).id
+                @notification_results = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id} AND contributors.user_id != #{decrypt(sprint_timelines(:sprint_1_state_1_winner).user.id).to_i}")
+                @res = @activity.user_notifications_for_contributors @sprint_timeline_id
+            end
+            it_behaves_like "user_notifications"
         end
-        it_behaves_like "user_notifications"
+        context "peer review" do
+            before(:each) do
+                @sprint_timeline_id = sprint_timelines(:sprint_1_state_1_review).id
+                @notification_results = @mysql_client.query("select * from contributors where sprint_state_id = #{sprint_states(:sprint_1_state_1).id} AND contributors.user_id != #{decrypt(sprint_timelines(:sprint_1_state_1_review).user.id).to_i}")
+                @res = @activity.user_notifications_for_contributors @sprint_timeline_id
+            end
+            it_behaves_like "user_notifications"
+        end
     end
 
     context "#user_notifications_for_contributor" do
@@ -93,19 +103,29 @@ describe ".Activity" do
     context "#user_notifications_by_roles" do
         fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
         context "not hidden" do
-            before(:each) do
-                @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
-                @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where (user_roles.user_id != #{decrypt(sprint_timelines(:sprint_1_transition).user_id).to_i}) AND user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
-                @res = @activity.user_notifications_by_roles @sprint_timeline_id
+            context "transition" do
+                before(:each) do
+                    @sprint_timeline_id = sprint_timelines(:sprint_1_transition).id 
+                    @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, users.id as user_id from users join user_roles on users.id = user_roles.user_id join role_states where (user_roles.user_id != #{decrypt(sprint_timelines(:sprint_1_transition).user_id).to_i}) AND user_roles.role_id = role_states.role_id AND role_states.id = #{role_states(:product_requirements_design).id}")
+                    @res = @activity.user_notifications_by_roles @sprint_timeline_id
+                end
+                it_behaves_like "user_notifications"
             end
-            it_behaves_like "user_notifications"
+            context "deadline" do
+                before(:each) do
+                    @sprint_timeline_id = sprint_timelines(:sprint_1_deadline).id
+                    @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, user_roles.user_id as user_id from sprint_timelines INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1 WHERE sprint_timelines.id = #{@sprint_timeline_id} AND sprint_timelines.notification_id = #{notifications(:deadline).id} AND (user_roles.user_id != sprint_timelines.user_id)")
+                    @res = @activity.user_notifications_by_roles @sprint_timeline_id
+                end
+                it_behaves_like "user_notifications"
+            end
         end
         context "hidden" do
             fixtures :projects
             before(:each) do
                 @sprint_timeline = sprint_timelines(:sprint_1_transition)
                 @mysql_client.query("update projects set hidden = 1 where id = #{@sprint_timeline.project.id}")
-                @res = @activity.user_notifications_by_roles @sprint_timeline_id
+                @res = @activity.user_notifications_by_roles @sprint_timeline.id
             end
             it "should return no results" do
                 expect(@res).to be_empty
@@ -141,19 +161,6 @@ describe ".Activity" do
             @res = @activity.user_notifications_for_job_contributors @sprint_timeline_id
         end
         it_behaves_like "user_notifications"
-    end
-
-    context "#user_notifications_by_roles_for_deadline" do
-        fixtures :users, :sprints, :sprint_timelines, :sprint_states, :roles, :user_roles, :states, :role_states
-        context "not hidden" do
-            before(:each) do
-                @sprint_timeline_id = sprint_timelines(:sprint_1_deadline).id 
-                @notification_results = @mysql_client.query("select #{@sprint_timeline_id} as sprint_timeline_id, user_roles.user_id as user_id from sprint_timelines INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1 WHERE sprint_timelines.id = #{@sprint_timeline_id} AND sprint_timelines.notification_id = #{notifications(:deadline).id} AND (user_roles.user_id != sprint_timelines.user_id)
-                                                            ")
-                @res = @activity.user_notifications_by_roles_for_deadline @sprint_timeline_id
-            end
-            it_behaves_like "user_notifications"
-        end
     end
 
     context "#record_user_notifications" do

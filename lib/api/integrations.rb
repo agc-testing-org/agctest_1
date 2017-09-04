@@ -74,6 +74,7 @@ require_relative '../workers/user_register_worker.rb'
 require_relative '../workers/user_notification_get_worker.rb'
 require_relative '../workers/user_notification_mail_worker.rb'
 require_relative '../workers/user_create_project_worker.rb'
+require_relative '../workers/deadline_worker.rb'
 
 # Throttling
 require_relative 'rack'

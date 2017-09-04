@@ -90,14 +90,13 @@ class Repo
             contributor.commit_success = fetched[:success]
             contributor.save #updates timestamp
             existing_contributor = get_existing_contributor contributor[:sprint_state_id]
-            if existing_contributor.length == 3
-                if sprint_state.expires == nil
-                    sprint_state.expires = (Time.now.utc + 2.day)
-                    sprint_state.save
-                    log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
-                    (issue.log_event log_params) || (return_error "an error has occurred")
-                    return (contributor && sprint_state)
-                end
+            if existing_contributor.length == 3 
+                sprint_state.expires = (Time.now.utc + 2.day)
+                sprint_state.save
+                log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
+                (issue.log_event log_params) || (return_error "an error has occurred")
+                DeadlineWorker.perform_at sprint_state.expires, sprint_state.sprint[:user_id], sprint_state.id
+                return (contributor && sprint_state)
             end
             return contributor 
         else
@@ -140,9 +139,9 @@ class Repo
             if (clear_clone sprint_state_id, contributor_id)
                 r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
                 original_hash = log_head r
-                
+
                 github_secret = ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']
-                
+
                 session && (github_secret = account.unlock_github_token session, github_token)
 
                 ((ENV['RACK_ENV'] != "test") && (prefix = "https://#{slave_username}:#{github_secret}@github.com")) || (prefix = "test")

@@ -179,7 +179,7 @@ describe "/contributors" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid contributor" do
-            fixtures :sprint_states, :projects, :contributors
+            fixtures :sprint_states, :sprints, :projects, :contributors, :notifications
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
@@ -189,6 +189,7 @@ describe "/contributors" do
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
                 @expires_sql = @mysql_client.query("select * from sprint_states where id = #{contributors(:adam_confirmed_1).sprint_state_id}").first
+                @review = @mysql_client.query("select * from sprint_timelines inner join notifications ON notifications.id = sprint_timelines.notification_id AND notifications.name = 'peer review'").first
             end
             context "contributor" do
                 it "should include commit" do
@@ -198,7 +199,10 @@ describe "/contributors" do
                     expect(@sql["commit_success"]).to eq(1)
                 end
                 it "should set expires" do
-                    expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H:%M:%S')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H:%M:%S'))
+                    expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H'))
+                end
+                it "should create sprint_timeline_event [future]" do
+                    expect(@review["sprint_state_id"]).to eq(contributors(:adam_confirmed_1).sprint_state_id)
                 end
             end
             it "should return contributor id" do

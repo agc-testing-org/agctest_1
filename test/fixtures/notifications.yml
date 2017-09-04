@@ -50,3 +50,6 @@ deadline:
   name: "deadline"
   description: "deadline"
 
+peer:
+  name: "peer review"
+  description: "a private review"

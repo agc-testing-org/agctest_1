@@ -4,6 +4,10 @@ class Activity
 
     end
 
+
+    ### The following activity methods should map users to a specific segment
+    ### Specific messaging for notification types should happen in the account class
+
     def user_notifications_by_skillsets sprint_timeline_id #TODO - this should apply to developers only, and probably as an extension of user_notifications_by_roles
         # all users that subscribe to a skillset listed for the sprint
         begin
@@ -17,12 +21,12 @@ class Activity
     def user_notifications_by_roles sprint_timeline_id
         # all users that subscribe to a role that corresponds to a sprint state/phase change (transition notification_id)
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "transition"}).id).joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("LEFT JOIN projects ON (sprint_timelines.project_id = projects.id) INNER JOIN notifications ON (sprint_timelines.notification_id = notifications.id AND (notifications.name = 'transition' OR notifications.name = 'deadline')) INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").where("projects.hidden IS NULL").select("user_roles.user_id")
         rescue => e
             puts e
             return []
         end
-    end 
+    end
 
     def user_notifications_for_job sprint_timeline_id
         # all users that subscribe to a role that corresponds to a job role
@@ -96,10 +100,10 @@ class Activity
         end
     end 
 
-    def user_notifications_for_contributors_with_winner sprint_timeline_id
-        # all users that contributed to a sprint state that now has a winner
+    def user_notifications_for_contributors sprint_timeline_id
+        # all users that contributed to a sprint state 
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "winner"}).id).joins("INNER join contributors ON contributors.sprint_state_id = sprint_timelines.sprint_state_id").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join contributors ON contributors.sprint_state_id = sprint_timelines.sprint_state_id").where("contributors.user_id != sprint_timelines.user_id").select("contributors.user_id")
         rescue => e
             puts e
             return []
@@ -118,16 +122,6 @@ class Activity
             return []
         end
     end
-
-    def user_notifications_by_roles_for_deadline sprint_timeline_id
-        # all users that subscribe to a role that corresponds to a sprint state/phase change (transition notification_id)
-        begin
-            return SprintTimeline.where(:id => sprint_timeline_id, :notification_id => Notification.find_by({:name => "deadline"}).id).joins("INNER JOIN states ON sprint_timelines.state_id = states.id INNER JOIN role_states ON states.id = role_states.state_id INNER JOIN user_roles ON user_roles.role_id = role_states.role_id AND user_roles.active = 1").where("user_roles.user_id != sprint_timelines.user_id").select("user_roles.user_id")
-        rescue => e
-            puts e
-            return []
-        end
-    end 
 
     def record_user_notifications users
         begin
@@ -183,13 +177,11 @@ class Activity
         user_ids = (get_decrypted_user_ids (user_notifications_for_job_owner id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_contributor id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_for_owner id), user_ids)
-        user_ids = (get_decrypted_user_ids (user_notifications_for_contributors_with_winner id), user_ids)
+        user_ids = (get_decrypted_user_ids (user_notifications_for_contributors id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_comments id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_votes id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_roles id), user_ids)
         user_ids = (get_decrypted_user_ids (user_notifications_by_comment_votes id), user_ids)
-        user_ids = (get_decrypted_user_ids (user_notifications_by_roles_for_deadline id), user_ids)
-
 
         store_user_notifications_count id, user_ids.length, "processing"
 
