@@ -229,6 +229,9 @@ label{
 .text-muted, .text-light{
     color: rgba(255,255,255,.7);
 }
+.blue-tint{
+    background-color:#eafcff !important;
+}  
 .logo{
     background-image: url(w7_logo_white.png);
     background-repeat:no-repeat;

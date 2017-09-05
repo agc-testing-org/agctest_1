@@ -9,16 +9,14 @@ export default Ember.Component.extend({
     orderedComments: Ember.computed.sort('comments', 'sortDefinition'),
     sortedComments: function() {
         if(this.get('orderedComments')){
-            return this.get('orderedComments').filterBy('explain',false).filterBy('review', false);
+            return this.get('orderedComments').filterBy('explain',false);
         }
         else{
             return [];
         }
     }.property('orderedComments.@each'),
     explainComments: Ember.computed.filterBy('comments', 'explain', true),
-    reviewComments: Ember.computed.filterBy('comments', 'review', true),
     sortDefinition: ['created_at:desc'],
-    
     actions: {
         showAll(yesNo){
             var number = 2;
