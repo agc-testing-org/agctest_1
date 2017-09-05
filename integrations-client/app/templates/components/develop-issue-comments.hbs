@@ -6,14 +6,10 @@
 
 {{#each (limited reviewComments count) as |comment|}}
     <div class="list-group-item rounded">
-        <div class="line"><span class="badge badge-default rounded selected">Peer Review</span></div>
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
-        {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
-            posted {{moment-from-now comment.created_at}}
-            {{#unless (eq comment.user_id sessionAccount.account.id)}}
-             by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
-            {{/unless}}
+            <span class="badge badge-default rounded selected">Peer Review</span> 
+            posted {{moment-from-now comment.created_at}} by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
         </small>
         {{#if session.isAuthenticated}}
         {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id class="ml-2"}}
@@ -25,14 +21,12 @@
 
 {{#if explainComments}}
 <div class="list-group-item rounded">
-    <div class="line"><span class="badge badge-default rounded selected">Author's Explanation</span></div>
     {{#each explainComments as |comment index|}}
         <div class="line">{{comment.text}}</div> 
         {{#if (eq explainComments.length (plus 1 index))}}
         <small class="text-muted">
-            {{#unless (eq comment.user_id sessionAccount.account.id)}}
-                - {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
-            {{/unless}}
+            <span class="badge badge-default rounded selected">Author's Explanation</span>
+            - {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
         </small>
         {{/if}}
     {{/each}}
