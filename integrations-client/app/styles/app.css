@@ -964,6 +964,9 @@ button{
     position:relative;
     color: #496174;
 }
+.carousel-control-prev, .carousel-control-next{
+    width:unset;
+}
 
 /* misc */
 * {
