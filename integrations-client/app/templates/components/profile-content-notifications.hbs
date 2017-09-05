@@ -62,7 +62,13 @@
 
                     {{#if (eq notification.notification.name "deadline")}}
                         <p class="line">
-                            We've set a deadline for {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}. At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent.
+                            We've set a deadline for the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}. At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent.
+                        </p>
+                    {{/if}}
+
+                    {{#if (eq notification.notification.name "peer review")}}
+                        <p class="line">
+                        The deadline for the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} has arrived!  We've selected {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}two solution proposals{{/link-to}} for you to review before we invite all users to provide feedback.
                         </p>
                     {{/if}}
 
