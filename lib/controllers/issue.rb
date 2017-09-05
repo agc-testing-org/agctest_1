@@ -187,37 +187,36 @@ class Issue
                         c.comments.each_with_index do |com,x|
                             comments[x][:user_profile] = account.get_profile com.user
                         end
-                        if sprint_state_expires == nil || sprint_state_expires > Time.now.utc
-                            if c[:user_id].to_i == user_id
-                                response[i][:active_contribution_id] = c.id
-                                response[i][:contributors][contributor_length] = {
-                                    :id => c.id,
-                                    :created_at => c.created_at,
-                                    :updated_at => c.updated_at,
-                                    :comments => comments,
-                                    :votes => c.votes.as_json,
-                                    :commit => c.commit,
-                                    :commit_success => c.commit_success,
-                                    :commit_remote => c.commit_remote,
-                                    :repo => c.repo
-                                }
-                            end
-                        end
-                        if sprint_state_expires && sprint_state_expires < Time.now.utc
+
+                        if sprint_state_expires && (sprint_state_expires < Time.now.utc) && ((sprint_state_results.length - 1) == i) #review when current sprint state is last
                             response[i][:review] = true
-                            if c.commit_success == true
-                                response[i][:contributors][contributor_length] = {
-                                    :id => c.id,
-                                    :created_at => c.created_at,
-                                    :updated_at => c.updated_at,
-                                    :comments => comments,
-                                    :votes => c.votes.as_json
-                                } 
-                                if c[:user_id].to_i == user_id
-                                    response[i][:active_contribution_id] = c.id
-                                end
-                            end
-                            
+                        end
+
+                        # for every contributor
+                        if c.commit_success == true
+                            response[i][:contributors][contributor_length] = {
+                                :id => c.id,
+                                :created_at => c.created_at,
+                                :updated_at => c.updated_at,
+                                :comments => comments,
+                                :votes => c.votes.as_json
+                            }
+                        end
+
+                        #always return owned contribution when exists
+                        if c[:user_id].to_i == user_id
+                            response[i][:active_contribution_id] = c.id
+                            response[i][:contributors][contributor_length] = {
+                                :id => c.id,
+                                :created_at => c.created_at,
+                                :updated_at => c.updated_at,
+                                :comments => comments,
+                                :votes => c.votes.as_json,
+                                :commit => c.commit,
+                                :commit_success => c.commit_success,
+                                :commit_remote => c.commit_remote,
+                                :repo => c.repo
+                            }
                         end
                     end
                 end
@@ -238,8 +237,8 @@ class Issue
         rescue => e
             puts e
             return nil
-            end
         end
+    end
 
 
     def get_sprint id # This also returns the project

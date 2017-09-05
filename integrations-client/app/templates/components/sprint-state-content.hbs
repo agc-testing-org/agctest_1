@@ -31,14 +31,14 @@
                             {{#if session.isAuthenticated}}
                                 {{#unless selected-state.active_contribution_id}}
                                     {{#if (eq selected-state.review true)}}
-                                        <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, the deadline for this sprint state has passed</h3>
+                                        <h4><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, the deadline for this sprint state has passed.  Contributors are now peer-reviewing proposals.</h4>
                                     {{else}}
                                         <h3><span class="text-capitalize">{{sessionAccount.account.first_name}}</span>, want to propose a solution?</h3>
                                         <h4>{{selected-state.state_id.instruction}}</h4>
                                     {{/if}}
                                 {{/unless}}                                
                                     {{#if selected-state.active_contribution_id}}
-                                        {{#if (eq selected-state.review true)}}
+                                        {{#if (and (eq selected-state.review true) (eq selected-state.id last-state.id))}}
                                             {{#each selected-state.contributors as |contributor index|}}
                                                 {{#if (eq contributor.id selected-state.active_contribution_id)}}
                                                     <h4 class="mb-2">This is your chance to check out other approaches and show how you would interact with other team members.</h4>
@@ -68,10 +68,10 @@
                                                 {{/if}}
                                             {{/each}}
                                         {{else}}
-                                            {{#each selected-state.contributors as |contributor|}}
-                                                {{#unless sessionAccount.account.github}}
-                                                    {{user-login-oauth text=" to participate" provider="github"}}
-                                                {{else}}
+                                            {{#unless sessionAccount.account.github}}    
+                                                {{user-login-oauth text=" to participate" provider="github"}}
+                                            {{else}}
+                                                {{#each selected-state.contributors as |contributor|}}
                                                     {{#if (eq contributor.id selected-state.active_contribution_id)}}
                                                         {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint class="hidden-md-up text-left"}}
                                                         {{develop-contribute open=(eq selected-state.id last-state.id) contributor=contributor sprint_state=selected-state project=project sprint=sprint class="hidden-sm-down text-center"}}
@@ -87,8 +87,8 @@
                                                             </div>
                                                         </div>
                                                     {{/if}}
-                                                {{/unless}}
-                                            {{/each}}
+                                                {{/each}}
+                                            {{/unless}}
                                         {{/if}}
                                     {{else}}
                                         {{#unless (eq selected-state.review true)}}
