@@ -6,7 +6,7 @@
 
 {{#each (limited reviewComments count) as |comment|}}
     <div class="list-group-item rounded">
-        <div class="line"><strong>Review</strong></div>
+        <div class="line"><span class="badge badge-default rounded selected">Peer Review</span></div>
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
         {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
@@ -25,7 +25,7 @@
 
 {{#if explainComments}}
 <div class="list-group-item rounded">
-    <div class="line"><strong>Author's Explanation</strong></div>
+    <div class="line"><span class="badge badge-default rounded selected">Author's Explanation</span></div>
     {{#each explainComments as |comment index|}}
         <div class="line">{{comment.text}}</div> 
         {{#if (eq explainComments.length (plus 1 index))}}
