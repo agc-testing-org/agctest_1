@@ -298,7 +298,7 @@ describe "/contributors" do
                 @mysql = @mysql_client.query("select * from comments").first
                 @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
             end
-            it "should save explain true" do
+            it "should save review true" do
                 expect(@mysql["review"]).to eq(1) 
             end
         end

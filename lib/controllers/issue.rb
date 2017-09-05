@@ -167,7 +167,7 @@ class Issue
             return nil
         end
     end
-
+    
     def get_sprint_states query, user_id
         begin
             account = Account.new
@@ -182,7 +182,7 @@ class Issue
                 response[i][:contributors] = []
                 ss.contributors.each_with_index do |c,k|
                     contributor_length = response[i][:contributors].length
-                    if c.commit || ((sprint_state_results.length - 1) == i) # don't show empty results unless this is the current sprint_state
+                    if c.commit || ((sprint_state_results.length - 1) == i) # if this is the current sprint_state OR [it's not and] contributors have commits
                         comments = c.comments.as_json
                         c.comments.each_with_index do |com,x|
                             comments[x][:user_profile] = account.get_profile com.user
@@ -192,19 +192,7 @@ class Issue
                             response[i][:review] = true
                         end
 
-                        # for every contributor
-                        if c.commit_success == true
-                            response[i][:contributors][contributor_length] = {
-                                :id => c.id,
-                                :created_at => c.created_at,
-                                :updated_at => c.updated_at,
-                                :comments => comments,
-                                :votes => c.votes.as_json
-                            }
-                        end
-
-                        #always return owned contribution when exists
-                        if c[:user_id].to_i == user_id
+                        if c[:user_id].to_i == user_id #return owned contribution when exists
                             response[i][:active_contribution_id] = c.id
                             response[i][:contributors][contributor_length] = {
                                 :id => c.id,
@@ -217,6 +205,14 @@ class Issue
                                 :commit_remote => c.commit_remote,
                                 :repo => c.repo
                             }
+                        else # return non-owned
+                            response[i][:contributors][contributor_length] = { 
+                                :id => c.id,
+                                :created_at => c.created_at,
+                                :updated_at => c.updated_at,
+                                :comments => comments,
+                                :votes => c.votes.as_json
+                            }   
                         end
                     end
                 end

@@ -141,20 +141,40 @@ describe "/sprints-states" do
                     it_behaves_like "ok"
                 end
             end
-            context "with contributors (owned) and comments" do
-                fixtures :contributors, :comments
-                before(:each) do
-                    sprint_state_id = sprint_states(:sprint_1_state_2).id
-                    get "/sprint-states?id=#{sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    @sprint_state = JSON.parse(last_response.body)[0]
-                    @contributors = @sprint_state["contributors"]
-                    @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id} AND contributors.commit IS NOT NULL")
+            context "not review" do
+                context "with contributors (owned) and comments" do
+                    fixtures :contributors, :comments
+                    before(:each) do
+                        sprint_state_id = sprint_states(:sprint_1_state_2).id
+                        get "/sprint-states?id=#{sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        @sprint_state = JSON.parse(last_response.body)[0]
+                        @contributors = @sprint_state["contributors"]
+                        @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id}")
+                    end
+                    it_behaves_like "contributors"
+                    it_behaves_like "ok"
+                    #it_behaves_like "contributor_comments" #TODO
                 end
-                it_behaves_like "contributors"
-                it_behaves_like "ok"
-                #it_behaves_like "contributor_comments" #TODO
             end
-
+            context "review" do
+                context "with contributors (owned) and comments" do
+                    fixtures :contributors, :comments
+                    before(:each) do
+                        sprint_state_id = sprint_states(:sprint_1_state_2).id
+                        @mysql_client.query("update sprint_states set expires = '#{(Time.now.utc - 1.day).strftime('%Y-%m-%d %H:%M:%S')}' where id = #{sprint_state_id}")
+                        get "/sprint-states?id=#{sprint_state_id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        @sprint_state = JSON.parse(last_response.body)[0]
+                        @contributors = @sprint_state["contributors"]
+                        @contributor_results = @mysql_client.query("select * from contributors where contributors.sprint_state_id = #{sprint_state_id}")
+                    end
+                    it_behaves_like "contributors"
+                    it_behaves_like "ok"
+                    it "should return review = true" do
+                        expect(@sprint_state["review"]).to be true
+                    end
+                    #it_behaves_like "contributor_comments" #TODO
+                end
+            end
         end
     end
 end
