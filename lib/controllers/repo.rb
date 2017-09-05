@@ -90,7 +90,7 @@ class Repo
             contributor.commit_success = fetched[:success]
             contributor.save #updates timestamp
             existing_contributor = get_existing_contributor contributor[:sprint_state_id]
-            if existing_contributor.length == 3 
+            if existing_contributor.length == 3 && !sprint_state.expires 
                 sprint_state.expires = (Time.now.utc + 2.day)
                 sprint_state.save
                 log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
