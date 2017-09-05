@@ -202,6 +202,9 @@ describe "/contributors" do
                     expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H'))
                 end
                 context "sprint_timeline_event [future]" do
+                    it "should include state id" do
+                        expect(@review["state_id"]).to eq(contributors(:adam_confirmed_1).sprint_state.state_id)
+                    end 
                     it "should include sprint_state id" do
                         expect(@review["sprint_state_id"]).to eq(contributors(:adam_confirmed_1).sprint_state_id)
                     end

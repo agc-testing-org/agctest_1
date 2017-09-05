@@ -95,7 +95,7 @@ class Repo
                 sprint_state.save
                 log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
                 (issue.log_event log_params) || (return_error "an error has occurred")
-                DeadlineWorker.perform_at sprint_state.expires, sprint_state.sprint[:user_id], sprint_state.sprint.project.id, sprint_state.sprint_id, sprint_state.id
+                DeadlineWorker.perform_at sprint_state.expires, sprint_state.sprint[:user_id], sprint_state.sprint.project.id, sprint_state.sprint_id, sprint_state.id, sprint_state.state_id
                 return (contributor && sprint_state)
             end
             return contributor 
