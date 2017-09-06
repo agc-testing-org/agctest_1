@@ -2,18 +2,19 @@
 
     {{#if session.isAuthenticated}}
         {{#if me}}
+
+            {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+                <div class="icon hidden-sm-down">
+                    <i class="fa fa-fw fa-2x fa-home"></i>
+                </div>
+                Home
+            {{/link-to}}
+        
             {{#link-to "develop.roadmap" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-map-o"></i>
                 </div>
                 Roadmap
-            {{/link-to}}
-
-            {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-paper-plane-o"></i>
-                </div>
-                Notifications
             {{/link-to}}
 
             {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}

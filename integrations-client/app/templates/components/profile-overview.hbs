@@ -22,30 +22,7 @@
                 {{profile-overview-skillsets-roles-list items=skillsets type="skillset" class="skillsets"}}
             {{/if}}
 
-            <div class="row">
-                {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}} 
-                    <div class="col-md-4 col-sm-4 col-4">
-                        {{sprint-state-overview-score total=contributors_received.meta.count title="Winning Solutions"}}
-                    </div>
-                    <div class="col-md-4 col-sm-4 col-4">
-                        {{sprint-state-overview-score total=comments_received.meta.count title="Comments Received"}}
-                    </div>
-                    <div class="col-md-4 col-sm-4 col-4">
-                        {{sprint-state-overview-score total=votes_received.meta.count title="Votes Received"}}
-                    </div>
-                {{/unless}}
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=comments.meta.count title="Comments Posted"}}
-                </div>
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=votes.meta.count title="Votes Cast"}}
-                </div>
-                {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-                <div class="col-md-4 col-sm-4 col-4">
-                    {{sprint-state-overview-score total=contributors.meta.count title="Solutions Proposed"}}
-                </div>
-                {{/unless}}
-            </div>
+            {{profile-stats-list roles=roles contributors_received=contributors_received comments_received=comments_received votes_received=votes_received comments=comments votes=votes contributors=contributors}}
         </div>
     </div>
 </div>

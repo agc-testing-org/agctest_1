@@ -16,7 +16,13 @@ export default Ember.Route.extend({
             skillsets: this.modelFor("me").skillsets,
             roles: this.modelFor("me").roles,
             user: this.modelFor("me").user,
-            params: params
+            params: params,
+            comments: this.modelFor("me").comments,
+            votes: this.modelFor("me").votes,
+            contributors: this.modelFor("me").contributors,
+            comments_received: this.modelFor("me").comments_received,
+            votes_received: this.modelFor("me").votes_received,
+            contributors_received: this.modelFor("me").contributors_received,
         });
     }
 });

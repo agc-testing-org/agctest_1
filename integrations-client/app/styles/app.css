@@ -314,6 +314,7 @@ label{
 }
 .bg-nav{
     background-color: #fff !important;
+    border-bottom:1px solid #ededed;
 }
 .bg-grey{
     background-color:#ededed;
