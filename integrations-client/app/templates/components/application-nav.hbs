@@ -1,25 +1,68 @@
-<nav class="navbar navbar-default navbar-toggleable-md navbar-inverse fixed-top bg-inverse clear">
-    <div class="background"></div>
-    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    {{#unless session.isAuthenticated}}
-    {{#link-to 'index' class="cursor-pointer navbar-brand" }}{{/link-to}}
-    {{else}}
-    {{#link-to 'index' class="cursor-pointer navbar-brand"}}{{/link-to}}
-    {{/unless}}
+<nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-nav shadow">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        {{#link-to "index" class="navbar-brand logo"}}<div class="icon"></div><div class="text">Wired7</div>{{/link-to}}
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+            </ul>
+            <form class="form-inline mt-2 mt-md-0">
+                <ul class="navbar-nav mr-auto">
+                    {{#unless session.isAuthenticated}}
+                        <li class="nav-item">
+                            {{#link-to "login" class="nav-link"}}Login{{/link-to}}
+                        </li>
+                        <li class="nav-item">
+                            {{#link-to "register" class="nav-link"}}Register{{/link-to}} 
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{splash}}/features" class="nav-link">Why Wired7?</a>
+                        </li>
+                    {{else}}
+                        <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
+                            <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-fw fa-users"></i> My Teams
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right rounded" aria-labelledby="dropdownMenuButton">
+                                {{application-nav-team-list teams=teams}}
+                            </div>
+                        </li>
+                        <div class="hidden-sm-up text-left">
+                            {{#if teams}}
+                            <li {{action "displayTeams"}} class="cursor-pointer nav-item text-capitalize">
+                                <i class="fa fa-fw fa-users"></i>
+                                {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
+                            </li>
+                            {{/if}}
+                            {{#if showTeams}}
+                                {{application-nav-team-list teams=teams}}
+                            {{/if}}
+                        </div>
 
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav ml-auto">
-            {{#unless session.isAuthenticated}}
+                        <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
+                            <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-fw fa-user-circle-o"></i> {{sessionAccount.account.first_name}}
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right rounded" aria-labelledby="dropdownMenuButton">                              
+                                <div class="dropdown-item">
+                                    {{#link-to "me.settings" tagName='li' href=false class="cursor-pointer nav-item text-capitalize" }}
+                                        <i class="fa fa-fw fa-wrench"></i> Settings
+                                    {{/link-to}}
+                                </div>
+                                <div class="dropdown-item">
+                                    {{user-logout}}
+                                </div>
+                            </div>
+                        </li>
 
-            {{user-login tagName="li" class="cursor-pointer"}}
-
-            {{else}}                        
-
-            {{user-logout tagName="li" class="cursor-pointer"}} 
-
-            {{/unless}} 
-        </ul>
-    </div>
+                        <div class="hidden-sm-up text-left">
+                            {{#link-to "me.settings" tagName='li' href=false class="cursor-pointer nav-item text-capitalize" }}
+                                <i class="fa fa-fw fa-wrench"></i> Settings
+                            {{/link-to}}
+                            {{user-logout}}
+                        </div>
+                        {{/unless}}
+                </ul>
+            </form>
+        </div>
 </nav>

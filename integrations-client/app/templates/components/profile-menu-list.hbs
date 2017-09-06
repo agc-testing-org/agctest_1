@@ -24,7 +24,6 @@
                 Roadmap
             {{/link-to}}
 
-
             {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-paper-plane-o"></i>
@@ -45,23 +44,6 @@
                 </div>
                 Contacts
             {{/link-to}}
-
-            {{#if teams}}
-                <li {{action "displayTeams"}} class="cursor-pointer nav-item text-center text-capitalize">
-                    <div class="icon hidden-sm-down">
-                        <i class="fa fa-fw fa-2x fa-users"></i>
-                    </div>
-                    {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
-                </li>
-            {{/if}}
-
-            {{#if showTeams}}
-            {{#each teams as |team|}}
-            {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-left text-capitalize nested" }}
-                {{team.name}}
-            {{/link-to}}
-            {{/each}}
-            {{/if}}
 
             {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
                 {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
@@ -109,7 +91,7 @@
         
         {{/if}}
 
-        {{user-logout}}
+
 
     {{/unless}}
 

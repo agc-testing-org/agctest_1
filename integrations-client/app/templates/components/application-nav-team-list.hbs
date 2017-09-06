@@ -1,0 +1,7 @@
+{{#each teams as |team|}}
+<div class="dropdown-item">
+    {{#link-to "team.select" team.id tagName='li' href=false class="cursor-pointer nav-item text-left text-capitalize nested" }}
+    {{team.name}}
+    {{/link-to}}
+</div>
+{{/each}}
