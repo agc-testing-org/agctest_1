@@ -13,6 +13,9 @@ export default Ember.Route.extend({
 
         return Ember.RSVP.hash({
             notifications: notifications,
+            skillsets: this.modelFor("me").skillsets,
+            roles: this.modelFor("me").roles,
+            user: this.modelFor("me").user,
             params: params
         });
     }

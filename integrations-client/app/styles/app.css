@@ -301,6 +301,11 @@ label{
     margin-bottom:20px;
     margin-top:60px;
 }
+.hidden-md-up.top{
+    background-color: transparent;
+    padding:0px;
+    margin-top:10px;
+}
 .section .top{
 
 }
@@ -309,6 +314,9 @@ label{
 }
 .bg-nav{
     background-color: #fff !important;
+}
+.bg-grey{
+    background-color:#ededed;
 }
 .navbar{
     padding:10px;
