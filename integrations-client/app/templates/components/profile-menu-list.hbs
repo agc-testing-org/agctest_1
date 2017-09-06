@@ -1,22 +1,7 @@
 <ul class="nav nav-pills flex-column timeline">
 
-    <li class="logo"></li>  
-
-    {{#unless session.isAuthenticated}}
-        <div class="menu">
-            {{#link-to "login" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <i class="fa fa-fw fa-sign-in"></i>Sign In
-            {{/link-to}}
-        </div>
-    {{else}}
-        <div class="menu">
-            {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <i class="fa fa-fw fa-user"></i>{{sessionAccount.account.first_name}}
-            {{/link-to}}
-        </div>
-
+    {{#if session.isAuthenticated}}
         {{#if me}}
-        
             {{#link-to "develop.roadmap" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-map-o"></i>
@@ -35,7 +20,7 @@
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-sort-amount-desc"></i>
                 </div>
-                Profile 
+                Profile
             {{/link-to}}
 
             {{#link-to "me.connections" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
@@ -53,15 +38,15 @@
                     Create Project
                 {{/link-to}}
             {{/if}}
+        {{else}}
 
-            {{#link-to "me.settings" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            {{#link-to "profile.overview" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-wrench"></i>
+                    <i class="fa fa-fw fa-2x fa-sort-amount-desc"></i>
                 </div>
-                Settings
+                Overview
             {{/link-to}}
 
-        {{else}}
             {{#unless (eq user.id sessionAccount.account.id)}}
                 {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
                     {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
@@ -72,19 +57,8 @@
                     {{/link-to}}
                 {{/unless}}
             {{/unless}}
-
-            {{#link-to "profile.overview" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                <div class="icon hidden-sm-down">
-                    <i class="fa fa-fw fa-2x fa-sort-amount-desc"></i>
-                </div>
-                Overview
-            {{/link-to}}
         
         {{/if}}
 
-
-
-    {{/unless}}
-
-    {{application-foot}}
+    {{/if}}
 </ul>

@@ -10,7 +10,7 @@
                 <ul class="navbar-nav mr-auto">
                     {{#unless session.isAuthenticated}}
                         <li class="nav-item">
-                            {{#link-to "login" class="nav-link"}}Login{{/link-to}}
+                            {{#link-to "login" class="nav-link"}}Sign In{{/link-to}}
                         </li>
                         <li class="nav-item">
                             {{#link-to "register" class="nav-link"}}Register{{/link-to}} 
@@ -26,31 +26,31 @@
                             {{/link-to}}
                         {{/if}}
 
+                        {{#if teams}}
                         <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
                             <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-fw fa-users"></i> My Teams
                             </button>
-                            <div class="dropdown-menu dropdown-menu-right rounded" aria-labelledby="dropdownMenuButton">
+                            <div class="dropdown-menu dropdown-menu-right rounded shadow" aria-labelledby="dropdownMenuButton">
                                 {{application-nav-team-list teams=teams}}
                             </div>
                         </li>
                         <div class="hidden-sm-up text-left">
-                            {{#if teams}}
                             <li {{action "displayTeams"}} class="cursor-pointer nav-item text-capitalize dropdown-item">
                                 <i class="fa fa-fw fa-users"></i>
                                 {{#if showTeams}}Hide{{else}}Show{{/if}} My Teams
                             </li>
-                            {{/if}}
                             {{#if showTeams}}
                                 {{application-nav-team-list teams=teams}}
                             {{/if}}
                         </div>
+                        {{/if}}
 
                         <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
                             <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-fw fa-user-circle-o"></i> {{sessionAccount.account.first_name}}
                             </button>
-                            <div class="dropdown-menu dropdown-menu-right rounded" aria-labelledby="dropdownMenuButton">                              
+                            <div class="dropdown-menu dropdown-menu-right rounded shadow" aria-labelledby="dropdownMenuButton">                              
                                 {{application-nav-user-list}}
                             </div>
                         </li>

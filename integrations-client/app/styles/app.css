@@ -213,6 +213,9 @@ label{
     font-size: 1rem;
     margin-left:4px;
 }
+.navbar .hidden-sm-up .nav-item{
+    margin-left:0px;
+}
 .navbar-inverse .navbar-nav .nav-link, .navbar-inverse .navbar-nav .nav-item{
    color: rgba(152, 152, 152, 1); 
 }
@@ -296,6 +299,7 @@ label{
     background-color: #fff;
     padding:20px;
     margin-bottom:20px;
+    margin-top:60px;
 }
 .section .top{
 
@@ -622,7 +626,7 @@ button{
  */
 .sidebar {
     position: fixed;
-    top: 0px;
+    top: 60px;
     bottom: 0;
     left: 0;
     z-index: 1000;
@@ -646,9 +650,8 @@ button{
     left:0px;
     top:0px;
 }
-
-.sidebar .nav, .sidebar.hidden-md-up .nav {
-
+.sidebar.hidden-md-up .nav {
+    margin-top: 60px;
 }
 .sidebar.hidden-md-up .nav li{
     text-align:left !important;
@@ -755,7 +758,7 @@ button{
 .main .slide{ /* need alternative for mobile */
     position:fixed;
     left:0px;
-    top:0px;
+    top:60px;
     height:100%;
     min-height:100%;
     margin-left: 100px;
@@ -769,6 +772,7 @@ button{
 .main .slide.hidden-md-up{
     position:relative;
     margin-left:0px;
+    top:0px;
 }
 .main .footprint{
     position:absolute;
@@ -810,7 +814,7 @@ button{
     padding:0px;
 }
 .main .still{
-    margin-top:0px;
+    padding-top:60px;
     padding-left:60px;
     padding-right:60px;
     padding-bottom:50px;
@@ -830,7 +834,7 @@ button{
     padding-top:94px;
 }
 .main .still .full{
-    margin-top:94px;
+    margin-top:44px;
 }
 .main .still.hidden-md-up .full{
     margin-top:20px;
@@ -916,6 +920,7 @@ button{
 .carousel.slide{
     position:relative;
     height:200px; 
+    margin-top:60px;
 }
 .carousel.slide .mars_frontend{
     background:url('mars_frontend.png') no-repeat right top;
