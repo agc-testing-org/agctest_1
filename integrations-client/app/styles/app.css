@@ -304,7 +304,8 @@ label{
 .hidden-md-up.top{
     background-color: transparent;
     padding:0px;
-    margin-top:10px;
+    padding-top:10px;
+    margin-top:0px;
 }
 .section .top{
 
@@ -712,6 +713,7 @@ button{
 }
 .foot-hold{
     margin-top:50px;
+    width:100%;
 }
 .foot-hold li{
     display:inline;
