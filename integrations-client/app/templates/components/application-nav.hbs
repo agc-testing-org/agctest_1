@@ -19,6 +19,13 @@
                             <a href="{{splash}}/features" class="nav-link">Why Wired7?</a>
                         </li>
                     {{else}}
+
+                        {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
+                            {{#link-to "team" tagName='button' href=false class="btn btn-success rounded  text-capitalize" }}
+                                <i class="fa fa-fw fa-user-plus"></i> Create Team
+                            {{/link-to}}
+                        {{/if}}
+
                         <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
                             <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <i class="fa fa-fw fa-users"></i> My Teams
@@ -29,9 +36,9 @@
                         </li>
                         <div class="hidden-sm-up text-left">
                             {{#if teams}}
-                            <li {{action "displayTeams"}} class="cursor-pointer nav-item text-capitalize">
+                            <li {{action "displayTeams"}} class="cursor-pointer nav-item text-capitalize dropdown-item">
                                 <i class="fa fa-fw fa-users"></i>
-                                {{#if showTeams}}Hide{{else}}Show{{/if}} Teams
+                                {{#if showTeams}}Hide{{else}}Show{{/if}} My Teams
                             </li>
                             {{/if}}
                             {{#if showTeams}}
@@ -44,22 +51,12 @@
                                 <i class="fa fa-fw fa-user-circle-o"></i> {{sessionAccount.account.first_name}}
                             </button>
                             <div class="dropdown-menu dropdown-menu-right rounded" aria-labelledby="dropdownMenuButton">                              
-                                <div class="dropdown-item">
-                                    {{#link-to "me.settings" tagName='li' href=false class="cursor-pointer nav-item text-capitalize" }}
-                                        <i class="fa fa-fw fa-wrench"></i> Settings
-                                    {{/link-to}}
-                                </div>
-                                <div class="dropdown-item">
-                                    {{user-logout}}
-                                </div>
+                                {{application-nav-user-list}}
                             </div>
                         </li>
 
                         <div class="hidden-sm-up text-left">
-                            {{#link-to "me.settings" tagName='li' href=false class="cursor-pointer nav-item text-capitalize" }}
-                                <i class="fa fa-fw fa-wrench"></i> Settings
-                            {{/link-to}}
-                            {{user-logout}}
+                            {{application-nav-user-list}}
                         </div>
                         {{/unless}}
                 </ul>

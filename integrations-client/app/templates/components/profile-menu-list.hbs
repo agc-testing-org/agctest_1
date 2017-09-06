@@ -45,15 +45,6 @@
                 Contacts
             {{/link-to}}
 
-            {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-                {{#link-to "team" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                    <div class="icon hidden-sm-down">
-                        <i class="fa fa-fw fa-2x fa-user-plus"></i>
-                    </div>
-                    Create Team
-                {{/link-to}}
-            {{/if}}
-
             {{#if sessionAccount.account.admin}}
                 {{#link-to "develop.new" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                     <div class="icon hidden-sm-down">
