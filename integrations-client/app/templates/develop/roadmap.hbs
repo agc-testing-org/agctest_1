@@ -2,10 +2,9 @@
 
 <div class="container-fluid pl-0 pr-0">
     {{application-nav teams=model.teams}}
-    {{#link-to "me.overview" class="exit rounded"}}<i class="fa fa-fw fa-home"></i> Home{{/link-to}}
+    {{develop-roadmap-overview class="top bg-nav text-center mb-0 hidden-xs-down"}}
+    {{develop-roadmap-overview class="top bg-nav text-left mb-0 hidden-sm-up"}}
     {{develop-carousel projects=model.projects}}
-    {{develop-roadmap-overview class="explain text-center hidden-xs-down shadow"}}
-    {{develop-roadmap-overview class="explain text-left hidden-sm-up shadow"}}
     <main class="col-sm-12 col-md-12 offset-sm-0">
         <div class="row main">
             <div class="col-md-12 col-sm-12 p-0">

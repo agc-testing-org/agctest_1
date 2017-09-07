@@ -1,5 +1,15 @@
 <ul class="nav nav-pills flex-column timeline">
     {{#if team}}
+    
+    {{#if (or team.show team.shares)}}
+        {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-home"></i>
+            </div>
+            Home
+        {{/link-to}}
+    {{/if}}
+
     {{#if team.show}}
         
         {{#if (eq team.plan.name "manager")}}
@@ -50,10 +60,7 @@
         {{/link-to}}
         {{/if}}
 
-
-    {{/if}}
-    
-    {{#if team.shares}}
+    {{else if team.shares}}
         {{#link-to "team.select.leads" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-share-alt"></i>
