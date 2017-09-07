@@ -1,6 +1,6 @@
 <div class="row vertical-align">
     <div class="col-md-6 col-sm-12">
-        <h3>{{user-profile-descriptor user_profile=user multiple_lines=true}}</h3>
+        <h3>{{user-profile-descriptor user_profile=user multiple_lines=true disable_you=true}}</h3>
         <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
         <div class="about text-capitalize mb-1"><strong>roles</strong>{{#each filteredRoles as |r index|}} {{r.name}}{{#unless (eq filteredRoles.length (plus 1 index))}},{{/unless}}{{/each}}</div>
         <div class="about text-capitalize"><strong>skills</strong>{{#each filteredSkillsets as |s index|}} {{s.name}}{{#unless (eq filteredSkillsets.length (plus 1 index))}},{{/unless}}{{/each}}</div>

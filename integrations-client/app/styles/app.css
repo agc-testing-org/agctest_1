@@ -636,7 +636,7 @@ button{
  */
 .sidebar {
     position: fixed;
-    top: 60px;
+    top: 62px;
     bottom: 0;
     left: 0;
     z-index: 1000;
@@ -879,9 +879,10 @@ button{
     margin-bottom:10px;
     padding:10px;
 }
-.top .score{
+.top .score, .bg-nav .score{
     border:1px solid #f9f9f9;
     border-bottom:1px solid #28B6C3 !important;
+    min-height:140px;
 }
 .main .overview .score .title {
 

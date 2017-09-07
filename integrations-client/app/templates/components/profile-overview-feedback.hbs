@@ -1,5 +1,5 @@
 {{#if items}}
-<h3 class="description section text-capitalize mb-0 mt-3">{{metric}}</h3>
+<h3 class="description section text-capitalize mb-0 mt-3">{{items.meta.count}} {{metric}}</h3>
 <div class="about section">{{description}}</div>
     <div class="list-group rounded text-left">
     {{#each (limited items count) as |item|}}

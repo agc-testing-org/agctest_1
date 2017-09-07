@@ -1,4 +1,10 @@
 <ul class="nav nav-pills flex-column timeline">
+    {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+        <div class="icon hidden-sm-down">
+        <i class="fa fa-fw fa-2x fa-home"></i>
+        </div>
+        Home
+    {{/link-to}}
     {{#link-to "develop.project.state" "all" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }} 
             {{#if has_tooltips}}
             {{tooltip-on-component text="All Sprints" class="tooltip rounded" side="right" enableLazyRendering=true}}
