@@ -2,7 +2,7 @@
 <h3 class="description section text-capitalize mb-0 mt-3">{{metric}}</h3>
 <div class="about section">{{description}}</div>
     <div class="list-group rounded text-left">
-    {{#each items as |item|}}
+    {{#each (limited items count) as |item|}}
         <div class="list-group-item rounded">
             <p class="line mb-0">
                 {{#if item.comment}}
@@ -22,10 +22,22 @@
             </p>
         </div>
     {{/each}}
+</div>
+
+<small class="more">
+    {{#if showingAll}}
+    <a {{action "showAll" false}}>Show Less</a>
+    {{else}}
+    {{#if (greater-than items.length count)}}
+    <a {{action "showAll" true}}>Show More ( {{items.length}} Total )</a>
+    {{/if}}
+    {{/if}}
+</small>
+    {{#if (or showingAll (eq limit_results null))}}
     {{#if me}}
         {{application-paging-no-model page=params.page last=items.length count=items.meta.count route=(concat "me." route) class="text-right"}}
-    {{else}}
+    {{else}}        
         {{application-paging page=params.page last=items.length count=items.meta.count route=(concat "profile." route) route_id=user.id class="text-right"}}
+    {{/if}}   
     {{/if}}
-</div>
 {{/if}}

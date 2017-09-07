@@ -4,7 +4,7 @@ export default Ember.Component.extend({
     session: Ember.inject.service('session'),
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
-    count: 2,
+    count: count,
     showingAll: false,
     orderedComments: Ember.computed.sort('comments', 'sortDefinition'),
     sortedComments: function() {
