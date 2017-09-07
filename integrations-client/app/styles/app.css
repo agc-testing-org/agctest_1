@@ -878,10 +878,11 @@ button{
 .main .overview .score, .welcome .score{
     margin-bottom:10px;
     padding:10px;
-    border-bottom:5px solid #f9f9f9;
+    border:1px solid #f9f9f9;
+    border-bottom:1px solid #28B6C3 !important;
 }
 .top .score{
-    border-bottom:5px solid #ededed !important;
+
 }
 .main .overview .score .title {
 
