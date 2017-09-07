@@ -852,33 +852,23 @@ button{
     margin-bottom:4px;
     border-bottom:2px solid #f9f9f9;
 }
-.list-group-item .score .total{
+.score .total{
     font-weight: 500;
     font-size: 24px;
 }
-.list-group-item .score .title{
+.score .title{
     font-weight:300;
+    margin-left:4px;
 }
-.main .overview .score, .welcome .score{
-    margin-bottom:10px;
+.score{
+    margin-bottom:2px;
+    margin-right:1px;
+    margin-left:0px;
     padding:10px;
-}
-.top .score, .bg-nav .score{
     border:1px solid #f9f9f9;
     border-bottom:1px solid #28B6C3 !important;
-    min-height:140px;
+    background-color:#fff;
 }
-.main .overview .score .title {
-
-}
-.welcome .score .title{
-    font-size:14px;
-}
-.main .overview .score .total, .welcome .score {
-    font-weight: 500;
-    font-size: 40px;
-}
-
 .main textarea, .main input{
     border: 1px solid #ededed !important;
     background-color: #ededed !important;

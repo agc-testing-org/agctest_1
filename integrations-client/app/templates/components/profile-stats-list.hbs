@@ -1,23 +1,23 @@
 <div class="row">
     {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-    <div class="col-xl-4 col-md-6 col-sm-4 col-6">
+    <div class="col-6 mr-0 p-0">
         {{sprint-state-overview-score total=contributors_received.meta.count title="Winning Solutions"}}
     </div>
-    <div class="col-xl-4 col-md-6 col-sm-4 col-6">
+    <div class="col-6 mr-0 p-0">
         {{sprint-state-overview-score total=comments_received.meta.count title="Comments Received"}}
     </div>
-    <div class="col-xl-4 col-md-6 col-sm-4 col-6">
+    <div class="col-6 mr-0 p-0">
         {{sprint-state-overview-score total=votes_received.meta.count title="Votes Received"}}
     </div>
     {{/unless}}
-    <div class="col-xl-4 col-md-6 col-sm-4 col-6">
+    <div class="col-6 mr-0 p-0">
         {{sprint-state-overview-score total=comments.meta.count title="Comments Posted"}}
     </div>
-    <div class="col-xl-4 col-md-6 col-sm-4 col-6">
+    <div class="col-6 mr-0 p-0">
         {{sprint-state-overview-score total=votes.meta.count title="Votes Cast"}}
     </div>
     {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-    <div class="col-xl-4 col-md-6 col-sm-4 col-6">
+    <div class="col-6 mr-0 p-0">
         {{sprint-state-overview-score total=contributors.meta.count title="Solutions Proposed"}}
     </div>
     {{/unless}}
