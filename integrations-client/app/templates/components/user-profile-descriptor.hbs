@@ -1,4 +1,4 @@
-{{#if (and (eq user_profile.id sessionAccount.account.id) (eq disable_you null))}}
+{{#if (and (or (eq user_profile.id sessionAccount.account.id) (eq user_id sessionAccount.account.id)) (eq disable_you null))}} <!-- check user_id for new -->
     you
 {{else}}
 {{#if user_profile.title}} 

@@ -1,10 +1,10 @@
 
 {{#if (or (eq default_seat.name "sponsored") (eq default_seat.name "priority"))}}
     <h3>Invite Talent</h3>
-    <div class="about section">Send email invitations to talent that you'd like to be evaluated on Wired7.  We'll make sure you're up-to-date on feedback that the people you invite receive.</div>
+    <div class="about section">Send email invitations to talent that you'd like to be evaluated and we will keep you up-to-date on any feedback the candidate receives</div>
 {{else if (eq default_seat.name "member") }}
-    <h3>Invite Your Co-Workers as Team Members</h3>
-    <div class="about section">Send email invitations to coworkers that that you'd like to share talent and contacts with.</div>
+    <h3>Invite Your Co-Workers</h3>
+    <div class="about section">Send email invitations to people that you'd like to share talent and contacts with</div>
 {{else}}
     <h3 class="text-capitalize">Invite {{default_seat.name}}</h3>
 {{/if}}

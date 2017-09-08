@@ -1,5 +1,9 @@
-<div class="full">
-    {{team-jobs-create team=team roles=roles user=user refresh="refresh"}}
-
+<div class="row">
+<div class="col-md-7 col-sm-12">
     {{team-jobs-list team=team jobs=jobs roles=roles}}
+</div>
+
+<div class="col-md-5 col-sm-12">
+    {{team-jobs-create team=team roles=roles user=user refresh="refresh" class="bg-nav rounded p-3"}}
+</div>
 </div>

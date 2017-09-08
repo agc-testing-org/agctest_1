@@ -28,12 +28,7 @@
             {{else}}
                 Posted
             {{/if}}
-            by 
-            {{#if (eq sessionAccount.account.id user_profile.id)}}
-                you
-            {{else}}
-                {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}} {{moment-from-now comment.created_at}}
-            {{/if}}
+            by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile user_id=comment.user_id class="d-inline"}}{{/link-to}} {{moment-from-now comment.created_at}}
         </small>
         {{#if session.isAuthenticated}}
         {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id class="ml-2"}}

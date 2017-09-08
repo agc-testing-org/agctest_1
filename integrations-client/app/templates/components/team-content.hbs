@@ -1,6 +1,9 @@
-<div class="full">
-    {{user-team-invite jobs=jobs team=team refresh="refresh" default_seat=default_seat}}
-
-    {{user-team-list team=team user_teams=user_teams share_seat=share_seat default_seat=default_seat refresh="refresh" class="mt-4"}}
+<div class="row">
+<div class="col-md-7 col-sm-12">
+    {{user-team-list team=team user_teams=user_teams share_seat=share_seat default_seat=default_seat refresh="refresh"}}
 </div>
 
+<div class="col-md-5 col-sm-12">
+    {{user-team-invite jobs=jobs team=team refresh="refresh" default_seat=default_seat class="bg-nav rounded p-3"}}
+</div>
+</div>

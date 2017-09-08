@@ -5,7 +5,7 @@
             <h3 class="description mb-5 text-center">Sign in to LinkedIn so that we can <strong>verify your identity</strong> and share anonymous background information with other users</h3>
             <h3 class="description text-center">{{user-login-oauth provider="linkedin" refresh="refresh" lg=true}}</h3>
         {{else}}
-            <h3 class="about text-center mb-5">{{user-profile-descriptor user_profile=user multiple_lines=true}}</h3>
+            <h3 class="about text-center mb-5">{{user-profile-descriptor user_profile=user multiple_lines=true disable_you=true}}</h3>
             <h3 class="description text-center">Looks good! This is what other users will know about you. All other personal identifying information is kept <strong>private</strong>.</h3>
 
 

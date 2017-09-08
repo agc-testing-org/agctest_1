@@ -753,7 +753,7 @@ button{
 .main .slide{ /* need alternative for mobile */
     position:fixed;
     left:0px;
-    top:60px;
+    top:0px;
     height:100%;
     min-height:100%;
     margin-left: 100px;
@@ -768,6 +768,7 @@ button{
     position:relative;
     margin-left:0px;
     top:0px;
+    margin-top:0px;
 }
 .main .footprint{
     position:absolute;

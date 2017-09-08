@@ -14,7 +14,7 @@ export default Ember.Route.extend({
         return Ember.RSVP.hash({
             user: this.modelFor("team").user,
             team: this.modelFor("team.select").team,
-            roles: this.store.findAll('role'),
+            roles: this.modelFor("team.select").roles,
             jobs: this.modelFor("team.select").jobs
         });
     }

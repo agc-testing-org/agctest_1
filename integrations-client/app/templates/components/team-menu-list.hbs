@@ -12,6 +12,13 @@
 
     {{#if team.show}}
         
+        {{#link-to "team.select.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-signal"></i>
+            </div>
+            Team Home 
+        {{/link-to}}
+
         {{#if (eq team.plan.name "manager")}}
         {{#link-to "team.select.jobs" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
@@ -20,26 +27,19 @@
             Jobs 
         {{/link-to}}
         {{/if}}
-
-        {{#link-to "team.select.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}            
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-paper-plane-o"></i>
-            </div>
-            Notifications
-        {{/link-to}}
     
-        {{#link-to "team.select.members" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-users"></i>
-            </div>
-            Members
-        {{/link-to}}
-
         {{#link-to "team.select.talent" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-cogs"></i>
             </div>
             Talent
+        {{/link-to}}
+
+        {{#link-to "team.select.members" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-users"></i>
+            </div>
+            Members
         {{/link-to}}
 
         {{#if (eq team.plan.name "recruiter")}}

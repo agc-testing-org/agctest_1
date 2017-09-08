@@ -1,11 +1,12 @@
+{{#if user_teams}}
 {{#if (or (eq default_seat.name "sponsored") (eq default_seat.name "priority"))}}
-    <h3>Your Talent</h3>
+    <h3>{{user_teams.length}} Candidates</h3>
     <div class="about section">Talent in your team's pipeline</div>
 {{else if (eq default_seat.name "member") }}
-    <h3>Your Team Members</h3>
-    <div class="about section">Coworkers that that you've shared talent and contacts with.</div>
+<h3>{{user_teams.length}} Members</h3>
+    <div class="about section">Team members that you've shared talent and contacts with</div>
 {{else}}
-    <h3 class="text-capitalize">{{default_seat.name}}s</h3>
+    <h3 class="text-capitalize">{{user_teams.length}} {{default_seat.name}}s</h3>
     {{#if (eq default_seat.name "share")}}
         <div class="about section">People outside of your organization that you've shared a profile with</div>
     {{/if}}
@@ -74,3 +75,4 @@
             </small>
         </div>
     {{/each}}
+{{/if}}

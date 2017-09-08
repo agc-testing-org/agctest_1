@@ -20,6 +20,12 @@
                         </li>
                     {{else}}
 
+                        {{#if show_home}}
+                            {{#link-to "me" tagName='button' href=false class="btn btn-info rounded  text-capitalize" }}
+                                <i class="fa fa-fw fa-home"></i> Home
+                            {{/link-to}}
+                        {{/if}}
+
                         {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
                             {{#link-to "team" tagName='button' href=false class="btn btn-success rounded  text-capitalize" }}
                                 <i class="fa fa-fw fa-user-plus"></i> Create Team
