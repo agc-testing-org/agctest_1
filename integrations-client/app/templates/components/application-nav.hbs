@@ -1,25 +1,71 @@
-<nav class="navbar navbar-default navbar-toggleable-md navbar-inverse fixed-top bg-inverse clear">
-    <div class="background"></div>
-    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-    {{#unless session.isAuthenticated}}
-    {{#link-to 'index' class="cursor-pointer navbar-brand" }}{{/link-to}}
-    {{else}}
-    {{#link-to 'index' class="cursor-pointer navbar-brand"}}{{/link-to}}
-    {{/unless}}
+<nav class="navbar navbar-toggleable-md navbar-inverse fixed-top bg-nav shadow">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        {{#link-to "index" class="navbar-brand logo"}}<div class="icon"></div><div class="text">Wired7</div>{{/link-to}}
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+            </ul>
+            <form class="form-inline mt-2 mt-md-0">
+                <ul class="navbar-nav mr-auto">
+                    {{#unless session.isAuthenticated}}
+                        <li class="nav-item">
+                            {{#link-to "login" class="nav-link"}}Sign In{{/link-to}}
+                        </li>
+                        <li class="nav-item">
+                            {{#link-to "register" class="nav-link"}}Register{{/link-to}} 
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{splash}}/features" class="nav-link">Why Wired7?</a>
+                        </li>
+                    {{else}}
 
-    <div class="collapse navbar-collapse" id="navbarCollapse">
-        <ul class="navbar-nav ml-auto">
-            {{#unless session.isAuthenticated}}
+                        {{#if show_home}}
+                            {{#link-to "me" tagName='button' href=false class="btn btn-info rounded  text-capitalize" }}
+                                <i class="fa fa-fw fa-home"></i> Home
+                            {{/link-to}}
+                        {{/if}}
 
-            {{user-login tagName="li" class="cursor-pointer"}}
+                        {{#if (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
+                            {{#link-to "team" tagName='button' href=false class="btn btn-success rounded  text-capitalize" }}
+                                <i class="fa fa-fw fa-user-plus"></i> Create Team
+                            {{/link-to}}
+                        {{/if}}
 
-            {{else}}                        
+                        {{#if teams}}
+                        <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
+                            <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-fw fa-users"></i> My Teams
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right rounded shadow" aria-labelledby="dropdownMenuButton">
+                                {{application-nav-team-list teams=teams}}
+                            </div>
+                        </li>
+                        <div class="hidden-sm-up text-left">
+                            <li {{action "displayTeams"}} class="cursor-pointer nav-item text-capitalize dropdown-item">
+                                <i class="fa fa-fw fa-users"></i>
+                                {{#if showTeams}}Hide{{else}}Show{{/if}} My Teams
+                            </li>
+                            {{#if showTeams}}
+                                {{application-nav-team-list teams=teams}}
+                            {{/if}}
+                        </div>
+                        {{/if}}
 
-            {{user-logout tagName="li" class="cursor-pointer"}} 
+                        <li class="cursor-pointer nav-item dropdown text-left text-capitalize hidden-md-down">
+                            <button class="dropdown-toggle btn btn-outline-secondary rounded" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fa fa-fw fa-user-circle-o"></i> {{sessionAccount.account.first_name}}
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right rounded shadow" aria-labelledby="dropdownMenuButton">                              
+                                {{application-nav-user-list}}
+                            </div>
+                        </li>
 
-            {{/unless}} 
-        </ul>
-    </div>
+                        <div class="hidden-sm-up text-left">
+                            {{application-nav-user-list}}
+                        </div>
+                        {{/unless}}
+                </ul>
+            </form>
+        </div>
 </nav>

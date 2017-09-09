@@ -1,14 +1,24 @@
 <ul class="nav nav-pills flex-column timeline">
-    <li class="logo"></li>
-    <div class="menu">
-        {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <i class="fa fa-fw fa-user"></i>My Profile
-        {{/link-to}}
-    </div>
-
     {{#if team}}
+    
+    {{#if (or team.show team.shares)}}
+        {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-home"></i>
+            </div>
+            Home
+        {{/link-to}}
+    {{/if}}
+
     {{#if team.show}}
         
+        {{#link-to "team.select.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-signal"></i>
+            </div>
+            Team Home 
+        {{/link-to}}
+
         {{#if (eq team.plan.name "manager")}}
         {{#link-to "team.select.jobs" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
@@ -17,26 +27,19 @@
             Jobs 
         {{/link-to}}
         {{/if}}
-
-        {{#link-to "team.select.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}            
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-paper-plane-o"></i>
-            </div>
-            Notifications
-        {{/link-to}}
     
-        {{#link-to "team.select.members" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-users"></i>
-            </div>
-            Members
-        {{/link-to}}
-
         {{#link-to "team.select.talent" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-cogs"></i>
             </div>
             Talent
+        {{/link-to}}
+
+        {{#link-to "team.select.members" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            <div class="icon hidden-sm-down">
+                <i class="fa fa-fw fa-2x fa-users"></i>
+            </div>
+            Members
         {{/link-to}}
 
         {{#if (eq team.plan.name "recruiter")}}
@@ -67,6 +70,7 @@
     {{/if}}
     
     {{#if team.shares}}
+    {{else if team.shares}}
         {{#link-to "team.select.leads" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
             <div class="icon hidden-sm-down">
                 <i class="fa fa-fw fa-2x fa-share-alt"></i>
@@ -77,7 +81,4 @@
 
     {{/if}}
 
-    {{user-logout}}
-
-    {{application-foot}}
 </ul>

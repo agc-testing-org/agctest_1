@@ -13,11 +13,13 @@ export default Ember.Component.extend({
         this._super(...arguments);
         var manager = this.get("manager");
         var recruiter = this.get("recruiter");
-        if(manager.length > 0){
-            this.send("setType",this.get("plans").findBy("name","manager").id);
-        }
-        else if(recruiter.length > 0){
-            this.send("setType",this.get("plans").findBy("name","recruiter").id);
+        if(this.get("plans")){
+            if(manager.length > 0){
+                this.send("setType",this.get("plans").findBy("name","manager").id);
+            }
+            else if(recruiter.length > 0){
+                this.send("setType",this.get("plans").findBy("name","recruiter").id);
+            }
         }
     },
     actions: {

@@ -12,7 +12,8 @@ export default Ember.Component.extend({
     init() {
         this._super(...arguments);
         var teams = this.get("teams");
-        var onTeam = teams.findBy('id',this.get("job").id);
+        var team_id = this.get("job.team_id");
+        var onTeam = teams.findBy('id',String(team_id));
         if(onTeam){
             this.set("on_team",true);
         }

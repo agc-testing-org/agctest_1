@@ -198,6 +198,7 @@ class Account
     end
 
     def valid_email email
+        email = email.strip
         if email =~ /\A([^@\s]+)@((?:[-a-z0-9]+.)+[a-z]{2,})\z/i
             return true
         else
@@ -374,10 +375,10 @@ class Account
     def get_teams user_id, params
         params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
-            return Team.joins(:user_teams).where({
+            return Team.joins(:user_teams,:plan).joins("INNER JOIN seats on seats.id = plans.seat_id").where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
-            }).where(params)
+            }).where(params).select("teams.*,plans.seat_id as default_seat_id, seats.name as default_seat_name").order("teams.id DESC")
         rescue => e
             puts e
             return nil
@@ -699,8 +700,14 @@ class Account
                 signature = "- The Wired7 ATeam"
 
                 if notification.sprint_timeline.notification.name == "comment" #|| notification.sprint_timeline.notification.name == "vote"
-                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.next_sprint_state.id}-#{notification.sprint_timeline.next_sprint_state.state.name}"
-                    return mail notification.user.email, "New Wired7 #{notification.sprint_timeline.notification.name.capitalize}", "#{notification.user.first_name},<br><br>There's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>\"#{notification.sprint_timeline.comment.text}\"<br><br>Use the following link to reply:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nThere's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{notification.sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint}\n\n\"#{notification.sprint_timeline.comment.text}\"\n\nUse the following link to reply:\n\n#{link}\n\n\n#{signature}" 
+                    if notification.sprint_timeline.next_sprint_state #normal comment
+                        sprint_state = notification.sprint_timeline.next_sprint_state.state.name
+                        link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.next_sprint_state.id}-#{notification.sprint_timeline.next_sprint_state.state.name}"
+                    else #peer review comment
+                        sprint_state = notification.sprint_timeline.sprint_state.state.name
+                        link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.sprint_state.state.name}"
+                    end
+                    return mail notification.user.email, "New Wired7 #{notification.sprint_timeline.notification.name.capitalize}", "#{notification.user.first_name},<br><br>There's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{sprint_state} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>\"#{notification.sprint_timeline.comment.text}\"<br><br>Use the following link to reply:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nThere's a new #{notification.sprint_timeline.notification.name} from #{profile} on the #{sprint_state} phase of the #{project} sprint #{sprint}\n\n\"#{notification.sprint_timeline.comment.text}\"\n\nUse the following link to reply:\n\n#{link}\n\n\n#{signature}" 
                 elsif notification.sprint_timeline.notification.name == "transition"
                     link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.state.name}"
                     return mail notification.user.email, "Wired7 #{notification.sprint_timeline.state.name} transition", "#{notification.user.first_name},<br><br>We've just started the #{notification.sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>#{notification.sprint_timeline.state.instruction}<br><br>Use the following link to join in:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nWe've just started the #{notification.sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\n#{notification.sprint_timeline.state.instruction}\n\nUse the following link to join in:\n\n#{link}\n\n\n#{signature}"
@@ -716,18 +723,31 @@ class Account
                     if notification.sprint_timeline.user_id == notification.user_id 
                         #TODO - confirmation
                     else
-                        return mail notification.user.email, "Wired7 Idea Pitch for #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company}", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
+                        return mail notification.user.email, "Wired7 Idea Pitch for #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.team.company}", "#{notification.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.team.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{notification.sprint_timeline.job.title} at #{notification.sprint_timeline.job.team.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n#{signature}"
                     end
                 elsif notification.sprint_timeline.notification.name == "job"
-                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{notification.sprint_timeline.job.id}-#{notification.sprint_timeline.job.title}-at-#{notification.sprint_timeline.job.company}"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{notification.sprint_timeline.job.id}-#{notification.sprint_timeline.job.title}-at-#{notification.sprint_timeline.job.team.company}"
                     if notification.sprint_timeline.user_id == notification.user.id
                         #TODO send confirmation / email with information on next steps
                         return true
                     else
-                        return mail notification.user.email, "#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} is looking for a #{notification.sprint_timeline.job.title} on Wired7", "#{notification.user.first_name},<br><br>#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:\n\n#{link}\n\n\n#{signature}"
+                        return mail notification.user.email, "#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.team.company} is looking for a #{notification.sprint_timeline.job.title} on Wired7", "#{notification.user.first_name},<br><br>#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.team.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\n#{notification.sprint_timeline.job.team.name} at #{notification.sprint_timeline.job.team.company} started a search for a #{notification.sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:\n\n#{link}\n\n\n#{signature}"
                     end
+                elsif notification.sprint_timeline.notification.name == "deadline"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.project.id}-#{notification.sprint_timeline.project.org}-#{notification.sprint_timeline.project.name}/sprint/#{notification.sprint_timeline.sprint.id}-#{notification.sprint_timeline.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.state.name}"
+                    return mail notification.user.email, "Wired7 #{notification.sprint_timeline.state.name} deadline set", "#{notification.user.first_name},<br><br>We've just set deadline for the #{notification.sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nWe've just set deadline for the #{notification.sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\nAt least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:\n\n#{link}\n\n\n#{signature}"   
+                elsif notification.sprint_timeline.notification.name == "peer review"
+                    link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.sprint_state.sprint.project.id}-#{notification.sprint_timeline.sprint_state.sprint.project.org}-#{notification.sprint_timeline.sprint_state.sprint.project.name}/sprint/#{notification.sprint_timeline.sprint_state.sprint.id}-#{notification.sprint_timeline.sprint_state.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.sprint_state.state.name}"
+                    
+                    subject = "Wired7 #{notification.sprint_timeline.sprint_state.state.name} Peer Review" 
+                    html_body = "#{notification.user.first_name},<br><br>The deadline for the #{notification.sprint_timeline.sprint_state.state.name} phase of the <i>#{notification.sprint_timeline.sprint_state.sprint.project.name}</i> sprint <i>#{notification.sprint_timeline.sprint_state.sprint.title}</i> has arrived!<br><br>We've selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with other team members:<br><br><: href='#{link}'>#{link}</a><br><br><br>#{signature}"
+                    body = "#{notification.user.first_name},\n\nThe deadline for the #{notification.sprint_timeline.sprint_state.state.name} phase of the #{notification.sprint_timeline.sprint_state.sprint.project.name} sprint #{notification.sprint_timeline.sprint_state.sprint.title} has arrived!\n\nWe selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with team members:\n\n#{link}\n\n\n#{signature}"
+                    return mail notification.user.email, subject, html_body, body
                 end
+                
             end
+            #TODO return mail notification.user.email, subject, html_body, body
+            #TODO SPEC TESTS for this method
         rescue => e
             puts e
             return false 

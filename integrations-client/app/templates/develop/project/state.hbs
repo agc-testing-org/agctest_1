@@ -1,5 +1,6 @@
 {{#unless (eq model.state.name "any")}}{{title model.state.name " sprints"}}{{else}}{{title "Sprints"}}{{/unless}}
 <div class="container-fluid pl-0 pr-0">
+    {{application-nav}}
     <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
         {{state-list states=model.states has_tooltips=true}}
     </nav>
@@ -8,8 +9,8 @@
     </nav>
     <main class="col-sm-12 col-md-12 offset-sm-0 pl-0 pr-0">
     <div class="row main">
-        <div class="col-md-12 col-sm-12 offset-md-0 top shadow hidden-sm-down">{{develop-overview model=model}}</div>
-        <div class="col-md-12 col-sm-12 offset-md-0 top shadow hidden-md-up">{{develop-overview model=model}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top bg-nav hidden-sm-down">{{develop-overview model=model}}</div>
+        <div class="col-md-12 col-sm-12 offset-md-0 top bg-nav hidden-md-up">{{develop-overview model=model}}</div>
         <div class="col-md-12 col-sm-12 offset-md-0 content hidden-sm-down">{{develop-content model=model}}</div>
         <div class="col-md-12 col-sm-12 offset-md-0 content hidden-md-up">{{develop-content model=model}}</div>
     </div>

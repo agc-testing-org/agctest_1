@@ -4,6 +4,7 @@
     {{title "Anonymous"}}
 {{/if}}
 <div class="container-fluid pl-0 pr-0">
+    {{application-nav me=model.me teams=model.teams user=model.user roles=model.roles}}
     <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
         {{profile-menu-list me=model.me teams=model.teams user=model.user roles=model.roles}}
     </nav>

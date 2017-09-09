@@ -4,11 +4,6 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
-    queryParams: {
-        section: {
-            refreshModel: true 
-        }
-    },
     actions: {
         refresh(){
             this.refresh();
@@ -27,12 +22,17 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
 
         return Ember.RSVP.hash({
             params: params,
-               user: user,
-               teams: this.store.findAll('team'),
-               skillsets: skillsets,
-               roles: roles,
-               seats: this.store.findAll('seat'),
-               plans: this.store.findAll('plan')
+            user: user,
+            teams: this.store.findAll('team'),
+            skillsets: skillsets,
+            roles: roles,
+            seats: this.store.findAll('seat'),
+            plans: this.store.findAll('plan'),
+            activeRoles: Ember.computed.filterBy("roles","active",true),
+            recruiter: Ember.computed.filterBy("activeRoles","name","recruiting"),
+            manager: Ember.computed.filterBy("activeRoles","name","management"),
+            managerPlan: Ember.computed.filterBy("plans","name","manager"),
+//            managerTeams: teams.filterBy('plan_id', parseInt(this.get("managerPlan")[0].id))
         });
-    }
+    },
 });

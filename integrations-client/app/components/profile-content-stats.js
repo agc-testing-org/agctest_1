@@ -6,6 +6,7 @@ export default Ember.Component.extend({
     manager: Ember.computed.filterBy("activeRoles","name","management"),
     didRender() {
         this._super(...arguments);
+        this.$('#masonry').masonry({});
     },
     actions: {
         refresh(){

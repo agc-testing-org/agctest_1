@@ -1,10 +1,11 @@
 <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
 
-    <div class="overview row text-left">
+    <div class="row text-left vertical-align">
         <div class="col-md-6 col-sm-12">
             <h2 class="name text-capitalize">{{model.project.org}} / {{model.project.name}}</h2>
             <div class="description">{{model.project.description}}</div>
             {{develop-overview-caption project=model.project}}
+            <div class="about text-capitalize mb-0">Created {{moment-from-now model.project.created_at}}</div>
             <div class="about mb-0">Showing Sprints in {{#unless (eq model.state.name "any")}}the{{/unless}} <strong><span class="text-capitalize">{{model.state.name}} Phase</span></strong></div>
             <div class="about text-capitalize mb-0">{{model.state.description}}</div>
         </div>

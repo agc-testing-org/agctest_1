@@ -74,6 +74,7 @@ require_relative '../workers/user_register_worker.rb'
 require_relative '../workers/user_notification_get_worker.rb'
 require_relative '../workers/user_notification_mail_worker.rb'
 require_relative '../workers/user_create_project_worker.rb'
+require_relative '../workers/deadline_worker.rb'
 
 # Throttling
 require_relative 'rack'
@@ -694,6 +695,7 @@ class Integrations < Sinatra::Base
         if team.plan
             team_response["plan"] = team.plan
             team_response["default_seat_id"] = team.plan.seat.id
+            team_response["default_seat_name"] = team.plan.seat.name
         end
         status 200
         return team_response.to_json
@@ -911,7 +913,7 @@ class Integrations < Sinatra::Base
         sprint_state = issue.get_sprint_state fields[:sprint_state_id]
 
         (params[:id] || sprint_state.state.name == "idea") || (return_error "unable to comment on this item")
-        comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text], fields[:explain]
+        comment = issue.create_comment @session_hash["id"], params[:id], fields[:sprint_state_id], fields[:text], fields[:explain], fields[:review]
         comment || (return_error "unable to save comment")
 
         sprint_ids = issue.get_sprint_state_ids_by_sprint sprint_state.sprint_id

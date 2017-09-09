@@ -7,7 +7,7 @@
         <label>Team Type</label>
             <div class="card-deck">
             {{#each plans as |plan|}}
-                <div class="card rounded cursor-pointer" {{action "setType" plan.id}}>
+                <div class="card rounded cursor-pointer mt-4" {{action "setType" plan.id}}>
                     <div class="card-block">
                         <h3 class="card-title text-capitalize">{{#if (eq planId plan.id)}}<i class="fa fa-check fa-fw" aria-hidden="true"></i>{{/if}}{{plan.name}}</h3>
                         <p class="card-text">{{plan.description}}</p>

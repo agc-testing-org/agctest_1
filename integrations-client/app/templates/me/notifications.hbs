@@ -1,4 +1,23 @@
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{profile-overview-notifications notifications=model.notifications}}</div>
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{profile-overview-notifications notifications=model.notifications}}</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{profile-content-notifications notifications=model.notifications params=model.params}}</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{profile-content-notifications notifications=model.notifications params=model.params}}</div>
+<div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down pb-0 bg-nav">
+    <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+        <h3>{{user-profile-descriptor user_profile=model.user multiple_lines=true disable_you=true}}</h3>
+        {{profile-overview-linkedin complete=model.user.title refresh="refresh"}}
+    </div>
+</div>
+<div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up pb-0 bg-nav">
+    <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+        <h3>{{user-profile-descriptor user_profile=model.user multiple_lines=true disable_you=true}}</h3>
+        {{profile-overview-linkedin complete=model.user.title refresh="refresh"}}
+    </div>
+</div>
+<div class="col-md-12 col-sm-12">
+    <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+        <div class="row">
+            <div class="col-md-7 col-sm-12 offset-md-0 mt-4 hidden-md-up">{{profile-content-notifications notifications=model.notifications params=model.params}} {{application-foot class="foot-hold text-center"}}</div>
+            <div class="col-md-4 col-sm-12 mt-2 hidden-md-up flex-first">{{profile-content-notifications-settings user=model.user skillsets=model.skillsets roles=model.roles}} {{profile-stats-list roles=model.roles contributors_received=model.contributors_received comments_received=model.comments_received votes_received=model.votes_received comments=model.comments votes=model.votes contributors=model.contributors class="overview text-center p-4 rounded"}}</div>
+
+            <div class="col-md-7 col-sm-12 offset-md-0 hidden-sm-down">{{profile-content-notifications notifications=model.notifications params=model.params}} {{application-foot class="foot-hold text-center"}}</div>
+            <div class="col-md-4 col-sm-12 hidden-sm-down">{{profile-content-notifications-settings user=model.user skillsets=model.skillsets roles=model.roles}} {{profile-stats-list roles=model.roles contributors_received=model.contributors_received comments_received=model.comments_received votes_received=model.votes_received comments=model.comments votes=model.votes contributors=model.contributors class="overview text-center p-4 rounded"}}</div>
+        </div>
+    </div>
+</div>

@@ -34,6 +34,15 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         });
         this.store.adapterFor('skillset').set('namespace', '');
 
+        this.store.adapterFor('aggregate-comment').set('namespace', 'users/me');
+        var comments = this.get('store').query('aggregate-comment', params);
+        var votes = this.get('store').query('aggregate-vote', params);
+        var contributors = this.get('store').query('aggregate-contributor', params);
+        var comments_received = this.get('store').query('aggregate-comments-received', params);
+        var votes_received = this.get('store').query('aggregate-votes-received', params);
+        var contributors_received = this.get('store').query('aggregate-contributors-received', params);
+        this.store.adapterFor('aggregate-comment').set('namespace', '');
+
         return Ember.RSVP.hash({
             teams: this.store.findAll('team'),
             skillsets: skillsets,
@@ -43,7 +52,13 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             user: user,
             states: states,
             params: params,
-            me: true
+            me: true,
+            comments: comments,
+            votes: votes,
+            contributors: contributors,
+            comments_received: comments_received,
+            votes_received: votes_received,
+            contributors_received: contributors_received,
         });
     }
 });

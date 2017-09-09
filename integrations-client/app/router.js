@@ -55,7 +55,9 @@ Router.map(function() {
         this.route('contributions-selected');
         this.route('token', {path: '/:token'});
     });
-    this.route('welcome');
+    this.route('welcome', function() {
+        this.route('identify');
+    });
     this.route('me', function() { // private profile (logged in)
         this.route('notifications');
         this.route('overview');

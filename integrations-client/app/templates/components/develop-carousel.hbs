@@ -1,11 +1,11 @@
-<div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+<div id="carouselControls" class="carousel slide" data-ride="carousel">
     <div class="carousel-inner" role="listbox">
         {{#each visibleProjects as |project index|}}
         {{#if (eq index 0)}}
         <div class="carousel-item active">
             <div class="d-block img-fluid mars_frontend" alt="Musk to Mars"></div>    
             <div class="text-center carousel-caption">
-                <div class="background"></div>
+                <div class="background rounded"></div>
                 <div class="carousel-text">Project {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) class="text-uppercase"}}{{project.org}}/{{project.name}}{{/link-to}}</div>
             </div>
         </div>
@@ -13,7 +13,7 @@
             <div class="carousel-item">
                 <div class="d-block img-fluid mars_frontend" alt="Musk to Mars"></div>
                 <div class="text-center carousel-caption">
-                    <div class="background"></div>
+                    <div class="background rounded"></div>
                     <div class="carousel-text">Project {{#link-to "develop.project" (concat project.id "-" project.org "-" project.name) class="text-uppercase"}}{{project.org}}/{{project.name}}{{/link-to}}</div>
                 </div>
             </div>
@@ -21,12 +21,12 @@
         {{/each}}
     </div>
     {{#if (greater-than visibleProjects.length 1)}}
-    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <a class="carousel-control-prev" href="#carouselControls" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
         <span class="sr-only">Previous</span>
     </a>
-    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <a class="carousel-control-next" href="#carouselControls" role="button" data-slide="next">
+        <span class="carousel-control-next-icon"></span>
         <span class="sr-only">Next</span>
     </a>
     {{/if}}

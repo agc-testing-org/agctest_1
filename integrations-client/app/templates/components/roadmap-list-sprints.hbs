@@ -12,7 +12,7 @@
         {{#unless job.sprint_id}}
         {{#if on_team}}
         <div class="line">
-            <button class="btn btn-outline-secondary btn-sm d-inline-block mr-1 rounded mt-2" {{action "select" job.team_id job.id sprint.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Approve</button>
+            <div class="cursor-pointer d-inline-block mr-1 rounded mt-2" {{action "select" job.team_id job.id sprint.id}}><i class="fa fa-thumbs-up" aria-hidden="true"></i> Approve</div>
         </div>
         {{/if}}             
         {{/unless}}

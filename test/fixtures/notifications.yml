@@ -46,3 +46,10 @@ sprint_comment_offensive:
   name: "sprint comment offensive"
   description: "its offensive sprint comment"
 
+deadline:
+  name: "deadline"
+  description: "deadline"
+
+peer:
+  name: "peer review"
+  description: "a private review"

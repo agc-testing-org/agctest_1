@@ -1,5 +1,6 @@
 {{title model.team.name}}
 <div class="container-fluid pl-0 pr-0">
+    {{application-nav}}
     <nav class="col-md-1 bg-faded sidebar hidden-sm-down">
         {{team-menu-list team=model.team}}
     </nav>
@@ -7,8 +8,23 @@
         {{team-menu-list team=model.team}}
     </nav>
     <main class="col-sm-12 col-md-12 offset-sm-0 pl-0 pr-0">
-        <div class="row main">
-            {{outlet}}
+    <div class="row main">
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down pb-0 bg-nav">
+            <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+                {{team-overview team=model.team}}
+            </div>              
+        </div>                  
+        <div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up pb-0 bg-nav">
+            <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+                {{team-overview team=model.team}}
+            </div>              
         </div>
+        <div class="col-md-12 col-sm-12">
+            <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+                {{outlet}}
+            </div>
+        </div>
+    </div>
     </main>
+    {{application-foot class="foot-hold text-center"}}
 </div>

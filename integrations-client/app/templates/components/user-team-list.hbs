@@ -1,13 +1,14 @@
-{{#if (or (eq default_seat.name "sponsored") (eq default_seat.name "priority"))}}
-    <h3>Your Talent</h3>
-    <div class="about section">Talent in your team's pipeline</div>
-{{else if (eq default_seat.name "member") }}
-    <h3>Your Team Members</h3>
-    <div class="about section">Coworkers that that you've shared talent and contacts with.</div>
+{{#if user_teams}}
+{{#if (or (eq default_seat_name "sponsored") (eq default_seat_name "priority"))}}
+    <h3 class="mb-0">{{user_teams.length}} Candidates</h3>
+    <div class="about section mb-3">Talent in your team's pipeline</div>
+{{else if (eq default_seat_name "member") }}
+    <h3 class="mb-0">{{user_teams.length}} Members</h3>
+    <div class="about section mb-3">Team members that you've shared talent and contacts with</div>
 {{else}}
-    <h3 class="text-capitalize">{{default_seat.name}}s</h3>
-    {{#if (eq default_seat.name "share")}}
-        <div class="about section">People outside of your organization that you've shared a profile with</div>
+    <h3 class="text-capitalize mb-0">{{user_teams.length}} {{default_seat_name}}s</h3>
+    {{#if (eq default_seat_name "share")}}
+        <div class="about section mb-3">People outside of your organization that you've shared a profile with</div>
     {{/if}}
 {{/if}}
 
@@ -17,7 +18,7 @@
             {{#if user.accepted}}
                 <span class="badge badge-info uppercase rounded">Accepted</span>
             {{/if}}
-            {{#if (eq default_seat.name "share")}}
+            {{#if (eq default_seat_name "share")}}
                 {{#link-to "profile" user.share_profile.id}}{{user.share_first_name}} {{user.share_last_name}}{{/link-to}} {{#if user.share_profile.title}} - {{user-profile-descriptor user_profile=user.share_profile class="d-inline"}}{{/if}} with
             {{/if}}
             {{#if user.user_first_name}}
@@ -31,7 +32,7 @@
             {{/if}}
 
             </h4>
-            {{#unless (or (eq default_seat.name "member") (or (eq default_seat.name "owner") (eq default_seat.name "share")))}}
+            {{#unless (or (eq default_seat_name "member") (or (eq default_seat_name "owner") (eq default_seat_name "share")))}}
             {{#if (or user.team_comments (or user.team_votes (or user.team_contributors (or user.team_comments_received (or user.team_votes_received (or user.team_contributors_received))))))}}
             <h4 class="row">
                 <div class="col-md-4 col-sm-4 col-4">
@@ -56,21 +57,28 @@
             {{/if}}
             {{/unless}}
             <small class="line text-muted">
-            {{#if (eq default_seat.name "share")}}Shared {{else}}Invited {{/if}}
+            {{#if (eq default_seat_name "share")}}Shared {{else}}Invited {{/if}}
             by {{#link-to "profile" user.sender_id}}{{user.sender_first_name}}{{/link-to}} {{moment-from-now user.created_at}}
             
             {{#if user.accepted}}
             
-            , accepted {{moment-from-now user.updated_at}}
+            - accepted {{moment-from-now user.updated_at}}
 
                 {{#if user.user_email}}
                     ({{user.user_email}})
                 {{/if}}
             
             {{/if}}
-            {{#unless (or (eq default_seat.name "member") (eq default_seat.name "owner"))}}
-                {{user-team-share default_seat=share_seat team=team profile_id=user.user_profile.id class="d-inline" refresh="refresh"}}
+            {{#unless (or (eq default_seat_name "member") (eq default_seat_name "owner"))}}
+                {{user-team-share default_seat_id=share_seat_id default_seat_name=share_seat_name team=team profile_id=user.user_profile.id class="d-inline" refresh="refresh"}}
             {{/unless}}
             </small>
         </div>
     {{/each}}
+{{else}}
+<div class="overview bg-nav rounded p-3 mb-2">
+    <div class="text-left">
+        <h3>No invitations</h3>
+    </div>
+</div>
+{{/if}}

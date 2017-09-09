@@ -1,4 +1,23 @@
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{team-overview-notifications notifications=model.notifications}}</div>
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{team-overview-notifications notifications=model.notifications}}</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{team-content-notifications notifications=model.notifications params=model.params}}</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{team-content-notifications notifications=model.notifications params=model.params}}</div>
+<div class="hidden-sm-down row">
+    <div class="col-md-5 col-sm-12 flex-last">
+        {{user-team-invite jobs=model.jobs team=model.team refresh="refresh" default_seat_id=model.default_seat_id default_seat_name=model.default_seat_name class="bg-nav rounded p-3 mb-4"}}
+        {{#if (eq model.team.plan.name "manager")}}
+            {{team-jobs-create team=model.team roles=model.roles user=model.user refresh="refresh" class="bg-nav rounded p-3 mb-4"}}
+        {{/if}}
+    </div>
+    <div class="col-md-7 col-sm-12">
+        {{team-content-notifications notifications=model.notifications params=model.params}}
+    </div>
+</div>
+<div class="hidden-md-up row">
+    <div class="col-md-5 col-sm-12 flex-last">
+        {{user-team-invite jobs=model.jobs team=model.team refresh="refresh" default_seat_id=model.default_seat_id default_seat_name=model.default_seat_name class="bg-nav rounded p-3 mb-4"}}
+        {{#if (eq model.team.plan.name "manager")}}
+            {{team-jobs-create team=model.team roles=model.roles user=model.user refresh="refresh" class="bg-nav rounded p-3 mb-4"}}
+        {{/if}}
+    </div>
+    <div class="col-md-7 col-sm-12">
+        {{team-content-notifications notifications=model.notifications params=model.params}}
+    </div>
+</div>
+

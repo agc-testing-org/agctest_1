@@ -5,33 +5,46 @@
         {{input type="text" value=email placeholder="name@example.com" class="form-control input-lg rounded"}}
         {{input type="hidden" value=default_seat.id}}
 
+        {{#if teams}}
+        <div class="dropdown d-inline">
+            <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{#if selectedTeam}}{{selectedTeam.name}}{{else}}For Team{{/if}}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                {{#each teams as |team|}}
+                    <a class="dropdown-item" {{action "selectTeam" team}}>{{team.name}}</a>
+                {{/each}}
+            </div>
+        </div>
+        {{/if}}
+
         {{#if jobs}}
-            <div class="dropdown d-inline">
-                <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{#if selectedJob}}{{selectedJob.title}}{{else}}Jobs{{/if}}
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    {{#each jobs as |job|}}
-                        <a class="dropdown-item" {{action "selectJob" job}}>{{job.title}}</a>
-                    {{/each}}
-                </div>
+        <div class="dropdown d-inline">
+            <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{#if selectedJob}}{{selectedJob.title}}{{else}}Jobs{{/if}}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                {{#each jobs as |job|}}
+                <a class="dropdown-item" {{action "selectJob" job}}>{{job.title}}</a>
+                {{/each}}
             </div>
+        </div>
         {{/if}}
 
-        {{#if sessionAccount.account.admin}}
-            <div class="dropdown d-inline">
-                <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {{#if selectedSeat}}{{selectedSeat.name}}{{else}}Seat Types{{/if}}
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    {{#each team.seats as |seat|}}
-                        <a class="dropdown-item" {{action "selectSeat" seat}}>{{seat.name}}</a>
-                    {{/each}}
-                </div>
+        {{#if (and sessionAccount.account.admin team.seats)}}
+        <div class="dropdown d-inline">
+            <button class="btn btn-info dropdown-toggle rounded" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {{#if selectedSeatId}}{{selectedSeatName}}{{else}}Seat Types{{/if}}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                {{#each team.seats as |seat|}}
+                <a class="dropdown-item" {{action "selectSeat" seat}}>{{seat.name}}</a>
+                {{/each}}
             </div>
+        </div>
         {{/if}}
 
-        <button type="submit" class="btn btn-info rounded d-inline">{{#if profile_id}}Share{{else}}Invite{{/if}}</button>
+        <button type="submit" class="btn btn-info rounded d-inline">{{#if successMessage}}<i class="fa fa-fw fa-thumbs-up"></i> Sent{{else}}{{#if profile_id}}Share{{else}}Invite{{/if}}{{/if}}</button>
 
     </div>
 </form>

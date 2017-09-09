@@ -11,5 +11,6 @@ export default DS.Model.extend({
     user_id: attr('string'),
     text: attr('string'),
     explain: attr('boolean'),
-    user_profile: DS.belongsTo('user-profile')
+    user_profile: DS.belongsTo('user-profile'),
+    review: attr('boolean')
 });

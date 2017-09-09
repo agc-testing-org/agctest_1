@@ -1,18 +1,10 @@
 <ul class="nav nav-pills flex-column timeline">
-    <li class="logo"></li>
-
-    <div class="menu">
-    {{#if session.isAuthenticated}}
-        {{#link-to "me" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize shadow" }}
-            <i class="fa fa-fw fa-user"></i>Profile
-        {{/link-to}}
-    {{else}}
-        {{#link-to "login" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize shadow"}}
-            <i class="fa fa-fw fa-sign-in"></i>Sign In
-        {{/link-to}}
-    {{/if}}
-    </div>
-
+    {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+        <div class="icon hidden-sm-down">
+            <i class="fa fa-fw fa-2x fa-home"></i>
+        </div>
+        Home
+    {{/link-to}}
     {{#each sprint_states as |sprint_state|}}
     {{#link-to "develop.project.sprint.state" (concat sprint_state.id "-" sprint_state.state_id.name) tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize shadow"}}
     <div class="icon hidden-sm-down">

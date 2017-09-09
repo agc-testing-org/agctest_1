@@ -1,21 +1,21 @@
 {{#if (or contributors_received.length (or contributors.length (or comments_received.length (or comments.length (or votes_received.length (or votes.length))))))}}
-<div class="full">
-
+<div id="masonry" class="grid col-md-12 col-sm-12 col-12" data-masonry='{ "itemSelector": ".grid-item", "percentPosition": true, columnWidth: ".grid-sizer" }'>
+    <div class="grid-sizer col-md-6 col-sm-6 col-12"></div>
         {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-        {{profile-overview-feedback user=user me=me params=params items=contributors_received metric="winning solutions" description="Solutions selected over other submissions for a task that meet project owner standards and fulfill the requirements of a given task." route="contributions-selected"}}
+        {{profile-overview-feedback class=(concat "grid-item col-sm-12 col-md-" col) limit_results=limit_results user=user me=me params=params items=contributors_received metric="winning solutions" description="Solutions selected over other submissions for a task that meet project owner standards and fulfill the requirements of a given task." route="contributions-selected"}}
 
-        {{profile-overview-feedback user=user me=me params=params items=comments_received metric="comments received" description="Feedback other users have for solutions proposed" route="comments-received"}}
+        {{profile-overview-feedback class=(concat "grid-item col-sm-12 col-md-" col) limit_results=limit_results user=user me=me params=params items=comments_received metric="comments received" description="Feedback other users have for solutions proposed" route="comments-received"}}
 
-        {{profile-overview-feedback user=user me=me params=params items=votes_received metric="votes received" description="Solutions that other users approve" route="votes-received"}}
+        {{profile-overview-feedback class=(concat "grid-item col-sm-12 col-md-" col) limit_results=limit_results user=user me=me params=params items=votes_received metric="votes received" description="Solutions that other users approve" route="votes-received"}}
 
         {{/unless}}
 
-        {{profile-overview-feedback user=user me=me params=params items=comments metric="comments posted" description="Feedback for solutions proposed" route="comments"}}
+        {{profile-overview-feedback class=(concat "grid-item col-sm-12 col-md-" col) limit_results=limit_results user=user me=me params=params items=comments metric="comments posted" description="Feedback for solutions proposed" route="comments"}}
 
-        {{profile-overview-feedback user=user me=me params=params items=votes metric="votes cast" description="Solutions approved" route="votes"}}
+        {{profile-overview-feedback class=(concat "grid-item col-sm-12 col-md-" col) limit_results=limit_results user=user me=me params=params items=votes metric="votes cast" description="Solutions approved" route="votes"}}
 
         {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-        {{profile-overview-feedback user=user me=me params=params items=contributors metric="solutions proposed" description="Solutions proposed for review and selection" route="contributions"}}
+        {{profile-overview-feedback class=(concat "grid-item col-sm-12 col-md-" col) limit_results=limit_results user=user me=me params=params items=contributors metric="solutions proposed" description="Solutions proposed for review and selection" route="contributions"}}
         {{/unless}}
 </div>
 {{else}}

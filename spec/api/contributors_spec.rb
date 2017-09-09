@@ -179,7 +179,7 @@ describe "/contributors" do
             Octokit::Client.any_instance.stub(:branch => @body)
         end
         context "valid contributor" do
-            fixtures :sprint_states, :projects, :contributors
+            fixtures :sprint_states, :sprints, :projects, :contributors, :notifications
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
@@ -188,6 +188,8 @@ describe "/contributors" do
                 patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
+                @expires_sql = @mysql_client.query("select * from sprint_states where id = #{contributors(:adam_confirmed_1).sprint_state_id}").first
+                @review = @mysql_client.query("select * from sprint_timelines inner join notifications ON notifications.id = sprint_timelines.notification_id AND notifications.name = 'peer review'").first
             end
             context "contributor" do
                 it "should include commit" do
@@ -195,6 +197,23 @@ describe "/contributors" do
                 end
                 it "should include commit_success" do
                     expect(@sql["commit_success"]).to eq(1)
+                end
+                it "should set expires" do
+                    expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H'))
+                end
+                context "sprint_timeline_event [future]" do
+                    it "should include state id" do
+                        expect(@review["state_id"]).to eq(contributors(:adam_confirmed_1).sprint_state.state_id)
+                    end 
+                    it "should include sprint_state id" do
+                        expect(@review["sprint_state_id"]).to eq(contributors(:adam_confirmed_1).sprint_state_id)
+                    end
+                    it "should include sprint id" do
+                        expect(@review["sprint_id"]).to eq(contributors(:adam_confirmed_1).sprint_state.sprint_id)
+                    end
+                    it "should include project id" do
+                        expect(@review["project_id"]).to eq(contributors(:adam_confirmed_1).sprint_state.sprint.project_id)
+                    end
                 end
             end
             it "should return contributor id" do
@@ -280,6 +299,18 @@ describe "/contributors" do
                     post "/contributors/76262/comments", {:text => "AA", :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 end
                 it_behaves_like "error", "unable to save comment"
+            end
+        end
+        context "review type comment" do
+            before(:each) do
+                @text = "AB"
+                post "/contributors/#{@contributor_id}/comments", {:text => @text, :review => true, :sprint_state_id => @sprint_state_id}.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @mysql = @mysql_client.query("select * from comments").first
+                @sprint_timeline = @mysql_client.query("select * from sprint_timelines").first
+            end
+            it "should save review true" do
+                expect(@mysql["review"]).to eq(1) 
             end
         end
     end

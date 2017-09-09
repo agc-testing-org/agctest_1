@@ -1,9 +1,9 @@
-<div class="full">
+
     <div class="list-group rounded text-left">
         {{#if notifications}}
-        <h4 class="about section">Team Notifications</h4>
+        <h3>{{notifications.meta.count}} Team Notifications</h3>
         {{#each notifications as |notification|}}
-        <div class="list-group-item rounded highlight-{{notification.read}}">
+        <div class="list-group-item rounded">
             {{#if (or (eq notification.notification.name "vote") (eq notification.notification.name "comment"))}}
             <p class="line">
 
@@ -53,15 +53,11 @@
         {{application-paging-same-page page=params.page last=notifications.length count=notifications.meta.count
         class="text-right"}}
         {{else}}
-        <div class="vertical-align-hold">
-            <div class="vertical-align-cell">
-                <div class="overview">
-                    <div class="text-center">
+                <div class="overview bg-nav rounded p-3 mb-2">
+                    <div class="text-left">
                         <h3>No team notifications</h3>
                     </div>
                 </div>
-            </div>
-        </div>
         {{/if}}
     </div>
-</div>
+

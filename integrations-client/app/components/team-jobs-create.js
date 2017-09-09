@@ -6,6 +6,7 @@ export default Ember.Component.extend({
     routes: Ember.inject.service('route-injection'),
     sessionAccount: Ember.inject.service('session-account'),
     errorMessage: null,
+    successMessage: null,
     role_id: null,
     init() { 
         this._super(...arguments);   
@@ -20,6 +21,10 @@ export default Ember.Component.extend({
             var zip = this.get("zip");
             var role_id = this.get("role_id");
             var _this = this;
+
+            _this.set("errorMessage",null);
+            _this.set("successMessage",null);
+
             if(title && title.length > 4){
                 if(link){
                     if(link.includes("http")){
@@ -33,9 +38,13 @@ export default Ember.Component.extend({
                                     zip: zip
                                 }).save().then(function(response){
                                     _this.set("errorMessage",null); 
+                                    _this.set("successMessage",true);
                                     _this.set("title",null);
                                     _this.set("link",null);
-                                    _this.sendAction("refresh");
+                                    Ember.run.later((function() {
+                                        _this.set("successMessage",null); 
+                                        _this.sendAction("refresh");
+                                    }), 3000);
                                 });
                             }
                             else {

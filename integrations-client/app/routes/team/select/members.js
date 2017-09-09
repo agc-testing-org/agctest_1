@@ -18,7 +18,8 @@ export default Ember.Route.extend({
                 team_id: this.paramsFor("team.select").id,
                 seat_id: memberSeat.get("id")
             }),
-            default_seat: memberSeat
+            default_seat_id: memberSeat.get("id"),
+            default_seat_name: memberSeat.get("name"),
         });
     },
 });

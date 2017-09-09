@@ -1,32 +1,34 @@
 {{#if comments}}
 <div class="list-group rounded text-left">
 
-{{#if explainComments}}
-<div class="list-group-item rounded">
-    <div class="line"><strong>Author's Explanation</strong></div>
-    {{#each explainComments as |comment index|}}
-        <div class="line">{{comment.text}}</div> 
-        {{#if (eq explainComments.length (plus 1 index))}}
-        <small class="text-muted">
-            {{#unless (eq comment.user_id sessionAccount.account.id)}}
-                - {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
-            {{/unless}}
-        </small>
-        {{/if}}
-    {{/each}}
-</div>
+{{#if explainComments}} <!-- append to the top of the comments as a single comment so they always display / the author can explain his/her work -->
+    <div class="list-group-item rounded blue-tint">
+        {{#each explainComments as |comment index|}}
+            <div class="line">{{comment.text}}</div> 
+            {{#if (eq explainComments.length (plus 1 index))}}
+            <small class="text-muted">
+                Posted by 
+                {{#if (eq sessionAccount.account.id user_profile.id)}}
+                    you, the contributor
+                {{else}}
+                    the contributor, {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
+                {{/if}}
+            </small>
+            {{/if}}
+        {{/each}}
+    </div>
 {{/if}}
-
 
 {{#each (limited sortedComments count) as |comment|}}
     <div class="list-group-item rounded">
         <div class="line">{{comment.text}}</div>
         <small class="text-muted">
-        {{#if (eq comment.user_id sessionAccount.account.id)}}you {{/if}}
-            posted {{moment-from-now comment.created_at}}
-            {{#unless (eq comment.user_id sessionAccount.account.id)}}
-             by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}
-            {{/unless}}
+            {{#if comment.review}}
+                Peer review posted
+            {{else}}
+                Posted
+            {{/if}}
+            by {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile user_id=comment.user_id class="d-inline"}}{{/link-to}} {{moment-from-now comment.created_at}}
         </small>
         {{#if session.isAuthenticated}}
         {{develop-issue-comments-upvote contributor=contributor sprint_state=sprint_state comment_id=comment.id class="ml-2"}}

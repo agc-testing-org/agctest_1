@@ -1,7 +1,7 @@
 {{#if profile_id}}
     {{#if showShare}}
         <a {{action "show"}}><i class="fa fa-fw fa-times" aria-hidden="true"></i> Hide Share</a>
-        {{user-team-share-invite profile_id=profile_id default_seat=default_seat team=team refresh="refresh"}} 
+        {{user-team-share-invite profile_id=profile_id default_seat_id=default_seat_id default_seat_name=default_seat_name team=team refresh="refresh"}} 
     {{else}}
         <a {{action "show"}}><i class="fa fa-fw fa-envelope-o" aria-hidden="true"></i> Share</a>
     {{/if}}

@@ -41,14 +41,15 @@ class Issue
         end
     end
 
-    def create_comment user_id, contributor_id, sprint_state_id, text, explain
+    def create_comment user_id, contributor_id, sprint_state_id, text, explain, review
         begin
             return Comment.create({
                 user_id: user_id,
                 sprint_state_id: sprint_state_id,
                 contributor_id: contributor_id,
                 text: text.strip,
-                explain: explain
+                explain: explain,
+                review: review
             })
         rescue => e
             puts e
@@ -166,7 +167,7 @@ class Issue
             return nil
         end
     end
-
+    
     def get_sprint_states query, user_id
         begin
             account = Account.new
@@ -176,28 +177,42 @@ class Issue
                 response[i] = ss.as_json
                 sprint_state = response[i]
                 sprint_state_id = sprint_state['id']
+                sprint_state_expires = sprint_state['expires']
                 response[i][:active_contribution_id] = nil
                 response[i][:contributors] = []
                 ss.contributors.each_with_index do |c,k|
                     contributor_length = response[i][:contributors].length
-                    if c.commit || ((sprint_state_results.length - 1) == i) # don't show empty results unless this is the current sprint_state
+                    if c.commit || ((sprint_state_results.length - 1) == i) # if this is the current sprint_state OR [it's not and] contributors have commits
                         comments = c.comments.as_json
                         c.comments.each_with_index do |com,x|
                             comments[x][:user_profile] = account.get_profile com.user
                         end
-                        response[i][:contributors][contributor_length] = {
-                            :id => c.id,
-                            :created_at => c.created_at,
-                            :updated_at => c.updated_at,
-                            :comments => comments,
-                            :votes => c.votes.as_json
-                        }
-                        if decrypt(c.user_id).to_i == user_id
-                            response[i][:contributors][contributor_length][:commit] = c.commit
-                            response[i][:contributors][contributor_length][:commit_success] =  c.commit_success
-                            response[i][:contributors][contributor_length][:commit_remote] =  c.commit_remote
-                            response[i][:contributors][contributor_length][:repo] = c.repo
+
+                        if sprint_state_expires && (sprint_state_expires < Time.now.utc) && ((sprint_state_results.length - 1) == i) #review when current sprint state is last
+                            response[i][:review] = true
+                        end
+
+                        if c[:user_id].to_i == user_id #return owned contribution when exists
                             response[i][:active_contribution_id] = c.id
+                            response[i][:contributors][contributor_length] = {
+                                :id => c.id,
+                                :created_at => c.created_at,
+                                :updated_at => c.updated_at,
+                                :comments => comments,
+                                :votes => c.votes.as_json,
+                                :commit => c.commit,
+                                :commit_success => c.commit_success,
+                                :commit_remote => c.commit_remote,
+                                :repo => c.repo
+                            }
+                        else # return non-owned
+                            response[i][:contributors][contributor_length] = { 
+                                :id => c.id,
+                                :created_at => c.created_at,
+                                :updated_at => c.updated_at,
+                                :comments => comments,
+                                :votes => c.votes.as_json
+                            }   
                         end
                     end
                 end
@@ -220,6 +235,7 @@ class Issue
             return nil
         end
     end
+
 
     def get_sprint id # This also returns the project
         begin
