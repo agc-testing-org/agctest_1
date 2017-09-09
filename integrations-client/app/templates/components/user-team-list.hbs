@@ -1,14 +1,14 @@
 {{#if user_teams}}
 {{#if (or (eq default_seat_name "sponsored") (eq default_seat_name "priority"))}}
-    <h3>{{user_teams.length}} Candidates</h3>
-    <div class="about section">Talent in your team's pipeline</div>
+    <h3 class="mb-0">{{user_teams.length}} Candidates</h3>
+    <div class="about section mb-3">Talent in your team's pipeline</div>
 {{else if (eq default_seat_name "member") }}
-<h3>{{user_teams.length}} Members</h3>
-    <div class="about section">Team members that you've shared talent and contacts with</div>
+    <h3 class="mb-0">{{user_teams.length}} Members</h3>
+    <div class="about section mb-3">Team members that you've shared talent and contacts with</div>
 {{else}}
-    <h3 class="text-capitalize">{{user_teams.length}} {{default_seat_name}}s</h3>
+    <h3 class="text-capitalize mb-0">{{user_teams.length}} {{default_seat_name}}s</h3>
     {{#if (eq default_seat_name "share")}}
-        <div class="about section">People outside of your organization that you've shared a profile with</div>
+        <div class="about section mb-3">People outside of your organization that you've shared a profile with</div>
     {{/if}}
 {{/if}}
 
@@ -62,7 +62,7 @@
             
             {{#if user.accepted}}
             
-            , accepted {{moment-from-now user.updated_at}}
+            - accepted {{moment-from-now user.updated_at}}
 
                 {{#if user.user_email}}
                     ({{user.user_email}})
@@ -70,9 +70,15 @@
             
             {{/if}}
             {{#unless (or (eq default_seat_name "member") (eq default_seat_name "owner"))}}
-                {{user-team-share default_seat=share_seat team=team profile_id=user.user_profile.id class="d-inline" refresh="refresh"}}
+                {{user-team-share default_seat_id=share_seat_id default_seat_name=share_seat_name team=team profile_id=user.user_profile.id class="d-inline" refresh="refresh"}}
             {{/unless}}
             </small>
         </div>
     {{/each}}
+{{else}}
+<div class="overview bg-nav rounded p-3 mb-2">
+    <div class="text-left">
+        <h3>No invitations</h3>
+    </div>
+</div>
 {{/if}}

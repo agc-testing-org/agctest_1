@@ -51,6 +51,7 @@ export default Ember.Route.extend({
             default_seat_id: defaultSeatId,
             default_seat_name: this.modelFor("team.select").team.get("default_seat_name"),
             share_seat_id: shareSeat.get("id"),
+            share_seat_name: shareSeat.get("name"),
             jobs: this.modelFor("team.select").jobs
         });
     },

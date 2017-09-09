@@ -1,7 +1,5 @@
 {{#if jobs}}
-<h3>Your Job Listings</h3>
-<div class="about section">Listings that your team has created</div>
-
+<h3>{{jobs.length}} Job Listings</h3>
 {{#each jobs as |job|}}
     <div class="list-group-item rounded"> 
         <h4 class="line">
@@ -14,4 +12,10 @@
         </small>
     </div>
 {{/each}}
+{{else}}
+<div class="overview bg-nav rounded p-3 mb-2">
+    <div class="text-left">
+        <h3>No job listings</h3>
+    </div>
+</div>
 {{/if}}

@@ -18,15 +18,12 @@ export default Ember.Component.extend({
     selectedTeam: function() {
         return this.get("team");
     }.property('team'),
-    didRender() {
-        this._super(...arguments);
-        this.set("inviteSent",false);
-    },
     actions: {
         invite(){
             var _this = this;
 
             _this.set("errorMessage",null);
+            _this.set("successMessage",null);
             var email = this.get('email');
 
             var selectedSeatId = this.get("selectedSeatId");
@@ -48,13 +45,13 @@ export default Ember.Component.extend({
                         profile_id: profileId
                     });
                     invitation.save().then(function(){
-                        _this.set("email","");
-                        _this.sendAction("refresh");
-                        _this.set("showInvite",false);
-                        _this.set("inviteSent",true);
-                        if(profileId){
-                            _this.get("routes").redirectWithId("team.select.shares",selectedTeam.id);
-                        }
+                        _this.set("email",null);
+                        _this.set("successMessage",true);  
+
+                        Ember.run.later((function() {
+                            _this.set("successMessage",null); 
+                            _this.sendAction("refresh");
+                        }), 3000);
                     }, function(xhr, status, error) {
                         var response = xhr.errors[0].detail;
                         _this.set("errorMessage",response);

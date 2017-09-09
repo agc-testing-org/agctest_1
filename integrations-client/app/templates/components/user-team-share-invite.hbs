@@ -44,7 +44,7 @@
         </div>
         {{/if}}
 
-        <button type="submit" class="btn btn-info rounded d-inline">{{#if profile_id}}Share{{else}}Invite{{/if}}</button>
+        <button type="submit" class="btn btn-info rounded d-inline">{{#if successMessage}}<i class="fa fa-fw fa-thumbs-up"></i> Sent{{else}}{{#if profile_id}}Share{{else}}Invite{{/if}}{{/if}}</button>
 
     </div>
 </form>
