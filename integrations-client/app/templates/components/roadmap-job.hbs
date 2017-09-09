@@ -5,6 +5,11 @@
     <small class="line text-muted">
         Posted {{moment-from-now job.created_at}}
     </small>
+    
+    <div class="cursor-pointer mr-1 d-inline-block rounded mt-0" {{action "displayInvite"}}><i class="fa fa-envelope" aria-hidden="true"></i> {{#if showInvite}}Hide Invite{{else}}{{#if inviteSent}}Message on the way!  Invite Another {{else}}Invite {{/if}} User to Compete{{/if}}</div>
+    {{#if showInvite}}
+        {{user-team-share-invite teams=teams job=job showInvite=showInvite inviteSent=inviteSent refresh="refresh" class="col-sm-12"}}
+    {{/if}}
 </div>
 <div class="line connected">
     {{roadmap-list-sprints sprints=job.sprints teams=teams job=job}}

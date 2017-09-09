@@ -1,6 +1,6 @@
 <div class="hidden-sm-down row">
     <div class="col-md-5 col-sm-12 flex-last">
-        {{user-team-invite jobs=model.jobs team=model.team refresh="refresh" default_seat=model.default_seat class="bg-nav rounded p-3 mb-4"}}
+        {{user-team-invite jobs=model.jobs team=model.team refresh="refresh" default_seat_id=model.default_seat_id default_seat_name=model.default_seat_name class="bg-nav rounded p-3 mb-4"}}
         {{#if (eq model.team.plan.name "manager")}}
             {{team-jobs-create team=model.team roles=model.roles user=model.user refresh="refresh" class="bg-nav rounded p-3 mb-4"}}
         {{/if}}
@@ -11,7 +11,7 @@
 </div>
 <div class="hidden-md-up row">
     <div class="col-md-5 col-sm-12 flex-last">
-        {{user-team-invite jobs=model.jobs team=model.team refresh="refresh" default_seat=model.default_seat class="bg-nav rounded p-3 mb-4"}}
+        {{user-team-invite jobs=model.jobs team=model.team refresh="refresh" default_seat_id=model.default_seat_id default_seat_name=model.default_seat_name class="bg-nav rounded p-3 mb-4"}}
         {{#if (eq model.team.plan.name "manager")}}
             {{team-jobs-create team=model.team roles=model.roles user=model.user refresh="refresh" class="bg-nav rounded p-3 mb-4"}}
         {{/if}}

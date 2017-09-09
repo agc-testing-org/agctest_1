@@ -11,12 +11,7 @@ export default Ember.Route.extend({
     model: function(params) {
 
         var defaultSeat = null;
-        var defaultSeatId = null;
-        if(this.modelFor("team.select").team.get("default_seat_id")){
-            defaultSeat = this.modelFor("team.select").team.get("default_seat_id");
-            defaultSeatId = defaultSeat.get("id");
-        }
-
+        var defaultSeatId = this.modelFor("team.select").team.get("default_seat_id");
         var shareSeat = this.store.peekAll("seat").findBy("name","share");
 
         this.store.adapterFor('team-comment').set('namespace', 'user-teams/' + this.paramsFor("team.select").id);
@@ -53,8 +48,9 @@ export default Ember.Route.extend({
                 team_id: this.paramsFor("team.select").id,
                 seat_id: defaultSeatId
             }),
-            default_seat: defaultSeat,
-            share_seat: shareSeat,
+            default_seat_id: defaultSeatId,
+            default_seat_name: this.modelFor("team.select").team.get("default_seat_name"),
+            share_seat_id: shareSeat.get("id"),
             jobs: this.modelFor("team.select").jobs
         });
     },

@@ -6,45 +6,79 @@ export default Ember.Component.extend({
     routes: Ember.inject.service('route-injection'),
     store: Ember.inject.service(''),
     errorMessage: null,
-    selectedSeat: null,
-    selectedJob: null,
+    selectedSeatName: function() {
+        return this.get("default_seat_name");
+    }.property('team'),
+    selectedSeatId: function() {
+        return this.get("default_seat_id");
+    }.property('team'),
+    selectedJob: function() { 
+        return this.get("job");
+    }.property('job'),
+    selectedTeam: function() {
+        return this.get("team");
+    }.property('team'),
+    didRender() {
+        this._super(...arguments);
+        this.set("inviteSent",false);
+    },
     actions: {
-        invite(teamId, profileId){
+        invite(){
             var _this = this;
+
+            _this.set("errorMessage",null);
             var email = this.get('email');
-             _this.set("errorMessage",null);   
-            var selectedSeat = this.get("selectedSeat.id");
-            if(!selectedSeat){
-                selectedSeat = this.get('default_seat.id');
+
+            var selectedSeatId = this.get("selectedSeatId");
+            var selectedJob = this.get("selectedJob");
+            var selectedJobId = null;
+            if(selectedJob){
+                selectedJobId = selectedJob.id;
             }
-            var selectedJob = this.get("selectedJob.id");
+            var selectedTeam = this.get("selectedTeam");
+            var profileId = this.get("profile_id");
+
             if(email && email.length > 4){
-                var invitation = this.get('store').createRecord('user-team', {
-                    team_id: teamId,
-                    user_email: email,
-                    seat_id: selectedSeat,
-                    job_id: selectedJob,
-                    profile_id: profileId
-                });
-                invitation.save().then(function(){
-                    _this.set("email","");
-                    _this.sendAction("refresh");
-                    if(profileId){
-                        _this.get("routes").redirectWithId("team.select.shares",teamId);
-                    }
-                }, function(xhr, status, error) {
-                    var response = xhr.errors[0].detail;
-                    _this.set("errorMessage",response);
-                });
+                if(selectedTeam){
+                    var invitation = this.get('store').createRecord('user-team', {
+                        team_id: selectedTeam.id,
+                        user_email: email,
+                        seat_id: selectedSeatId,
+                        job_id: selectedJobId,
+                        profile_id: profileId
+                    });
+                    invitation.save().then(function(){
+                        _this.set("email","");
+                        _this.sendAction("refresh");
+                        _this.set("showInvite",false);
+                        _this.set("inviteSent",true);
+                        if(profileId){
+                            _this.get("routes").redirectWithId("team.select.shares",selectedTeam.id);
+                        }
+                    }, function(xhr, status, error) {
+                        var response = xhr.errors[0].detail;
+                        _this.set("errorMessage",response);
+                    });
+                }
+                else {
+                    _this.set("errorMessage","select a team to manage the candidate");
+                }
+            }
+            else{
+                _this.set("errorMessage","please enter a valid email address");
             }
         },
+        selectTeam(team){
+            this.set("selectedTeam",team);
+            this.set("selectedSeatId",team.get("default_seat_id"));
+        },
         selectSeat(seat){
-            this.set("selectedSeat",seat);
+            this.set("selectedSeatId",seat.get("id"));
+            this.set("selectedSeatName",seat.get("name"));
         },
         selectJob(job){
             this.set("selectedJob",job);
         }
-
     }
 
 });

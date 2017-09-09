@@ -695,6 +695,7 @@ class Integrations < Sinatra::Base
         if team.plan
             team_response["plan"] = team.plan
             team_response["default_seat_id"] = team.plan.seat.id
+            team_response["default_seat_name"] = team.plan.seat.name
         end
         status 200
         return team_response.to_json

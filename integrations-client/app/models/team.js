@@ -12,7 +12,8 @@ export default DS.Model.extend({
     user_id: attr('string'),
     plan_id: attr('number'),
     plan: DS.belongsTo('plan'),
-    default_seat_id: DS.belongsTo('seat'), 
+    default_seat_id: attr('number'), 
+    default_seat_name: attr('string'), 
     created_at: attr('date'),
     updated_at: attr('date')
 });

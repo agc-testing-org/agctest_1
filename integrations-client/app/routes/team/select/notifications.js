@@ -14,12 +14,6 @@ export default Ember.Route.extend({
         var notifications = this.store.query('notification',params);
         this.store.adapterFor('notification').set('namespace', '');
 
-        var defaultSeat = null;
-        if(this.modelFor("team.select").team.get("default_seat_id")){
-            defaultSeat = this.modelFor("team.select").team.get("default_seat_id");
-        }  
-        var memberSeat = this.store.peekAll("seat").findBy("name","member");
-
         return Ember.RSVP.hash({
             notifications: notifications,
             params: params,
@@ -28,8 +22,8 @@ export default Ember.Route.extend({
             jobs: this.modelFor("team.select").jobs,
             user: this.modelFor("team").user,
             roles: this.modelFor("team.select").roles,
-            default_seat: defaultSeat,
-            member_seat: memberSeat
+            default_seat_id: this.modelFor("team.select").team.get("default_seat_id"),
+            default_seat_name: this.modelFor("team.select").team.get("default_seat_name"),
         });
     }
 });

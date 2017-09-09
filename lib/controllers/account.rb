@@ -198,6 +198,7 @@ class Account
     end
 
     def valid_email email
+        email = email.strip
         if email =~ /\A([^@\s]+)@((?:[-a-z0-9]+.)+[a-z]{2,})\z/i
             return true
         else
@@ -375,10 +376,10 @@ class Account
     def get_teams user_id, params
         params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
-            return Team.joins(:user_teams).where({
+            return Team.joins(:user_teams,:plan).joins("INNER JOIN seats on seats.id = plans.seat_id").where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
-            }).where(params)
+            }).where(params).select("teams.*,plans.seat_id as default_seat_id, seats.name as default_seat_name")
         rescue => e
             puts e
             return nil
