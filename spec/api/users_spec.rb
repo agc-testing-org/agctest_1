@@ -533,8 +533,8 @@ describe "/users" do
             it_behaves_like "unauthorized"
         end
         context "contact belongs to team" do
-            fixtures :users, :user_teams, :teams, :seats
-            context "with sponsored seat" do
+            fixtures :users, :user_teams, :teams, :seats, :plans
+            context "with priority seat" do
                 before(:each) do
                     post "/users/#{users(:elina_bteam_priority).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
                     @res = [JSON.parse(last_response.body)]

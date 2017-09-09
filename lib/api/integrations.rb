@@ -1332,9 +1332,11 @@ class Integrations < Sinatra::Base
         (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
         
         if fields[:seat_id] == Seat.find_by(:name => "sponsored").id
-            expires = Time.now + 60*60*24*30*3 #3 months
+            plan = Plan.find_by(:name => "recruiter")
+            expires = Time.now + 60*60*24* plan.period
         elsif fields[:seat_id] == Seat.find_by(:name => "priority").id
-            expires = Time.now + 60*60*24*14  #2 weeks      
+            plan = Plan.find_by(:name => "manager")
+            expires = Time.now + 60*60*24* plan.period      
         end
 
         invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id, fields[:job_id], expires
