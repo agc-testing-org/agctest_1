@@ -379,7 +379,7 @@ class Account
             return Team.joins(:user_teams,:plan).joins("INNER JOIN seats on seats.id = plans.seat_id").where({
                 "user_teams.user_id" => user_id,
                 "user_teams.accepted" => true #don't allow team to show for registered invites...
-            }).where(params).select("teams.*,plans.seat_id as default_seat_id, seats.name as default_seat_name")
+            }).where(params).select("teams.*,plans.seat_id as default_seat_id, seats.name as default_seat_name").order("teams.id DESC")
         rescue => e
             puts e
             return nil

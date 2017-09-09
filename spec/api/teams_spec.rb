@@ -34,6 +34,19 @@ describe "/teams" do
         end
     end
 
+    shared_examples_for "teams_with_default_seat" do
+        it "should return default_seat_id" do
+            @team_results.each_with_index do |team_result,i|
+                expect(@teams[i]["default_seat_id"]).to eq(team_result["default_seat_id"])
+            end                     
+        end
+        it "should return default_seat_name" do
+            @team_results.each_with_index do |team_result,i|
+                expect(@teams[i]["default_seat_name"]).to eq(team_result["default_seat_name"])
+            end                                                                 
+        end
+    end
+
     describe "POST /" do
         before(:each) do
             @name = "NEW TEAM"
@@ -115,18 +128,20 @@ describe "/teams" do
             context "no params" do
                 before(:each) do
                     get "/teams", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true")
+                    @team_results = @mysql_client.query("select teams.*,plans.seat_id as default_seat_id, seats.name as default_seat_name from teams INNER JOIN plans ON plans.id = teams.plan_id INNER JOIN seats on seats.id = plans.seat_id INNER JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true ORDER BY teams.id DESC")
                     @teams = JSON.parse(last_response.body)
                 end
                 it_behaves_like "teams"
+                it_behaves_like "teams_with_default_seat"
             end
             context "params - seat_id" do
                 before(:each) do
                     get "/teams", {:seat_id => seats(:member).id}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                    @team_results = @mysql_client.query("select teams.* from teams JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true AND user_teams.seat_id = #{seats(:member).id}")
+                    @team_results = @mysql_client.query("select teams.*,plans.seat_id as default_seat_id, seats.name as default_seat_name from teams INNER JOIN plans ON plans.id = teams.plan_id INNER JOIN seats on seats.id = plans.seat_id INNER JOIN user_teams ON user_teams.team_id = teams.id where user_teams.user_id = #{decrypt(@user).to_i} AND user_teams.accepted = true AND user_teams.seat_id = #{seats(:member).id} ORDER BY teams.id DESC")
                     @teams = JSON.parse(last_response.body)
                 end
                 it_behaves_like "teams"
+                it_behaves_like "teams_with_default_seat"
             end
         end
         context "no teams" do
@@ -156,8 +171,11 @@ describe "/teams" do
             it "should return owner / user" do
                 expect(@teams[0]["user"]["id"]).to eq(teams(:ateam).user.id)
             end
-            it "should return default seat_id" do
+            it "should return default_seat_id" do
                 expect(@teams[0]["default_seat_id"]).to eq(teams(:ateam).plan.seat.id)
+            end
+            it "should return default_seat_name" do
+                expect(@teams[0]["default_seat_name"]).to eq(teams(:ateam).plan.seat.name)
             end
             it "should return a list of permitted seats (to invite others)" do
                 expect(@teams[0]["seats"].to_json).to eq([{:id => seats(:priority).id},{:id => seats(:share).id},{:id => seats(:member).id}].to_json)
