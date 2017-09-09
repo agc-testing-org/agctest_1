@@ -1125,7 +1125,7 @@ class Integrations < Sinatra::Base
             active_seat = Seat.where({:name => seat}).first
         end
 
-        connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team), (active_seat.id if active_seat)
+        connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team)
 
         if active_team && connection && seat == "sponsored"
             connection.read = 1

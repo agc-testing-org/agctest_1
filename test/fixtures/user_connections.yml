@@ -21,13 +21,11 @@ elina_dteam_sponsored:
   contact: elina_dteam_sponsored
   read: true
   confirmed: 2
-  team: dteam 
-  seat: sponsored
+  team: dteam
 
 elina_bteam_priority:
-  user: adam_confirmed
+  user: adam_admin
   contact: elina_bteam_priority
   read: true
-  confirmed: 2
-  team: bteam 
-  seat: priority
+  confirmed: 1
+  team: bteam
