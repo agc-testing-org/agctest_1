@@ -1,11 +1,11 @@
 <div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down pb-0 bg-nav">
     <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
-        {{profile-overview user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params comments=model.comments votes=model.votes contributors=model.contributors comments_received=model.comments_received votes_received=model.votes_received contributors_received=model.contributors_received refresh="refresh"}}
+        {{profile-overview user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params comments=model.comments votes=model.votes contributors=model.contributors comments_received=model.comments_received votes_received=model.votes_received contributors_received=model.contributors_received request=model.request refresh="refresh"}}
     </div>
 </div>
 <div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up pb-0 bg-nav">
     <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
-        {{profile-overview user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params comments=model.comments votes=model.votes contributors=model.contributors comments_received=model.comments_received votes_received=model.votes_received contributors_received=model.contributors_received refresh="refresh"}}
+        {{profile-overview user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params comments=model.comments votes=model.votes contributors=model.contributors comments_received=model.comments_received votes_received=model.votes_received contributors_received=model.contributors_received request=model.request refresh="refresh"}}
     </div>              
 </div>  
 
@@ -13,8 +13,9 @@
 <div class="col-md-12 col-sm-12">
     <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
         <div class="row">
-            {{profile-content-stats col=6 limit_results=true user=model.user roles=model.roles me=model.me params=model.params comments=model.comments votes=model.votes contributors=model.contributors comments_received=model.comments_received votes_received=model.votes_received contributors_received=model.contributors_received class="col-sm-12"}} {{application-foot class="foot-hold text-center"}}
+            {{profile-content-stats col=6 limit_results=true user=model.user roles=model.roles me=model.me params=model.params comments=model.comments votes=model.votes contributors=model.contributors comments_received=model.comments_received votes_received=model.votes_received contributors_received=model.contributors_received class="col-sm-12"}}
         </div>
     </div>
+    {{application-foot class="foot-hold text-center"}}
 </div>
 

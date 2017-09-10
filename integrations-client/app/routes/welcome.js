@@ -6,6 +6,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     sessionAccount: Ember.inject.service('session-account'),
     actions: {
         refresh(){
+            console.log("refreshing model");
             this.refresh();
         }
     },

@@ -3,6 +3,13 @@ import AuthenticatedRouteMixin from 'ember-simple-auth/mixins/authenticated-rout
 
 export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
+
+    actions: {
+        refresh(){
+            this.refresh();
+        }
+    },
+
     model: function(params) {     
 
         var store = this.get('store');
@@ -13,6 +20,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         this.store.adapterFor('skillset').set('namespace', 'users/'+params.id);
         var skillsets = this.store.findAll('skillset');
         var roles = this.store.findAll('role');
+        var request = this.store.queryRecord('request',{});
         this.store.adapterFor('skillset').set('namespace', '');
 
         return Ember.RSVP.hash({
@@ -21,7 +29,8 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
             user: user,
             states: states,
             params: params,
-            me: false
+            me: false,
+            request: request
         });
     },
     renderTemplate(controller,model) {

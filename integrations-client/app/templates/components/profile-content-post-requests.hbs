@@ -1,32 +1,24 @@
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
-        <div class="overview">
-            <div class="text-center">
+        {{#unless (eq user_id sessionAccount.account.id)}}
+            {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
+                <div class="mb-3">
                 {{#if (eq request.id 0)}}
-                    <h3>Request this user's contact information?</h3>
-                    <h4>Please note that this will automatically share yours</h4>
-
-                    <button class="btn btn-secondary rounded mt-2" {{action "request" user_id}}>Request</button>
+                    <button class="btn btn-info btn-sm rounded" {{action "request" user_id}}>Send Contact Request</button>
+                    <div class="about">
+                        <small>Note: this will automatically share your contact information with this user</small>
+                    </div>
                 {{else}}
                     {{#if (eq request.contact_id sessionAccount.account.id)}}
-                        <h3>This user has already requested your information!</h3>
-                        <h3>View {{#link-to "me.connections"}}my contacts{{/link-to}}</h3>
+                        {{connection-confirm request=request hide_profile=true refresh="refresh" class="about"}}                             
                     {{else}}
                         {{#if (eq request.confirmed "1")}}
-                            <h3>You've requested contact information!</h3>
-                            <h3>Your request is under review.</h3>
+                            <button class="btn btn-warning btn-sm rounded" disabled>Contact Request Sent</button>
                         {{else if (eq request.confirmed "3")}}
-                            <h3>You've already sent a contact request.</h3>
-                            <h3>This user is not ready to share contact information with you.</h3>
+                            <button class="btn btn-danger btn-sm rounded" disabled>Request Declined</button>
                         {{else if (eq request.confirmed "2")}}
-                            <h3>This user has confirmed your request!</h3>
-                            <h3>View {{#link-to "me.connections"}}my contacts{{/link-to}}</h3>
+                            <button class="btn btn-success btn-sm rounded" disabled>Request Accepted</button> 
                         {{/if}}
                     {{/if}}
-
                 {{/if}}
-            </div>
-        </div>
-        {{application-foot class="foot-hold text-center"}}
-    </div>
-</div>
+                </div>
+            {{/unless}}
+        {{/unless}}

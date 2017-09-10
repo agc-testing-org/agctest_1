@@ -4,6 +4,7 @@
         <div class="about text-capitalize">Joined {{moment-from-now user.created_at}}</div>
         <div class="about text-capitalize mb-1"><strong>roles</strong>{{#each filteredRoles as |r index|}} {{r.name}}{{#unless (eq filteredRoles.length (plus 1 index))}},{{/unless}}{{/each}}</div>
         <div class="about text-capitalize"><strong>skills</strong>{{#each filteredSkillsets as |s index|}} {{s.name}}{{#unless (eq filteredSkillsets.length (plus 1 index))}},{{/unless}}{{/each}}</div>
+        {{profile-content-post-requests request=request roles=filteredRoles user_id=user.id refresh="refresh"}}
     </div>
     <div class="col-md-6 col-sm-12">
         {{profile-stats-list roles=roles contributors_received=contributors_received comments_received=comments_received votes_received=votes_received comments=comments votes=votes contributors=contributors class="overview text-center"}}
