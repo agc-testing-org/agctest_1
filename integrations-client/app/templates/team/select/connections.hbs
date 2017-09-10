@@ -1,13 +1,2 @@
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">
-    {{team-overview-connections connections=model.connections}}
-</div>
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">
-    {{team-overview-connections connections=model.connections}} 
-</div>
-
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">
-	{{team-content-connections connections=model.connections team=model.team}}
-</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">
-	{{team-content-connections connections=model.connections team=model.team}}
-</div>
+<div class="hidden-sm-down col-md-7 col-sm-12">{{team-content-connections connections=model.connections team=model.team}}</div>
+<div class="hidden-md-up col-md-7 col-sm-12">{{team-content-connections connections=model.connections team=model.team}}</div>

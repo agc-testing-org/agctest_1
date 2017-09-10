@@ -5,7 +5,7 @@
         {{request.first_name}}
     {{/unless}}
     is interested in contacting you. Share your contact information?
-    <button {{action "confirmeUserConnectionRequests" request.id 2}} class="btn btn-info rounded btn-sm">Accept</button>
+    <button {{action "confirmeUserConnectionRequests" request.id 2}} class="btn btn-info rounded btn-sm">Share</button>
     <button {{action "confirmeUserConnectionRequests" request.id 3}} class="btn btn-warning rounded btn-sm">Decline</button>
 {{else if (eq request.confirmed "2")}}
     You are sharing contact information with 
@@ -22,6 +22,6 @@
     {{else}}
         {{request.first_name}}
     {{/unless}}
-    <button {{action "confirmeUserConnectionRequests" request.id 2}} class="btn btn-info rounded btn-sm">Accept</button>
+    <button {{action "confirmeUserConnectionRequests" request.id 2}} class="btn btn-info rounded btn-sm">Share</button>
 {{/if}}
 

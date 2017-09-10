@@ -1,6 +1,5 @@
 {{#if connections}}
-<div class="full">
-    <h4 class="about section">Team Contacts and Contact Requests</h4>
+    <h3>{{connections.length}} Contacts</h3>
     <div class="list-group rounded text-left">
         {{#each connections as |connection|}}
         <div class="list-group-item rounded">
@@ -14,15 +13,11 @@
         </div>
         {{/each}}
     </div>
-</div>
+
 {{else}}
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
-        <div class="overview">
-            <div class="text-center">
-                <h3>No contacts or contact requests</h3>
-            </div>
-        </div>
+<div class="overview bg-nav rounded p-3 mb-2">
+    <div class="text-left">
+        <h3>No contacts</h3>
     </div>
 </div>
 {{/if}}
