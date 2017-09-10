@@ -583,15 +583,19 @@ class Account
         end
     end
 
-    def get_team_connections_requested team_id
+    def get_team_connections_requested team_id, team_plan
         begin   
             contacts = []
-            UserConnection.joins("inner join users on user_connections.user_id = users.id inner join user_teams on user_connections.contact_id = user_teams.user_id").where("user_connections.team_id = ?", team_id).select("user_connections.*, users.id, users.first_name, users.email, user_teams.seat_id").order("user_connections.created_at DESC").each_with_index do |c,i|
-                contacts[i] = c.as_json
-                contacts[i][:user_profile] = get_profile c.user
-                contacts[i][:contact_first_name] = c.contact.first_name
+            connections = UserConnection.joins("inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id").where("user_connections.team_id = ?", team_id)
+            if team_plan == "recruiter"
+                connections.select("user_connections.*, contact.first_name as contact_first_name, users.id, users.first_name, users.email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").each_with_index do |c,i|
+                    contacts[i] = c.as_json
+                    contacts[i][:user_profile] = get_profile c.user
+                end
+                return contacts
+            else # manager - don't show requestor info
+                return connections.select("user_connections.id, user_connections.contact_id, user_connections.created_at, user_connections.updated_at, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC")
             end
-            return contacts
         rescue => e
             puts e
             return nil
@@ -738,13 +742,13 @@ class Account
                     return mail notification.user.email, "Wired7 #{notification.sprint_timeline.state.name} deadline set", "#{notification.user.first_name},<br><br>We've just set deadline for the #{notification.sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nWe've just set deadline for the #{notification.sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\nAt least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:\n\n#{link}\n\n\n#{signature}"   
                 elsif notification.sprint_timeline.notification.name == "peer review"
                     link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.sprint_state.sprint.project.id}-#{notification.sprint_timeline.sprint_state.sprint.project.org}-#{notification.sprint_timeline.sprint_state.sprint.project.name}/sprint/#{notification.sprint_timeline.sprint_state.sprint.id}-#{notification.sprint_timeline.sprint_state.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.sprint_state.state.name}"
-                    
+
                     subject = "Wired7 #{notification.sprint_timeline.sprint_state.state.name} Peer Review" 
                     html_body = "#{notification.user.first_name},<br><br>The deadline for the #{notification.sprint_timeline.sprint_state.state.name} phase of the <i>#{notification.sprint_timeline.sprint_state.sprint.project.name}</i> sprint <i>#{notification.sprint_timeline.sprint_state.sprint.title}</i> has arrived!<br><br>We've selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with other team members:<br><br><: href='#{link}'>#{link}</a><br><br><br>#{signature}"
                     body = "#{notification.user.first_name},\n\nThe deadline for the #{notification.sprint_timeline.sprint_state.state.name} phase of the #{notification.sprint_timeline.sprint_state.sprint.project.name} sprint #{notification.sprint_timeline.sprint_state.sprint.title} has arrived!\n\nWe selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with team members:\n\n#{link}\n\n\n#{signature}"
                     return mail notification.user.email, subject, html_body, body
                 end
-                
+
             end
             #TODO return mail notification.user.email, subject, html_body, body
             #TODO SPEC TESTS for this method
