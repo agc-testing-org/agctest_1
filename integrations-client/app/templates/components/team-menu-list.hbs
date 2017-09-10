@@ -1,14 +1,12 @@
 <ul class="nav nav-pills flex-column timeline">
     {{#if team}}
     
-    {{#if (or team.show team.shares)}}
-        {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-            <div class="icon hidden-sm-down">
-                <i class="fa fa-fw fa-2x fa-home"></i>
-            </div>
-            Home
-        {{/link-to}}
-    {{/if}}
+    {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+        <div class="icon hidden-sm-down">
+            <i class="fa fa-fw fa-2x fa-home"></i>
+        </div>
+        Home
+    {{/link-to}}
 
     {{#if team.show}}
         
