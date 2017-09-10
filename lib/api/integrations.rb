@@ -739,7 +739,7 @@ class Integrations < Sinatra::Base
         ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
         org = Organization.new
         team = org.get_team params[:id]
-        requested = account.get_team_connections_requested params[:id], team.plan.name
+        requested = org.get_team_connections_requested params[:id], team.plan.name
         status 200
         return requested.to_json
     end
