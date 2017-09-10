@@ -4,10 +4,16 @@
     <div class="list-group rounded text-left">
         {{#each connections as |connection|}}
         <div class="list-group-item rounded highlight-{{notification.read}}">
-            <h4 class="line text-capitalize">
+            {{#unless connection.expires}}
+            <h4 class="line">
                 {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}}
             </h4>
             <p class="line"><span class="text-muted"><strong>E:</strong></span> {{connection.email}}</p>
+            {{else}}
+            <h4 class="line">
+                Someone wants to contact you but you are exclusively working with {{connection.team_name}} @ {{connection.team_company}}, the team that invited you.  Your seat expires <strong>{{moment-from-now connection.expires}}</strong>.
+            </h4>
+            {{/unless}}
             <small class="line text-muted">{{moment-from-now connection.created_at}}</small>
 
         {{#unless (eq connection.user_id user.id)}}

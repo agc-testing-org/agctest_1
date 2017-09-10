@@ -13,6 +13,8 @@ export default DS.Model.extend({
     read: DS.attr('boolean'),
 	confirmed: DS.attr('number'),
 	team_id: DS.attr('number'),
+    team_name: DS.attr('string'),
+    team_company: DS.attr('string'),
 	seat_id: DS.attr('number'),
     contact_first_name: DS.attr('string'),
     expires: attr('date'),

@@ -541,12 +541,16 @@ class Account
     def get_user_connections_requested user_id # people that request are automatically added as contacts
         begin
             contacts = []
-            seat = Seat.find_or_initialize_by(:name => 'priority')
-            UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} left join user_teams ut on user_connections.contact_id = ut.user_id").where("user_connections.team_id is null OR ut.seat_id = ?", seat["id"]).select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            requests = UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} INNER JOIN user_teams ut on user_connections.contact_id = ut.user_id INNER JOIN seats ON ut.seat_id = seats.id INNER JOIN teams ON teams.id = ut.team_id")
+           
+            full = requests.where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.user
             end
-            return contacts
+
+            partial = requests.where("seats.name = 'priority' AND ut.expires > now()").select("user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company").order('user_connections.created_at DESC')
+
+            return (full + partial)
         rescue => e
             puts e
             return nil
@@ -571,8 +575,7 @@ class Account
     def get_user_connections_accepted user_id
         begin
             contacts = []
-            seat = Seat.find_or_initialize_by(:name => 'priority')
-            UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id} AND user_connections.confirmed = 2 left join user_teams ut on user_connections.contact_id = ut.user_id").where("user_connections.team_id is null OR ut.seat_id = ?", seat["id"]).select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id} AND user_connections.confirmed = 2 left join user_teams ut on user_connections.contact_id = ut.user_id INNER JOIN seats ON ut.seat_id = seats.id").where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.contact
             end
