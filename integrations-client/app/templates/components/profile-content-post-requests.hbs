@@ -8,8 +8,7 @@
                     </div>
                 {{else}}
                     {{#if (eq request.contact_id sessionAccount.account.id)}}
-                        <div class="about">This user would like to contact you</div>
-                        <button class="btn btn-info btn-sm rounded" {{action "accept" user_id}}>Accept Contact Request</button>
+                        {{connection-confirm request=request hide_profile=true refresh="refresh" class="about"}}                             
                     {{else}}
                         {{#if (eq request.confirmed "1")}}
                             <button class="btn btn-warning btn-sm rounded" disabled>Contact Request Sent</button>
