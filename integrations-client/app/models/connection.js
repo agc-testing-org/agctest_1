@@ -17,5 +17,6 @@ export default DS.Model.extend({
     team_company: DS.attr('string'),
 	seat_id: DS.attr('number'),
     contact_first_name: DS.attr('string'),
+    contact_email: DS.attr('string'),
     expires: attr('date'),
 });

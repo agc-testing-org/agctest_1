@@ -541,7 +541,7 @@ class Account
     def get_user_connections_requested user_id # people that request are automatically added as contacts
         begin
             contacts = []
-            requests = UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} INNER JOIN user_teams ut on user_connections.contact_id = ut.user_id INNER JOIN seats ON ut.seat_id = seats.id INNER JOIN teams ON teams.id = ut.team_id")
+            requests = UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id")
            
             full = requests.where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
@@ -557,25 +557,10 @@ class Account
         end
     end
 
-    def get_user_connections_with_team user_id
-        begin
-            contacts = []
-            seat = Seat.find_or_initialize_by(:name => 'sponsored')
-            UserTeam.joins("inner join users on user_teams.sender_id = users.id inner join user_connections on user_teams.user_id = user_connections.contact_id").where("user_connections.user_id != user_teams.sender_id and user_connections.user_id = ? and user_connections.team_id is not null and user_teams.seat_id = ?", user_id, seat["id"]).select("user_connections.*, user_teams.sender_id, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
-                contacts[i] = c.as_json
-                contacts[i][:user_profile] = get_profile c.sender
-            end
-            return contacts
-        rescue => e
-            puts e
-            return nil
-        end
-    end
-
     def get_user_connections_accepted user_id
         begin
             contacts = []
-            UserConnection.joins("INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id} AND user_connections.confirmed = 2 left join user_teams ut on user_connections.contact_id = ut.user_id INNER JOIN seats ON ut.seat_id = seats.id").where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id} AND user_connections.confirmed = 2 LEFT JOIN user_teams ut ON (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id").where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.contact
             end

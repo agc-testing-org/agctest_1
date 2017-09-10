@@ -17,9 +17,10 @@ class Organization
             contacts = []
             connections = UserConnection.joins("inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id").where("user_connections.team_id = ?", team_id)
             if team_plan == "recruiter" 
-                connections.select("user_connections.*, contact.first_name as contact_first_name, users.id, users.first_name, users.email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").each_with_index do |c,i|
+                account = Account.new 
+                connections.select("user_connections.*, contact.first_name as contact_first_name, users.id, users.first_name, contact.email as contact_email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").each_with_index do |c,i|
                     contacts[i] = c.as_json
-                    contacts[i][:user_profile] = get_profile c.user
+                    contacts[i][:user_profile] = account.get_profile c.user
                 end
                 return contacts 
             else # manager - don't show requestor info
