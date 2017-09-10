@@ -39,20 +39,8 @@
                     <i class="fa fa-fw fa-2x fa-sort-amount-desc"></i>
                 </div>
                 Overview
-            {{/link-to}}
-
-            {{#unless (eq user.id sessionAccount.account.id)}}
-                {{#unless (or (greater-than manager.length 0) (greater-than recruiter.length 0))}}
-                    {{#link-to "profile.requests" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
-                        <div class="icon hidden-sm-down">
-                            <i class="fa fa-fw fa-2x fa-user-plus"></i>
-                        </div>
-                        Request Contact
-                    {{/link-to}}
-                {{/unless}}
-            {{/unless}}
+            {{/link-to}}        
         
         {{/if}}
-
     {{/if}}
 </ul>

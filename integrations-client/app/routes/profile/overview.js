@@ -5,9 +5,10 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     store: Ember.inject.service(),
     sessionAccount: Ember.inject.service('session-account'),
     actions: {
-        refresh(){
-            this.refresh();
-        }
+        // let parent route handle refresh to avoid reloading everything
+        //        refresh(){
+        //            this.refresh();
+        //        }
     },
     model: function(params) { 
 
@@ -22,11 +23,11 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
         this.store.adapterFor('aggregate-comment').set('namespace', ''); 
 
         return Ember.RSVP.hash({
-            teams: this.store.findAll('team'),
             skillsets: this.modelFor("profile").skillsets,
             roles: this.modelFor("profile").roles,
             user: this.modelFor("profile").user,
             states: this.modelFor("profile").states,
+            request: this.modelFor("profile").request,
             params: params,
             comments: comments,
             votes: votes,
