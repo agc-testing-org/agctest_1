@@ -10,9 +10,17 @@
             </h4>
             <p class="line"><span class="text-muted"><strong>E:</strong></span> {{connection.email}}</p>
             {{else}}
+            {{#unless (eq connection.team_plan "recruiter")}}
+            HERE
             <h4 class="line">
                 Someone wants to contact you but you are exclusively working with {{connection.team_name}} @ {{connection.team_company}}, the team that invited you.  Your seat expires <strong>{{moment-from-now connection.expires}}</strong>.
             </h4>
+            {{else}}
+            <h4 class="line">
+                {{#link-to "profile" connection.user_profile.id}}{{connection.first_name}} {{connection.last_name}} {{#if connection.user_profile.title}}({{user-profile-descriptor user_profile=connection.user_profile class="d-inline"}}){{/if}}{{/link-to}} is currently represented by {{connection.first_name}} on {{connection.team_name}} @ {{connection.team_company}}
+            </h4>
+            <p class="line"><span class="text-muted"><strong>E:</strong></span> {{connection.email}}</p>
+            {{/unless}}
             {{/unless}}
             <small class="line text-muted">{{moment-from-now connection.created_at}}</small>
 
