@@ -827,25 +827,54 @@ describe ".Account" do
         end
     end 
 
-    context "#create_connection_request" do
+    shared_examples_for "connection_request" do
+        it "should include user_id" do
+            expect(@res["user_id"]).to eq(@user_id)
+        end
+        it "should include contact_id" do
+            expect(@res["contact_id"]).to eq(@contact_id)
+        end
+        it "should include read" do
+            expect(@res["read"]).to eq(false)
+        end
+        it "should include confirmed" do
+            expect(@res["confirmed"]).to eq(1)
+        end
+        it "should include team_id" do
+            expect(@res["team_id"]).to eq(@team_id) 
+        end
+    end
+
+    context "#create_connection_request", :focus => true do
         fixtures :users
         context "connection_request_confirmed" do
             before(:each) do
                 @contact_id = (decrypt(users(:adam_protected).id).to_i)
                 @user_id = (decrypt(users(:adam).id).to_i)
-                @res = (@account.create_connection_request @user_id, @contact_id, nil)
+                @team_id = nil
             end
-            it "should include user_id" do
-                expect(@res["user_id"]).to eq(@user_id)
+            context "without team_id" do
+                before(:each) do
+                    @res = (@account.create_connection_request @user_id, @contact_id, @team_id)
+                end
+                it_behaves_like "connection_request"
             end
-            it "should include contact_id" do
-                expect(@res["contact_id"]).to eq(@contact_id)
+            context "with team_id" do
+                fixtures :teams
+                before(:each) do
+                    @team_id = teams(:ateam).id
+                    @res = (@account.create_connection_request @user_id, @contact_id, @team_id)
+                end
+                it_behaves_like "connection_request"
             end
-            it "should include read" do
-                expect(@res["read"]).to eq(false)
-            end
-            it "should include confirmed" do
-                expect(@res["confirmed"]).to eq(1)
+            context "invalid team_id" do
+                before(:each) do
+                    @team_id = 133339
+                    @res = (@account.create_connection_request @user_id, @contact_id, @team_id)
+                end 
+                it "should return nil" do
+                    expect(@res).to be nil
+                end
             end
         end
     end 
@@ -860,7 +889,7 @@ describe ".Account" do
             expect(@res).to eq(user_teams(:adam_original_invite).seat_id)
         end
     end
-    
+
     shared_examples_for "invite" do
         it "to" do
             expect(@res[:to]).to eq @to
