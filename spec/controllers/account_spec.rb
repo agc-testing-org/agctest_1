@@ -871,10 +871,16 @@ describe ".Account" do
         end 
     end 
 
-    context "#get_user_connections_requested" do
+    context "#get_user_connections_requested", :focus => true do
+        fixtures :users, :user_connections
         before(:each) do
-            @res = @account.get_user_connections_requested 
-        #    puts @res.inspect
+            @res = @account.get_user_connections_requested user_connections(:elina_bteam_priority).contact[:id] 
+            puts @res.inspect
+        end
+        # SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = 403470360 LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC
+        # SELECT user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = 403470360 LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (seats.name = 'priority' AND ut.expires > now()) ORDER BY user_connections.created_at DESC
+        it "" do
+
         end
     end
 

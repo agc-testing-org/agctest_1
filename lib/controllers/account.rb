@@ -538,19 +538,23 @@ class Account
         end
     end
 
-    def get_user_connections_requested user_id # people that request are automatically added as contacts
+    def get_user_connections_requested_no_current_seat
+        contacts = []
         begin
-            contacts = []
-            requests = UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id")
-           
-            full = requests.where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id").where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.user
             end
+            return contacts
+        rescue => e
+            puts e
+            return nil
+        end
+    end
 
-            partial = requests.where("seats.name = 'priority' AND ut.expires > now()").select("user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company").order('user_connections.created_at DESC')
-
-            return (full + partial)
+    def get_user_connections_requested_current_priority_seat
+        begin
+            return UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id").where("seats.name = 'priority' AND ut.expires > now()").select("user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company").order('user_connections.created_at DESC')
         rescue => e
             puts e
             return nil

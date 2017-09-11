@@ -1168,10 +1168,11 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         accepted = account.get_user_connections_accepted @session_hash["id"]
-        requested = account.get_user_connections_requested @session_hash["id"]
+        requested_no_seat = account.get_user_connections_requested_no_current_seat @session_hash["id"]
+        requested_priority_seat = account. get_user_connections_requested_current_priority_seat @session_hash["id"]
         sponsored = account.get_user_connections_with_team @session_hash["id"]
         status 200
-        return (accepted + requested + sponsored).to_json
+        return (accepted + requested_no_seat + requested_priority_seat + sponsored).to_json
     end
 
     connections_requests_get_by_id = lambda do
