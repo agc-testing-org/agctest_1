@@ -29,7 +29,7 @@ RSpec.configure do |config|
     config.include Rack::Test::Methods
     config.fixture_path = File.expand_path("../../test/fixtures", __FILE__)
 
-        ActiveRecord::Base.logger = Logger.new(STDOUT)
+    #    ActiveRecord::Base.logger = Logger.new(STDOUT)
 
     config.use_transactional_fixtures = false
 

@@ -793,7 +793,7 @@ describe ".Account" do
         end
     end 
 
-    shared_examples_for "connections_accepted" do
+    shared_examples_for "connections_full" do
         it "should return a result" do
             expect(@mysql_result.count).to be > 0
         end
@@ -821,10 +821,19 @@ describe ".Account" do
             @mysql_result.each_with_index do |res,i|
                 expect(@res[i]["email"]).to eq(res["email"])
             end                                                                 
-        end                                         
+        end                              
+    end
+    shared_examples_for "connections_accepted_profile" do
         it "should include user_profile" do
             @mysql_result.each_with_index do |res,i|
                 expect(decrypt(@res[i][:user_profile][:id]).to_i).to eq(res["contact_id"])
+            end                                                                 
+        end 
+    end
+    shared_examples_for "connections_requested_profile" do
+        it "should include user_profile" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i][:user_profile][:id]).to_i).to eq(res["user_id"])
             end                                                                 
         end 
     end
@@ -836,7 +845,8 @@ describe ".Account" do
                 @res = @account.get_user_connections_accepted user_connections(:adam_confirmed_request_adam_accepted).user[:id] 
                 @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:adam_confirmed_request_adam_accepted).user[:id]} AND user_connections.confirmed = 2 LEFT JOIN user_teams ut ON (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
             end
-            it_behaves_like "connections_accepted"
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_accepted_profile"
         end
         context "with team_id but not priority expired seat" do
             fixtures :user_connections, :teams
@@ -855,9 +865,9 @@ describe ".Account" do
                 @mysql_client.query("update user_connections set confirmed = 2 where id = #{user_connections(:elina_bteam_priority).id}")
                 @res = @account.get_user_connections_accepted user_connections(:elina_bteam_priority).user[:id]
                 @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:elina_bteam_priority).user[:id]} AND user_connections.confirmed = 2 LEFT JOIN user_teams ut ON (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
-                puts @res.inspect
             end
-            it_behaves_like "connections_accepted"
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_accepted_profile"
         end
         context "with priority seat and expires > now (priority user belongs to team)" do
             fixtures :user_connections, :teams, :seats, :user_teams
@@ -871,17 +881,49 @@ describe ".Account" do
         end 
     end 
 
-    context "#get_user_connections_requested", :focus => true do
+    context "#get_user_connections_requested_no_current_seat" do
         fixtures :users, :user_connections
-        before(:each) do
-            @res = @account.get_user_connections_requested user_connections(:elina_bteam_priority).contact[:id] 
-            puts @res.inspect
+        context "no team_id" do
+            before(:each) do
+                @res = @account.get_user_connections_requested_no_current_seat user_connections(:adam_confirmed_request_adam_accepted).contact[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:adam_confirmed_request_adam_accepted).contact[:id]} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_requested_profile"
         end
-        # SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = 403470360 LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC
-        # SELECT user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = 403470360 LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (seats.name = 'priority' AND ut.expires > now()) ORDER BY user_connections.created_at DESC
-        it "" do
+        context "with team_id but not priority expired seat" do
+            fixtures :user_connections, :teams
+            before(:each) do
+                @mysql_client.query("update user_connections set team_id = #{teams(:ateam).id}")
+                @res =  @account.get_user_connections_requested_no_current_seat user_connections(:adam_confirmed_request_adam_accepted).contact[:id] 
+            end
+            it "should return empty" do
+                expect(@res).to be_empty
+            end
+        end
+        context "expired priority" do
+            fixtures :user_connections, :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
+                @res = @account.get_user_connections_requested_no_current_seat user_connections(:elina_bteam_priority).contact[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:elina_bteam_priority).contact[:id]} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_requested_profile"
+        end
+        context "with priority seat and expires > now (priority user belongs to team)" do
+            fixtures :user_connections, :teams, :seats, :user_teams
+            before(:each) do
+                @res = @account.get_user_connections_requested_no_current_seat user_connections(:elina_bteam_priority).contact[:id]
+            end
+            it "should return empty" do
+                expect(@res).to be_empty 
+            end
+        end 
+    end
 
-        end
+    context "#get_user_connections_requested_current_priority_seat" do
+        # SELECT user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = 403470360 LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (seats.name = 'priority' AND ut.expires > now()) ORDER BY user_connections.created_at DESC
     end
 
     context "#get_user_connections_with_team" do
