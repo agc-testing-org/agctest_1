@@ -18,13 +18,13 @@ class Organization
             connections = UserConnection.joins("inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id").where("user_connections.team_id = ?", team_id)
             if team_plan == "recruiter" 
                 account = Account.new 
-                connections.select("user_connections.*, contact.first_name as contact_first_name, users.id, users.first_name, contact.email as contact_email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").each_with_index do |c,i|
+                connections.select("user_connections.*, '#{team_plan}' as team_plan, users.id, users.first_name, users.email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").each_with_index do |c,i|
                     contacts[i] = c.as_json
                     contacts[i][:user_profile] = account.get_profile c.user
                 end
                 return contacts 
             else # manager - don't show requestor info
-                return connections.select("user_connections.id, user_connections.contact_id, user_connections.created_at, user_connections.updated_at, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC")
+                return connections.select("user_connections.id, '#{team_plan}' as team_plan,  user_connections.contact_id, user_connections.created_at, user_connections.updated_at, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").as_json
             end
         rescue => e
             puts e

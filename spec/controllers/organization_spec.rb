@@ -6,6 +6,77 @@ describe ".Organization" do
         @team = Organization.new
     end
 
+    shared_examples_for "team_connections_manager" do
+        it "should return a result" do
+            expect(@mysql_result.count).to be > 0
+        end
+        it "should include id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["id"]).to eq(res["id"])
+            end                                                         
+        end  
+        it "should include contact_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i]["contact_id"]).to_i).to eq(res["contact_id"])
+            end
+        end
+        it "should include contact_first_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["contact_first_name"]).to eq(res["contact_first_name"])
+            end                                                                 
+        end  
+        it "should include team_plan" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_plan"]).to eq(res["team_plan"])
+            end
+        end
+        it "should include expires" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["expires"]).to eq(res["expires"].to_s(:db))
+            end
+        end
+    end
+
+    shared_examples_for "team_connections_recruiter" do
+        it "should include user_id as user_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i]["user_id"]).to_i).to eq(res["user_id"])
+            end
+        end
+        it "should include user first_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["first_name"]).to eq(res["first_name"])
+            end                                                 
+        end
+        it "should include user_profile" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i][:user_profile][:id]).to_i).to eq(res["user_id"])
+            end
+        end
+        it "should include user email" do 
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["email"]).to eq(res["email"])
+            end                                                 
+        end
+    end
+
+    context "#get_team_connections_requested" do
+        fixtures :users, :user_connections, :teams, :user_teams, :seats, :plans
+        context "manager" do
+            before(:each) do
+                @res = @team.get_team_connections_requested user_connections(:elina_bteam_priority).team.id, user_connections(:elina_bteam_priority).team.plan.name
+                @mysql_result = @mysql_client.query("SELECT user_connections.id, 'manager' as team_plan,  user_connections.contact_id, user_connections.created_at, user_connections.updated_at, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name FROM `user_connections` inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id WHERE (user_connections.team_id = #{user_connections(:elina_bteam_priority).team.id}) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "team_connections_manager"
+        end
+        context "recruiter", :focus => true do
+            before(:each) do
+                @res = @team.get_team_connections_requested user_connections(:elina_dteam_sponsored).team.id, user_connections(:elina_dteam_sponsored).team.plan.name
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, 'recruiter' as team_plan, users.id, users.first_name, users.email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name FROM `user_connections` inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id WHERE (user_connections.team_id = #{user_connections(:elina_bteam_priority).team.id}) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "team_connections_recruiter"
+        end
+    end
     context "#invite_member" do
         fixtures :users, :teams, :user_teams, :seats
         before(:each) do
