@@ -87,7 +87,7 @@ describe "/users" do
 
     describe "GET /me" do
         fixtures :user_profiles, :user_positions
-        context "signed in", :focus => true do
+        context "signed in" do
             before(:each) do
                 @position = user_positions(:adam_confirmed)
                 @profile = user_profiles(:adam_confirmed)
@@ -404,49 +404,22 @@ describe "/users" do
         end
     end
 
-    describe "GET /me/connections" do
+    describe "GET /me/connections" do 
+        # relying on these tests doesn't make sense because we're returning the results for three different methods, where each has more than one variation for the response
+        # check for a successful response here and use controller tests instead
         fixtures :user_connections
-        context "signed in" do
-            before(:each) do
-                get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} left join user_teams ut on user_connections.contact_id = ut.user_id where user_connections.confirmed=2 and user_connections.team_id is null or ut.seat_id = #{seats(:priority).id}) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} left join user_teams ut on user_connections.contact_id = ut.user_id where user_connections.team_id is null or ut.seat_id = #{seats(:priority).id})")
-            end
-            it_behaves_like "contact"
-            it_behaves_like "contact_info"
-            it_behaves_like "ok"
-        end
         context "not signed in" do
             before(:each) do
                 get "/users/me/connections"
             end
             it_behaves_like "unauthorized"
         end
-        context "contact belongs to team" do
-            fixtures :user_teams, :seats
-            context "with sponsored seat" do\
+        context "signed in" do
+            context "not priority or sponsored" do
                 before(:each) do
-                    get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                     @res = JSON.parse(last_response.body)
-                    @contact_result = @mysql_client.query("SELECT user_connections.*, user_teams.sender_id, users.first_name, users.email FROM user_teams inner join users on user_teams.sender_id = users.id inner join user_connections on user_teams.user_id = user_connections.contact_id WHERE user_connections.user_id != user_teams.sender_id and user_connections.user_id = #{decrypt(user_connections(:elina_dteam_sponsored).user_id).to_i} and user_connections.team_id is not null and user_teams.seat_id = #{seats(:sponsored).id} and user_connections.confirmed = 2")
-                    @inviter_id = user_teams(:elina_dteam_sponsored).sender_id
                 end
-
-                it "should include sender_id" do
-                    @contact_result.each_with_index do |r, i|
-                        expect(decrypt(@res[i]["sender_id"]).to_i).to eq(r["sender_id"])
-                        expect(@res[i]["sender_id"]).to eq(@inviter_id)
-                    end
-                end
-            end
-            context "with priority seat" do
-                before(:each) do
-                    get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
-                    @res = JSON.parse(last_response.body) 
-                    @contact_result = @mysql_client.query("(SELECT user_connections.*, users.first_name, users.email FROM user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:elina_bteam_priority).user_id).to_i} AND user_connections.confirmed=2 left join user_teams ut ON user_connections.contact_id = ut.user_id WHERE (user_connections.team_id is null or ut.seat_id = #{seats(:priority).id})) UNION (select user_connections.*, users.first_name, users.email FROM user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:elina_bteam_priority).user_id).to_i} left join user_teams ut on user_connections.contact_id = ut.user_id where (user_connections.team_id is null or ut.seat_id = #{seats(:priority).id}))")
-                end
-                it_behaves_like "contact"
-                it_behaves_like "contact_info"
                 it_behaves_like "ok"
             end
         end
