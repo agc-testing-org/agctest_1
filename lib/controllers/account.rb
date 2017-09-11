@@ -554,7 +554,7 @@ class Account
 
     def get_user_connections_requested_current_priority_seat user_id
         begin
-            return UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id").where("seats.name = 'priority' AND ut.expires > now()").select("user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company").order('user_connections.created_at DESC')
+            return UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id").where("seats.name = 'priority' AND ut.expires > now()").select("user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company").order('user_connections.created_at DESC').as_json
         rescue => e
             puts e
             return nil
@@ -578,7 +578,7 @@ class Account
     def get_user_connections_with_team user_id
         begin
             contacts = []
-            UserConnection.joins("inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.user_id = #{user_id}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id").select("user_connections.*, user_teams.sender_id, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.contact_id = #{user_id}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id").select("user_connections.*, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.contact
             end

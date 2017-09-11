@@ -849,7 +849,7 @@ describe ".Account" do
             it_behaves_like "connections_accepted_profile"
         end
         context "with team_id but not priority expired seat" do
-            fixtures :user_connections, :teams
+            fixtures :teams
             before(:each) do
                 @mysql_client.query("update user_connections set team_id = #{teams(:ateam).id}")
                 @res = @account.get_user_connections_accepted user_connections(:adam_confirmed_request_adam_accepted).user[:id]
@@ -859,7 +859,7 @@ describe ".Account" do
             end
         end
         context "with priority seat and expires <= now (priority user no longer belongs to team)" do
-            fixtures :user_connections, :teams, :seats, :user_teams
+            fixtures :teams, :seats, :user_teams
             before(:each) do
                 @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
                 @mysql_client.query("update user_connections set confirmed = 2 where id = #{user_connections(:elina_bteam_priority).id}")
@@ -870,7 +870,7 @@ describe ".Account" do
             it_behaves_like "connections_accepted_profile"
         end
         context "with priority seat and expires > now (priority user belongs to team)" do
-            fixtures :user_connections, :teams, :seats, :user_teams
+            fixtures :teams, :seats, :user_teams
             before(:each) do
                 @mysql_client.query("update user_connections set confirmed = 2 where id = #{user_connections(:elina_bteam_priority).user[:id]}")
                 @res = @account.get_user_connections_accepted user_connections(:elina_bteam_priority).user[:id]
@@ -892,7 +892,7 @@ describe ".Account" do
             it_behaves_like "connections_requested_profile"
         end
         context "with team_id but not priority expired seat" do
-            fixtures :user_connections, :teams
+            fixtures :teams
             before(:each) do
                 @mysql_client.query("update user_connections set team_id = #{teams(:ateam).id}")
                 @res =  @account.get_user_connections_requested_no_current_seat user_connections(:adam_confirmed_request_adam_accepted).contact[:id] 
@@ -902,7 +902,7 @@ describe ".Account" do
             end
         end
         context "expired priority" do
-            fixtures :user_connections, :teams, :seats, :user_teams
+            fixtures :teams, :seats, :user_teams
             before(:each) do
                 @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
                 @res = @account.get_user_connections_requested_no_current_seat user_connections(:elina_bteam_priority).contact[:id]
@@ -912,7 +912,7 @@ describe ".Account" do
             it_behaves_like "connections_requested_profile"
         end
         context "with priority seat and expires > now (priority user belongs to team)" do
-            fixtures :user_connections, :teams, :seats, :user_teams
+            fixtures :teams, :seats, :user_teams
             before(:each) do
                 @res = @account.get_user_connections_requested_no_current_seat user_connections(:elina_bteam_priority).contact[:id]
             end
@@ -922,12 +922,78 @@ describe ".Account" do
         end 
     end
 
-    context "#get_user_connections_requested_current_priority_seat" do
-        # SELECT user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = 403470360 LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (seats.name = 'priority' AND ut.expires > now()) ORDER BY user_connections.created_at DESC
+    shared_examples_for "connections_partial" do
+        it "should return a result" do
+            expect(@mysql_result.count).to be > 0
+        end
+        it "should include team_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_id"]).to eq(res["team_id"])
+            end
+        end
+        it "should include expires" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["expires"]).to eq(res["expires"].to_s(:db))
+            end
+        end
+        it "should include team_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_name"]).to eq(res["team_name"])
+            end
+        end
+        it "should include first_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_company"]).to eq(res["team_company"])
+            end
+        end
     end
 
-    context "#get_user_connections_with_team" do
+    context "#get_user_connections_requested_current_priority_seat" do
+        fixtures :users, :user_connections
+        context "non-expired seat" do
+            fixtures :user_connections, :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_result = @mysql_client.query("SELECT user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:elina_bteam_priority).contact[:id]} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (seats.name = 'priority' AND ut.expires > now()) ORDER BY user_connections.created_at DESC")
+                @res = @account.get_user_connections_requested_current_priority_seat user_connections(:elina_bteam_priority).contact[:id]
+            end
+            it_behaves_like "connections_partial"
+        end
+        context "expired seat" do
+            fixtures :user_connections, :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
+                @res = @account.get_user_connections_requested_current_priority_seat user_connections(:elina_bteam_priority).contact[:id]
+            end
+            it "should return empty" do
+                expect(@res).to be_empty
+            end
+        end
+    end
 
+    shared_examples_for "team_connections" do
+        it "should include team_plan" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_plan"]).to eq(res["team_plan"])
+            end
+        end
+        it "should not include sender_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["sender_id"]).to be nil
+            end                                                 
+        end  
+    end
+
+    context "#get_user_connections_with_team", :focus => true do
+        fixtures :users, :user_connections, :user_teams, :teams, :seats, :plans
+        context "sponsored seat" do
+            before(:each) do
+                @res = @account.get_user_connections_with_team user_connections(:elina_dteam_sponsored).contact[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email FROM `user_connections` inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.contact_id = #{user_connections(:elina_dteam_sponsored).contact[:id]}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_partial"
+            it_behaves_like "team_connections"
+        end
     end
 
     context "#update_user_connections" do
