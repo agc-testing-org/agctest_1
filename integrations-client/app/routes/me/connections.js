@@ -4,9 +4,8 @@ export default Ember.Route.extend({
     
     model: function () {
 
-        this.store.unloadAll('connection');
         this.store.adapterFor('connection').set('namespace', 'users/me');
-        var connections = this.store.findAll('connection');
+        var connections = this.store.query('connection',{});
         this.store.adapterFor('connection').set('namespace', '');
 
         return Ember.RSVP.hash({

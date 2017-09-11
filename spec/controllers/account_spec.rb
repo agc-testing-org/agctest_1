@@ -987,8 +987,8 @@ describe ".Account" do
         fixtures :users, :user_connections, :user_teams, :teams, :seats, :plans
         context "sponsored seat" do
             before(:each) do
-                @res = @account.get_user_connections_with_team user_connections(:elina_dteam_sponsored).contact[:id]
-                @mysql_result = @mysql_client.query("SELECT user_connections.*, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email FROM `user_connections` inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.contact_id = #{user_connections(:elina_dteam_sponsored).contact[:id]}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id ORDER BY user_connections.created_at DESC")
+                @res = @account.get_user_connections_with_team user_connections(:elina_dteam_sponsored).user[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email FROM `user_connections` inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.user_id = #{user_connections(:elina_dteam_sponsored).user[:id]}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id ORDER BY user_connections.created_at DESC")
             end
             it_behaves_like "connections_full"
             it_behaves_like "connections_partial"
