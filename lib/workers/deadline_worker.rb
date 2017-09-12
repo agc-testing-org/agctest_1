@@ -5,9 +5,10 @@ class DeadlineWorker
         sprint_state = issue.get_sprint_state sprint_state_id
 
         contributors = sprint_state.contributors.where("contributors.commit_remote IS NOT NULL").each do |c|
+            puts c.inspect
             ContributorSyncWorker.perform_async c.id, c.user.github_username
         end
 
-        DeadlineNotificationWorker.perform_at (sprint_state.expires + 1.minute), sprint_state.sprint.sprint[:user_id], sprint_state.sprint.project_id, sprint_state.sprint_id, sprint_state_id, sprint_state.state.id
+        DeadlineNotificationWorker.perform_at (sprint_state.expires + 1.minute), sprint_state.sprint[:user_id], sprint_state.sprint.project_id, sprint_state.sprint_id, sprint_state_id, sprint_state.state.id
     end
 end
