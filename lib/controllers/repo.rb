@@ -173,7 +173,7 @@ class Repo
 
     def anonymize sprint_state_id, contributor_id, branch_to_push
         directory = "repositories/#{sprint_state_id}_#{contributor_id}"
-        return %x(cd #{directory}; git checkout #{branch_to_push}; cd ../..; cp lib/scripts/anonymize #{directory}; cd #{directory}; ./anonymize; ).include? "rewritten"
+        return %x(./lib/scripts/anonymize #{directory} #{branch_to_push}).include? "rewritten"
     end
 
     def clear_clone sprint_state_id, contributor_id
