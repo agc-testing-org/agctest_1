@@ -38,6 +38,7 @@ Router.map(function() {
             this.route('talent');
             this.route('owners');
             this.route('notifications');
+            this.route('connections');
             this.route('shares');
             this.route('leads');
             this.route('jobs');

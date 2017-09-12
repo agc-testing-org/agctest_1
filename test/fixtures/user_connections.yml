@@ -11,7 +11,21 @@ adam_confirmed_request_adam_accepted:
   confirmed: 2
 
 adam_confirmed_request_adam_admin_pending:
-  user: adam_confirmed
-  contact: adam_admin
+  user: adam_admin
+  contact: adam_confirmed
   read: false
   confirmed: 1
+
+elina_dteam_sponsored:
+  user: adam_admin
+  contact: elina_dteam_sponsored
+  read: true
+  confirmed: 2
+  team: dteam
+
+elina_bteam_priority:
+  user: adam_admin
+  contact: elina_bteam_priority
+  read: true
+  confirmed: 1
+  team: bteam

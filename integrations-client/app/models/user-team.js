@@ -28,6 +28,7 @@ export default DS.Model.extend({
     team_comments_received: DS.belongsTo('team-comments-received'),
     team_votes_received: DS.belongsTo('team-votes-received'),
     team_contributors_received: DS.belongsTo('team-contributors-received'),
+    expires: attr('date'),
     job_id: attr('number'),
     job_company: attr('string'),
     job_title: attr('string'),

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170904044405) do
+ActiveRecord::Schema.define(version: 20170911043307) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -215,7 +215,9 @@ ActiveRecord::Schema.define(version: 20170904044405) do
     t.boolean "read", default: false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer "team_id"
     t.index ["contact_id"], name: "index_user_connections_on_contact_id"
+    t.index ["team_id"], name: "fk_rails_5ad8886edc"
     t.index ["user_id", "contact_id"], name: "index_contact_id_and_user_id_on_user_connections", unique: true
     t.index ["user_id"], name: "index_user_connections_on_user_id"
   end
@@ -295,7 +297,7 @@ ActiveRecord::Schema.define(version: 20170904044405) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "seat_id"
-    t.integer "period"
+    t.datetime "expires"
     t.integer "profile_id"
     t.integer "job_id"
     t.index ["job_id"], name: "fk_rails_078dfb7402"
@@ -370,6 +372,7 @@ ActiveRecord::Schema.define(version: 20170904044405) do
   add_foreign_key "sprints", "users"
   add_foreign_key "teams", "plans"
   add_foreign_key "teams", "users"
+  add_foreign_key "user_connections", "teams"
   add_foreign_key "user_connections", "users"
   add_foreign_key "user_connections", "users", column: "contact_id"
   add_foreign_key "user_notifications", "sprint_timelines"

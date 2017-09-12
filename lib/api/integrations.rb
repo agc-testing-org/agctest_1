@@ -731,6 +731,19 @@ class Integrations < Sinatra::Base
         return team.to_json
     end
 
+    team_connections_get = lambda do
+        protected!
+        check_required_field params[:id], "id"
+        account = Account.new
+        seat = account.get_seat @session_hash["id"], params[:id]
+        ((seat && (seat == "member")) || @session_hash["admin"]) || return_not_found
+        org = Organization.new
+        team = org.get_team params[:id]
+        requested = org.get_team_connections_requested params[:id], team.plan.name
+        status 200
+        return requested.to_json
+    end
+
     jobs_get = lambda do
         org = Organization.new
         jobs = org.get_jobs params
@@ -1109,8 +1122,23 @@ class Integrations < Sinatra::Base
         check_required_field params[:id], "id"
         id = decrypt(params[:id]) || return_not_found
         account = Account.new
+        candidate_teams = account.get_teams id, {}
+        active_team = candidate_teams.where("expires > ?", Time.now).first
+        if active_team
+            seat = account.get_seat id, active_team
+            active_seat = Seat.where({:name => seat}).first
+        end
+
+        connection = account.create_connection_request @session_hash["id"], id, (active_team.id if active_team)
+
+        if active_team && connection && seat == "sponsored"
+            connection.read = 1
+            connection.confirmed = 2
+            connection.save
+        end    
+
         status 201
-        return (account.create_connection_request @session_hash["id"], id).to_json
+        return connection.to_json
     end
 
     connections_requests_get = lambda do
@@ -1140,9 +1168,11 @@ class Integrations < Sinatra::Base
         protected!
         account = Account.new
         accepted = account.get_user_connections_accepted @session_hash["id"]
-        requested = account.get_user_connections_requested @session_hash["id"]
+        requested_no_seat = account.get_user_connections_requested_no_current_seat @session_hash["id"]
+        requested_priority_seat = account. get_user_connections_requested_current_priority_seat @session_hash["id"]
+        sponsored = account.get_user_connections_with_team @session_hash["id"]
         status 200
-        return (accepted + requested).to_json
+        return (accepted + requested_no_seat + requested_priority_seat + sponsored).to_json
     end
 
     connections_requests_get_by_id = lambda do
@@ -1303,9 +1333,19 @@ class Integrations < Sinatra::Base
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
         (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
-        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id, fields[:job_id]
+        
+        if fields[:seat_id] == Seat.find_by(:name => "sponsored").id
+            plan = Plan.find_by(:name => "recruiter")
+            expires = Time.now + 60*60*24* plan.period
+        elsif fields[:seat_id] == Seat.find_by(:name => "priority").id
+            plan = Plan.find_by(:name => "manager")
+            expires = Time.now + 60*60*24* plan.period      
+        end
+
+        invitation = team.invite_member fields[:team_id], @session_hash["id"], user[:id], user[:email], fields[:seat_id], profile_id, fields[:job_id], expires
         invitation || (return_error "invite error")
-        invitation.id || (return_error "this email address has an existing invitation")
+        invitation.id || (invitation.errors.messages[:user_email] && (return_error invitation.errors.messages[:user_email][0])) # validation failed
+
         UserInviteWorker.perform_async invitation.token
         invitation = invitation.as_json
         invitation.delete("token")
@@ -1597,6 +1637,7 @@ class Integrations < Sinatra::Base
     post "/teams", &teams_post
     get "/teams", allows: [:seat_id], &teams_get
     get "/teams/:id", allows: [:id], needs: [:id], &teams_get_by_id
+    get "/teams/:id/connections", needs: [:id], &team_connections_get
     get "/team-invites", &team_invites_get
 
     get "/teams/:id/notifications", allows: [:id, :page], needs: [:id], &teams_notifications_get

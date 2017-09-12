@@ -148,6 +148,15 @@ describe "/user-teams" do
                         it_behaves_like "invites_teams"
                     end
                 end
+                context "working with another team" do
+                    before(:each) do
+                        @new_team = teams(:different_team_for_invite)
+                        @current_user_team = user_teams(:adam_confirmed_b_team)
+                        post "/user-teams", { :user_email => @current_user_team.user_email, :team_id => @new_team.id, :seat_id => seats(:priority).id }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                        @res = [JSON.parse(last_response.body)]
+                    end
+                    it_behaves_like "error", "this user is exclusively working with another team"
+                end
                 context "with job" do
                     fixtures :jobs
                     before(:each) do

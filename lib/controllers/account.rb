@@ -372,7 +372,6 @@ class Account
         end
     end
 
-
     def get_teams user_id, params
         params = assign_param_to_model params, "seat_id", "user_teams"
         begin 
@@ -515,12 +514,13 @@ class Account
         end
     end
 
-    def create_connection_request user_id, contact_id
+    def create_connection_request user_id, contact_id, team_id
         begin
             return UserConnection.find_or_create_by({
                 user_id: user_id,
-                contact_id: contact_id
-            }).as_json
+                contact_id: contact_id,
+                team_id: team_id
+            })
         rescue => e
             puts e
             return nil
@@ -538,10 +538,10 @@ class Account
         end
     end
 
-    def get_user_connections_requested user_id # people that request are automatically added as contacts
+    def get_user_connections_requested_no_current_seat user_id
+        contacts = []
         begin
-            contacts = []
-            UserConnection.joins("inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id}").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id").where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.user
             end
@@ -552,10 +552,33 @@ class Account
         end
     end
 
+    def get_user_connections_requested_current_priority_seat user_id
+        begin
+            return UserConnection.joins("INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_id} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id").where("seats.name = 'priority' AND ut.expires > now()").select("user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company").order('user_connections.created_at DESC').as_json
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def get_user_connections_accepted user_id
         begin
             contacts = []
-            UserConnection.joins("inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id}").where("user_connections.confirmed=2").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+            UserConnection.joins("INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_id} AND user_connections.confirmed = 2 LEFT JOIN user_teams ut ON (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id").where("user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())").select("user_connections.*, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
+                contacts[i] = c.as_json
+                contacts[i][:user_profile] = get_profile c.contact
+            end
+            return contacts
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def get_user_connections_with_team user_id
+        begin
+            contacts = []
+            UserConnection.joins("inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.user_id = #{user_id}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id").select("user_connections.*, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email").order('user_connections.created_at DESC').each_with_index do |c,i|
                 contacts[i] = c.as_json
                 contacts[i][:user_profile] = get_profile c.contact
             end
@@ -706,13 +729,13 @@ class Account
                     return mail notification.user.email, "Wired7 #{notification.sprint_timeline.state.name} deadline set", "#{notification.user.first_name},<br><br>We've just set deadline for the #{notification.sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:<br><br><a href='#{link}'>#{link}</a><br><br><br>#{signature}", "#{notification.user.first_name},\n\nWe've just set deadline for the #{notification.sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\nAt least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:\n\n#{link}\n\n\n#{signature}"   
                 elsif notification.sprint_timeline.notification.name == "peer review"
                     link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{notification.sprint_timeline.sprint_state.sprint.project.id}-#{notification.sprint_timeline.sprint_state.sprint.project.org}-#{notification.sprint_timeline.sprint_state.sprint.project.name}/sprint/#{notification.sprint_timeline.sprint_state.sprint.id}-#{notification.sprint_timeline.sprint_state.sprint.title}/state/#{notification.sprint_timeline.sprint_state.id}-#{notification.sprint_timeline.sprint_state.state.name}"
-                    
+
                     subject = "Wired7 #{notification.sprint_timeline.sprint_state.state.name} Peer Review" 
                     html_body = "#{notification.user.first_name},<br><br>The deadline for the #{notification.sprint_timeline.sprint_state.state.name} phase of the <i>#{notification.sprint_timeline.sprint_state.sprint.project.name}</i> sprint <i>#{notification.sprint_timeline.sprint_state.sprint.title}</i> has arrived!<br><br>We've selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with other team members:<br><br><: href='#{link}'>#{link}</a><br><br><br>#{signature}"
                     body = "#{notification.user.first_name},\n\nThe deadline for the #{notification.sprint_timeline.sprint_state.state.name} phase of the #{notification.sprint_timeline.sprint_state.sprint.project.name} sprint #{notification.sprint_timeline.sprint_state.sprint.title} has arrived!\n\nWe selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with team members:\n\n#{link}\n\n\n#{signature}"
                     return mail notification.user.email, subject, html_body, body
                 end
-                
+
             end
             #TODO return mail notification.user.email, subject, html_body, body
             #TODO SPEC TESTS for this method

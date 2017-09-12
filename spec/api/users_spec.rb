@@ -87,7 +87,7 @@ describe "/users" do
 
     describe "GET /me" do
         fixtures :user_profiles, :user_positions
-        context "signed in", :focus => true do
+        context "signed in" do
             before(:each) do
                 @position = user_positions(:adam_confirmed)
                 @profile = user_profiles(:adam_confirmed)
@@ -360,6 +360,17 @@ describe "/users" do
         end
     end
 
+    shared_examples_for "contact_team" do
+        it "should include team_id" do
+            @contact_result.each_with_index do |r,i|
+                expect(@res[i]["team_id"]).to eq(r["team_id"])               
+                expect(r["team_id"]).to eq(@team_id)
+                expect(r["confirmed"]).to eq(@confirmed)
+                expect(r["read"]).to eq(@read)
+            end
+        end
+    end
+
     shared_examples_for "contact" do
         it "should include user_id" do
             @contact_result.each_with_index do |r,i|
@@ -393,23 +404,24 @@ describe "/users" do
         end
     end
 
-    describe "GET /me/connections" do
+    describe "GET /me/connections" do 
+        # relying on these tests doesn't make sense because we're returning the results for three different methods, where each has more than one variation for the response
+        # check for a successful response here and use controller tests instead
         fixtures :user_connections
-        context "signed in" do
-            before(:each) do
-                get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @res = JSON.parse(last_response.body)
-                @contact_result = @mysql_client.query("(select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.contact_id=users.id AND user_connections.user_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i} where user_connections.confirmed=2) UNION (select user_connections.*, users.first_name, users.email from user_connections inner join users ON user_connections.user_id=users.id AND user_connections.contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_accepted).user_id).to_i})")
-            end
-            it_behaves_like "contact"
-            it_behaves_like "contact_info"
-            it_behaves_like "ok"
-        end
         context "not signed in" do
             before(:each) do
                 get "/users/me/connections"
             end
             it_behaves_like "unauthorized"
+        end
+        context "signed in" do
+            context "not priority or sponsored" do
+                before(:each) do
+                    get "/users/me/connections", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                    @res = JSON.parse(last_response.body)
+                end
+                it_behaves_like "ok"
+            end
         end
     end
 
@@ -417,7 +429,7 @@ describe "/users" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
-                get "/users/me/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                get "/users/me/requests", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users ON user_connections.user_id=users.id where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i}")
             end
@@ -437,7 +449,7 @@ describe "/users" do
         fixtures :user_connections
         context "signed in" do
             before(:each) do
-                get "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                get "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {},  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
                 @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.user_id where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
@@ -458,7 +470,7 @@ describe "/users" do
         context "signed in" do
             before(:each) do
                 @confirmed = 2
-                patch "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                patch "/users/me/connections/#{user_connections(:adam_confirmed_request_adam_admin_pending).id}", {:user_id => user_connections(:adam_confirmed_request_adam_admin_pending).user_id, :read => true, :confirmed => 2}.to_json,  {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
                 @contact_result = @mysql_client.query("select user_connections.*,users.first_name from user_connections inner join users on users.id = user_connections.contact_id where contact_id = #{decrypt(user_connections(:adam_confirmed_request_adam_admin_pending).contact_id).to_i} AND user_connections.id = #{user_connections(:adam_confirmed_request_adam_admin_pending).id}")
             end
@@ -477,6 +489,7 @@ describe "/users" do
     end
 
     describe "POST /:id/requests" do
+        fixtures :users
         context "signed in" do
             before(:each) do
                 post "/users/#{users(:adam_admin).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
@@ -491,6 +504,35 @@ describe "/users" do
                 post "/users/#{users(:adam_admin).id}/requests"
             end
             it_behaves_like "unauthorized"
+        end
+        context "contact belongs to team" do
+            fixtures :users, :user_teams, :teams, :seats, :plans
+            context "with priority seat" do
+                before(:each) do
+                    post "/users/#{users(:elina_bteam_priority).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(users(:elina_bteam_priority).id).to_i}")
+                    @team_id = teams(:bteam).id
+                    @confirmed = 1
+                    @read = 0
+                end 
+                it_behaves_like "contact"
+                it_behaves_like "created"
+                it_behaves_like "contact_team"
+            end
+            context "with sponsored seat" do
+                before(:each) do
+                    post "/users/#{users(:elina_dteam_sponsored).id}/requests", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                    @res = [JSON.parse(last_response.body)]
+                    @contact_result = @mysql_client.query("select * from user_connections where contact_id = #{decrypt(users(:elina_dteam_sponsored).id).to_i}")
+                    @team_id = teams(:dteam).id
+                    @confirmed = 2
+                    @read = 1
+                end 
+                it_behaves_like "contact"
+                it_behaves_like "created"
+                it_behaves_like "contact_team"
+            end
         end
     end
 

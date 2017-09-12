@@ -57,6 +57,8 @@ adam_confirmed_b_team:
   updated_at: <%= 1.hour.ago.to_s(:db) %>
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: priority 
+  user_email: "adam+confirmed_b_team@wired7.com"
+  expires:  <%= 1.day.from_now.to_s(:db) %>
 
 adam_protected:
   sender: adam_confirmed
@@ -120,6 +122,31 @@ adam_confirmed_share_2_cteam:
   created_at: <%= 5.hour.ago.to_s(:db) %>
   seat: share
   profile: adam
+
+adam_confirmed_different_team_for_invite:
+  sender: adam_admin
+  user: adam_confirmed
+  team: different_team_for_invite
+  seat: member
+  accepted: true
+
+elina_bteam_priority:
+  sender: adam
+  user: elina_bteam_priority
+  user_email: "elina1@wired7.com"
+  team: bteam
+  seat: priority
+  accepted: true
+  expires:  <%= 1.day.from_now.to_s(:db) %>
+
+elina_dteam_sponsored:
+  sender: adam
+  user: elina_dteam_sponsored
+  user_email: "elina2@wired7.com"
+  team: dteam
+  seat: sponsored
+  accepted: true
+  expires:  <%= 1.day.from_now.to_s(:db) %>
 
 mail_invite_not_on_team_profile:
   sender: adam_confirmed

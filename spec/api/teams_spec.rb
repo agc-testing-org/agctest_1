@@ -52,7 +52,6 @@ describe "/teams" do
             @name = "NEW TEAM"
         end
         context "signed in" do
-            fixtures :user_teams
             context "valid fields" do
                 fixtures :user_profiles, :user_positions
                 before(:each) do
@@ -64,7 +63,7 @@ describe "/teams" do
 
                 context "user_teams" do
                     before(:each) do
-                        @user_team_result = @mysql_client.query("select * from user_teams ORDER BY id DESC").first
+                        @user_team_result = @mysql_client.query("select * from user_teams").first
                     end
                     it "saves owner as sender_id" do
                         expect(@user_team_result["sender_id"]).to eq(decrypt(@user).to_i)
@@ -289,6 +288,55 @@ describe "/teams" do
             it_behaves_like "ok"
             it_behaves_like "team_notifications"
         end
+    end
+
+    shared_examples_for "team_connections" do
+        it "should return id" do
+            @connections_results.each_with_index do |n,i|
+                expect(n["id"]).to eq(@res[i]["id"])
+            end 
+        end 
+        it "should return first_name" do
+            @connections_results.each_with_index do |n,i|
+                expect(n["first_name"]).to eq(@res[i]["first_name"])
+            end 
+        end 
+        it "should return email" do
+            @connections_results.each_with_index do |n,i|
+                expect(n["email"]).to eq(@res[i]["email"])
+            end 
+        end 
+    end
+
+    describe "GET /teams/:id/connections" do
+        fixtures :user_connections, :teams, :user_teams
+        before(:each) do
+            @ateam = teams(:ateam).id
+            @bteam = teams(:bteam).id
+        end
+        context "signed in" do 
+            before(:each) do
+                get "/teams/#{@ateam}/connections", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                base_query = "SELECT user_connections.*, users.id, users.first_name, users.email FROM user_connections INNER JOIN users ON user_connections.user_id = users.id WHERE user_connections.team_id = #{teams(:ateam).id}"
+                @connections_results = @mysql_client.query("#{base_query}")
+            end 
+            it_behaves_like "team_connections"
+            it_behaves_like "ok"
+        end
+        context "not signed in" do
+            before(:each) do
+                get "/teams/#{@ateam}/connections"
+            end
+            it_behaves_like "unauthorized"
+        end
+        context "not member" do
+            before(:each) do
+                get "/teams/#{@bteam}/connections", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+            end
+            it_behaves_like "not_found"
+        end    
     end
 
     describe "GET /:id/shares" do

@@ -793,22 +793,208 @@ describe ".Account" do
         end
     end 
 
-    context "#get_user_connections_accepted" do
-        fixtures :users
-        context "user_info" do
-            fixtures :user_connections
-            before(:each) do
-                user_id = decrypt(users(:masha_post_connection_request).id).to_i
-                @res = (@account.get_user_connections_accepted user_id).first
-            end
-            it "should include user_id" do
-                expect(@res["first_name"]).to eq(users(:masha_get_connection_request).first_name)
-            end
-            it "should include contact_id" do
-                expect(@res["email"]).to eq(users(:masha_get_connection_request).email)
+    shared_examples_for "connections_full" do
+        it "should return a result" do
+            expect(@mysql_result.count).to be > 0
+        end
+        it "should include user_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i]["user_id"]).to_i).to eq(res["user_id"])
             end
         end
+        it "should include contact_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i]["contact_id"]).to_i).to eq(res["contact_id"])
+            end                                                                 
+        end                                         
+        it "should include confirmed" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["confirmed"]).to eq(res["confirmed"])
+            end                                                                 
+        end
+        it "should include first_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["first_name"]).to eq(res["first_name"])
+            end                                                                 
+        end                                         
+        it "should include email" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["email"]).to eq(res["email"])
+            end                                                                 
+        end                              
+    end
+    shared_examples_for "connections_accepted_profile" do
+        it "should include user_profile" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i][:user_profile][:id]).to_i).to eq(res["contact_id"])
+            end                                                                 
+        end 
+    end
+    shared_examples_for "connections_requested_profile" do
+        it "should include user_profile" do
+            @mysql_result.each_with_index do |res,i|
+                expect(decrypt(@res[i][:user_profile][:id]).to_i).to eq(res["user_id"])
+            end                                                                 
+        end 
+    end
+
+    context "#get_user_connections_accepted" do
+        fixtures :users, :user_connections
+        context "no team_id" do
+            before(:each) do
+                @res = @account.get_user_connections_accepted user_connections(:adam_confirmed_request_adam_accepted).user[:id] 
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:adam_confirmed_request_adam_accepted).user[:id]} AND user_connections.confirmed = 2 LEFT JOIN user_teams ut ON (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_accepted_profile"
+        end
+        context "with team_id but not priority expired seat" do
+            fixtures :teams
+            before(:each) do
+                @mysql_client.query("update user_connections set team_id = #{teams(:ateam).id}")
+                @res = @account.get_user_connections_accepted user_connections(:adam_confirmed_request_adam_accepted).user[:id]
+            end
+            it "should return empty" do
+                expect(@res).to be_empty 
+            end
+        end
+        context "with priority seat and expires <= now (priority user no longer belongs to team)" do
+            fixtures :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
+                @mysql_client.query("update user_connections set confirmed = 2 where id = #{user_connections(:elina_bteam_priority).id}")
+                @res = @account.get_user_connections_accepted user_connections(:elina_bteam_priority).user[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.contact_id=users.id AND user_connections.user_id = #{user_connections(:elina_bteam_priority).user[:id]} AND user_connections.confirmed = 2 LEFT JOIN user_teams ut ON (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_accepted_profile"
+        end
+        context "with priority seat and expires > now (priority user belongs to team)" do
+            fixtures :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_client.query("update user_connections set confirmed = 2 where id = #{user_connections(:elina_bteam_priority).user[:id]}")
+                @res = @account.get_user_connections_accepted user_connections(:elina_bteam_priority).user[:id]
+            end
+            it "should return empty" do
+                expect(@res).to be_empty 
+            end
+        end 
     end 
+
+    context "#get_user_connections_requested_no_current_seat" do
+        fixtures :users, :user_connections
+        context "no team_id" do
+            before(:each) do
+                @res = @account.get_user_connections_requested_no_current_seat user_connections(:adam_confirmed_request_adam_accepted).contact[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:adam_confirmed_request_adam_accepted).contact[:id]} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_requested_profile"
+        end
+        context "with team_id but not priority expired seat" do
+            fixtures :teams
+            before(:each) do
+                @mysql_client.query("update user_connections set team_id = #{teams(:ateam).id}")
+                @res =  @account.get_user_connections_requested_no_current_seat user_connections(:adam_confirmed_request_adam_accepted).contact[:id] 
+            end
+            it "should return empty" do
+                expect(@res).to be_empty
+            end
+        end
+        context "expired priority" do
+            fixtures :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
+                @res = @account.get_user_connections_requested_no_current_seat user_connections(:elina_bteam_priority).contact[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, users.first_name, users.email FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:elina_bteam_priority).contact[:id]} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (user_connections.team_id is null OR (seats.name = 'priority' AND ut.expires <= now())) ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_requested_profile"
+        end
+        context "with priority seat and expires > now (priority user belongs to team)" do
+            fixtures :teams, :seats, :user_teams
+            before(:each) do
+                @res = @account.get_user_connections_requested_no_current_seat user_connections(:elina_bteam_priority).contact[:id]
+            end
+            it "should return empty" do
+                expect(@res).to be_empty 
+            end
+        end 
+    end
+
+    shared_examples_for "connections_partial" do
+        it "should return a result" do
+            expect(@mysql_result.count).to be > 0
+        end
+        it "should include team_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_id"]).to eq(res["team_id"])
+            end
+        end
+        it "should include expires" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["expires"]).to eq(res["expires"].to_s(:db))
+            end
+        end
+        it "should include team_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_name"]).to eq(res["team_name"])
+            end
+        end
+        it "should include first_name" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_company"]).to eq(res["team_company"])
+            end
+        end
+    end
+
+    context "#get_user_connections_requested_current_priority_seat" do
+        fixtures :users, :user_connections
+        context "non-expired seat" do
+            fixtures :user_connections, :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_result = @mysql_client.query("SELECT user_connections.id, user_connections.created_at, ut.id, ut.expires, ut.team_id, teams.name as team_name, teams.company as team_company FROM `user_connections` INNER JOIN users ON user_connections.user_id=users.id AND user_connections.contact_id = #{user_connections(:elina_bteam_priority).contact[:id]} LEFT JOIN user_teams ut on (user_connections.contact_id = ut.user_id AND user_connections.team_id IS NOT NULL) LEFT JOIN seats ON ut.seat_id = seats.id LEFT JOIN teams ON teams.id = ut.team_id WHERE (seats.name = 'priority' AND ut.expires > now()) ORDER BY user_connections.created_at DESC")
+                @res = @account.get_user_connections_requested_current_priority_seat user_connections(:elina_bteam_priority).contact[:id]
+            end
+            it_behaves_like "connections_partial"
+        end
+        context "expired seat" do
+            fixtures :user_connections, :teams, :seats, :user_teams
+            before(:each) do
+                @mysql_client.query("update user_teams set expires = '#{1.day.ago.to_s(:db)}'")
+                @res = @account.get_user_connections_requested_current_priority_seat user_connections(:elina_bteam_priority).contact[:id]
+            end
+            it "should return empty" do
+                expect(@res).to be_empty
+            end
+        end
+    end
+
+    shared_examples_for "team_connections" do
+        it "should include team_plan" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["team_plan"]).to eq(res["team_plan"])
+            end
+        end
+        it "should not include sender_id" do
+            @mysql_result.each_with_index do |res,i|
+                expect(@res[i]["sender_id"]).to be nil
+            end                                                 
+        end  
+    end
+
+    context "#get_user_connections_with_team", :focus => true do
+        fixtures :users, :user_connections, :user_teams, :teams, :seats, :plans
+        context "sponsored seat" do
+            before(:each) do
+                @res = @account.get_user_connections_with_team user_connections(:elina_dteam_sponsored).user[:id]
+                @mysql_result = @mysql_client.query("SELECT user_connections.*, user_teams.expires, plans.name as team_plan, teams.name as team_name, teams.company as team_company, users.first_name, users.email FROM `user_connections` inner join user_teams on (user_teams.user_id = user_connections.contact_id and user_connections.team_id is not null and user_connections.user_id = #{user_connections(:elina_dteam_sponsored).user[:id]}) inner join users on user_teams.sender_id = users.id INNER JOIN seats ON user_teams.seat_id = seats.id AND seats.name = 'sponsored' LEFT JOIN teams ON teams.id = user_teams.team_id LEFT JOIN plans ON teams.plan_id = plans.id ORDER BY user_connections.created_at DESC")
+            end
+            it_behaves_like "connections_full"
+            it_behaves_like "connections_partial"
+            it_behaves_like "team_connections"
+        end
+    end
 
     context "#update_user_connections" do
         fixtures :users
@@ -827,26 +1013,54 @@ describe ".Account" do
         end
     end 
 
+    shared_examples_for "connection_request" do
+        it "should include user_id" do
+            expect(@res["user_id"]).to eq(@user_id)
+        end
+        it "should include contact_id" do
+            expect(@res["contact_id"]).to eq(@contact_id)
+        end
+        it "should include read" do
+            expect(@res["read"]).to eq(false)
+        end
+        it "should include confirmed" do
+            expect(@res["confirmed"]).to eq(1)
+        end
+        it "should include team_id" do
+            expect(@res["team_id"]).to eq(@team_id) 
+        end
+    end
+
     context "#create_connection_request" do
         fixtures :users
         context "connection_request_confirmed" do
-            fixtures :user_connections
             before(:each) do
                 @contact_id = (decrypt(users(:adam_protected).id).to_i)
                 @user_id = (decrypt(users(:adam).id).to_i)
-                @res = (@account.create_connection_request @user_id, @contact_id)
+                @team_id = nil
             end
-            it "should include user_id" do
-                expect(decrypt(@res["user_id"]).to_i).to eq(@user_id)
+            context "without team_id" do
+                before(:each) do
+                    @res = (@account.create_connection_request @user_id, @contact_id, @team_id)
+                end
+                it_behaves_like "connection_request"
             end
-            it "should include contact_id" do
-                expect(decrypt(@res["contact_id"]).to_i).to eq(@contact_id)
+            context "with team_id" do
+                fixtures :teams
+                before(:each) do
+                    @team_id = teams(:ateam).id
+                    @res = (@account.create_connection_request @user_id, @contact_id, @team_id)
+                end
+                it_behaves_like "connection_request"
             end
-            it "should include read" do
-                expect(@res["read"]).to eq(false)
-            end
-            it "should include confirmed" do
-                expect(@res["confirmed"]).to eq(1)
+            context "invalid team_id" do
+                before(:each) do
+                    @team_id = 133339
+                    @res = (@account.create_connection_request @user_id, @contact_id, @team_id)
+                end 
+                it "should return nil" do
+                    expect(@res).to be nil
+                end
             end
         end
     end 
@@ -861,7 +1075,7 @@ describe ".Account" do
             expect(@res).to eq(user_teams(:adam_original_invite).seat_id)
         end
     end
-    
+
     shared_examples_for "invite" do
         it "to" do
             expect(@res[:to]).to eq @to
@@ -877,7 +1091,7 @@ describe ".Account" do
         end
     end
 
-    context "#mail_invite", :focus => true do
+    context "#mail_invite" do
         fixtures :users, :jobs, :teams, :user_teams, :seats
         context "not on team" do
             context "profile" do

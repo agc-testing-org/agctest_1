@@ -12,6 +12,26 @@ class Organization
         end
     end
 
+    def get_team_connections_requested team_id, team_plan
+        begin
+            contacts = []
+            connections = UserConnection.joins("inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id").where("user_connections.team_id = ?", team_id)
+            if team_plan == "recruiter" 
+                account = Account.new 
+                connections.select("user_connections.*, '#{team_plan}' as team_plan, users.id, users.first_name, users.email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").each_with_index do |c,i|
+                    contacts[i] = c.as_json
+                    contacts[i][:user_profile] = account.get_profile c.user
+                end
+                return contacts 
+            else # manager - don't show requestor info
+                return connections.select("user_connections.id, '#{team_plan}' as team_plan,  user_connections.contact_id, user_connections.created_at, user_connections.updated_at, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name").order("user_connections.created_at DESC").as_json
+            end
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
     def get_shares user_id, params
         account = Account.new
         shares = []
@@ -119,9 +139,9 @@ class Organization
         end
     end
 
-    def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id, job_id
+    def invite_member team_id, sender_id, user_id, user_email, seat_id, profile_id, job_id, expires
         begin
-            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id, job_id: job_id})
+            return UserTeam.create({ team_id: team_id, user_id: user_id, sender_id: sender_id, user_email: (user_email.strip if user_email), token: SecureRandom.hex(32), seat_id: seat_id, profile_id: profile_id, job_id: job_id, expires: expires})
         rescue => e
             puts e
             return nil
