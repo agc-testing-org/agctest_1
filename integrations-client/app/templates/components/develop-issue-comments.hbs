@@ -8,7 +8,7 @@
             {{#if (eq explainComments.length (plus 1 index))}}
             <small class="text-muted">
                 Posted by 
-                {{#if (eq sessionAccount.account.id user_profile.id)}}
+                {{#if (or (eq sessionAccount.account.id comment.user_profile.id) (eq sessionAccount.account.id comment.user_id))}}
                     you, the contributor
                 {{else}}
                     the contributor, {{#link-to "profile" comment.user_id}}{{user-profile-descriptor with_a=true user_profile=comment.user_profile class="d-inline"}}{{/link-to}}

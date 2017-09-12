@@ -76,33 +76,32 @@ class Repo
         end
     end
 
+    def create_deadline sprint_state 
+        existing_contributor = get_existing_contributor sprint_state.id
+        if existing_contributor.length == 3 && !sprint_state.expires
+            issue = Issue.new
+            sprint_state.expires = (Time.now.utc + 2.day)
+            sprint_state.save
+            log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
+            (issue.log_event log_params) || (return_error "an error has occurred")
+            DeadlineWorker.perform_at sprint_state.expires, sprint_state.id
+        end
+        return sprint_state.expires
+    end
+
     def sync contributor_id, username
         params = {:id => contributor_id}
         contributor = get_contributor params
         fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
-        issue = Issue.new
-        sprint_state = issue.get_sprint_state contributor[:sprint_state_id]
         if fetched
             contributor.prepared = true
             contributor.commit = fetched[:sha]
             contributor.commit_remote = fetched[:sha_remote]
             contributor.commit_success = fetched[:success]
-            contributor.save #updates timestamp
-            existing_contributor = get_existing_contributor contributor[:sprint_state_id]
-            if existing_contributor.length == 3 && !sprint_state.expires 
-                sprint_state.expires = (Time.now.utc + 2.day)
-                sprint_state.save
-                log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
-                (issue.log_event log_params) || (return_error "an error has occurred")
-                DeadlineWorker.perform_at sprint_state.expires, sprint_state.sprint[:user_id], sprint_state.sprint.project.id, sprint_state.sprint_id, sprint_state.id, sprint_state.state_id
-                return (contributor && sprint_state)
-            end
-            return contributor 
-        else
-            contributor.prepared = false
-            return (contributor.save && contributor.prepared)
+            contributor.save
         end
+        return (contributor.save && contributor.prepared)
     end
 
     def join session, github_token, contributor_id, username
@@ -332,7 +331,7 @@ class Repo
 
     def get_existing_contributor sprint_state_id
         begin
-            return Contributor.joins("INNER JOIN sprint_states on contributors.sprint_state_id = sprint_states.id").where("contributors.sprint_state_id = #{sprint_state_id} and contributors.commit_success = 1 and sprint_states.expires is NULL").as_json
+            return Contributor.joins("INNER JOIN sprint_states on contributors.sprint_state_id = sprint_states.id").where("contributors.sprint_state_id = #{sprint_state_id} and contributors.commit_remote IS NOT NULL and sprint_states.expires is NULL").as_json
         rescue => e
             puts e
             return nil

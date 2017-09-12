@@ -2,20 +2,26 @@
     <h3 class="description section underline mb-1 mt-1 text-left">
         {{#if contributor.preparing}}{{application-loading size=1 class="d-inline"}}{{/if}} How to Contribute
     </h3>    
-    <small class="text-muted mb-2 text-left"><strong>Last Commit</strong> {{moment-from-now contributor.updated_at}} {{#if contributor.commit_success}}({{contributor.commit_remote}}){{/if}}</small>
+    <small class="text-muted mb-2 text-left"><strong>Last Commit</strong> {{moment-from-now contributor.updated_at}} {{#if contributor.commit_remote}}({{contributor.commit_remote}}){{/if}}</small>
     
     <div class="row top ml-0 mr-0 mt-0 rounded">
         <div class="col-sm-4 col-md-4">
             {{stacked-icon value="fa-clone" icon="fa-square" size="2" class="hidden-sm-down"}}
-            <h4 class="line">{{stacked-icon value="fa-clone" icon="fa-square" size="1" class="hidden-md-up d-inline"}} We've disguised and cloned this project to <strong>{{sessionAccount.account.github_username}}/{{contributor.repo}}</strong></h4>
+            <h4 class="line">{{stacked-icon value="fa-clone" icon="fa-square" size="1" class="hidden-md-up d-inline"}} We've disguised and cloned this project to <strong>{{sessionAccount.account.github_username}}/{{contributor.repo}}</strong> on Github</h4>
         </div>
         <div class="col-sm-4 col-md-4">
             {{stacked-icon value="fa-wrench" icon="fa-square" size="2" class="hidden-sm-down"}}
-            <h4 class="line">{{stacked-icon value="fa-wrench" icon="fa-square" size="1" class="hidden-md-up d-inline"}} Make all of your changes to <strong>branch {{sprint_state.id}}</strong> of this repository with <a {{action "showGit"}}>Git</a> or <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">edit directly on Github</a><br><a {{action "showGit"}}>{{#if showingGit}}Hide{{else}}Show{{/if}}</a> Git instructions</h4>
+            <h4 class="line">{{stacked-icon value="fa-wrench" icon="fa-square" size="1" class="hidden-md-up d-inline"}} Make your changes to 
+                
+                {{#if (eq sprint_state.state_id.name "requirements design")}}
+                    <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">this requirements document</a> on 
+                {{/if}}
+
+                <strong>branch {{sprint_state.id}}</strong> with <a {{action "showGit"}}>Git</a> or <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/tree/{{sprint_state.id}}">edit directly on Github</a><br><a {{action "showGit"}}>{{#if showingGit}}Hide{{else}}Show{{/if}}</a> Git instructions</h4>
         </div>
          <div class="col-sm-4 col-md-4">
             {{stacked-icon value="fa-rss" icon="fa-square" size="2" class="hidden-sm-down"}}
-            <h4 class="line">{{stacked-icon value="fa-rss" icon="fa-square" size="1" class="hidden-md-up d-inline"}} When you're ready <a {{action "submit" project.id contributor.id }}>submit your changes</a> and we will update your proposal</h4>
+            <h4 class="line">{{stacked-icon value="fa-rss" icon="fa-square" size="1" class="hidden-md-up d-inline"}}<a {{action "submit" project.id contributor.id }}>submit your changes</a> each time you commit to let us know which version of your work to use</h4>
         </div>
     </div>
 
@@ -42,9 +48,9 @@
     </div>
     {{/if}}
         
-    <div class="about section mt-1 text-left">
+    <div class="description section mt-1 text-left">
         {{#if (eq sprint_state.state_id.name "requirements design")}}
-        Add your changes to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">this requirements document file</a> (Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md)
+        Changes should be made to <a target="_blank" href="https://github.com/{{sessionAccount.account.github_username}}/{{contributor.repo}}/blob/{{sprint_state.id}}/requirements/Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md">Requirements-Document-for-Wired7-Sprint-v{{sprint.id}}.md</a>
         {{/if}}
     </div>
 </div>

@@ -75,6 +75,7 @@ require_relative '../workers/user_notification_get_worker.rb'
 require_relative '../workers/user_notification_mail_worker.rb'
 require_relative '../workers/user_create_project_worker.rb'
 require_relative '../workers/deadline_worker.rb'
+require_relative '../workers/deadline_notification_worker.rb'
 
 # Throttling
 require_relative 'rack'
@@ -1098,10 +1099,17 @@ class Integrations < Sinatra::Base
         contributor || return_not_found
         github = (repo.github_client github_authorization)
         github || (return_error "unable to authenticate github")
-        contributor.preparing = true
-        contributor.prepared = 0
-        contributor.save
-        ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
+        if (contributor.sprint_state.expires && (contributor.sprint_state.expires < Time.now.utc)) # publish changes
+            contributor.preparing = true
+            contributor.prepared = false
+            contributor.save
+            ContributorSyncWorker.perform_async contributor[:id], @session_hash["github_username"]
+        else # record hash for collection at end of deadline
+            original_hash = (repo.log_head_remote github_authorization, @session_hash["github_username"], contributor.repo, contributor[:sprint_state_id]) rescue return_not_found
+            contributor.commit_remote = original_hash
+            contributor.save
+            deadline = repo.create_deadline contributor.sprint_state
+        end
         status 200
         return contributor.to_json 
     end
@@ -1333,7 +1341,7 @@ class Integrations < Sinatra::Base
         user = account.get query
         user = (user || (account.create fields[:user_email], nil, nil, request.ip))
         (profile_id = decrypt(fields[:profile_id])) || (profile_id = nil)
-        
+
         if fields[:seat_id] == Seat.find_by(:name => "sponsored").id
             plan = Plan.find_by(:name => "recruiter")
             expires = Time.now + 60*60*24* plan.period

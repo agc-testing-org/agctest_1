@@ -1,8 +1,13 @@
 class DeadlineWorker
     include Sidekiq::Worker
-    def perform sprint_user_id, project_id, sprint_id, sprint_state_id, state_id
+    def perform sprint_state_id
         issue = Issue.new
-        log_params = {:user_id => sprint_user_id, :project_id => project_id, :sprint_id => sprint_id, :sprint_state_id => sprint_state_id, :state_id => state_id, :notification_id => Notification.find_by({:name => "peer review"}).id}
-        return (issue.log_event log_params)
+        sprint_state = issue.get_sprint_state sprint_state_id
+
+        contributors = sprint_state.contributors.where("contributors.commit_remote IS NOT NULL").each do |c|
+            ContributorSyncWorker.perform_async c.id, c.user.github_username
+        end
+
+        DeadlineNotificationWorker.perform_at (sprint_state.expires + 1.minute), sprint_state.sprint.sprint[:user_id], sprint_state.sprint.project_id, sprint_state.sprint_id, sprint_state_id, sprint_state.state.id
     end
 end
