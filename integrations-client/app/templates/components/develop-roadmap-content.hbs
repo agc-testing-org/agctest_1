@@ -1,5 +1,5 @@
 {{#if job}}
-    <small class="col-sm-12 text-center">{{#link-to "develop.roadmap" (query-params id='undefined')}}show all listings{{/link-to}}</small>
+    <small class="col-sm-12 text-center mt-2">{{#link-to "develop.roadmap" (query-params id='undefined')}}show all listings{{/link-to}}</small>
     <div class="col-sm-12 col-md-8 offset-md-2">
         {{roadmap-job job=job projects=projects teams=teams refresh="refresh"}}
     </div>

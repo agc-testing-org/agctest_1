@@ -4,7 +4,8 @@
         <div class="col-md-6 col-sm-12">
             <h2 class="name text-capitalize">{{model.project.org}} / {{model.project.name}}</h2>
             <div class="description">{{model.project.description}}</div>
-            {{develop-overview-caption project=model.project}}
+            {{develop-overview-caption project=model.project class="about"}}
+            <a target="_blank" href="https://github.com/{{org}}/{{model.project.name}}_{{model.project.id}}/tree/master"><i class="fa fa-window-restore fa-fw"></i> View on Github</a>
             <div class="about text-capitalize mb-0">Created {{moment-from-now model.project.created_at}}</div>
             <div class="about mb-0">Showing Sprints in {{#unless (eq model.state.name "any")}}the{{/unless}} <strong><span class="text-capitalize">{{model.state.name}} Phase</span></strong></div>
             <div class="about text-capitalize mb-0">{{model.state.description}}</div>

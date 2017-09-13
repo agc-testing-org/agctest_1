@@ -134,8 +134,9 @@ describe ".Repo" do
             @sprint_state_id = 99
             @contributor_id = "adam123"
             @branch = "master"
+            @path = "repositories/#{@sprint_state_id}_#{@contributor_id}"
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
-            @res = @repository.checkout @sha
+            @res = @repo.checkout @path, @sha
         end
         it "should check out" do
             expect(%x( cd repositories/#{@sprint_state_id}_#{@contributor_id}; git branch ).split("\n")[0]).to eq("* (HEAD detached at b218bd1)")
@@ -147,12 +148,13 @@ describe ".Repo" do
             @contributor_id = "adam123"
             @branch = "master"
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
+            @path = "repositories/#{@sprint_state_id}_#{@contributor_id}"
             @commit_message = "newest commit"
-            %x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git branch; echo '1' > tmp; git add .; git commit -m"#{@commit_message};")
-            @res = @repo.log_head @repository
+            %x( cd #{@path}; git branch; echo '1' > tmp; git add .; git commit -m"#{@commit_message};")
+            @res = @repo.log_head @path
         end
         it "should return the most recent commit message" do
-            expect("#{@res}\n").to eq(%x(cd repositories/#{@sprint_state_id}_#{@contributor_id}; git rev-parse HEAD))
+            expect("#{@res}\n").to eq(%x(cd #{@path}; git rev-parse HEAD))
         end
     end
     context "#add_remote" do
@@ -161,9 +163,10 @@ describe ".Repo" do
             @contributor_id = "adam123"
             @branch = "master"          
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
+            @path = "repositories/#{@sprint_state_id}_#{@contributor_id}"
             @remote = "https://agc-testing:123456@github.com/agc-testing/a-repo"
             @name = "adam-remote"
-            @res = @repo.add_remote @repository, @remote, @name
+            @res = @repo.add_remote @path, @remote, @name
         end
         context "success" do
             it "should return a git object" do
@@ -173,37 +176,7 @@ describe ".Repo" do
                 expect(%x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git remote -v )).to include("#{@name}\t#{@remote} (push)")
             end
         end
-        context "failure" do
-            it "should return nil" do
-                expect(@repo.add_remote @repository, @remote, @name).to be false 
-            end
-        end
     end
-
-    context "#add_remote" do
-        before(:each) do
-            @sprint_state_id = 99
-            @contributor_id = "adam123" 
-            @branch = "master"          
-            @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
-            @remote = "https://agc-testing:123456@github.com/agc-testing/a-repo"
-            @name = "adam-remote"
-            @res = @repo.add_remote @repository, @remote, @name
-        end                                                                                                                     
-        context "success" do
-            it "should return a git object" do 
-                expect(@res).to be true                         
-            end                                                             
-            it "should add a remote" do                 
-                expect(%x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git remote -v )).to include("#{@name}\t#{@remote} (push)")
-            end                                                                         
-        end                                                     
-        context "failure" do        
-            it "should return nil" do               
-                expect(@repo.add_remote @repository, @remote, @name).to be false       
-            end                                                                     
-        end                                                 
-    end 
 
     context "#add_branch" do
         before(:each) do
@@ -212,7 +185,8 @@ describe ".Repo" do
             @branch = "master"
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
             @new_branch = "develop"
-            @res = @repo.add_branch @repository, @new_branch
+            @path = "repositories/#{@sprint_state_id}_#{@contributor_id}"
+            @res = @repo.add_branch @path, @new_branch
         end
         context "success" do
             it "should return something, not nil" do
@@ -235,8 +209,9 @@ describe ".Repo" do
             @contributor_id = "adam123" 
             @branch = "master"    
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
-            @repo.add_branch @repository, @sprint_state_id
-            @res = @repo.anonymize @sprint_state_id, @contributor_id, @sprint_state_id
+            @path = "repositories/#{@sprint_state_id}_#{@contributor_id}"
+            @repo.add_branch @path, @sprint_state_id
+            @res = @repo.anonymize @path, @sprint_state_id
         end
         it "should return true" do
             expect(@res).to be true
@@ -259,19 +234,21 @@ describe ".Repo" do
 
     context "#push_remote" do
         before(:each) do
+            @uri_b = "#{%x{pwd}.strip}/test/git-repo-log-b"
+            %x( rm -rf #{@uri_b})
             @sprint_state_id = 99
             @contributor_id = "adam123" 
             @branch = "master"          
             @repository = @repo.clone @uri, @sprint_state_id, @contributor_id, @branch
-            @uri_b = "test/git-repo-log-b"
-            %x( cp -rf test/git-repo #{@uri_b}; mv #{@uri_b}/git #{@uri_b}/.git)
+            @path = "repositories/#{@sprint_state_id}_#{@contributor_id}"
+            %x(mkdir #{@uri_b}; cd #{@uri_b}; git init --bare)
             @new_branch = "branch"
-            @repo.add_branch @repository, @new_branch
+            @repo.add_branch @path, @new_branch
             @commit_message = "newest commit"
-            %x( cd "repositories/#{@sprint_state_id}_#{@contributor_id}"; git branch; echo '1' > tmp; git add .; git commit -m"#{@commit_message};")
+            %x( cd "#{@path}"; git checkout #{@new_branch}; echo '1' > tmp; git add .; git commit -m"#{@commit_message};")
             @name = "adam-remote"
-            @repo.add_remote @repository, @uri_b, @name
-            @res = @repo.push_remote @repository, @name, @new_branch
+            @repo.add_remote @path, @uri_b, @name
+            @res = @repo.push_remote @path, @name, @new_branch
         end        
         after(:each) do
             %x( rm -rf #{@uri_b})
@@ -281,7 +258,7 @@ describe ".Repo" do
                 expect(@res).to be true
             end
             it "should send last commit to remote" do
-                expect(%x( cd #{@uri_b}; git checkout #{@new_branch}; git log)).to include(@commit_message)
+                expect(%x( cd #{@uri_b}; git log #{@new_branch})).to include(@commit_message)
             end
         end
     end 

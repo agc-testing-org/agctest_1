@@ -76,33 +76,33 @@ class Repo
         end
     end
 
+    def create_deadline sprint_state 
+        existing_contributor = get_existing_contributor sprint_state
+        if existing_contributor.length >= 3 
+            issue = Issue.new
+            sprint_state.expires = (Time.now.utc + 2.days)
+            sprint_state.save
+            log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :contributor_id => existing_contributor.first, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint[:user_id]}
+            (issue.log_event log_params) || (return_error "an error has occurred")
+            DeadlineWorker.perform_at sprint_state.expires, sprint_state.id
+        end 
+        return sprint_state.expires
+    end
+
     def sync contributor_id, username
         params = {:id => contributor_id}
         contributor = get_contributor params
         fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
-        issue = Issue.new
-        sprint_state = issue.get_sprint_state contributor[:sprint_state_id]
         if fetched
+            puts fetched.inspect
             contributor.prepared = true
             contributor.commit = fetched[:sha]
             contributor.commit_remote = fetched[:sha_remote]
             contributor.commit_success = fetched[:success]
-            contributor.save #updates timestamp
-            existing_contributor = get_existing_contributor contributor[:sprint_state_id]
-            if existing_contributor.length == 3 && !sprint_state.expires 
-                sprint_state.expires = (Time.now.utc + 2.day)
-                sprint_state.save
-                log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  contributor[:sprint_state_id], :contributor_id => contributor_id, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint['user_id']}
-                (issue.log_event log_params) || (return_error "an error has occurred")
-                DeadlineWorker.perform_at sprint_state.expires, sprint_state.sprint[:user_id], sprint_state.sprint.project.id, sprint_state.sprint_id, sprint_state.id, sprint_state.state_id
-                return (contributor && sprint_state)
-            end
-            return contributor 
-        else
-            contributor.prepared = false
-            return (contributor.save && contributor.prepared)
+            contributor.save
         end
+        return (contributor.save && contributor.prepared)
     end
 
     def join session, github_token, contributor_id, username
@@ -135,28 +135,31 @@ class Repo
 
         account = Account.new
 
+        path = "repositories/#{sprint_state_id}_#{contributor_id}"
+
         begin
             if (clear_clone sprint_state_id, contributor_id)
                 r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
-                original_hash = log_head r
+                original_hash = log_head path 
+                puts original_hash.inspect
 
                 github_secret = ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']
 
                 session && (github_secret = account.unlock_github_token session, github_token)
 
-                ((ENV['RACK_ENV'] != "test") && (prefix = "https://#{slave_username}:#{github_secret}@github.com")) || (prefix = "test")
+                ((ENV['RACK_ENV'] != "test") && (prefix = "https://#{slave_username}:#{github_secret}@github.com")) || (prefix = "#{%x{pwd}.strip}/test")
 
-                added_remote = add_remote r, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
+                added_remote = add_remote path, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
 
                 if added_remote
-                    checkout r, sha
-                    add_branch r, branch_to_push
+                    checkout path, sha
+                    add_branch path, branch_to_push
                     if anonymous
-                        anonymize sprint_state_id, contributor_id, branch_to_push
+                        anonymize path, branch_to_push
                     end
-                    push_remote r, sprint_state_id, branch_to_push 
+                    push_remote path, sprint_state_id, branch_to_push 
                     remote_hash = log_head_remote github_secret, slave_username, slave_project, branch_to_push 
-                    local_hash = log_head r
+                    local_hash = log_head path 
                     cleared = clear_clone sprint_state_id, contributor_id
                     return {:success => (cleared && (remote_hash == local_hash)), :sha => remote_hash, :sha_remote => original_hash }
                 else
@@ -172,9 +175,8 @@ class Repo
 
     end
 
-    def anonymize sprint_state_id, contributor_id, branch_to_push
-        directory = "repositories/#{sprint_state_id}_#{contributor_id}"
-        return %x(cd #{directory}; git checkout #{branch_to_push}; cd ../..; cp lib/scripts/anonymize #{directory}; cd #{directory}; ./anonymize; ).include? "rewritten"
+    def anonymize path, branch_to_push
+        return %x(cd #{path}; git checkout #{branch_to_push}; cd ../..; cp lib/scripts/anonymize #{path}; cd #{path}; ./anonymize; ).include? "rewritten"
     end
 
     def clear_clone sprint_state_id, contributor_id
@@ -197,27 +199,33 @@ class Repo
         end
     end
 
-    def add_remote g, uri, name
+    def add_remote path, uri, name
         begin
             #return g.add_remote(resource_id, "https://#{ENV['WIRED7_GITHUB_ADMIN_USER']}:#{ENV['WIRED7_GITHUB_ADMIN_PASSWORD']}@github.com/#{ENV['WIRED7_GITHUB_ADMIN_ORG']}/#{repo}.git")
-            return (g.add_remote(name, uri).name == name)
+            #return (g.add_remote(name, uri).name == name)
+            res = %x(cd #{path}; git remote add #{name.to_s} #{uri}; git remote get-url --push #{name})            
+            return (res.include? uri)
         rescue => e
             puts e
             return false 
         end
     end
 
-    def checkout g, sha
+    def checkout path, sha
         begin
-            return g.checkout(sha)
+            %x(cd #{path}; git checkout #{sha})
+            return true
         rescue => e
             puts e
+            return false
         end
     end
 
-    def add_branch g, branch
+    def add_branch path, branch
         begin
-            return (g.branch(branch.to_s).checkout.include? branch.to_s)
+            #return (g.branch(branch.to_s).checkout.include? branch.to_s)
+            %x(cd #{path}; git branch #{branch.to_s}; git checkout #{branch.to_s})
+            return true
         rescue => e
             puts e
             return false
@@ -235,9 +243,10 @@ class Repo
         end
     end
 
-    def push_remote g, name, branch
+    def push_remote path, name, branch
         begin
-            g.push(g.remote(name.to_s),branch.to_s,{:force => true})
+            %x(cd #{path}; git push #{name.to_s} #{branch.to_s} --force)
+            #g.push(g.remote(name.to_s),branch.to_s,{:force => true})
             return true
         rescue => e
             puts e
@@ -245,9 +254,10 @@ class Repo
         end
     end
 
-    def log_head r
+    def log_head path
         begin
-            return r.log.first.objectish
+            return %x(cd #{path}; git rev-parse --verify HEAD).strip
+            #return r.log.first.objectish
         rescue => e
             puts e
             return nil
@@ -330,12 +340,16 @@ class Repo
                             return final
     end
 
-    def get_existing_contributor sprint_state_id
+    def get_existing_contributor sprint_state
         begin
-            return Contributor.joins("INNER JOIN sprint_states on contributors.sprint_state_id = sprint_states.id").where("contributors.sprint_state_id = #{sprint_state_id} and contributors.commit_success = 1 and sprint_states.expires is NULL").as_json
+            if !sprint_state.expires
+                return sprint_state.contributors.where("contributors.commit_remote IS NOT NULL").order("id ASC")
+            else
+                return [] 
+            end
         rescue => e
             puts e
-            return nil
+            return []
         end
     end
 end
