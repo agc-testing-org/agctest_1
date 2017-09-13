@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git -C $1 filter-branch --env-filter '
+git filter-branch --env-filter '
 CORRECT_NAME="Wired7.Anonymous"
 CORRECT_EMAIL="no-reply@wired7.com"
 export GIT_COMMITTER_NAME="$CORRECT_NAME"
