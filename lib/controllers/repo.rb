@@ -80,7 +80,7 @@ class Repo
         existing_contributor = get_existing_contributor sprint_state
         if existing_contributor.length >= 3 
             issue = Issue.new
-            sprint_state.expires = (Time.now.utc + 2.days)
+            sprint_state.expires = (Time.now.utc + ENV["INTEGRATIONS_SPRINT_EXPIRE_DAYS"].to_i.days)
             sprint_state.save
             log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :contributor_id => existing_contributor.first, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint[:user_id]}
             (issue.log_event log_params) || (return_error "an error has occurred")

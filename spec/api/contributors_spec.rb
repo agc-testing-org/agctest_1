@@ -236,8 +236,8 @@ describe "/contributors" do
                 it "should include commit" do
                     expect(@sql["commit"]).to eq(@sha_anonymous)
                 end
-                it "should set expires" do
-                    expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H'))
+                it "should set expires", :focus => true do
+                    expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H')).to eq((Time.now.utc + ENV["INTEGRATIONS_SPRINT_EXPIRE_DAYS"].to_i.days).strftime('%Y-%m-%d %H'))
                 end
                 context "sprint_timeline_event [future]" do
                     it "should include state id" do
