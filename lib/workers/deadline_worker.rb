@@ -9,6 +9,6 @@ class DeadlineWorker
             ContributorSyncWorker.perform_async c.id, c.user.github_username
         end
 
-        DeadlineNotificationWorker.perform_at (sprint_state.expires + 1.minute), sprint_state.sprint[:user_id], sprint_state.sprint.project_id, sprint_state.sprint_id, sprint_state_id, sprint_state.state.id
+        DeadlineNotificationWorker.perform_at (Time.now.utc + 1.minute), sprint_state.sprint[:user_id], sprint_state.sprint.project_id, sprint_state.sprint_id, sprint_state_id, sprint_state.state.id
     end
 end
