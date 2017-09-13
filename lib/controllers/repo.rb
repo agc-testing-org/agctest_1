@@ -95,7 +95,6 @@ class Repo
         fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
         if fetched
-            puts fetched.inspect
             contributor.prepared = true
             contributor.commit = fetched[:sha]
             contributor.commit_remote = fetched[:sha_remote]
