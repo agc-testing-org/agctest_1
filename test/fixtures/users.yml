@@ -14,7 +14,7 @@ adam_confirmed:
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>
   admin: false
-  github_username: adam_confirmed_github
+  github_username: "ADAM123"
   refresh: "RFRSH"
 
 adam_protected:
@@ -34,6 +34,7 @@ adam_admin:
   token: ABCDE
   admin: true
   confirmed: true
+  github_username: "ADAM123"
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
 
 masha_post_connection_request:
@@ -42,10 +43,12 @@ masha_post_connection_request:
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   token: WDX
+  github_username: "ADAM123"
 
 masha_get_connection_request:
   first_name: masha2
   email: masha2@wired7.com
+  github_username: "ADAM123"
   updated_at: <%= 2.day.ago.to_s(:db) %>
   created_at: <%= 5.day.ago.to_s(:db) %>
   token: XYZ

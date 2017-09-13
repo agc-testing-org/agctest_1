@@ -153,7 +153,7 @@ describe "/contributors" do
         context "valid contributor" do
             before(:each) do
                 get "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
-                @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} AND sprint_state_id = #{contributors(:adam_confirmed_1).sprint_state_id} ORDER BY ID DESC").first
                 @res = JSON.parse(last_response.body)
             end
             it "should return contributor id" do
@@ -167,19 +167,57 @@ describe "/contributors" do
         before(:each) do
             Octokit::Client.any_instance.stub(:login) { @username }
             Octokit::Client.any_instance.stub(:create_repository) { {} }
-
-            body = {
-                :name=>"1",
-                :commit=>{
-                    :sha=>contributors(:adam_confirmed_1).commit
-                }
-            }
-
-            @body = JSON.parse(body.to_json, object_class: OpenStruct)
-            Octokit::Client.any_instance.stub(:branch => @body)
         end
-        context "valid contributor" do
+        context "single contributor" do
+            before(:each) do
+                body = {
+                    :name=>"1",
+                    :commit=>{ 
+                        :sha=> @sha
+                    }
+                }
+
+                @body = JSON.parse(body.to_json, object_class: OpenStruct)
+                Octokit::Client.any_instance.stub(:branch => @body)
+            end
             fixtures :sprint_states, :sprints, :projects, :contributors, :notifications
+            before(:each) do
+                @sprint_state_id = contributors(:adam_confirmed_1b).sprint_state_id
+                @project = projects(:demo).id
+                %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
+                %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
+                patch "/contributors/#{contributors(:adam_confirmed_1b).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
+                @res = JSON.parse(last_response.body)
+                @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1b).user_id)} ORDER BY ID DESC").first
+                @expires_sql = @mysql_client.query("select * from sprint_states where id = #{contributors(:adam_confirmed_1b).sprint_state_id}").first
+            end
+            context "contributor" do
+                it "should include commit_remote" do
+                    puts @res.inspect
+                    expect(@sql["commit_remote"]).to eq(@sha)
+                end
+                it "should should update commit" do                
+                    puts @res.inspect                                                       
+                    expect(@sql["commit"]).to be nil
+                end  
+                it "should not set expires" do
+                    expect(@expires_sql["expires"]).to be nil
+                end
+            end
+        end
+        context "valid contributors (2+)" do
+            fixtures :sprint_states, :sprints, :projects, :contributors, :notifications
+            before(:each) do
+                body = {
+                    :name=>"1",
+                    :commit=>{ 
+                        :sha=> @sha_anonymous
+                    }
+                }
+
+                @body = JSON.parse(body.to_json, object_class: OpenStruct)
+                Octokit::Client.any_instance.stub(:branch => @body)
+            end
             before(:each) do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
@@ -187,16 +225,16 @@ describe "/contributors" do
                 %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
                 patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
-                @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
+                @sql = @mysql_client.query("select * from contributors where sprint_state_id = #{contributors(:adam_confirmed_1).sprint_state_id} AND user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first
                 @expires_sql = @mysql_client.query("select * from sprint_states where id = #{contributors(:adam_confirmed_1).sprint_state_id}").first
                 @review = @mysql_client.query("select * from sprint_timelines inner join notifications ON notifications.id = sprint_timelines.notification_id AND notifications.name = 'peer review'").first
             end
             context "contributor" do
-                it "should include commit" do
-                    expect(@sql["commit"]).to eq(contributors(:adam_confirmed_1).commit)
+                it "should include commit_remote" do
+                    expect(@sql["commit_remote"]).to eq(@sha)
                 end
-                it "should include commit_success" do
-                    expect(@sql["commit_success"]).to eq(1)
+                it "should include commit" do
+                    expect(@sql["commit"]).to eq(@sha_anonymous)
                 end
                 it "should set expires" do
                     expect((@expires_sql["expires"]).strftime('%Y-%m-%d %H')).to eq((Time.now.utc + 2.day).strftime('%Y-%m-%d %H'))

@@ -78,14 +78,14 @@ class Repo
 
     def create_deadline sprint_state 
         existing_contributor = get_existing_contributor sprint_state
-        if existing_contributor.length == 3 && !sprint_state.expires
+        if existing_contributor.length >= 3 
             issue = Issue.new
-            sprint_state.expires = (Time.now.utc + 0.minute) #TODO change back to 2.days
+            sprint_state.expires = (Time.now.utc + 2.days)
             sprint_state.save
             log_params = {:project_id => sprint_state.sprint.project.id, :sprint_id => sprint_state.sprint_id, :state_id => sprint_state.state_id, :sprint_state_id =>  sprint_state.id, :contributor_id => existing_contributor.first, :notification_id => Notification.find_by({:name => "deadline"}).id, :user_id => sprint_state.sprint[:user_id]}
             (issue.log_event log_params) || (return_error "an error has occurred")
             DeadlineWorker.perform_at sprint_state.expires, sprint_state.id
-        end
+        end 
         return sprint_state.expires
     end
 
@@ -95,6 +95,7 @@ class Repo
         fetched = refresh nil, nil, contributor_id, contributor[:sprint_state_id], username, contributor[:repo], ENV['INTEGRATIONS_GITHUB_ORG'], "#{contributor.sprint_state.sprint.project.name}_#{contributor.sprint_state.sprint.project.id}", contributor[:sprint_state_id], contributor[:sprint_state_id], "#{contributor[:sprint_state_id]}_#{contributor[:id]}", true
         contributor.preparing = false
         if fetched
+            puts fetched.inspect
             contributor.prepared = true
             contributor.commit = fetched[:sha]
             contributor.commit_remote = fetched[:sha_remote]
@@ -146,7 +147,7 @@ class Repo
 
                 session && (github_secret = account.unlock_github_token session, github_token)
 
-                ((ENV['RACK_ENV'] != "test") && (prefix = "https://#{slave_username}:#{github_secret}@github.com")) || (prefix = "test")
+                ((ENV['RACK_ENV'] != "test") && (prefix = "https://#{slave_username}:#{github_secret}@github.com")) || (prefix = "#{%x{pwd}.strip}/test")
 
                 added_remote = add_remote path, "#{prefix}/#{slave_username}/#{slave_project}", sprint_state_id
 

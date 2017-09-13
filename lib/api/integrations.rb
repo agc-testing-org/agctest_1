@@ -1108,7 +1108,7 @@ class Integrations < Sinatra::Base
             original_hash = (repo.log_head_remote github_authorization, @session_hash["github_username"], contributor.repo, contributor[:sprint_state_id]) rescue return_not_found
             contributor.commit_remote = original_hash
             contributor.save
-            deadline = repo.create_deadline contributor.sprint_state
+            !contributor.sprint_state.expires && (repo.create_deadline contributor.sprint_state)
         end
         status 200
         return contributor.to_json 

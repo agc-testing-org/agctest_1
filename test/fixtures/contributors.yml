@@ -4,8 +4,8 @@ adam_confirmed_1:
   sprint_state: sprint_1_state_1
   updated_at: <%= 2.hours.ago.to_s(:db) %>
   created_at: <%= 5.hours.ago.to_s(:db) %>
-  commit: "18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8" #commit after conversion to Wired7.anonymous
-  commit_remote: "b218bd1da7786b8beece26fc2e6b2fa240597969"
+  #commit: "18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8" #commit after conversion to Wired7.anonymous
+  #commit_remote: "b218bd1da7786b8beece26fc2e6b2fa240597969"
 
 adam_admin_1:
   user: adam_admin
@@ -61,3 +61,8 @@ masha_get_connection_request_1:
   commit_remote: "b218bd1da7786b8beece26fc2e6b2fa240597969"
   commit_success: true
 
+adam_confirmed_1b:
+  user: adam_confirmed
+  repo: "git-repo-log"
+  sprint_state: sprint_1b_state_1
+  created_at: <%= 5.hours.ago.to_s(:db) %>

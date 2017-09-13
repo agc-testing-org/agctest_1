@@ -33,6 +33,7 @@ RSpec.configure do |config|
             @uri = "test/#{@username}/git-repo-log.git"
             @uri_master = "test/#{@username}/DEMO.git"
             @sha = "b218bd1da7786b8beece26fc2e6b2fa240597969"
+            @sha_anonymous = "18feb3c1568fe4cac7bf4eae543bf1a5ee8405b8"
         end
     end
 end
