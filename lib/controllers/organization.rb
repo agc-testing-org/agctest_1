@@ -176,14 +176,14 @@ class Organization
     end
 
     def get_team_notifications params
-        team_id = params["id"]
+        team_id = params["id"].to_i
         page = (params["page"].to_i if params["page"].to_i > 0) || 1
         params = drop_key params, "page"
         account = Account.new
         begin
-            vote_comment_winner = Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "winner"})).select(:id).map(&:id).join(",")
             response = []
-            notifications = SprintTimeline.joins("inner join user_notifications inner join user_teams INNER join contributors ON sprint_timelines.contributor_id = contributors.id INNER JOIN seats on user_teams.seat_id = seats.id").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_teams.team_id = ? and user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and seats.name in ('sponsored', 'priority') AND sprint_timelines.notification_id IN(#{vote_comment_winner}) and contributors.user_id != sprint_timelines.user_id", team_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            #TODO - incorporate user-triggered actions, including acceptance/joins 
+            notifications = SprintTimeline.joins("inner join user_notifications ON sprint_timelines.id=user_notifications.sprint_timeline_id inner join user_teams ON user_notifications.user_id = user_teams.user_id and user_teams.accepted = 1 and user_teams.team_id = #{team_id} INNER join contributors ON sprint_timelines.contributor_id = contributors.id INNER JOIN seats on user_teams.seat_id = seats.id inner join notifications ON sprint_timelines.notification_id = notifications.id").where("notifications.name IN ('comment','vote','winner','new','comment vote','sprint comment','sprint vote','sprint comment vote') and seats.name in ('sponsored', 'priority') AND contributors.user_id != sprint_timelines.user_id").select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
             notifications.each_with_index do |notification,i|
                 response[i] = notification.as_json
                 response[i][:talent_id] = notification.contributor.user.id

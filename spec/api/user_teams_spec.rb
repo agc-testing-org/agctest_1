@@ -209,6 +209,7 @@ describe "/user-teams" do
                 post "/user-teams/token", { :token => user_teams(:adam_confirmed_b_team).token }.to_json, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = [JSON.parse(last_response.body)]
                 @team_invite_result = @mysql_client.query("select * from user_teams where id = '#{user_teams(:adam_confirmed_b_team).id}'")
+                @sprint_timelines_result = @mysql_client.query("select * from sprint_timelines").first 
             end
             it_behaves_like "invites_teams"
             it "should set accepted = true" do
@@ -216,6 +217,17 @@ describe "/user-teams" do
             end
             it "should update the record" do
                 expect(@team_invite_result.first["accepted"]).to eq 1
+            end
+            context "sprint_timelines" do
+                it "should record user_id" do
+                    expect(@sprint_timelines_result["user_id"]).to eq(@team_invite_result.first["user_id"])
+                end
+                it "should record team_id" do
+                    expect(@sprint_timelines_result["team_id"]).to eq(@team_invite_result.first["team_id"])
+                end
+                it "should record notification_id" do
+                    expect(@sprint_timelines_result["notification_id"]).to eq(notifications(:join).id)
+                end
             end
             it_behaves_like "ok"
         end

@@ -233,17 +233,30 @@ describe "API" do
             @password = 'pass1221ef31'
         end 
         context "valid token" do
+            fixtures :notifications
             before(:each) do
                 @token = user_teams(:adam_confirmed_b_team).token
                 post "/accept", { :password => @password, :firstName => @first_name, :token => @token }.to_json
                 @res = JSON.parse(last_response.body)
                 @query = "select * from users where id = #{decrypt(users(:adam_confirmed).id)}"
-                @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id}")
+                @user_teams_result = @mysql_client.query("select * from user_teams where team_id = #{user_teams(:adam_confirmed_b_team).team_id} AND user_id = #{user_teams(:adam_confirmed_b_team)[:user_id]}")
+                @sprint_timelines_result = @mysql_client.query("select * from sprint_timelines").first
             end 
             it_behaves_like "session_response"
             it_behaves_like "new_session"
             it "should set accepted = true" do
                 expect(@user_teams_result.first["accepted"]).to be 1
+            end
+            context "sprint_timelines" do
+                it "should record user_id" do
+                    expect(@sprint_timelines_result["user_id"]).to eq(@user_teams_result.first["user_id"])
+                end
+                it "should record team_id" do
+                    expect(@sprint_timelines_result["team_id"]).to eq(@user_teams_result.first["team_id"])
+                end
+                it "should record notification_id" do
+                    expect(@sprint_timelines_result["notification_id"]).to eq(notifications(:join).id)
+                end
             end
             it_behaves_like "ok"
         end

@@ -341,6 +341,9 @@ class Integrations < Sinatra::Base
         seat_id = account.get_seat_permissions user[:id]
         slack = Slack.new
         slack.post_accepted invitation.first
+        issue = Issue.new
+        log_params = {:user_id => invitation.first[:user_id], :team_id => invitation.first.team_id, :notification_id => Notification.find_by({:name => "join"}).id}
+        (issue.log_event log_params) || (return_error "unable to log acceptance")
         status 200
         return (session_tokens user, seat_id, true).to_json
     end
@@ -1305,6 +1308,9 @@ class Integrations < Sinatra::Base
         (@session_hash["id"] == decrypt(invitation.first.user_id).to_i) || (return_error "this invitation is invalid")
         team = account.join_team invitation
         team || (return_error "this invitation has expired")
+        issue = Issue.new 
+        log_params = {:user_id => @session_hash["id"], :team_id => invitation.first.team_id, :notification_id => Notification.find_by({:name => "join"}).id}
+        (issue.log_event log_params) || (return_error "unable to log acceptance")
         status 200
         return team.to_json 
     end

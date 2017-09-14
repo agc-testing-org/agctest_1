@@ -53,3 +53,7 @@ deadline:
 peer:
   name: "peer review"
   description: "a private review"
+
+join:
+  name: "join"
+  description: "invitation accepted"

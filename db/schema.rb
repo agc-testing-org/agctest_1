@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170911043307) do
+ActiveRecord::Schema.define(version: 20170914032533) do
 
   create_table "comments", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "user_id", null: false
@@ -165,6 +165,7 @@ ActiveRecord::Schema.define(version: 20170911043307) do
     t.integer "processing"
     t.integer "next_sprint_state_id"
     t.integer "job_id"
+    t.integer "team_id"
     t.index ["comment_id"], name: "index_sprint_timelines_on_comment_id"
     t.index ["contributor_id"], name: "index_sprint_timelines_on_contributor_id"
     t.index ["job_id"], name: "fk_rails_1d21bcd0f9"
