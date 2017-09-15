@@ -1,5 +1,5 @@
 sprint_1_transition:
-  user: adam_admin
+  user: adam
   project: demo 
   sprint: sprint_1
   sprint_state: sprint_1_state_2
@@ -55,6 +55,15 @@ sprint_1_state_1_winner:
   notification: winner
   created_at: <%= 5.day.ago.to_s(:db) %>
 
+sprint_1_state_3_winner:
+  user: adam
+  project: demo
+  sprint: sprint_1
+  contributor: adam_confirmed_1
+  sprint_state: sprint_1_state_2
+  next_sprint_state: sprint_1_state_3
+  notification: winner
+  created_at: <%= 5.day.ago.to_s(:db) %>
 
 sprint_1_state_1_comment_2:
   user: adam_admin
@@ -79,7 +88,7 @@ sprint_1_state_2_winner:
   created_at: <%= 5.day.ago.to_s(:db) %>
 
 sprint_1_deadline:
-  user: adam_admin
+  user: adam
   project: demo 
   sprint: sprint_1
   sprint_state: sprint_1_state_2
@@ -89,7 +98,7 @@ sprint_1_deadline:
   created_at: <%= 3.day.ago.to_s(:db) %>
 
 sprint_1_state_1_explain:
-  user: adam_confirmed
+  user: adam
   project: demo
   sprint: sprint_1
   comment: adam_confirmed_explain
@@ -100,7 +109,7 @@ sprint_1_state_1_explain:
   created_at: <%= 5.day.ago.to_s(:db) %>
 
 sprint_1_state_1_review:
-  user: adam_confirmed
+  user: adam
   sprint_state: sprint_1_state_1
   notification: peer
   created_at: <%= 5.day.ago.to_s(:db) %>

@@ -1158,4 +1158,162 @@ describe ".Account" do
             end
         end
     end
+
+    shared_examples_for "notification email" do
+        it "to" do
+            expect(@res[:to]).to eq @to
+        end
+        it "subject" do
+            expect(@res[:subject]).to eq @subject
+        end
+        it "html_body" do
+            expect(@res[:html_body]).to eq @html_body
+        end
+        it "html" do
+            expect(@res[:body]).to eq @body
+        end
+    end
+
+    context "#create_notification_email" do
+        fixtures :users, :notifications, :sprint_timelines, :states, :sprints, :sprint_states, :projects, :user_notifications
+        context "regular comment" do
+            fixtures :comments
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_state_1_comment)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                user_profile = @account.get_profile sprint_timeline.user
+                profile = @account.user_profile_descriptor user_profile
+                sprint_state = sprint_timeline.next_sprint_state.state.name
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}/state/#{sprint_timeline.next_sprint_state.id}-#{sprint_timeline.next_sprint_state.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "New Wired7 #{sprint_timeline.notification.name.capitalize}"
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>There's a new #{sprint_timeline.notification.name} from #{profile} on the #{sprint_state} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>\"#{sprint_timeline.comment.text}\"<br><br>Use the following link to reply:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"                
+                @body = "#{sprint_timeline.user.first_name},\n\nThere's a new #{sprint_timeline.notification.name} from #{profile} on the #{sprint_state} phase of the #{project} sprint #{sprint}\n\n\"#{sprint_timeline.comment.text}\"\n\nUse the following link to reply:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+
+        context "comment without next_sprint_state" do
+            fixtures :comments
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_state_1_explain)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                user_profile = @account.get_profile sprint_timeline.user
+                profile = @account.user_profile_descriptor user_profile
+                sprint_state = sprint_timeline.sprint_state.state.name
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}/state/#{sprint_timeline.sprint_state.id}-#{sprint_timeline.sprint_state.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "New Wired7 #{sprint_timeline.notification.name.capitalize}"
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>There's a new #{sprint_timeline.notification.name} from #{profile} on the #{sprint_state} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>\"#{sprint_timeline.comment.text}\"<br><br>Use the following link to reply:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"                
+                @body = "#{sprint_timeline.user.first_name},\n\nThere's a new #{sprint_timeline.notification.name} from #{profile} on the #{sprint_state} phase of the #{project} sprint #{sprint}\n\n\"#{sprint_timeline.comment.text}\"\n\nUse the following link to reply:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+
+        context "transition" do
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_transition)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}/state/#{sprint_timeline.sprint_state.id}-#{sprint_timeline.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "Wired7 #{sprint_timeline.state.name} transition"
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>We've just started the #{sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>#{sprint_timeline.state.instruction}<br><br>Use the following link to join in:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{sprint_timeline.user.first_name},\n\nWe've just started the #{sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\n#{sprint_timeline.state.instruction}\n\nUse the following link to join in:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+
+        context "winner != contributor" do
+            fixtures :contributors
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_state_3_winner)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}/state/#{sprint_timeline.next_sprint_state.id}-#{sprint_timeline.next_sprint_state.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "Wired7 Proposal Selected"
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>A winning proposal has been selected for the #{sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i>.  Use the following link to check out all of the proposals:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{sprint_timeline.user.first_name},\n\nA winning proposal has been selected for the #{sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint}.  Use the following link to check out all of the proposals:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+
+        context "winner = contributor" do
+            fixtures :contributors
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_state_2_winner)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}/state/#{sprint_timeline.next_sprint_state.id}-#{sprint_timeline.next_sprint_state.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "Your Wired7 Proposal Won!"
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>Congratulations!  Your proposal for the #{sprint_timeline.next_sprint_state.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i> has been selected for merge!  Use the following link to check out the other proposals:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{sprint_timeline.user.first_name},\n\nCongratulations!  Your proposal for the #{sprint_timeline.next_sprint_state.state.name} phase of the #{project} sprint #{sprint} has been selected for merge!  Use the following link to check out the other proposals:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+
+        # context "new" do
+        #     fixtures :jobs, :teams
+        #     before(:each) do
+        #         sprint_timeline = sprint_timelines(:job_developer)
+        #         project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+        #         sprint = sprint_timeline.sprint.title
+        #         user_profile = @account.get_profile sprint_timeline.user
+        #         profile = @account.user_profile_descriptor user_profile
+        #         link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}"
+        #         @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+        #         puts @res.class
+        #         puts @res.to_json
+
+        #         @to = sprint_timeline.user.email
+        #         @subject = "Wired7 Idea Pitch for #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company}"
+        #         @html_body = "#{sprint_timeline.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+        #         @body = "#{sprint_timeline.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n- The Wired7 ATeam"
+        #     end 
+        #     it_behaves_like "notification email"
+        #     it "should be ok" do
+        #         expect(1).to eq 1
+        #     end
+        # end
+
+        context "job" do
+        end
+
+        context "deadline" do
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_deadline)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}/state/#{sprint_timeline.sprint_state.id}-#{sprint_timeline.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "Wired7 #{sprint_timeline.state.name} deadline set"
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>We've just set deadline for the #{sprint_timeline.state.name} phase of the <i>#{project}</i> sprint <i>#{sprint}</i><br><br>At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{sprint_timeline.user.first_name},\n\nWe've just set deadline for the #{sprint_timeline.state.name} phase of the #{project} sprint #{sprint}\n\nAt least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+
+        context "peer review" do
+            before(:each) do
+                sprint_timeline = sprint_timelines(:sprint_1_state_1_review)
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.sprint_state.sprint.project.id}-#{sprint_timeline.sprint_state.sprint.project.org}-#{sprint_timeline.sprint_state.sprint.project.name}/sprint/#{sprint_timeline.sprint_state.sprint.id}-#{sprint_timeline.sprint_state.sprint.title}/state/#{sprint_timeline.sprint_state.id}-#{sprint_timeline.sprint_state.state.name}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
+                @to = sprint_timeline.user.email
+                @subject = "Wired7 #{sprint_timeline.sprint_state.state.name} Peer Review" 
+                @html_body = "#{sprint_timeline.user.first_name},<br><br>The deadline for the #{sprint_timeline.sprint_state.state.name} phase of the <i>#{sprint_timeline.sprint_state.sprint.project.name}</i> sprint <i>#{sprint_timeline.sprint_state.sprint.title}</i> has arrived!<br><br>We've selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with other team members:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{sprint_timeline.user.first_name},\n\nThe deadline for the #{sprint_timeline.sprint_state.state.name} phase of the #{sprint_timeline.sprint_state.sprint.project.name} sprint #{sprint_timeline.sprint_state.sprint.title} has arrived!\n\nWe selected two solution proposals for you to review before we invite all users to provide feedback.  Use the following link to check out other approaches and show how you would interact with team members:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
+    end
 end
