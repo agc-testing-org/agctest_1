@@ -3,9 +3,9 @@
         {{#if (eq type "role_id")}}
             {{#link-to (query-params role_id=item.id)}}
                 {{#if (eq params.role_id item.id)}}
-                    <span class="badge badge-default rounded selected cursor-pointer">{{item.name}}</span>
+                    <span class="badge badge-default rounded selected cursor-pointer role"><i class="fa fa-fw fa-1x fa-paint-brush"></i>{{item.name}}</span>
                 {{else}}
-                    <span class="badge badge-default rounded unselected cursor-pointer">{{item.name}}</span>
+                    <span class="badge badge-default rounded unselected cursor-pointer role"><i class="fa fa-fw fa-1x fa-paint-brush"></i>{{item.name}}</span>
                 {{/if}}
             {{/link-to}}
         {{else if (eq type "skillset_id")}}
@@ -22,7 +22,7 @@
 
 {{#if active}}
 {{#if (eq type "role_id")}}
-    {{#link-to (query-params role_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">all roles</span>{{/link-to}} 
+    {{#link-to (query-params role_id="")}}<span class="badge badge-default rounded unselected cursor-pointer role">all roles</span>{{/link-to}} 
 {{else if (eq type "skillset_id")}}
     {{#link-to (query-params skillset_id="")}}<span class="badge badge-default rounded unselected cursor-pointer">all skillsets</span>{{/link-to}} 
 {{/if}}

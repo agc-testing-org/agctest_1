@@ -1,20 +1,21 @@
-<div class="vertical-align-hold">
-    <div class="vertical-align-cell">
-        <div class="overview text-center">
-            {{#if me}}
-            <h1 class="name text-capitalize">{{sessionAccount.account.first_name}}</h1>
-            {{else}}
-            <h1 class="name text-capitalize"><i class="fa fa-fw fa-2x fa-user-secret" aria-hidden="true"></i></h1>
-            {{/if}}
-            <h3 class="description">Filter {{aggregate}} by Role and Skillset</h3>
-            {{#if me}}
-                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
-                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
-            {{else}}
-                {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
-                {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
-            {{/if}}
-        </div>
-    </div>
+{{#if roles}}
+<h4 class="about section">Filter by Role</h4>
+<div class="bg-nav rounded mb-4 p-3">
+    {{#if me}}
+        {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
+    {{else}}
+        {{profile-overview-skillsets-roles-stats items=roles user_id=user.id type="role_id" params=params class="skillsets mb-1"}}
+    {{/if}}
 </div>
+{{/if}}
 
+{{#if skillsets}}
+<h4 class="about section">Filter by Skillset</h4>
+<div class="bg-nav rounded mb-4 p-3">
+    {{#if me}}
+        {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
+    {{else}}
+        {{profile-overview-skillsets-roles-stats items=skillsets user_id=user.id type="skillset_id" params=params class="skillsets"}}
+    {{/if}} 
+</div>
+{{/if}}
