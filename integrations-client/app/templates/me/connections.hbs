@@ -1,13 +1,5 @@
-<div class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down pb-0 bg-nav">
-    <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
-        <h3>{{user-profile-descriptor user_profile=model.user multiple_lines=true disable_you=true}}</h3>
-    </div>
-</div>
-<div class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up pb-0 bg-nav">
-    <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
-        <h3>{{user-profile-descriptor user_profile=model.user multiple_lines=true disable_you=true}}</h3>
-    </div>
-</div>
+{{me-home-overview class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down pb-0 bg-nav" user=model.user}}
+{{me-home-overview class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up pb-0 bg-nav" user=model.user}}
 
 <div class="col-md-12 col-sm-12">
     <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">

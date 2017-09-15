@@ -20,6 +20,7 @@ export default Ember.Route.extend(AuthenticatedRouteMixin,{
     model: function(params) {
         return Ember.RSVP.hash({
             token: params.id,
+            user: this.modelFor("me").user,
             invitation: this.store.queryRecord('team-invite', {
                 token: params.id
             }),

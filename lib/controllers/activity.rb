@@ -116,7 +116,7 @@ class Activity
         # all comment and vote notifications not written by owner
         # TODO rethink ownership (anyone can create a sprint...) - also need a way to let the project owner know what's going on
         begin
-            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id LEFT join comments on comments.id = sprint_timelines.comment_id").where("comments.explain = 0").where("sprint_timelines.user_id != sprints.user_id and sprint_timelines.notification_id IN(#{Notification.where({:name => "vote"}).or(Notification.where({:name => "comment"})).or(Notification.where({:name => "comment vote"})).or(Notification.where({:name => "sprint comment"})).or(Notification.where({:name => "sprint comment vote"})).or(Notification.where({:name => "sprint vote"})).select(:id).map(&:id).join(",")})").select("sprints.user_id")
+            return SprintTimeline.where(:id => sprint_timeline_id).joins("INNER join sprints ON sprint_timelines.sprint_id=sprints.id LEFT join comments on comments.id = sprint_timelines.comment_id AND comments.explain = 0 LEFT join votes on votes.id = sprint_timelines.vote_id INNER JOIN notifications ON notifications.id = sprint_timelines.notification_id").where("sprint_timelines.user_id != sprints.user_id and notifications.name IN('vote','comment','comment vote','sprint comment','sprint comment vote','sprint vote')").select("sprints.user_id")
         rescue => e
             puts e
             return []

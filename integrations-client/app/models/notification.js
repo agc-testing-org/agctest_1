@@ -8,6 +8,7 @@ export default DS.Model.extend({
     sprint: DS.belongsTo('sprint'),
     project: DS.belongsTo('project'),
     comment: DS.belongsTo('comment'),
+    contributor_id: attr('number'),
     vote: DS.belongsTo('vote'),
     created_at: attr('date'),
     read: attr('boolean'),

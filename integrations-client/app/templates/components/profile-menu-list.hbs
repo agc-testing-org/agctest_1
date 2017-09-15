@@ -2,7 +2,7 @@
 
     {{#if session.isAuthenticated}}
 
-            {{#link-to "me.notifications" tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
+            {{#link-to "me.notifications" (query-params page="undefined") tagName='li' href=false class="cursor-pointer nav-item text-center text-capitalize" }}
                 <div class="icon hidden-sm-down">
                     <i class="fa fa-fw fa-2x fa-home"></i>
                 </div>

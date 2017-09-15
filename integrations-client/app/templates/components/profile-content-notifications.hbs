@@ -8,7 +8,20 @@
                     {{#if (eq notification.notification.name "comment")}}
                         <p class="line">
                             {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
-                            commented on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+                            commented on <strong>Proposal {{notification.contributor_id}}</strong> of the 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} 
+                            of <strong>{{notification.sprint.title}}</strong>
+                        </p>
+                        <p class="line quotation">
+                            <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                        </p>
+                    {{/if}}
+
+                    {{#if (eq notification.notification.name "sprint comment")}}
+                        <p class="line">
+                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            commented on sprint proposal for 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state.id "-" notification.sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} 
                         </p>
                         <p class="line quotation">
                             <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
@@ -18,66 +31,122 @@
                     {{#if (eq notification.notification.name "vote")}}
                         <p class="line">
                             {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
-                            voted on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+                            voted for <strong>Proposal {{notification.contributor_id}}</strong> on the 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} 
+                            of 
+                            <strong>{{notification.sprint.title}}</strong>
                         </p>
                     {{/if}}
                    
                     {{#if (eq notification.notification.name "job")}}
                         <p class="line">
-                        {{notification.job_team_name}} at <strong>{{notification.job_company}}</strong> started a search for a {{notification.job_title}}.  If you're interested, {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company)}}  propose and build an idea{{/link-to}} that earns the hiring manager's attention.
+                            <i class="fa fa-briefcase fa-fw" aria-hidden="true"></i> {{notification.job_team_name}} at <strong>{{notification.job_company}}</strong> started a search for a 
+                            {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company)}}{{notification.job_title}}{{/link-to}}.  
+                            <br>
+                            If you're interested, 
+                            {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company) class="text-lowercase"}} propose an idea for a Wired7 project{{/link-to}} that earns the hiring manager's attention.
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "new")}}
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
-                            proposed a new sprint idea ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) for the {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company)}}{{notification.job_title}}{{/link-to}} listing at <strong>{{notification.job_company}}</strong> using {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
+                            <i class="fa fa-lightbulb-o fa-fw" aria-hidden="true"></i> {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            proposed a new sprint idea 
+                            ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) 
+                            for the 
+                            {{#link-to "develop.roadmap.job" (concat notification.job_id "-" notification.job_title "-at-" notification.job_company)}}{{notification.job_title}}{{/link-to}} 
+                            job listing at <strong>{{notification.job_company}}</strong> using 
+                            {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "transition")}}
                         <p class="line">
-                            {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} transitioned to the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}}.  {{notification.state_id.instruction}}
+                            <strong>{{notification.sprint.title}}</strong>
+                            transitioned to the 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}}.  
+                            <br>
+                            {{notification.state_id.instruction}}
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "winner")}}
                         <p class="line">
-                            A winning proposal for the {{notification.next_sprint_state.state_id.name}} phase of {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} was selected for merge into {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
+                            <i class="fa fa-trophy fa-fw" aria-hidden="true"></i> <strong>Proposal {{notification.contributor_id}}</strong> for the 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase {{/link-to}}
+                            of <strong>{{notification.sprint.title}}</strong> was selected for merge into 
+                            {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "comment vote")}}
                         <p class="line">
                             {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
-                            agrees with a comment from {{#if (eq notification.user_profile_comment_vote.id sessionAccount.account.id)}}you {{/if}}
-                            {{#unless (eq notification.user_profile_comment_vote.id sessionAccount.account.id)}}
+                            agrees with a comment from
                             {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
-                            {{/unless}} on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}
+                            on the 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} 
+                            of <strong>{{notification.sprint.title}}</strong>
                         </p>
                         <p class="line quotation">
                             <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment_vote.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
                         </p>
                     {{/if}}
 
+                    {{#if (eq notification.notification.name "sprint comment vote")}} <!-- no next sprint state -->
+                        <p class="line">
+                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            agrees with a comment from
+                            {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
+                            on the sprint proposal for 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state.id "-" notification.sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} 
+                        </p>                                                                                                                                                                                                                                                    <p class="line quotation">
+                            <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment_vote.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
+                        </p>
+                    {{/if}}
+
+                    {{#if (eq notification.notification.name "sprint vote")}} <!-- no next sprint state -->
+                        <p class="line">
+                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}} likes the 
+                            {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} 
+                            sprint proposal for 
+                            {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
+                        </p>
+                    {{/if}}
+
                     {{#if (eq notification.notification.name "deadline")}}
                         <p class="line">
-                            We've set a deadline for the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}. At least three solutions have been proposed. Contribute in the next 48 hours to showcase your talent.
+                            <i class="fa fa-hourglass-half fa-fw" aria-hidden="true"></i> We've set a deadline for the 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}} 
+                            of <strong>{{notification.sprint.title}}</strong>.
+                            <br>
+                            Three or more solutions have already been proposed.
+                            <br>
+                            Contribute in the next 48 hours to showcase your talent!
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "peer review")}}
                         <p class="line">
-                        The deadline for the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}{{notification.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} has arrived!  We've selected {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name)}}two solution proposals{{/link-to}} for you to review before we invite all users to provide feedback.
+                            <i class="fa fa-flag-checkered fa-fw" aria-hidden="true"></i> The deadline for the {{notification.state_id.name}} phase of <strong>{{notification.sprint.title}}</strong> has arrived!
+                            <br>We've selected 
+                            {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state_id "-" notification.state_id.name) class="text-lowercase"}} two solution proposals for you to review{{/link-to}} 
+                            before we invite all users to provide feedback.
                         </p>
                     {{/if}}
 
                     {{#if (eq notification.notification.name "comment offensive")}}
                         <p class="line">
-                            Someone has flagged a comment from {{#if (eq notification.user_profile_comment_vote.id sessionAccount.account.id)}}you {{/if}}
-                            {{#unless (eq notification.user_profile_comment_vote.id sessionAccount.account.id)}}
+                            Someone has flagged a comment from 
                             {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
-                            {{/unless}} on the {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}. Wired7 ATeam will review it.
+                            on the 
+                            {{#if notification.next_sprint_state}}
+                                {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}}
+                            {{else}}
+                                {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state.id "-" notification.sprint_state.state_id.name)}}{{notification.sprint_state.state_id.name}} phase{{/link-to}} 
+                            {{/if}}
+                            of {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}.
+                            <br>The Wired7 ATeam will review it.
                         </p>
                         <p class="line quotation">
                             <i class="fa fa-fw fa-1x fa-quote-left" aria-hidden="true"></i> {{notification.comment_vote.text}} <i class="fa fa-fw fa-1x fa-quote-right" aria-hidden="true"></i>
