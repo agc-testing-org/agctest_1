@@ -34,7 +34,7 @@ sprint_1_state_1_comment:
   created_at: <%= 5.day.ago.to_s(:db) %>
 
 sprint_1_state_1_vote:
-  user: adam_admin
+  user: adam
   project: demo
   sprint: sprint_1
   vote: adam_admin_1
@@ -98,7 +98,7 @@ sprint_1_deadline:
   created_at: <%= 3.day.ago.to_s(:db) %>
 
 sprint_1_state_1_explain:
-  user: adam
+  user: adam_confirmed
   project: demo
   sprint: sprint_1
   comment: adam_confirmed_explain
