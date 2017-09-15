@@ -1261,31 +1261,40 @@ describe ".Account" do
             it_behaves_like "notification email"
         end
 
-        # context "new" do
-        #     fixtures :jobs, :teams
-        #     before(:each) do
-        #         sprint_timeline = sprint_timelines(:job_developer)
-        #         project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
-        #         sprint = sprint_timeline.sprint.title
-        #         user_profile = @account.get_profile sprint_timeline.user
-        #         profile = @account.user_profile_descriptor user_profile
-        #         link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}"
-        #         @res = @account.create_notification_email sprint_timeline.id, decrypt(sprint_timeline.user.id)
-        #         puts @res.class
-        #         puts @res.to_json
-
-        #         @to = sprint_timeline.user.email
-        #         @subject = "Wired7 Idea Pitch for #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company}"
-        #         @html_body = "#{sprint_timeline.user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
-        #         @body = "#{sprint_timeline.user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n- The Wired7 ATeam"
-        #     end 
-        #     it_behaves_like "notification email"
-        #     it "should be ok" do
-        #         expect(1).to eq 1
-        #     end
-        # end
+        context "new" do
+            fixtures :jobs, :teams
+            before(:each) do
+                sprint_timeline = sprint_timelines(:job_developer_idea)
+                project = sprint_timeline.project.org + "/" + sprint_timeline.project.name
+                sprint = sprint_timeline.sprint.title
+                user_profile = @account.get_profile sprint_timeline.user
+                profile = @account.user_profile_descriptor user_profile
+                user = users(:elina)
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/#{sprint_timeline.project.id}-#{sprint_timeline.project.org}-#{sprint_timeline.project.name}/sprint/#{sprint_timeline.sprint.id}-#{sprint_timeline.sprint.title}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(user.id)
+                @to = user.email
+                @subject = "Wired7 Idea Pitch for #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company}"
+                @html_body = "#{user.first_name},<br><br>#{profile} has just proposed a new sprint idea for the #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company} listing using <i>#{project}</i>:<br><br>#{sprint}<br><br>Use the following link to check it out:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{user.first_name},\n\n#{profile} has just proposed a new sprint idea for the #{sprint_timeline.job.title} at #{sprint_timeline.job.team.company} listing using #{project}:\n\n#{sprint}\n\nUse the following link to check it out:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
+        end
 
         context "job" do
+            fixtures :jobs, :teams
+            before(:each) do
+                sprint_timeline = sprint_timelines(:job_developer)
+                user_profile = @account.get_profile sprint_timeline.user
+                profile = @account.user_profile_descriptor user_profile
+                user = users(:elina)
+                link = "#{ENV['INTEGRATIONS_HOST']}/develop/roadmap/job/#{sprint_timeline.job.id}-#{sprint_timeline.job.title}-at-#{sprint_timeline.job.team.company}"
+                @res = @account.create_notification_email sprint_timeline.id, decrypt(user.id)
+                @to = user.email
+                @subject = "#{sprint_timeline.job.team.name} at #{sprint_timeline.job.team.company} is looking for a #{sprint_timeline.job.title} on Wired7"
+                @html_body = "#{user.first_name},<br><br>#{sprint_timeline.job.team.name} at #{sprint_timeline.job.team.company} started a search for a #{sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:<br><br><a href='#{link}'>#{link}</a><br><br><br>- The Wired7 ATeam"
+                @body = "#{user.first_name},\n\n#{sprint_timeline.job.team.name} at #{sprint_timeline.job.team.company} started a search for a #{sprint_timeline.job.title}.  If you're interested, use the following link to propose and build an idea that earns the hiring manager's attention:\n\n#{link}\n\n\n- The Wired7 ATeam"
+            end 
+            it_behaves_like "notification email"
         end
 
         context "deadline" do

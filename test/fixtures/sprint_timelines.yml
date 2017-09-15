@@ -17,7 +17,9 @@ job_developer:
 job_developer_idea:
   user: adam
   job: developer
-  sprint_id: sprint_1
+  project: demo
+  sprint: sprint_1
+  sprint_state: sprint_1_state_1
   notification: new
   created_at: <%= 3.day.ago.to_s(:db) %>
 
