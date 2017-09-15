@@ -1,4 +1,15 @@
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-sm-down">{{profile-overview-aggregates aggregate="Winning Solutions" user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params items=model.contributors_received refresh="refresh"}}</div>
-<div class="col-md-5 col-sm-12 offset-md-0 slide hidden-md-up">{{profile-overview-aggregates aggregate="Winning Solutions" user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params items=model.contributors_received refresh="refresh"}}</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-sm-down">{{profile-content-stats col=12 me=model.me user=model.user params=model.params contributors_received=model.contributors_received}}</div>
-<div class="col-md-6 col-sm-12 offset-md-6 still hidden-md-up">{{profile-content-stats col=12 me=model.me user=model.user params=model.params contributors_received=model.contributors_received}}</div>
+{{me-home-overview class="col-md-12 col-sm-12 offset-md-0 top hidden-sm-down pb-0 bg-nav" user=model.user}}
+{{me-home-overview class="col-md-12 col-sm-12 offset-md-0 top hidden-md-up pb-0 bg-nav" user=model.user}}
+
+<div class="col-md-12 col-sm-12">
+    <div class="col-md-11 col-sm-12 offset-md-1 offset-sm-0">
+        <div class="row">
+            <div class="col-md-7 col-sm-12 offset-md-0 mt-4 hidden-md-up">{{profile-content-stats col=12 me=model.me user=model.user params=model.params contributors_received=model.contributors_received}}</div>
+            <div class="col-md-4 col-sm-12 mt-2 hidden-md-up flex-first">{{profile-overview-aggregates aggregate="Winning Solutions" user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params items=model.contributors_received refresh="refresh"}}</div>
+
+            <div class="col-md-7 col-sm-12 offset-md-0 hidden-sm-down">{{profile-content-stats col=12 me=model.me user=model.user params=model.params contributors_received=model.contributors_received}}</div>
+            <div class="col-md-4 col-sm-12 hidden-sm-down">{{profile-overview-aggregates aggregate="Winning Solutions" user=model.user skillsets=model.skillsets roles=model.roles me=model.me params=model.params items=model.contributors_received refresh="refresh"}}</div>
+        </div>
+    </div>
+    {{application-foot class="foot-hold text-center"}}
+</div>
