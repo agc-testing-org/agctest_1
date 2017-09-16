@@ -12,3 +12,48 @@ job_developer_for_adam_confirmed:
   user: adam_confirmed
   read: false
   sprint_timeline: job_developer
+
+sprint_1_state_1_comment_for_adam_admin:
+  user: adam_admin
+  read: false
+  sprint_timeline: sprint_1_state_1_comment
+  
+sprint_1_state_1_explain_for_adam_confirmed:
+  user: adam_confirmed
+  read: false
+  sprint_timeline: sprint_1_state_1_explain
+
+sprint_1_transition_for_adam:
+  user: adam
+  read: false
+  sprint_timeline: sprint_1_transition
+
+sprint_1_state_3_winner_for_adam:
+  user: adam
+  read: false
+  sprint_timeline: sprint_1_state_3_winner
+
+sprint_1_state_2_winner_for_adam:
+  user: adam
+  read: false
+  sprint_timeline: sprint_1_state_2_winner
+
+sprint_1_deadline_for_adam:
+  user: adam
+  read: false
+  sprint_timeline: sprint_1_deadline
+
+sprint_1_state_1_review_for_adam:
+  user: adam
+  read: false
+  sprint_timeline: sprint_1_state_1_review
+
+job_developer_idea_for_elina:
+  user: elina
+  read: false
+  sprint_timeline: job_developer_idea
+
+job_developer_for_elina:
+  user: elina
+  read: false
+  sprint_timeline: job_developer
