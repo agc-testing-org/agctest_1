@@ -17,4 +17,5 @@ class SprintTimeline < ActiveRecord::Base
     belongs_to :contributor
     belongs_to :notification
     belongs_to :job
+    belongs_to :team
 end

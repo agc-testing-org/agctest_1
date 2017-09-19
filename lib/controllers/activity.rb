@@ -169,6 +169,33 @@ class Activity
         return users
     end
 
+    def record_team_notification team_id, sprint_timeline_id
+        begin
+            return TeamNotification.create({:team_id => team_id, :sprint_timeline_id => sprint_timeline_id})
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def process_team_notification sprint_timeline_id
+        begin
+            on_team_at_time = SprintTimeline.where(:id => sprint_timeline_id).joins("inner join notifications on sprint_timelines.notification_id = notifications.id LEFT JOIN user_teams ON sprint_timelines.user_id = user_teams.user_id AND user_teams.accepted = 1 AND user_teams.updated_at < sprint_timelines.created_at AND user_teams.expires > sprint_timelines.created_at LEFT JOIN contributors ON sprint_timelines.contributor_id = contributors.id LEFT JOIN user_teams user_teams_b ON user_teams_b.user_id = contributors.user_id AND user_teams_b.accepted = 1 AND user_teams_b.updated_at < sprint_timelines.created_at AND user_teams_b.expires > sprint_timelines.created_at LEFT JOIN seats ON user_teams.seat_id = seats.id LEFT join seats seats_b ON user_teams_b.seat_id = seats_b.id").where("seats.name in('sponsored','priority') OR seats_b.name in('sponsored','priority')").select("user_teams.team_id as user_action", "user_teams_b.team_id as feedback_action").as_json
+        rescue => e
+            puts e
+            return nil
+        end
+        if on_team_at_time.first
+            if on_team_at_time.first["user_action"]
+                return record_team_notification on_team_at_time.first["user_action"], sprint_timeline_id 
+            else
+                return record_team_notification on_team_at_time.first["feedback_action"], sprint_timeline_id
+            end
+        else
+            return nil
+        end
+    end
+
     def process_notification id
 
         user_ids = []
@@ -203,6 +230,15 @@ class Activity
     def user_notifications_that_need_to_be_mailed id
         begin
             return UserNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id LEFT JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN users ON (users.id = user_notifications.user_id AND users.confirmed = 1) INNER JOIN notifications on sprint_timelines.notification_id = notifications.id").where("(user_notification_settings.active = 1 OR user_notification_settings.active IS NULL) and (user_notification_settings.notification_id = sprint_timelines.notification_id OR user_notification_settings.notification_id IS NULL) and user_notifications.read = 0 and notifications.name != 'vote' and sprint_timelines.id = ?", id).select("user_notifications.user_id, user_notifications.sprint_timeline_id")
+        rescue => e
+            puts e
+            return nil
+        end
+    end
+
+    def team_notifications_that_need_to_be_mailed id
+        begin
+            return TeamNotification.joins("INNER JOIN sprint_timelines on sprint_timelines.id=team_notifications.sprint_timeline_id INNER JOIN user_teams ON team_notifications.team_id = user_teams.team_id INNER JOIN users ON (users.id = user_teams.user_id AND users.confirmed = 1 AND user_teams.accepted = 1) INNER JOIN notifications on sprint_timelines.notification_id = notifications.id INNER JOIN seats ON seats.id = user_teams.seat_id AND seats.name = 'member' LEFT JOIN user_notification_settings on user_notification_settings.user_id = users.id").where("(user_notification_settings.active = 1 OR user_notification_settings.active IS NULL) and (user_notification_settings.notification_id = sprint_timelines.notification_id OR user_notification_settings.notification_id IS NULL) and notifications.name != 'vote' and sprint_timelines.id = ?", id).select("user_teams.user_id, team_notifications.sprint_timeline_id")
         rescue => e
             puts e
             return nil

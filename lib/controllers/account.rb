@@ -1,6 +1,7 @@
 class Account
     include Obfuscate
     include ParamsHelper
+    include NotificationsHelper
     def initialize
         @per_page = 10
     end
@@ -591,36 +592,11 @@ class Account
 
     def get_user_notifications user_id, params
         page = (params["page"].to_i if params["page"].to_i > 0) || 1
-
         params = drop_key params, "page"
         begin     
-            response = []
-            notifications = SprintTimeline.joins("inner join user_notifications").where("sprint_timelines.id=user_notifications.sprint_timeline_id and user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
-            notifications.each_with_index do |notification,i| 
-                response[i] = notification.as_json
-                response[i][:user_profile] = get_profile notification.user
-                response[i][:sprint] = notification.sprint
-                response[i][:project] = notification.project
-                response[i][:sprint_state] = notification.sprint_state
-                response[i][:next_sprint_state] = notification.next_sprint_state
-                response[i][:comment] = notification.comment
-                response[i][:vote] = notification.vote
-                response[i][:notification] = notification.notification
-
-                if notification.vote && notification.vote.comment
-                    response[i][:comment_vote] = notification.vote.comment
-                    response[i][:user_profile_comment_vote] = get_profile notification.vote.comment.user
-                end
-
-                if notification.job
-                    response[i][:job_title] = notification.job.title
-                    response[i][:job_team_name] = notification.job.team.name
-                    response[i][:job_company] = notification.job.team.company
-                end
-            end
-
+            notifications = SprintTimeline.joins("inner join user_notifications ON sprint_timelines.id = user_notifications.sprint_timeline_id").where("user_notifications.user_id = ?", user_id).select("sprint_timelines.*, user_notifications.id, user_notifications.read").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            response = notifications_result notifications, false
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
-
         rescue => e
             puts e
             return nil

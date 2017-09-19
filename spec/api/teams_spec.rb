@@ -261,7 +261,7 @@ describe "/teams" do
                 @notification_results = @mysql_client.query("#{base_query} limit #{@per_page}")
                 @notification_count = @mysql_client.query(base_query).count
             end
-            it "should return count" do
+            it "should return count", :focus => true do
                 expect(JSON.parse(last_response.body)["meta"]["count"]).to eq @notification_count
             end 
             it_behaves_like "team_notifications"

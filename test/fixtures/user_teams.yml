@@ -93,6 +93,7 @@ adam_confirmed_priority:
   updated_at: <%= 1.hour.ago.to_s(:db) %>
   created_at: <%= 1.hour.ago.to_s(:db) %>
   seat: priority
+  expires:  <%= 1.day.from_now.to_s(:db) %>
 
 adam_adam_admin_team:
   sender: adam_admin
@@ -193,3 +194,33 @@ mail_invite_on_team_job:
   created_at: <%= 1.minute.ago.to_s(:db) %>
   seat: priority
   job: developer
+
+adam_admin_priority_team:
+  sender: adam_admin 
+  user: adam_admin
+  accepted: true
+  seat: member
+  team: join_priority
+  user_email: "adam_admin@wired7.com"
+
+adam_no_notifications_join_priority_team:
+  sender: adam_admin
+  user: adam_no_notifications
+  team: join_priority
+  user_email: "adam_no_notifications@wired7.com"
+  seat: priority
+  accepted: true
+  expires:  <%= 1.day.from_now.to_s(:db) %>
+  created_at: <%= 1.day.ago.to_s(:db) %>
+  updated_at: <%= 1.day.ago.to_s(:db) %>
+
+adam_no_notifications_join_recruiter_team:
+  sender: adam_admin
+  user: adam_no_notifications
+  team: join_recruiter
+  user_email: "adam_no_notifications@wired7.com"
+  seat: recruiter
+  accepted: true
+  expires:  <%= 1.day.from_now.to_s(:db) %>
+  created_at: <%= 1.day.ago.to_s(:db) %>
+  updated_at: <%= 1.day.ago.to_s(:db) %>

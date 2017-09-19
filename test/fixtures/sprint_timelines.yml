@@ -33,7 +33,7 @@ sprint_1_state_1_comment:
   contributor: adam_confirmed_1
   state_id: 1
   notification: comment
-  created_at: <%= 5.day.ago.to_s(:db) %>
+  created_at: <%= 5.minute.ago.to_s(:db) %>
 
 sprint_1_state_1_vote:
   user: adam
@@ -115,3 +115,21 @@ sprint_1_state_1_review:
   sprint_state: sprint_1_state_1
   notification: peer
   created_at: <%= 5.day.ago.to_s(:db) %>
+
+adam_confirmed_priority_join:
+  user: adam_confirmed
+  team: ateam
+  notification: join
+  created_at: <%= 5.day.ago.to_s(:db) %>
+
+adam_no_notifications_join_team_priority_join:
+  user: adam_no_notifications
+  team: join_priority
+  notification: join
+  created_at: <%= 0.day.ago.to_s(:db) %>
+
+adam_no_notifications_join_team_recruiter_join:
+  user: adam_no_notifications
+  team: join_recruiter 
+  notification: join
+  created_at: <%= 0.day.ago.to_s(:db) %>

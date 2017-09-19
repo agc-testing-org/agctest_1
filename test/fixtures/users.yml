@@ -94,5 +94,10 @@ elina:
   confirmed: true
   password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
 
-
-
+adam_no_notifications:
+  email: adam+no+notifications@wired7.com
+  first_name: adam_no_notifications
+  password: $2a$10$13STS2ivbO6gU5kF1W9CDuoLPTQxbDTU2Nq9vtfQpKAlCkDowltWq
+  token: DDDAAC1N
+  updated_at: <%= 2.hours.ago.to_s(:db) %>
+  created_at: <%= 5.hours.ago.to_s(:db) %>

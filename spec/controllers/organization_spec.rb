@@ -69,7 +69,7 @@ describe ".Organization" do
             end
             it_behaves_like "team_connections_manager"
         end
-        context "recruiter", :focus => true do
+        context "recruiter" do
             before(:each) do
                 @res = @team.get_team_connections_requested user_connections(:elina_dteam_sponsored).team.id, user_connections(:elina_dteam_sponsored).team.plan.name
                 @mysql_result = @mysql_client.query("SELECT user_connections.*, 'recruiter' as team_plan, users.id, users.first_name, users.email, user_teams.seat_id, user_teams.expires, contact.first_name as contact_first_name FROM `user_connections` inner join users on user_connections.user_id = users.id INNER JOIN users contact ON contact.id = user_connections.contact_id inner join user_teams on user_connections.contact_id = user_teams.user_id WHERE (user_connections.team_id = #{user_connections(:elina_bteam_priority).team.id}) ORDER BY user_connections.created_at DESC")
@@ -109,6 +109,25 @@ describe ".Organization" do
             it "should return error" do
                 expect(@res.errors.messages).to be_empty 
             end
+        end
+    end
+
+
+    context "#get_team_notifications" do
+        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :contributors, :notifications
+        before(:each) do
+            params = {
+                "id" => teams(:join_priority).id
+            }
+            @res = @team.get_team_notifications params
+            puts @res.inspect
+        end
+        it "should return a single result", :focus => true do
+            expect(@res[:data].length).to be 1
+            expect(@res[:meta][:count]).to be 1
+        end
+        context "while seat is active" do
+
         end
     end
 end

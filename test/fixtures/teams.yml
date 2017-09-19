@@ -47,3 +47,19 @@ dteam:
   created_at: <%= 5.day.ago.to_s(:db) %>
   plan: recruiter
   company: "ATEAM TECHNOLOGIES"
+
+join_priority:
+  user: adam_admin
+  name: "JOIN_PRIORITY"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  plan: manager 
+  company: "ATEAM TECHNOLOGIES"
+
+join_recruiter:
+  user: adam_admin 
+  name: "JOIN_RECRUITER"
+  updated_at: <%= 2.day.ago.to_s(:db) %>
+  created_at: <%= 5.day.ago.to_s(:db) %>
+  plan: recruiter
+  company: "ATEAM TECHNOLOGIES"

@@ -299,11 +299,83 @@ describe ".Activity" do
         context "unconfirmed users" do
             before(:each) do
                 @mysql_client.query("update users set confirmed = 0")
-                @notification_results = @mysql_client.query("SELECT user_notifications.user_id, user_notifications.sprint_timeline_id FROM user_notifications INNER JOIN sprint_timelines on sprint_timelines.id=user_notifications.sprint_timeline_id INNER JOIN user_notification_settings on user_notification_settings.user_id = user_notifications.user_id INNER JOIN notifications on sprint_timelines.notification_id = notifications.id WHERE (user_notification_settings.active = 1 and user_notification_settings.notification_id = sprint_timelines.notification_id and user_notifications.read = 0 and notifications.name in ('comment', 'transition', 'winner', 'new') and sprint_timelines.id = #{@sprint_timeline_id})").first
                 @res = @activity.user_notifications_that_need_to_be_mailed @sprint_timeline_id
             end
             it "should return empty" do
                 expect(@res).to be_empty
+            end
+        end
+    end
+
+    context "#team_notifications_that_need_to_be_mailed" do
+        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :user_notifications, :user_notification_settings, :notifications, :team_notifications
+        before(:each) do
+            @sprint_timeline_id = team_notifications(:adam_no_notifications_join_team_priority_join).sprint_timeline_id
+        end
+        context "confirmed users" do
+            before(:each) do
+                @notification_results = @mysql_client.query("select user_teams.user_id, team_notifications.sprint_timeline_id from team_notifications INNER JOIN sprint_timelines on sprint_timelines.id=team_notifications.sprint_timeline_id INNER JOIN user_teams ON team_notifications.team_id = user_teams.team_id INNER JOIN users ON (users.id = user_teams.user_id AND users.confirmed = 1 AND user_teams.accepted = 1) INNER JOIN notifications on sprint_timelines.notification_id = notifications.id INNER JOIN seats ON seats.id = user_teams.seat_id AND seats.name = 'member' LEFT JOIN user_notification_settings on user_notification_settings.user_id = users.id where (user_notification_settings.active = 1 OR user_notification_settings.active IS NULL) and (user_notification_settings.notification_id = sprint_timelines.notification_id OR user_notification_settings.notification_id IS NULL) and notifications.name != 'vote' and sprint_timelines.id = #{@sprint_timeline_id}")
+                @res = @activity.team_notifications_that_need_to_be_mailed @sprint_timeline_id
+            end
+            context "user_notifications" do
+                it "should return team members" do
+                    @notification_results.each_with_index do |n,i|
+                        expect(n["user_id"]).to eq(@res[i][:user_id])
+                    end
+                end
+                it "should return sprint_timeline_id" do
+                    @notification_results.each_with_index do |n,i|
+                        expect(n["sprint_timeline_id"]).to eq(@res[i][:sprint_timeline_id])
+                    end
+                end
+            end
+        end
+        context "unconfirmed users" do
+            before(:each) do                
+                @mysql_client.query("update users set confirmed = 0")
+                @res = @activity.team_notifications_that_need_to_be_mailed @sprint_timeline_id
+            end
+            it "should return empty" do
+                expect(@res).to be_empty
+            end
+        end
+    end
+
+    context "#process_team_notification,#record_team_notification" do
+        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :notifications
+        context "user action, ie join" do
+            before(:each) do
+                @res = @activity.process_team_notification sprint_timelines(:adam_no_notifications_join_team_priority_join).id
+            end
+            context "team_notifications" do
+                it "should record team_id" do
+                    expect(@res[:team_id]).to eq sprint_timelines(:adam_no_notifications_join_team_priority_join).team_id
+                end
+                it "should record sprint_timeline_id" do
+                    expect(@res[:sprint_timeline_id]).to eq sprint_timelines(:adam_no_notifications_join_team_priority_join).id
+                end
+            end
+        end
+        context "user feedback, ie comment" do
+            fixtures :contributors, :sprints, :sprint_states
+            before(:each) do
+                @res = @activity.process_team_notification sprint_timelines(:sprint_1_state_1_comment).id
+            end
+            context "team_notifications" do
+                it "should record team_id" do
+                    expect(@res[:team_id]).to eq sprint_timelines(:sprint_1_state_1_comment).contributor.user.user_teams.where("expires IS NOT NULL").first.team_id
+                end
+                it "should record sprint_timeline_id" do
+                    expect(@res[:sprint_timeline_id]).to eq sprint_timelines(:sprint_1_state_1_comment).id
+                end
+            end
+        end
+        context "not on team" do
+            before(:each) do
+                @res = @activity.process_team_notification sprint_timelines(:sprint_1_transition).id
+            end                             
+            it "should return nil" do
+                expect(@res).to be nil 
             end
         end
     end
