@@ -185,7 +185,7 @@ describe "/contributors" do
                 @sprint_state_id = contributors(:adam_confirmed_1b).sprint_state_id
                 @project = projects(:demo).id
                 %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
-                %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
+                %x( cd #{@uri}; git checkout -b #{@sprint_state_id} --quiet >/dev/null; git add .; git commit -m"new branch"; git branch)
                 patch "/contributors/#{contributors(:adam_confirmed_1b).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors where user_id = #{decrypt(contributors(:adam_confirmed_1b).user_id)} ORDER BY ID DESC").first
@@ -222,7 +222,7 @@ describe "/contributors" do
                 @sprint_state_id = contributors(:adam_confirmed_1).sprint_state_id
                 @project = projects(:demo).id
                 %x(cp -rf #{@uri_master} test/#{ENV['INTEGRATIONS_GITHUB_ORG']}/DEMO_#{@project}.git)
-                %x( cd #{@uri}; git checkout -b #{@sprint_state_id}; git add .; git commit -m"new branch"; git branch)
+                %x( cd #{@uri}; git checkout -b #{@sprint_state_id} --quiet >/dev/null; git add .; git commit -m"new branch"; git branch)
                 patch "/contributors/#{contributors(:adam_confirmed_1).id}", {}, {"HTTP_AUTHORIZATION" => "Bearer #{@non_admin_w7_token}"}
                 @res = JSON.parse(last_response.body)
                 @sql = @mysql_client.query("select * from contributors where sprint_state_id = #{contributors(:adam_confirmed_1).sprint_state_id} AND user_id = #{decrypt(contributors(:adam_confirmed_1).user_id)} ORDER BY ID DESC").first

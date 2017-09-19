@@ -140,7 +140,6 @@ class Repo
             if (clear_clone sprint_state_id, contributor_id)
                 r = clone "#{ENV['INTEGRATIONS_GITHUB_URL']}/#{master_username}/#{master_project}.git", sprint_state_id, contributor_id, branch
                 original_hash = log_head path 
-                puts original_hash.inspect
 
                 github_secret = ENV['INTEGRATIONS_GITHUB_ADMIN_SECRET']
 
@@ -175,7 +174,7 @@ class Repo
     end
 
     def anonymize path, branch_to_push
-        return %x(cd #{path}; git checkout #{branch_to_push} >/dev/null; cd ../..; cp lib/scripts/anonymize #{path}; cd #{path}; ./anonymize; ).include? "rewritten"
+        return %x(cd #{path}; git checkout #{branch_to_push} --quiet >/dev/null; cd ../..; cp lib/scripts/anonymize #{path}; cd #{path}; ./anonymize; ).include? "rewritten"
     end
 
     def clear_clone sprint_state_id, contributor_id
@@ -212,7 +211,7 @@ class Repo
 
     def checkout path, sha
         begin
-            %x(cd #{path}; git checkout #{sha} >/dev/null)
+            %x(cd #{path}; git checkout #{sha} --quiet >/dev/null)
             return true
         rescue => e
             puts e
@@ -223,7 +222,7 @@ class Repo
     def add_branch path, branch
         begin
             #return (g.branch(branch.to_s).checkout.include? branch.to_s)
-            %x(cd #{path}; git branch #{branch.to_s}; git checkout #{branch.to_s} >/dev/null)
+            %x(cd #{path}; git branch #{branch.to_s} --quiet >/dev/null; git checkout #{branch.to_s} --quiet >/dev/null)
             return true
         rescue => e
             puts e
@@ -244,7 +243,7 @@ class Repo
 
     def push_remote path, name, branch
         begin
-            %x(cd #{path}; git push #{name.to_s} #{branch.to_s} --force >/dev/null)
+            %x(cd #{path}; git push #{name.to_s} #{branch.to_s} --force --quiet >/dev/null)
             #g.push(g.remote(name.to_s),branch.to_s,{:force => true})
             return true
         rescue => e
