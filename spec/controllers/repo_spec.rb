@@ -245,7 +245,7 @@ describe ".Repo" do
             @new_branch = "branch"
             @repo.add_branch @path, @new_branch
             @commit_message = "newest commit"
-            %x( cd "#{@path}"; git checkout #{@new_branch}; echo '1' > tmp; git add .; git commit -m"#{@commit_message};")
+            %x( cd "#{@path}"; git checkout #{@new_branch} >/dev/null; echo '1' > tmp; git add .; git commit -m"#{@commit_message};")
             @name = "adam-remote"
             @repo.add_remote @path, @uri_b, @name
             @res = @repo.push_remote @path, @name, @new_branch
