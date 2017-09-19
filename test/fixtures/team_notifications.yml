@@ -1,4 +1,5 @@
 adam_no_notifications_join_team_priority_join:
   team: join_priority
+  user: adam_confirmed
   sprint_timeline: adam_no_notifications_join_team_priority_join
   created_at: <%= 0.day.ago.to_s(:db) %>

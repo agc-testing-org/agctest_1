@@ -114,7 +114,7 @@ describe ".Organization" do
 
 
     context "#get_team_notifications", :focus => true do
-        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :contributors, :notifications, :team_notifications
+        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :contributors, :notifications, :team_notifications, :comments, :votes
         context "no page" do
             before(:each) do
                 @per_page = 10
@@ -127,8 +127,13 @@ describe ".Organization" do
                 @notification_results = @mysql_client.query("select * from team_notifications where team_id = #{team_notifications(:adam_no_notifications_join_team_priority_join).team_id} limit #{@per_page}")# offset #{(@page - 1) * @per_page}")
                 @notification_count = @mysql_client.query("select * from team_notifications where team_id = #{team_notifications(:adam_no_notifications_join_team_priority_join).team_id}").count
             end
-            it "should return count", :focus => true do
+            it "should return count" do
                 expect(@count).to eq @notification_count
+            end
+            it "should return user_id as team_user" do
+                @notification_results.each_with_index do |n,i|
+                    expect(@res[i]["team_user"]).to eq n["user_id"]
+                end
             end
             it_behaves_like "team_notifications"
         end

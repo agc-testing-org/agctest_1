@@ -7,7 +7,13 @@
                 <div class="list-group-item rounded highlight-true">                    
                     {{#if (eq notification.notification.name "comment")}}
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             commented on <strong>Proposal {{notification.contributor_id}}</strong> of the 
                             {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} 
                             of <strong>{{notification.sprint.title}}</strong>
@@ -19,7 +25,13 @@
 
                     {{#if (eq notification.notification.name "sprint comment")}}
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}                                
+                                {{/if}}
+                             {{/link-to}}
                             commented on sprint proposal for 
                             {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state.id "-" notification.sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} 
                         </p>
@@ -30,7 +42,13 @@
 
                     {{#if (eq notification.notification.name "vote")}}
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}
+                                {{/if}}
+                           {{/link-to}}
                             voted for <strong>Proposal {{notification.contributor_id}}</strong> on the 
                             {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} 
                             of 
@@ -50,7 +68,14 @@
 
                     {{#if (eq notification.notification.name "new")}}
                         <p class="line">
-                            <i class="fa fa-lightbulb-o fa-fw" aria-hidden="true"></i> {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            <i class="fa fa-lightbulb-o fa-fw" aria-hidden="true"></i> 
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             proposed a new sprint idea 
                             ({{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}}) 
                             for the 
@@ -81,9 +106,21 @@
 
                     {{#if (eq notification.notification.name "comment vote")}}
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             agrees with a comment from
-                            {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.comment_vote_user_profile.id}}
+                                {{#if notification.comment_vote_user_first_name}}
+                                    {{notification.comment_vote_user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.comment_vote_user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             on the 
                             {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}} 
                             of <strong>{{notification.sprint.title}}</strong>
@@ -95,9 +132,21 @@
 
                     {{#if (eq notification.notification.name "sprint comment vote")}} <!-- no next sprint state -->
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             agrees with a comment from
-                            {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.comment_vote_user_profile.id}}
+                                {{#if notification.comment_vote_user_first_name}}
+                                    {{notification.comment_vote_user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.comment_vote_user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             on the sprint proposal for 
                             {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.sprint_state.id "-" notification.sprint_state.state_id.name)}}{{notification.sprint.title}}{{/link-to}} 
                         </p>                                                                                                                                                                                                                                                    <p class="line quotation">
@@ -107,7 +156,13 @@
 
                     {{#if (eq notification.notification.name "sprint vote")}} <!-- no next sprint state -->
                         <p class="line">
-                            {{#link-to "profile" notification.user_profile.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}{{/link-to}} likes the 
+                            {{#link-to "profile" notification.user_profile.id}}
+                                {{#if notification.user_first_name}}
+                                    {{notification.user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}} likes the 
                             {{#link-to "develop.project.sprint" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title)}}{{notification.sprint.title}}{{/link-to}} 
                             sprint proposal for 
                             {{#link-to "develop.project" (concat notification.project.id "-" notification.project.org "-" notification.project.name) class="text-uppercase"}}{{notification.project.org}} / {{notification.project.name}}{{/link-to}}
@@ -138,7 +193,13 @@
                     {{#if (eq notification.notification.name "comment offensive")}}
                         <p class="line">
                             Someone has flagged a comment from 
-                            {{#link-to "profile" notification.user_profile_comment_vote.id}}{{user-profile-descriptor with_a=true user_profile=notification.user_profile_comment_vote class="d-inline"}}{{/link-to}}
+                            {{#link-to "profile" notification.comment_vote_user_profile.id}}
+                                {{#if notification.comment_vote_user_first_name}}
+                                    {{notification.comment_vote_user_first_name}}
+                                {{else}}
+                                    {{user-profile-descriptor with_a=true user_profile=notification.comment_vote_user_profile class="d-inline"}}
+                                {{/if}}
+                            {{/link-to}}
                             on the 
                             {{#if notification.next_sprint_state}}
                                 {{#link-to "develop.project.sprint.state" (concat notification.project.id "-" notification.project.org "-" notification.project.name) (concat notification.sprint.id "-" notification.sprint.title) (concat notification.next_sprint_state.id "-" notification.next_sprint_state.state_id.name)}}{{notification.next_sprint_state.state_id.name}} phase{{/link-to}}

@@ -181,9 +181,8 @@ class Organization
         team_id = params["id"].to_i
         page = (params["page"].to_i if params["page"].to_i > 0) || 1
         params = drop_key params, "page"
-        puts params.inspect
         begin
-            notifications = SprintTimeline.joins("inner join team_notifications ON sprint_timelines.id = team_notifications.sprint_timeline_id").where("team_notifications.team_id = ?", team_id).select("sprint_timelines.*, team_notifications.id").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
+            notifications = SprintTimeline.joins("inner join team_notifications ON sprint_timelines.id = team_notifications.sprint_timeline_id").where("team_notifications.team_id = ?", team_id).select("sprint_timelines.*, team_notifications.id, team_notifications.user_id as team_user").order('created_at DESC').limit(@per_page).offset((page-1)*@per_page)
             response = notifications_result notifications, true
             return {:meta => {:count => notifications.except(:limit,:offset,:select).count}, :data => response}
         rescue => e

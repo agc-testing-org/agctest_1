@@ -169,9 +169,9 @@ class Activity
         return users
     end
 
-    def record_team_notification team_id, sprint_timeline_id
+    def record_team_notification team_id, user_id, sprint_timeline_id
         begin
-            return TeamNotification.create({:team_id => team_id, :sprint_timeline_id => sprint_timeline_id})
+            return TeamNotification.create({:team_id => team_id, :user_id => user_id, :sprint_timeline_id => sprint_timeline_id})
         rescue => e
             puts e
             return nil
@@ -180,16 +180,16 @@ class Activity
 
     def process_team_notification sprint_timeline_id
         begin
-            on_team_at_time = SprintTimeline.where(:id => sprint_timeline_id).joins("inner join notifications on sprint_timelines.notification_id = notifications.id LEFT JOIN user_teams ON sprint_timelines.user_id = user_teams.user_id AND user_teams.accepted = 1 AND user_teams.updated_at < sprint_timelines.created_at AND user_teams.expires > sprint_timelines.created_at LEFT JOIN contributors ON sprint_timelines.contributor_id = contributors.id LEFT JOIN user_teams user_teams_b ON user_teams_b.user_id = contributors.user_id AND user_teams_b.accepted = 1 AND user_teams_b.updated_at < sprint_timelines.created_at AND user_teams_b.expires > sprint_timelines.created_at LEFT JOIN seats ON user_teams.seat_id = seats.id LEFT join seats seats_b ON user_teams_b.seat_id = seats_b.id").where("seats.name in('sponsored','priority') OR seats_b.name in('sponsored','priority')").select("user_teams.team_id as user_action", "user_teams_b.team_id as feedback_action").as_json
+            on_team_at_time = SprintTimeline.where(:id => sprint_timeline_id).joins("inner join notifications on sprint_timelines.notification_id = notifications.id LEFT JOIN user_teams ON sprint_timelines.user_id = user_teams.user_id AND user_teams.accepted = 1 AND user_teams.updated_at < sprint_timelines.created_at AND user_teams.expires > sprint_timelines.created_at LEFT JOIN contributors ON sprint_timelines.contributor_id = contributors.id LEFT JOIN user_teams user_teams_b ON user_teams_b.user_id = contributors.user_id AND user_teams_b.accepted = 1 AND user_teams_b.updated_at < sprint_timelines.created_at AND user_teams_b.expires > sprint_timelines.created_at LEFT JOIN seats ON user_teams.seat_id = seats.id LEFT join seats seats_b ON user_teams_b.seat_id = seats_b.id").where("seats.name in('sponsored','priority') OR seats_b.name in('sponsored','priority')").select("user_teams.team_id as team_action", "user_teams_b.team_id as team_feedback","user_teams.user_id as user_action", "user_teams_b.user_id as user_feedback").as_json
         rescue => e
             puts e
             return nil
         end
         if on_team_at_time.first
             if on_team_at_time.first["user_action"]
-                return record_team_notification on_team_at_time.first["user_action"], sprint_timeline_id 
+                return record_team_notification on_team_at_time.first["team_action"], on_team_at_time.first["user_action"], sprint_timeline_id
             else
-                return record_team_notification on_team_at_time.first["feedback_action"], sprint_timeline_id
+                return record_team_notification on_team_at_time.first["team_feedback"], on_team_at_time.first["user_feedback"], sprint_timeline_id
             end
         else
             return nil

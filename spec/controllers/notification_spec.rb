@@ -354,6 +354,9 @@ describe ".Activity" do
                 it "should record sprint_timeline_id" do
                     expect(@res[:sprint_timeline_id]).to eq sprint_timelines(:adam_no_notifications_join_team_priority_join).id
                 end
+                it "should record user_id" do
+                    expect(@res[:user_id]).to eq sprint_timelines(:adam_no_notifications_join_team_priority_join).user[:id]
+                end
             end
         end
         context "user feedback, ie comment" do
@@ -368,6 +371,9 @@ describe ".Activity" do
                 it "should record sprint_timeline_id" do
                     expect(@res[:sprint_timeline_id]).to eq sprint_timelines(:sprint_1_state_1_comment).id
                 end
+                it "should record user_id" do
+                    expect(@res[:user_id]).to eq sprint_timelines(:sprint_1_state_1_comment).contributor.user[:id]
+                end 
             end
         end
         context "not on team" do

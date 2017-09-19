@@ -200,11 +200,13 @@ ActiveRecord::Schema.define(version: 20170914032533) do
 
   create_table "team_notifications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "team_id", null: false
+    t.integer "user_id", null: false
     t.integer "sprint_timeline_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["sprint_timeline_id"], name: "fk_rails_f4224b2910"
     t.index ["team_id"], name: "fk_rails_3c8993daf5"
+    t.index ["user_id"], name: "fk_rails_78d3a46b77"
   end
 
   create_table "teams", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
@@ -382,6 +384,7 @@ ActiveRecord::Schema.define(version: 20170914032533) do
   add_foreign_key "sprints", "users"
   add_foreign_key "team_notifications", "sprint_timelines"
   add_foreign_key "team_notifications", "teams"
+  add_foreign_key "team_notifications", "users"
   add_foreign_key "teams", "plans"
   add_foreign_key "teams", "users"
   add_foreign_key "user_connections", "teams"
