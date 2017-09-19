@@ -113,21 +113,24 @@ describe ".Organization" do
     end
 
 
-    context "#get_team_notifications" do
-        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :contributors, :notifications
-        before(:each) do
-            params = {
-                "id" => teams(:join_priority).id
-            }
-            @res = @team.get_team_notifications params
-            puts @res.inspect
-        end
-        it "should return a single result", :focus => true do
-            expect(@res[:data].length).to be 1
-            expect(@res[:meta][:count]).to be 1
-        end
-        context "while seat is active" do
-
+    context "#get_team_notifications", :focus => true do
+        fixtures :users, :teams, :user_teams, :seats, :sprint_timelines, :contributors, :notifications, :team_notifications
+        context "no page" do
+            before(:each) do
+                @per_page = 10
+                params = {
+                    "id" => team_notifications(:adam_no_notifications_join_team_priority_join).team_id
+                }
+                @res = JSON.parse((@team.get_team_notifications params).to_json)
+                @count = @res["meta"]["count"]
+                @res = @res["data"]
+                @notification_results = @mysql_client.query("select * from team_notifications where team_id = #{team_notifications(:adam_no_notifications_join_team_priority_join).team_id} limit #{@per_page}")# offset #{(@page - 1) * @per_page}")
+                @notification_count = @mysql_client.query("select * from team_notifications where team_id = #{team_notifications(:adam_no_notifications_join_team_priority_join).team_id}").count
+            end
+            it "should return count", :focus => true do
+                expect(@count).to eq @notification_count
+            end
+            it_behaves_like "team_notifications"
         end
     end
 end

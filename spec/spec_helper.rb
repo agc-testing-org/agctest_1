@@ -116,3 +116,10 @@ shared_examples_for "ok" do
     end                 
 end
 
+shared_examples_for "team_notifications" do
+    it "should return id" do
+        @notification_results.each_with_index do |n,i|
+            expect(n["sprint_timeline_id"]).to eq(@res[i]["id"])
+        end
+    end
+end
